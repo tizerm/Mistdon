@@ -1,0 +1,18 @@
+body {
+	background-color: #222222;
+	background-image: url("../resources/back_kari.jpg");
+	background-attachment: fixed;
+	background-position: left bottom;
+	background-repeat: no-repeat;
+	color: #ffffff;
+	margin: 0px;
+	padding: 0px;
+}
+
+a:link, a:visited {
+	color: #a5a9b5;
+}
+
+a:hover {
+	color: #d1d8ed;
+}

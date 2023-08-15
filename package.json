@@ -4,6 +4,7 @@
   "description": "This is Electron base Mastodon and Misskey client.",
   "main": "main.js",
   "scripts": {
+    "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,5 +12,8 @@
     "url": "MMchan"
   },
   "author": "tizerm",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^26.0.0"
+  }
 }

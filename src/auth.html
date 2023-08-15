@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
+	<meta
+		http-equiv="Content-Security-Policy"
+		content="default-src 'self'; connect-src *; script-src 'self'"
+	/>
+	<meta
+		http-equiv="X-Content-Security-Policy"
+		content="default-src 'self'; connect-src *; script-src 'self'"
+	/>
+	<link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
+	<link rel="stylesheet" type="text/css" href="css/mm_auth.css"/>
+	<script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
+	<script type="text/javascript" src="js/mm_auth.js"></script>
+	<title>MMchan - Authorize</title>
+<head>
+<body>
+<section id="content">
+	<h2>アカウントの追加</h2>
+	<div id="form">
+		<div id="instance_form">
+			<span id="top_text">
+			追加したいアカウントのインスタンス(サーバー)の<br/>
+			URLを入力してください。</span><br/>
+			https://<input type="text" id="txt_instance_domain" name="txt_instance_domain" size="50"/>/<br/>
+			<button type="button" id="on_auth_instance">認証</button>
+		</div>
+		<div id="code_form">
+			<span id="top_text">
+			別画面に表示されたコードを入力(コピペ)してください
+			</span><br/>
+			<input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
+			<input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
+			<input type="text" id="txt_auth_code" name="txt_auth_code" size="80"/><br/>
+			<button type="button" id="on_auth_token">登録</button>
+		</div>
+	</div>
+	<a href="index.html">認証をやめて戻る</a>
+</section>
+</body>
+<html>
