@@ -11,17 +11,40 @@ const yyyymmdd = new Intl.DateTimeFormat(undefined,
 	}
 )
 
-function createHeader(instance_name, bind_id) {
-	var html = '<th id="' + bind_id + '" class="head">'
-		+ '<h2>' + instance_name + '</h2>'
+/**
+ * #Renderer #jQuery
+ * カラムのテンプレートを生成する
+ * 中身は後入れ
+ * 
+ * @param col_json カラム情報のJSON
+ */
+function createColumn(col_json) {
+	// カラムヘッダを生成
+	var html = '<th id="'
+		+ col_json.column_id + '_head" class="head">'
+		+ '<h2>' + col_json.label_head + '</h2>'
+		+ '<h3>' + col_json.label_type + '</h3>'
 		+ '</th>';
 	$("#columns>table>thead>tr").append(html);
-
+	
+	// カラム本体を空の状態で生成
+	html = '<td id="' + col_json.column_id + '_body" class="timeline">'
+		+ '<ul></ul></td>';
+	$("#columns>table>tbody>tr").append(html);
+	
+	// カラムヘッダの色を変更
+	$("#columns>table>thead>tr>#" + col_json.column_id + "_head")
+		.css("background-color", "#" + col_json.col_color);
 }
 
-// Mastodonから受け取ったJSON配列をHTMLに整形
+/**
+ * #Renderer #jQuery
+ * Mastodonから受け取ったタイムラインJSONをHTMLとして生成
+ * 
+ * @param path カラム情報のJSON
+ */
 function createTimelineMast(array_json, bind_id) {
-	var html = '<td id="' + bind_id + '" class="timeline"><ul>';
+	var html = '';
 	$.each(array_json, function(index, value) {
 		var date = yyyymmdd.format(new Date(value.created_at));
 		// toot_url = value.url
@@ -42,8 +65,7 @@ function createTimelineMast(array_json, bind_id) {
 			+ '<a class="buttons reply">RP</a>'
 			+ '</div></li>';
 	});
-	html += '</ul></td>';
-	$("#columns>table>tbody>tr").append(html);
+	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
 }
 
 // Misskeyから受け取ったJSON配列をHTMLに整形

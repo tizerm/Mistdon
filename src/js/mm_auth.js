@@ -1,4 +1,27 @@
 $(() => {
+	// ドメイン入力時のイベント
+	$("#txt_instance_domain").on("blur", (e) => {
+		var instance_domain = $("#txt_instance_domain").val();
+		if (!instance_domain) {
+			// 空の場合は表示リセット
+			$("#lbl_instance_name").text("(Instance Name)");
+			return;
+		}
+	
+		// ajaxでインスタンス情報を取得
+		$.ajax({
+			type: "GET",
+			url: "https://" + instance_domain + "/api/v2/instance",
+			dataType: "json"
+		}).then((data) => {
+			// 取得できたらインスタンス情報をセット
+			$("#lbl_instance_name").text(data.title);
+		}).catch((jqXHR, textStatus, errorThrown) => {
+			// 取得失敗時はエラー文字を入れる(v3.x.xは取得できない)
+			$("#lbl_instance_name").text("(不正なインスタンスかv3.x.x以下です)");
+		});
+	});
+
 	// 認証ボタンイベント(インスタンスを検索)
 	$("#on_auth_instance").on("click", (e) => {
 		var instance_domain = $("#txt_instance_domain").val();
@@ -63,12 +86,14 @@ $(() => {
 			});
 		}).then((data) => {
 			// アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
-			window.accessApi.writeFile(JSON.stringify({
-				'url': data.url,
+			window.accessApi.writePrefAccs({
+				'domain': instance_domain,
+				'platform': 'Mastodon',
+				'user_id': data.username,
 				'username': data.display_name,
 				'access_token': access_token,
 				'avatar_url': data.avatar
-			}));
+			});
 			alert("アカウントの認証に成功しました！");
 		}).catch((jqXHR, textStatus, errorThrown) => {
 			// 取得失敗時

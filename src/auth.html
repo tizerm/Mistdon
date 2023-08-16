@@ -4,11 +4,11 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
 	<meta
 		http-equiv="Content-Security-Policy"
-		content="default-src 'self'; connect-src *; script-src 'self'"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
 	/>
 	<meta
 		http-equiv="X-Content-Security-Policy"
-		content="default-src 'self'; connect-src *; script-src 'self'"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
 	/>
 	<link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
 	<link rel="stylesheet" type="text/css" href="css/mm_auth.css"/>
@@ -23,8 +23,9 @@
 		<div id="instance_form">
 			<span id="top_text">
 			追加したいアカウントのインスタンス(サーバー)の<br/>
-			URLを入力してください。</span><br/>
-			https://<input type="text" id="txt_instance_domain" name="txt_instance_domain" size="50"/>/<br/>
+			URLを入力してください。</span>
+			<div id="instance_box">https://<input type="text" id="txt_instance_domain" name="txt_instance_domain" size="50"/>/</div>
+			<div id="lbl_instance_name">(Instance Name)</div>
 			<button type="button" id="on_auth_instance">認証</button>
 		</div>
 		<div id="code_form">

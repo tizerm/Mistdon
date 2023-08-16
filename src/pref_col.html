@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
+	<meta
+		http-equiv="Content-Security-Policy"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+	/>
+	<meta
+		http-equiv="X-Content-Security-Policy"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+	/>
+	<link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
+	<link rel="stylesheet" type="text/css" href="css/mm_pref_col.css"/>
+	<script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
+	<script type="text/javascript" src="js/mm_pref_col.js"></script>
+	<title>MMchan - Authorize</title>
+<head>
+<body>
+<section id="content">
+	<h2>カラムの追加</h2>
+	<div id="form">
+		<div id="instance_form">
+			<div id="lbl_integrate">
+				<input type="checkbox" id="chk_integrated" name="chk_integrated" value="true" disabled/>
+				<label for="chk_integrated">統合型カラムにする(※未実装)</label>
+			</div>
+			<span id="top_text">
+			追加したいカラムのアカウントを選択してください。
+			</span>
+			<select id="cmb_account" name="cmb_account">
+				<option value="">(認証アカウントがありません)</option>
+			</select>
+			<div id="lbl_type">
+				追加するカラムの種類
+				<input type="radio" id="opt_timeline_type1" name="opt_timeline_type" value="home" checked/>
+				<label for="opt_timeline_type1">ホーム</label>
+				<input type="radio" id="opt_timeline_type2" name="opt_timeline_type" value="local"/>
+				<label for="opt_timeline_type2">ローカル</label>
+				<input type="radio" id="opt_timeline_type3" name="opt_timeline_type" value="federation"/>
+				<label for="opt_timeline_type3">連合</label>
+				<input type="radio" id="opt_timeline_type4" name="opt_timeline_type" value="notification"/>
+				<label for="opt_timeline_type4">通知</label>
+			</div>
+			ヘッダの色: #
+			<input type="text" id="txt_col_color" name="txt_col_color" size="10"/><br/>
+			<button type="button" id="on_add_column">カラムを追加</button>
+		</div>
+	</div>
+	<a href="index.html">設定をやめて戻る</a>
+</section>
+</body>
+<html>

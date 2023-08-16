@@ -67,13 +67,12 @@
 	width: 100%;
 }
 #columns>table>thead>tr>.head {
-	background-color: #3c315e;
 	border-top-left-radius: 18px;
 	border-top-right-radius: 18px;
 	color: #ffffff;
 	margin: 0px;
 	padding: 12px 24px;
-	min-width: 400px;
+	width: 360px;
 }
 
 #columns>table>thead>tr>.head>h2,
@@ -108,7 +107,7 @@
 }
 
 #columns>table>tbody>tr>.timeline>ul>li {
-	background-color: rgba(67,67,67,0.85);
+	background-color: rgba(67,67,67,0.95);
 	border-radius: 12px;
 	list-style-type: none;
 	margin: 6px;

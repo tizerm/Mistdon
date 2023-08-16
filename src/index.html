@@ -4,11 +4,11 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
 	<meta
 		http-equiv="Content-Security-Policy"
-		content="default-src 'self'; connect-src *; script-src 'self'"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
 	/>
 	<meta
 		http-equiv="X-Content-Security-Policy"
-		content="default-src 'self'; connect-src *; script-src 'self'"
+		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
 	/>
 	<link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
 	<link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
@@ -22,7 +22,7 @@
 	<ul>
 		<li class="current_icon"><img src="{current_icon}" class="current_icon"/></li>
 		<li><a href="auth.html">Auth</a></li>
-		<li>U</li>
+		<li><a href="pref_col.html">Col</a></li>
 		<li>R</li>
 	</ul>
 </nav>
@@ -30,20 +30,13 @@
 	<h1>{target_instance} - MMchan</h1>
 	<textarea id="txt_postarea"></textarea>
 	<button type="button" id="on_submit">SUBMIT</button>
-	<!--
-	<button type="button" id="on_gettl_mast">Get Timeline(Mastodon)</button>
-	<button type="button" id="on_gettl_msky">Get Timeline(Misskey)</button>
-	-->
 </header>
 <section id="columns">
 <table>
 	<thead>
 		<tr>
+		<!--
 			<th id="col1_head" class="head">
-				<h2>{instance_domain}</h2>
-				<h3>{timeline_type}</h3>
-			</th>
-			<th id="col2_head" class="head">
 				<h2>{instance_domain}</h2>
 				<h3>{timeline_type}</h3>
 			</th>
@@ -51,32 +44,13 @@
 				<h2>{instance_domain}</h2>
 				<h3>{timeline_type}</h3>
 			</th>
+			-->
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
+		<!--
 			<td id="col1_body" class="timeline">
-				<ul>
-					<li>
-						<div class="user">
-							<img src="{usericon}" class="usericon"/>
-							<h4 class="username">{username}</h4>
-							<a class="userid">{userid}</a>
-						</div>
-						<div class="content">
-							{content}
-						</div>
-						<div class="post_footer">
-							<a class="created_at">{created_at}</a>
-							<a class="buttons option">OPT</a>
-							<a class="buttons favorite">FAV</a>
-							<a class="buttons boost">BT</a>
-							<a class="buttons reply">RP</a>
-						</div>
-					</li>
-				</ul>
-			</td>
-			<td id="col2_body" class="timeline">
 				<ul>
 					<li>
 						<div class="user">
@@ -118,6 +92,7 @@
 					</li>
 				</ul>
 			</td>
+			-->
 		</tr>
 	</tbody>
 </table>
