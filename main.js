@@ -92,25 +92,30 @@ function writePrefCols(event, json_data) {
 	const proc = async () => {
 		var read_data = await readPrefCols()
 		var col_num = (read_data ? read_data.length : 0) + 1;
-		var api_url = null
+		var rest_url = null
+		var socket_url = null
 		var query_param = null
 		
 		// タイムラインタイプによって設定値を変える
 		switch (json_data.timeline_type) {
 			case 'home': // ホームタイムライン
-				api_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
+				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
+				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user"
 				query_param = {}
 				break;
 			case 'local': // ローカルタイムライン
-				api_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:local"
 				query_param = { 'local': true }
 				break;
 			case 'federation': // 連合タイムライン
-				api_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:remote"
 				query_param = { 'remote': true }
 				break;
 			case 'notification': // 通知
-				api_url = "https://" + json_data.account.domain + "/api/v1/notifications"
+				rest_url = "https://" + json_data.account.domain + "/api/v1/notifications"
+				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user:notification"
 				query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
 				break;
 			default:
@@ -125,7 +130,8 @@ function writePrefCols(event, json_data) {
 			'timelines': [{ // TODO: 将来的に統合TLに拡張するので配列で保存
 				'key_address': json_data.key_address,
 				'timeline_type': json_data.timeline_type,
-				'api_url': api_url,
+				'rest_url': rest_url,
+				'socket_url': socket_url,
 				'query_param': query_param
 			}],
 			'col_color': json_data.col_color

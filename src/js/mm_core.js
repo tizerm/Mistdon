@@ -26,7 +26,7 @@ $(() => {
 				tl.query_param.limit = 30;
 				$.ajax({
 					type: "GET",
-					url: tl.api_url,
+					url: tl.rest_url,
 					dataType: "json",
 					headers: { "Authorization": "Bearer " + accounts.get(tl.key_address).access_token },
 					data: tl.query_param
@@ -39,10 +39,25 @@ $(() => {
 						// タイムラインの場合
 						createTimelineMast(data, col.column_id + "_body");
 					}
-					console.log(data);
 				}).catch((jqXHR, textStatus, errorThrown) => {
 					// 取得失敗時
 					console.log('!ERR: timeline get failed. ' + textStatus);
+				});
+				// REST API呼び出してる間にStreaming API用のWebSocketを準備
+				var socket = new WebSocket(tl.socket_url
+					+ "&access_token=" + accounts.get(tl.key_address).access_token);
+				socket.addEventListener("message", (event) => {
+					// 更新通知が来た場合
+					var data = JSON.parse(event.data);
+					if (data.event == "update") {
+						// タイムラインの更新通知
+						$("#columns>table>tbody>tr>#" + col.column_id + "_body>ul")
+							.prepend(createTimelineMastLine(JSON.parse(data.payload)));
+					} else if (tl.timeline_type == "notification" && data.event == "notification") {
+						// 通知の更新通知
+						$("#columns>table>tbody>tr>#" + col.column_id + "_body>ul")
+							.prepend(createNotificationMastLine(JSON.parse(data.payload)));
+					}
 				});
 			});
 		});
