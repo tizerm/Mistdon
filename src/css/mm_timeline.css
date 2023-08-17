@@ -65,6 +65,7 @@
 
 #columns>table {
 	width: 100%;
+	table-layout: fixed;
 }
 #columns>table>thead>tr>.head {
 	border-top-left-radius: 18px;
@@ -114,6 +115,24 @@
 	padding: 12px;
 }
 
+#columns>table>tbody>tr>.timeline>ul>li>.label_head {
+	border-radius: 12px;
+	padding: 2px 24px;
+	margin: -12px -12px 6px;
+	font-size: 12px;
+	text-align: right;
+}
+
+.label_reblog {
+	background-color: #408a08;
+}
+.label_favorite {
+	background-color: #a85e0a;
+}
+.label_follow {
+	background-color: #0a64a8;
+}
+
 #columns>table>tbody>tr>.timeline>ul>li>.user>.usericon {
 	border-radius: 12px;
 	width: 48px;
@@ -139,6 +158,22 @@
 	font-size: 14px;
 	margin: 6px 18px;
 }
+#columns>table>tbody>tr>.timeline>ul>li>.content a:not([class*="mention"]) {
+	display: inline-block;
+	max-width: 240px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.media>.sensitivel_media {
+	display: none;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.media .media_preview {
+	border-radius: 8px;
+	display: inline;
+	width: 128px;
+	height: 128px;
+}
+
 #columns>table>tbody>tr>.timeline>ul>li>.content>p {
 	margin: 0px;
 }

@@ -41,29 +41,130 @@ function createColumn(col_json) {
  * #Renderer #jQuery
  * Mastodonから受け取ったタイムラインJSONをHTMLとして生成
  * 
- * @param path カラム情報のJSON
+ * @param array_json APIから返却された投稿配列JSON
+ * @param bind_id バインド先のID
  */
 function createTimelineMast(array_json, bind_id) {
 	var html = '';
 	$.each(array_json, function(index, value) {
-		var date = yyyymmdd.format(new Date(value.created_at));
+		// ブーストツートならブースト先を、通常なら本体を参照先にする
+		var viewdata = value.reblog ? value.reblog : value;
 		// toot_url = value.url
 		// account_url = value.account.url
-		html += '<li><div class="user">'
+		var date = yyyymmdd.format(new Date(viewdata.created_at));
+		html += '<li>';
+		if (value.reblog) {
+			// ブーストツートの場合はブーストヘッダを表示
+			html += '<div class="label_head label_reblog">'
+				+ '<span>Boosted by @' + value.account.acct + '</span>'
+				+ '</div>';
+		}
+		html += '<div class="user">'
 			// ユーザーアカウント情報
-			+ '<img src="' + value.account.avatar + '" class="usericon"/>'
-			+ '<h4 class="username">' + value.account.display_name + '</h4>'
-			+ '<a class="userid">' + value.account.acct + '</a>'
+			+ '<img src="' + viewdata.account.avatar + '" class="usericon"/>'
+			+ '<h4 class="username">' + viewdata.account.display_name + '</h4>'
+			+ '<a class="userid">@' + viewdata.account.acct + '</a>'
 			+ '</div><div class="content">'
 			// 本文
-			+ value.content
-			+ '</div><div class="post_footer">'
-			+ '<a href="' + value.url + '" target="_blank" class="created_at">' + date + '</a>'
+			+ viewdata.content
+			+ '</div>';
+		if (viewdata.media_attachments.length > 0) {
+			// 添付画像がある場合は画像を表示
+			html += '<div class="media">';
+			if (viewdata.sensitive) {
+				// 閲覧注意設定の場合は画像を隠す
+				html += '<a class="sensitive_header">閲覧注意の画像があります</a>'
+					+ '<div class="sensitivel_media">';
+			} else {
+				html += '<div class="normal_media">';
+			}
+			viewdata.media_attachments.forEach((media) => {
+				html += '<img src="' + media.preview_url + '" class="media_preview"/>';
+			});
+			html += '</div></div>';
+		}
+		html += '<div class="post_footer">'
+			+ '<a href="' + viewdata.url + '" target="_blank" class="created_at">' + date + '</a>'
 			+ '<a class="buttons option">OPT</a>'
 			+ '<a class="buttons favorite">FAV</a>'
 			+ '<a class="buttons boost">BT</a>'
 			+ '<a class="buttons reply">RP</a>'
 			+ '</div></li>';
+	});
+	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
+}
+
+/**
+ * #Renderer #jQuery
+ * Mastodonから受け取った通知JSONをHTMLとして生成
+ * 
+ * @param array_json APIから返却された投稿配列JSON
+ * @param bind_id バインド先のID
+ */
+function createNotificationMast(array_json, bind_id) {
+	var html = '';
+	$.each(array_json, function(index, value) {
+		// ブーストツートならブースト先を、通常なら本体を参照先にする
+		// toot_url = value.url
+		// account_url = value.account.url
+		var date = yyyymmdd.format(new Date(value.created_at));
+		html += '<li>';
+		// 通知タイプによって表示を変更
+		switch (value.type) {
+			case 'favourite': // お気に入り
+				html += '<div class="label_head label_favorite">'
+					+ '<span>Favorited by @' + value.account.acct + '</span>'
+					+ '</div>';
+				break;
+			case 'reblog': // ブースト
+				html += '<div class="label_head label_reblog">'
+					+ '<span>Boosted by @' + value.account.acct + '</span>'
+					+ '</div>';
+				break;
+			case 'follow': // フォロー通知
+				html += '<div class="label_head label_follow">'
+					+ '<span>Followed by @' + value.account.acct + '</span>'
+					+ '</div>';
+				break;
+			default: // リプライの場合はヘッダ書かない
+				break;
+		}
+		html += '<div class="user">'
+			// ユーザーアカウント情報
+			+ '<img src="' + value.account.avatar + '" class="usericon"/>'
+			+ '<h4 class="username">' + value.account.display_name + '</h4>'
+			+ '<a class="userid">@' + value.account.acct + '</a>'
+			+ '</div><div class="content">';
+			// 本文
+		if (value.type == 'follow') {
+			// フォローの場合はユーザーのプロフを表示
+			html += value.account.note;
+		} else {
+			html += value.status.content;
+		}
+		html += '</div><div class="post_footer">';
+		// 通知タイプによって表示を変更
+		switch (value.type) {
+			case 'mention': // リプライ
+				html += '<a href="' + value.status.url + '" target="_blank" class="created_at">' + date + '</a>'
+					+ '<a class="buttons option">OPT</a>'
+					+ '<a class="buttons favorite">FAV</a>'
+					+ '<a class="buttons boost">BT</a>'
+					+ '<a class="buttons reply">RP</a>';
+				break;
+			case 'follow': // フォロー通知
+				html += '<div class="created_at">Post: ' + value.account.statuses_count
+					+ ' / Follow: ' + value.account.following_count
+					+ ' / Follower: ' + value.account.followers_count + '</div>'
+					+ '<a class="buttons option">OPT</a>'
+					+ '<a class="buttons block">BL</a>'
+					+ '<a class="buttons follow">FL</a>';
+				break;
+			default: // お気に入りとブーストは日付だけ
+				html += '<div class="created_at">' + date + '</a>';
+				break;
+		}
+		html += '</div></li>';
 	});
 	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
 }

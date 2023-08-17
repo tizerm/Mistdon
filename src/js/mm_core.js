@@ -32,7 +32,13 @@ $(() => {
 					data: tl.query_param
 				}).then((data) => {
 					// 取得成功時
-					createTimelineMast(data, col.column_id + "_body");
+					if (tl.timeline_type == 'notification') {
+						// 通知欄の場合
+						createNotificationMast(data, col.column_id + "_body");
+					} else {
+						// タイムラインの場合
+						createTimelineMast(data, col.column_id + "_body");
+					}
 					console.log(data);
 				}).catch((jqXHR, textStatus, errorThrown) => {
 					// 取得失敗時
