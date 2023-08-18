@@ -1,10 +1,10 @@
 $(() => {
 	// ドメイン入力時のイベント
-	$("#txt_instance_domain").on("blur", (e) => {
-		var instance_domain = $("#txt_instance_domain").val();
+	$("#txt_mst_instance_domain").on("blur", (e) => {
+		var instance_domain = $("#txt_mst_instance_domain").val();
 		if (!instance_domain) {
 			// 空の場合は表示リセット
-			$("#lbl_instance_name").text("(Instance Name)");
+			$("#lbl_mst_instance_name").text("(Instance Name)");
 			return;
 		}
 	
@@ -15,16 +15,20 @@ $(() => {
 			dataType: "json"
 		}).then((data) => {
 			// 取得できたらインスタンス情報をセット
-			$("#lbl_instance_name").text(data.title);
+			console.log(data);
+			$("#lbl_mst_instance_name").text(data.title);
 		}).catch((jqXHR, textStatus, errorThrown) => {
 			// 取得失敗時はエラー文字を入れる(v3.x.xは取得できない)
-			$("#lbl_instance_name").text("(不正なインスタンスかv3.x.x以下です)");
+			$("#lbl_mst_instance_name").text("(不正なインスタンスかv3.x.x以下です)");
 		});
 	});
 
+	/*============================================================================================*/
+	// ↓Mastodonの認証ロジック↓
+
 	// 認証ボタンイベント(インスタンスを検索)
-	$("#on_auth_instance").on("click", (e) => {
-		var instance_domain = $("#txt_instance_domain").val();
+	$("#on_mst_auth_instance").on("click", (e) => {
+		var instance_domain = $("#txt_mst_instance_domain").val();
 		var permission = ["read", "write", "follow", "push"].join(" ");
 	
 		// ajaxでアプリケーション登録
@@ -54,11 +58,11 @@ $(() => {
 	});
 
 	// 登録ボタンイベント(アクセストークン取得)
-	$("#on_auth_token").on("click", (e) => {
+	$("#on_mst_auth_token").on("click", (e) => {
 		var access_token = null;
 
-		var instance_domain = $("#txt_instance_domain").val();
-		var auth_code = $("#txt_auth_code").val();
+		var instance_domain = $("#txt_mst_instance_domain").val();
+		var auth_code = $("#txt_mst_auth_code").val();
 		var client_id = $("#hdn_client_id").val();
 		var client_secret = $("#hdn_client_secret").val();
 
@@ -86,13 +90,88 @@ $(() => {
 			});
 		}).then((data) => {
 			// アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
-			window.accessApi.writePrefAccs({
+			window.accessApi.writePrefMstdAccs({
 				'domain': instance_domain,
 				'platform': 'Mastodon',
 				'user_id': data.username,
 				'username': data.display_name,
 				'access_token': access_token,
 				'avatar_url': data.avatar
+			});
+			alert("アカウントの認証に成功しました！");
+		}).catch((jqXHR, textStatus, errorThrown) => {
+			// 取得失敗時
+			alert( "Request failed: " + textStatus );
+		});
+	});
+
+	/*============================================================================================*/
+	// ↓Misskeyの認証ロジック↓
+
+	// 認証ボタンイベント(アプリ登録と認証)
+	$("#on_msk_auth_instance").on("click", (e) => {
+		var instance_domain = $("#txt_msk_instance_domain").val();
+		var permission = ["read:account", "read:notes", "write:notes", "write:blocks",
+			"read:drive", "read:favorites", "write:favorites", "read:following", "write:following",
+			"write:mutes", "read:notifications", "read:reactions", "write:reactions",
+			"write:votes", "read:channels", "write:channels"];
+	
+		// ajaxでアプリケーション登録
+		$.ajax({
+			type: "POST",
+			url: "https://" + instance_domain + "/api/app/create",
+			dataType: "json",
+			headers: { "Content-Type": "application/json" },
+			data: JSON.stringify({
+				'name': 'MMchan',
+				'description': 'This is Electron base Mastodon and Misskey client.',
+				'permission': permission
+			})
+		}).then((data) => {
+			// アプリ登録に成功したらsecretを保存して認証セッションを開始
+			$("#hdn_app_secret").val(data.secret);
+			return $.ajax({
+				type: "POST",
+				url: "https://" + instance_domain + "/api/auth/session/generate",
+				dataType: "json",
+				headers: { "Content-Type": "application/json" },
+				data: JSON.stringify({
+					'appSecret': data.secret
+				})
+			});
+		}).then((data) => {
+			// 無事にレスポンスが返ったらtokenを保存して認証許可ウィンドウを生成
+			$("#hdn_app_token").val(data.token);
+			window.open(data.url, "_blank");
+		}).catch((jqXHR, textStatus, errorThrown) => {
+			// 取得失敗時
+			alert( "Request failed: " + textStatus );
+		});
+	});
+
+	// 登録ボタンイベント(アクセストークンの生成と保存)
+	$("#on_msk_auth_token").on("click", (e) => {
+		var instance_domain = $("#txt_msk_instance_domain").val();
+		var app_secret = $("#hdn_app_secret").val();
+		var app_token = $("#hdn_app_token").val();
+
+		// ajaxでアクセストークン取得
+		$.ajax({
+			type: "POST",
+			url: "https://" + instance_domain + "/api/auth/session/userkey",
+			dataType: "json",
+			headers: { "Content-Type": "application/json" },
+			data: JSON.stringify({
+				'appSecret': app_secret,
+				'token': app_token
+			})
+		}).then((data) => {
+			// 無事にレスポンスが返ったら、返ってきたアクセストークンをメインプロセスに渡す
+			window.accessApi.writePrefMskyAccs({
+				'domain': instance_domain,
+				'user': data.user,
+				'app_secret': app_secret,
+				'access_token': data.accessToken
 			});
 			alert("アカウントの認証に成功しました！");
 		}).catch((jqXHR, textStatus, errorThrown) => {

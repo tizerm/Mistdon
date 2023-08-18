@@ -5,6 +5,7 @@ $(() => {
 		// メインプロセスメソッドが非同期なのでawaitかけてアカウント情報を取得
 		accounts = await window.accessApi.readPrefAccs();
 		var html = "";
+		console.log(accounts);
 		accounts.forEach((v, k) => {
 			html += '<option value="' + k + '">'
 				+ v.username + ' - ' + k + '</option>';

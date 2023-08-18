@@ -19,14 +19,15 @@
 <body>
 <section id="content">
 	<h2>アカウントの追加</h2>
-	<div id="form">
+	<div id="form_mastodon">
+		<h3>Mastodonアカウントの追加</h3>
 		<div id="instance_form">
 			<span id="top_text">
 			追加したいアカウントのインスタンス(サーバー)の<br/>
 			URLを入力してください。</span>
-			<div id="instance_box">https://<input type="text" id="txt_instance_domain" name="txt_instance_domain" size="50"/>/</div>
-			<div id="lbl_instance_name">(Instance Name)</div>
-			<button type="button" id="on_auth_instance">認証</button>
+			<div id="instance_box">https://<input type="text" id="txt_mst_instance_domain" name="txt_mst_instance_domain" size="50"/>/</div>
+			<div id="lbl_mst_instance_name">(Instance Name)</div>
+			<button type="button" id="on_mst_auth_instance">認証</button>
 		</div>
 		<div id="code_form">
 			<span id="top_text">
@@ -34,8 +35,27 @@
 			</span><br/>
 			<input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
 			<input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
-			<input type="text" id="txt_auth_code" name="txt_auth_code" size="80"/><br/>
-			<button type="button" id="on_auth_token">登録</button>
+			<input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
+			<button type="button" id="on_mst_auth_token">登録</button>
+		</div>
+	</div>
+	<div id="form_mastodon">
+		<h3>Misskeyアカウントの追加</h3>
+		<div id="instance_form">
+			<span id="top_text">
+			追加したいアカウントのインスタンス(サーバー)の<br/>
+			URLを入力してください。</span>
+			<div id="instance_box">https://<input type="text" id="txt_msk_instance_domain" name="txt_msk_instance_domain" size="50"/>/</div>
+			<div id="lbl_msk_instance_name">(Instance Name)</div>
+			<button type="button" id="on_msk_auth_instance">認証</button>
+		</div>
+		<div id="code_form">
+			<span id="top_text">
+			別画面で認証ボタンを押して完了してから下のボタンを押してください。
+			</span><br/>
+			<input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
+			<input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
+			<button type="button" id="on_msk_auth_token">登録</button>
 		</div>
 	</div>
 	<a href="index.html">認証をやめて戻る</a>

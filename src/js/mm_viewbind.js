@@ -37,6 +37,8 @@ function createColumn(col_json) {
 		.css("background-color", "#" + col_json.col_color);
 }
 
+/*================================================================================================*/
+
 /**
  * #Renderer #jQuery
  * Mastodonから受け取ったタイムラインJSONをHTMLとして生成
@@ -77,19 +79,26 @@ function createTimelineMastLine(value) {
 		+ '<img src="' + viewdata.account.avatar + '" class="usericon"/>'
 		+ '<h4 class="username">' + viewdata.account.display_name + '</h4>'
 		+ '<a class="userid">@' + viewdata.account.acct + '</a>'
-		+ '</div><div class="content">'
-		// 本文
-		+ viewdata.content
-		+ '</div>';
+		+ '</div><div class="content">';
+	if (viewdata.spoiler_text) {
+		// CWテキストがある場合CWボタンを表示
+		html += '<a class="expand_header label_cw">' + viewdata.spoiler_text + '</a>'
+			+ '<div class="main_content cw_content">';
+	} else {
+		// ない場合は普通にブロックを作る
+		html += '<div class="main_content">';
+	}
+	// 本文
+	html += viewdata.content + '</div></div>';
 	if (viewdata.media_attachments.length > 0) {
 		// 添付画像がある場合は画像を表示
 		html += '<div class="media">';
 		if (viewdata.sensitive) {
 			// 閲覧注意設定の場合は画像を隠す
-			html += '<a class="sensitive_header">閲覧注意の画像があります</a>'
-				+ '<div class="sensitivel_media">';
+			html += '<a class="expand_header label_sensitive">閲覧注意の画像があります</a>'
+				+ '<div class="media_content cw_content">';
 		} else {
-			html += '<div class="normal_media">';
+			html += '<div class="media_content">';
 		}
 		viewdata.media_attachments.forEach((media) => {
 			html += '<img src="' + media.preview_url + '" class="media_preview"/>';
@@ -156,7 +165,7 @@ function createNotificationMastLine(value) {
 		+ '<img src="' + value.account.avatar + '" class="usericon"/>'
 		+ '<h4 class="username">' + value.account.display_name + '</h4>'
 		+ '<a class="userid">@' + value.account.acct + '</a>'
-		+ '</div><div class="content">';
+		+ '</div><div class="content"><div class="main_content">';
 		// 本文
 	if (value.type == 'follow') {
 		// フォローの場合はユーザーのプロフを表示
@@ -164,7 +173,7 @@ function createNotificationMastLine(value) {
 	} else {
 		html += value.status.content;
 	}
-	html += '</div><div class="post_footer">';
+	html += '</div></div><div class="post_footer">';
 	// 通知タイプによって表示を変更
 	switch (value.type) {
 		case 'mention': // リプライ
@@ -190,29 +199,82 @@ function createNotificationMastLine(value) {
 	return html;
 }
 
-// Misskeyから受け取ったJSON配列をHTMLに整形
+/*================================================================================================*/
+
+/**
+ * #Renderer #jQuery
+ * Misskeyから受け取ったタイムラインJSONをHTMLとして生成
+ * 
+ * @param array_json APIから返却された投稿配列JSON
+ * @param bind_id バインド先のID
+ */
 function createTimelineMsky(array_json, bind_id) {
-	var html = '<td id="' + bind_id + '" class="timeline"><ul>';
-	$.each(array_json, function(index, value) {
-		var date = yyyymmdd.format(new Date(value.createdAt));
-		// toot_url = value.uri
-		// account_url = (そのままだとアクセスできない)
-		html += '<li><div class="user">'
-			// ユーザーアカウント情報
-			+ '<img src="' + value.user.avatarUrl + '" class="usericon"/>'
-			+ '<h4 class="username">' + value.user.name + '</h4>'
-			+ '<a class="userid">' + value.user.username + '</a>'
-			+ '</div><div class="content">'
-			// 本文
-			+ value.text
-			+ '</div><div class="post_footer">'
-			+ '<a href="' + value.uri + '" target="_blank" class="created_at">' + date + '</a>'
-			+ '<a class="buttons option">OPT</a>'
-			+ '<a class="buttons favorite">ACT</a>'
-			+ '<a class="buttons boost">RN</a>'
-			+ '<a class="buttons reply">RP</a>'
-			+ '</div></li>';
+	var html = '';
+	$.each(array_json, (index, value) => {
+		html += createTimelineMskyLine(value);
 	});
-	html += '</ul></td>';
-	$("#columns>table>tbody>tr").append(html);
+	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
+}
+
+/**
+ * #Renderer #jQuery
+ * Misskeyから受け取ったタイムラインJSONをHTMLとして生成(1行だけ)
+ * 
+ * @param value 個別status JSON
+ */
+function createTimelineMskyLine(value) {
+	var html = '';
+	// リノートならリノート先を、通常なら本体を参照先にする
+	var viewdata = value.reblog ? value.reblog : value;
+	// toot_url = value.uri
+	// account_url = (そのままだとアクセスできない)
+	var date = yyyymmdd.format(new Date(viewdata.createdAt));
+	html += '<li>';
+	if (value.reblog) {
+		// ブーストツートの場合はブーストヘッダを表示
+		html += '<div class="label_head label_reblog">'
+			+ '<span>Renoted by @' + value.user.username + '</span>'
+			+ '</div>';
+	}
+	html += '<div class="user">'
+		// ユーザーアカウント情報
+		+ '<img src="' + viewdata.user.avatarUrl + '" class="usericon"/>'
+		+ '<h4 class="username">' + viewdata.user.name + '</h4>'
+		+ '<a class="userid">@' + viewdata.user.username + '</a>'
+		+ '</div><div class="content">';
+	if (viewdata.spoiler_text) {
+		// CWテキストがある場合CWボタンを表示
+		html += '<a class="expand_header label_cw">' + viewdata.spoiler_text + '</a>'
+			+ '<div class="main_content cw_content">';
+	} else {
+		// ない場合は普通にブロックを作る
+		html += '<div class="main_content">';
+	}
+	// 本文
+	html += viewdata.text + '</div></div>';
+	// TODO: 画像添付も一旦保留
+	/*
+	if (viewdata.media_attachments.length > 0) {
+		// 添付画像がある場合は画像を表示
+		html += '<div class="media">';
+		if (viewdata.sensitive) {
+			// 閲覧注意設定の場合は画像を隠す
+			html += '<a class="expand_header label_sensitive">閲覧注意の画像があります</a>'
+				+ '<div class="media_content cw_content">';
+		} else {
+			html += '<div class="media_content">';
+		}
+		viewdata.media_attachments.forEach((media) => {
+			html += '<img src="' + media.preview_url + '" class="media_preview"/>';
+		});
+		html += '</div></div>';
+	}//*/
+	html += '<div class="post_footer">'
+		+ '<a href="' + viewdata.uri + '" target="_blank" class="created_at">' + date + '</a>'
+		+ '<a class="buttons option">OPT</a>'
+		+ '<a class="buttons favorite">FAV</a>'
+		+ '<a class="buttons boost">BT</a>'
+		+ '<a class="buttons reply">RP</a>'
+		+ '</div></li>';
+	return html;
 }

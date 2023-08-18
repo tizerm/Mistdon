@@ -6,6 +6,7 @@
 // モジュールのインポート
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
+const crypto = require('crypto')
 const fs = require('fs')
 
 // アプリ保持用設定データの管理
@@ -38,13 +39,13 @@ function readPrefAccs() {
 
 /**
  * #IPC
- * アカウント認証情報を設定ファイルに書き込む
+ * アカウント認証情報を設定ファイルに書き込む(Mastodon用)
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
  * @param path 書き込むファイルのパス
  * @param json_data 書き込むJSONデータ
  */
-function writePrefAccs(event, json_data) {
+function writePrefMstdAccs(event, json_data) {
 	// ファイルに書き込み
 	var content = writeFileArrayJson('prefs/auth.json', json_data)
 
@@ -54,6 +55,41 @@ function writePrefAccs(event, json_data) {
 		pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
 	} else {
 		pref_accounts.set('@' + json_data.user_id + '@' + json_data.domain, json_data)
+	}
+}
+
+/**
+ * #IPC
+ * アカウント認証情報を設定ファイルに書き込む(Misskey用)
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param path 書き込むファイルのパス
+ * @param json_data 書き込むJSONデータ
+ */
+function writePrefMskyAccs(event, json_data) {
+	// まずはaccessTokenとappSecretからiを生成
+	const i = crypto.createHash("sha256")
+		.update(json_data.access_token + json_data.app_secret, "utf8")
+		.digest("hex")
+	// JSONを生成(あとでキャッシュに入れるので)
+	const write_json = {
+		'domain': json_data.domain,
+		'platform': 'Misskey',
+		'user_id': json_data.user.username,
+		'username': json_data.user.name,
+		'access_token': i,
+		'avatar_url': json_data.user.avatarUrl
+	}
+
+	// ファイルに書き込み
+	var content = writeFileArrayJson('prefs/auth.json', write_json)
+
+	// キャッシュを更新
+	if (!pref_accounts) {
+		// キャッシュがない場合はファイルを読み込んでキャッシュを生成
+		pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
+	} else {
+		pref_accounts.set('@' + write_json.user_id + '@' + write_json.domain, write_json)
 	}
 }
 
@@ -95,28 +131,62 @@ function writePrefCols(event, json_data) {
 		var rest_url = null
 		var socket_url = null
 		var query_param = null
+		var socket_param = null
 		
-		// タイムラインタイプによって設定値を変える
-		switch (json_data.timeline_type) {
-			case 'home': // ホームタイムライン
-				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
-				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user"
-				query_param = {}
+		// プラットフォームの種類によってAPIの形式が違うので個別に設定
+		switch (json_data.account.platform) {
+			case 'Mastodon': // Mastodon
+				// タイムラインタイプによって設定値を変える
+				switch (json_data.timeline_type) {
+					case 'home': // ホームタイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
+						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user"
+						query_param = {}
+						break;
+					case 'local': // ローカルタイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:local"
+						query_param = { 'local': true }
+						break;
+					case 'federation': // 連合タイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
+						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:remote"
+						query_param = { 'remote': true }
+						break;
+					case 'notification': // 通知
+						rest_url = "https://" + json_data.account.domain + "/api/v1/notifications"
+						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user:notification"
+						query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+						break;
+					default:
+						break;
+				}
 				break;
-			case 'local': // ローカルタイムライン
-				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
-				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:local"
-				query_param = { 'local': true }
-				break;
-			case 'federation': // 連合タイムライン
-				rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
-				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:remote"
-				query_param = { 'remote': true }
-				break;
-			case 'notification': // 通知
-				rest_url = "https://" + json_data.account.domain + "/api/v1/notifications"
-				socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user:notification"
-				query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+			case 'Misskey': // Misskey
+				// タイムラインタイプによって設定値を変える
+				switch (json_data.timeline_type) {
+					case 'home': // ホームタイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/notes/timeline"
+						query_param = {}
+						break;
+					case 'local': // ローカルタイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/notes/local-timeline"
+						query_param = {}
+						break;
+					case 'federation': // 連合タイムライン
+						rest_url = "https://" + json_data.account.domain + "/api/notes/global-timeline"
+						query_param = {}
+						break;
+					case 'notification': // 通知
+						rest_url = "https://" + json_data.account.domain + "/api/i/notifications"
+						query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
+						break;
+					default:
+						break;
+				}
+				// WebSocket URLは共通なので外に出す
+				// TODO: 将来的にアカウント単位でWebSocketに接続するのでカラムに保存するのやめます……
+				socket_url = "wss://" + json_data.account.domain + "/streaming"
 				break;
 			default:
 				break;
@@ -235,7 +305,8 @@ app.whenReady().then(() => {
 	// IPC通信で呼び出すメソッド定義
 	ipcMain.handle('read-pref-accs', readPrefAccs)
 	ipcMain.handle('read-pref-cols', readPrefCols)
-	ipcMain.on('write-pref-accs', writePrefAccs)
+	ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
+	ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
 	ipcMain.on('write-pref-cols', writePrefCols)
 
 	// ウィンドウ生成
