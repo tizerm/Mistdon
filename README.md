@@ -1,4 +1,4 @@
-# This is Electron base Mastodon and Misskey cliant.
+# This is Electron base Mastodon and Misskey client.
 <h3>開発コードネーム: MMchan</h3>
 
 <p>
