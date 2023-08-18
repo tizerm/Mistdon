@@ -142,24 +142,24 @@ function writePrefCols(event, json_data) {
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user"
 						query_param = {}
-						break;
+						break
 					case 'local': // ローカルタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:local"
 						query_param = { 'local': true }
-						break;
+						break
 					case 'federation': // 連合タイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:remote"
 						query_param = { 'remote': true }
-						break;
+						break
 					case 'notification': // 通知
 						rest_url = "https://" + json_data.account.domain + "/api/v1/notifications"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user:notification"
 						query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
-						break;
+						break
 					default:
-						break;
+						break
 				}
 				break;
 			case 'Misskey': // Misskey
@@ -168,28 +168,28 @@ function writePrefCols(event, json_data) {
 					case 'home': // ホームタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/timeline"
 						query_param = {}
-						break;
+						break
 					case 'local': // ローカルタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/local-timeline"
 						query_param = {}
-						break;
+						break
 					case 'federation': // 連合タイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/global-timeline"
 						query_param = {}
-						break;
+						break
 					case 'notification': // 通知
 						rest_url = "https://" + json_data.account.domain + "/api/i/notifications"
 						query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
-						break;
+						break
 					default:
-						break;
+						break
 				}
 				// WebSocket URLは共通なので外に出す
 				// TODO: 将来的にアカウント単位でWebSocketに接続するのでカラムに保存するのやめます……
 				socket_url = "wss://" + json_data.account.domain + "/streaming"
-				break;
+				break
 			default:
-				break;
+				break
 		}
 
 		// JSONデータを生成しながらファイルに書き込み
