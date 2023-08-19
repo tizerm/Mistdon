@@ -26,6 +26,7 @@ $(() => {
 			'key_address': acc_address,
 			'timeline_type': timeline_type,
 			'account': acc_info,
+			'tl_color': color,
 			'col_color': color
 		});
 	});

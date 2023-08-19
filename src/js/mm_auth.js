@@ -92,9 +92,10 @@ $(() => {
 			// アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
 			window.accessApi.writePrefMstdAccs({
 				'domain': instance_domain,
-				'platform': 'Mastodon',
 				'user_id': data.username,
 				'username': data.display_name,
+				"client_id": client_id,
+				"client_secret": client_secret,
 				'access_token': access_token,
 				'avatar_url': data.avatar
 			});

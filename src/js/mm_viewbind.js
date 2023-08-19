@@ -67,6 +67,7 @@ function createTimelineMastLine(value) {
 	// toot_url = value.url
 	// account_url = value.account.url
 	var date = yyyymmdd.format(new Date(viewdata.created_at));
+	var display_name = viewdata.account.display_name ? viewdata.account.display_name : viewdata.account.username;
 	html += '<li>';
 	if (value.reblog) {
 		// ブーストツートの場合はブーストヘッダを表示
@@ -77,7 +78,7 @@ function createTimelineMastLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + viewdata.account.avatar + '" class="usericon"/>'
-		+ '<h4 class="username">' + viewdata.account.display_name + '</h4>'
+		+ '<h4 class="username">' + display_name + '</h4>'
 		+ '<a class="userid">@' + viewdata.account.acct + '</a>'
 		+ '</div><div class="content">';
 	if (viewdata.spoiler_text) {
@@ -139,6 +140,7 @@ function createNotificationMast(array_json, bind_id) {
 function createNotificationMastLine(value) {
 	var html = '';
 	var date = yyyymmdd.format(new Date(value.created_at));
+	var display_name = value.account.display_name ? value.account.display_name : value.account.username;
 	html += '<li>';
 	// 通知タイプによって表示を変更
 	switch (value.type) {
@@ -163,7 +165,7 @@ function createNotificationMastLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + value.account.avatar + '" class="usericon"/>'
-		+ '<h4 class="username">' + value.account.display_name + '</h4>'
+		+ '<h4 class="username">' + display_name + '</h4>'
 		+ '<a class="userid">@' + value.account.acct + '</a>'
 		+ '</div><div class="content"><div class="main_content">';
 		// 本文
@@ -225,26 +227,29 @@ function createTimelineMsky(array_json, bind_id) {
 function createTimelineMskyLine(value) {
 	var html = '';
 	// リノートならリノート先を、通常なら本体を参照先にする
-	var viewdata = value.reblog ? value.reblog : value;
+	var viewdata = value.renote ? value.renote : value;
 	// toot_url = value.uri
 	// account_url = (そのままだとアクセスできない)
 	var date = yyyymmdd.format(new Date(viewdata.createdAt));
+	var display_name = viewdata.user.name ? viewdata.user.name : viewdata.user.username;
+	var user_address = viewdata.user.username + (viewdata.user.host ? ('@' + viewdata.user.host) : '');
 	html += '<li>';
-	if (value.reblog) {
-		// ブーストツートの場合はブーストヘッダを表示
+	if (value.renote) {
+		// リノートの場合はリノートヘッダを表示
+		var renote_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
 		html += '<div class="label_head label_reblog">'
-			+ '<span>Renoted by @' + value.user.username + '</span>'
+			+ '<span>Renoted by @' + renote_address + '</span>'
 			+ '</div>';
 	}
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + viewdata.user.avatarUrl + '" class="usericon"/>'
 		+ '<h4 class="username">' + viewdata.user.name + '</h4>'
-		+ '<a class="userid">@' + viewdata.user.username + '</a>'
+		+ '<a class="userid">@' + user_address + '</a>'
 		+ '</div><div class="content">';
-	if (viewdata.spoiler_text) {
+	if (viewdata.cw) {
 		// CWテキストがある場合CWボタンを表示
-		html += '<a class="expand_header label_cw">' + viewdata.spoiler_text + '</a>'
+		html += '<a class="expand_header label_cw">' + viewdata.cw + '</a>'
 			+ '<div class="main_content cw_content">';
 	} else {
 		// ない場合は普通にブロックを作る
@@ -252,9 +257,7 @@ function createTimelineMskyLine(value) {
 	}
 	// 本文
 	html += viewdata.text + '</div></div>';
-	// TODO: 画像添付も一旦保留
-	/*
-	if (viewdata.media_attachments.length > 0) {
+	if (viewdata.files.length > 0) {
 		// 添付画像がある場合は画像を表示
 		html += '<div class="media">';
 		if (viewdata.sensitive) {
@@ -264,17 +267,105 @@ function createTimelineMskyLine(value) {
 		} else {
 			html += '<div class="media_content">';
 		}
-		viewdata.media_attachments.forEach((media) => {
-			html += '<img src="' + media.preview_url + '" class="media_preview"/>';
+		viewdata.files.forEach((media) => {
+			html += '<img src="' + media.thumbnailUrl + '" class="media_preview"/>';
 		});
 		html += '</div></div>';
-	}//*/
+	}
 	html += '<div class="post_footer">'
-		+ '<a href="' + viewdata.uri + '" target="_blank" class="created_at">' + date + '</a>'
+		+ '<a href="' + viewdata.id + '" target="_blank" class="created_at">' + date + '</a>'
 		+ '<a class="buttons option">OPT</a>'
-		+ '<a class="buttons favorite">FAV</a>'
-		+ '<a class="buttons boost">BT</a>'
+		+ '<a class="buttons favorite">ACT</a>'
+		+ '<a class="buttons boost">RN</a>'
 		+ '<a class="buttons reply">RP</a>'
 		+ '</div></li>';
+	return html;
+}
+
+/**
+ * #Renderer #jQuery
+ * Misskeyから受け取った通知JSONをHTMLとして生成
+ * 
+ * @param array_json APIから返却された投稿配列JSON
+ * @param bind_id バインド先のID
+ */
+function createNotificationMsky(array_json, bind_id) {
+	var html = '';
+	$.each(array_json, (index, value) => {
+		html += createNotificationMskyLine(value);
+	});
+	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
+}
+
+/**
+ * #Renderer #jQuery
+ * Misskeyから受け取った通知JSONをHTMLとして生成(1行だけ)
+ * 
+ * @param value 個別status JSON
+ */
+function createNotificationMskyLine(value) {
+	var html = '';
+	var date = yyyymmdd.format(new Date(value.createdAt));
+	var display_name = value.user.name ? value.user.name : value.user.username;
+	var user_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
+	html += '<li>';
+	// 通知タイプによって表示を変更
+	switch (value.type) {
+		case 'reaction': // 絵文字リアクション
+			html += '<div class="label_head label_favorite">'
+				+ '<span>ReAction from @' + user_address + '</span>'
+				+ '</div>';
+			break;
+		case 'renote': // リノート
+			html += '<div class="label_head label_reblog">'
+				+ '<span>Renoted by @' + user_address + '</span>'
+				+ '</div>';
+			break;
+		case 'follow': // フォロー通知
+			html += '<div class="label_head label_follow">'
+				+ '<span>Followed by @' + user_address + '</span>'
+				+ '</div>';
+			break;
+		default: // リプライの場合はヘッダ書かない
+			break;
+	}
+	html += '<div class="user">'
+		// ユーザーアカウント情報
+		+ '<img src="' + value.user.avatarUrl + '" class="usericon"/>'
+		+ '<h4 class="username">' + value.user.name + '</h4>'
+		+ '<a class="userid">@' + user_address + '</a>'
+		+ '</div><div class="content"><div class="main_content">';
+		// 本文
+	if (value.type == 'renote') {
+		// リノートの場合は二重ネストしているノートを見に行くの場合は内容を表示
+		html += value.note.renote.text;
+	} else if (value.type != 'follow' && value.type != 'followRequestAccepted') {
+		// フォロー以外の場合は内容を表示
+		html += value.note.text;
+	}
+	html += '</div></div><div class="post_footer">';
+	// 通知タイプによって表示を変更
+	switch (value.type) {
+		case 'mention': // リプライ
+			html += '<a href="' + value.note.id + '" target="_blank" class="created_at">' + date + '</a>'
+				+ '<a class="buttons option">OPT</a>'
+				+ '<a class="buttons favorite">ACT</a>'
+				+ '<a class="buttons boost">RN</a>'
+				+ '<a class="buttons reply">RP</a>';
+			break;
+		case 'follow': // フォロー通知
+		/*
+			html += '<div class="created_at">Post: ' + value.account.statuses_count
+				+ ' / Follow: ' + value.account.following_count
+				+ ' / Follower: ' + value.account.followers_count + '</div>'
+				+ '<a class="buttons option">OPT</a>'
+				+ '<a class="buttons block">BL</a>'
+				+ '<a class="buttons follow">FL</a>';//*/
+			break;
+		default: // お気に入りとブーストは日付だけ
+			html += '<div class="created_at">' + date + '</a>';
+			break;
+	}
+	html += '</div></li>';
 	return html;
 }

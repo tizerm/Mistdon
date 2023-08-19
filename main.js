@@ -46,15 +46,28 @@ function readPrefAccs() {
  * @param json_data 書き込むJSONデータ
  */
 function writePrefMstdAccs(event, json_data) {
+	// JSONを生成(あとでキャッシュに入れるので)
+	const write_json = {
+		'domain': json_data.domain,
+		'platform': 'Mastodon',
+		'user_id': json_data.user_id,
+		'username': json_data.username,
+		'socket_url': 'wss://' + json_data.domain + '/api/v1/streaming',
+		'client_id': json_data.client_id,
+		'client_secret': json_data.client_secret,
+		'access_token': json_data.access_token,
+		'avatar_url': json_data.avatar_url
+	}
+
 	// ファイルに書き込み
-	var content = writeFileArrayJson('prefs/auth.json', json_data)
+	var content = writeFileArrayJson('prefs/auth.json', write_json)
 
 	// キャッシュを更新
 	if (!pref_accounts) {
 		// キャッシュがない場合はファイルを読み込んでキャッシュを生成
 		pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
 	} else {
-		pref_accounts.set('@' + json_data.user_id + '@' + json_data.domain, json_data)
+		pref_accounts.set('@' + json_data.user_id + '@' + json_data.domain, write_json)
 	}
 }
 
@@ -77,6 +90,9 @@ function writePrefMskyAccs(event, json_data) {
 		'platform': 'Misskey',
 		'user_id': json_data.user.username,
 		'username': json_data.user.name,
+		'socket_url': 'wss://' + json_data.domain + '/streaming',
+		'client_id': null,
+		'client_secret': json_data.app_secret,
 		'access_token': i,
 		'avatar_url': json_data.user.avatarUrl
 	}
@@ -142,21 +158,25 @@ function writePrefCols(event, json_data) {
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/home"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user"
 						query_param = {}
+						socket_param = { 'stream': 'user' }
 						break
 					case 'local': // ローカルタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:local"
 						query_param = { 'local': true }
+						socket_param = { 'stream': 'public:local' }
 						break
 					case 'federation': // 連合タイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/v1/timelines/public"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=public:remote"
 						query_param = { 'remote': true }
+						socket_param = { 'stream': 'public:remote' }
 						break
 					case 'notification': // 通知
 						rest_url = "https://" + json_data.account.domain + "/api/v1/notifications"
 						socket_url = "wss://" + json_data.account.domain + "/api/v1/streaming?stream=user:notification"
 						query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+						socket_param = { 'stream': 'user:notification' }
 						break
 					default:
 						break
@@ -168,24 +188,27 @@ function writePrefCols(event, json_data) {
 					case 'home': // ホームタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/timeline"
 						query_param = {}
+						socket_param = { 'channel': 'homeTimeline' }
 						break
 					case 'local': // ローカルタイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/local-timeline"
 						query_param = {}
+						socket_param = { 'channel': 'localTimeline' }
 						break
 					case 'federation': // 連合タイムライン
 						rest_url = "https://" + json_data.account.domain + "/api/notes/global-timeline"
 						query_param = {}
+						socket_param = { 'channel': 'globalTimeline' }
 						break
 					case 'notification': // 通知
 						rest_url = "https://" + json_data.account.domain + "/api/i/notifications"
 						query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
+						socket_param = { 'channel': 'main' }
 						break
 					default:
 						break
 				}
 				// WebSocket URLは共通なので外に出す
-				// TODO: 将来的にアカウント単位でWebSocketに接続するのでカラムに保存するのやめます……
 				socket_url = "wss://" + json_data.account.domain + "/streaming"
 				break
 			default:
@@ -202,7 +225,9 @@ function writePrefCols(event, json_data) {
 				'timeline_type': json_data.timeline_type,
 				'rest_url': rest_url,
 				'socket_url': socket_url,
-				'query_param': query_param
+				'query_param': query_param,
+				'socket_param': socket_param,
+				'tl_color': json_data.tl_color
 			}],
 			'col_color': json_data.col_color
 		})
