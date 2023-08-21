@@ -140,25 +140,3 @@ $(() => {
 	});
 
 });
-
-/*
-		var index = $("#columns>table>thead>tr>th").length;
-		createColumn(null, index + 1);
-		$("#columns>table>tbody>tr>td").eq(index)
-			.find("ul").append(createTimelineOptionLine(null, 1, accounts));
-
-		
-		var acc_address = $("#cmb_account").val();
-		var timeline_type = $('input:radio[name="opt_timeline_type"]:checked').val();
-		var color = $("#txt_col_color").val();
-		var acc_info = accounts.get(acc_address);
-		
-		// ファイルに追加する処理を書く(整形はメインプロセスで)
-		window.accessApi.writePrefCols({
-			'key_address': acc_address,
-			'timeline_type': timeline_type,
-			'account': acc_info,
-			'tl_color': color,
-			'col_color': color
-		});
-//*/
