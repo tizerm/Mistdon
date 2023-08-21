@@ -140,7 +140,112 @@ function readPrefCols() {
  * @param json_data 整形前の書き込むJSONデータ
  */
 function writePrefCols(event, json_data) {
+	// ファイル書き込み用にJSONファイルを再生成
+	var write_json = []
+	json_data.forEach((col, index) => {
+		var tl_list = []
+		col.timelines.forEach((tl) => {
+			// タイムラインのJSONを再生成
+			var rest_url = null
+			var socket_url = null
+			var query_param = null
+			var socket_param = null
+
+			// プラットフォームの種類によってAPIの形式が違うので個別に設定
+			switch (tl.account.platform) {
+				case 'Mastodon': // Mastodon
+					// タイムラインタイプによって設定値を変える
+					switch (tl.timeline_type) {
+						case 'home': // ホームタイムライン
+							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/home"
+							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user"
+							query_param = {}
+							socket_param = { 'stream': 'user' }
+							break
+						case 'local': // ローカルタイムライン
+							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
+							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:local"
+							query_param = { 'local': true }
+							socket_param = { 'stream': 'public:local' }
+							break
+						case 'federation': // 連合タイムライン
+							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
+							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:remote"
+							query_param = { 'remote': true }
+							socket_param = { 'stream': 'public:remote' }
+							break
+						case 'notification': // 通知
+							rest_url = "https://" + tl.account.domain + "/api/v1/notifications"
+							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user:notification"
+							query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+							socket_param = { 'stream': 'user:notification' }
+							break
+						default:
+							break
+					}
+					break;
+				case 'Misskey': // Misskey
+					// タイムラインタイプによって設定値を変える
+					switch (tl.timeline_type) {
+						case 'home': // ホームタイムライン
+							rest_url = "https://" + tl.account.domain + "/api/notes/timeline"
+							query_param = {}
+							socket_param = { 'channel': 'homeTimeline' }
+							break
+						case 'local': // ローカルタイムライン
+							rest_url = "https://" + tl.account.domain + "/api/notes/local-timeline"
+							query_param = {}
+							socket_param = { 'channel': 'localTimeline' }
+							break
+						case 'federation': // 連合タイムライン
+							rest_url = "https://" + tl.account.domain + "/api/notes/global-timeline"
+							query_param = {}
+							socket_param = { 'channel': 'globalTimeline' }
+							break
+						case 'notification': // 通知
+							rest_url = "https://" + tl.account.domain + "/api/i/notifications"
+							query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
+							socket_param = { 'channel': 'main' }
+							break
+						default:
+							break
+					}
+					// WebSocket URLは共通なので外に出す
+					socket_url = "wss://" + tl.account.domain + "/streaming"
+					break
+				default:
+					break
+			}
+			// タイムラインリストに追加
+			tl_list.push({
+				'key_address': tl.key_address,
+				'host': tl.account.domain,
+				'timeline_type': tl.timeline_type,
+				'rest_url': rest_url,
+				'socket_url': socket_url,
+				'query_param': query_param,
+				'socket_param': socket_param,
+				'tl_color': tl.tl_color
+			})
+		})
+		// カラムリストに追加
+		write_json.push({
+			'column_id': 'col' + (index + 1),
+			'label_head': col.label_head,
+			'label_type': col.label_type,
+			'timelines': tl_list,
+			'col_color': col.col_color,
+			'col_width': col.col_width
+		})
+	})
+	// 最終的な設定ファイルをJSONファイルに書き込み
+	var content = overwriteFile('prefs/columns.json', write_json)
+	
+	// キャッシュを更新
+	pref_columns = JSON.parse(content)
+
 	// 別ファイルを読む処理があるのでawait挟むため非同期にする
+	/*
 	const proc = async () => {
 		var read_data = await readPrefCols()
 		var col_num = (read_data ? read_data.length : 0) + 1;
@@ -236,6 +341,7 @@ function writePrefCols(event, json_data) {
 		pref_columns = JSON.parse(content)
 	}
 	proc()
+	//*/
 }
 
 /*================================================================================================*/
@@ -278,6 +384,25 @@ function writeFileArrayJson(path, json_data) {
 		// ファイルが存在しない場合(配列化してstring化)
 		content = JSON.stringify([json_data])
 	}
+
+	fs.writeFile(path, content, 'utf8', (err) => {
+		if (err) throw err;
+		console.log('@INF: file write successed.')
+	})
+	return content
+}
+
+/**
+ * #Utils #Node.js
+ * 汎用JSONファイル書き込みメソッド(非同期)
+ * 引数のJSONファイルをファイルに書き込む(完全上書き処理)
+ * 
+ * @param path 読み込むファイルのパス
+ * @param json_data ファイルに書き込むJSONデータ(この内容で上書き)
+ * @return 最終的に書き込んだファイル内容string
+ */
+function overwriteFile(path, json_data) {
+	var content = JSON.stringify(json_data)
 
 	fs.writeFile(path, content, 'utf8', (err) => {
 		if (err) throw err;

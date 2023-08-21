@@ -13,6 +13,52 @@ const yyyymmdd = new Intl.DateTimeFormat(undefined,
 
 /**
  * #Renderer #jQuery
+ * MastodonとMisskeyのタイムラインデータをソートマップ可能なデータとして返す
+ * 
+ * @param data ポスト情報のJSON
+ * @param timeline 流れてきたタイムラインJSON
+ * @param tl_acc 流れてきたアカウントJSON
+ */
+function getIntegratedPost(data, timeline, tl_acc) {
+	var binding_key = null;
+	var sort_date = null;
+	var user_address = null;
+
+	// プラットフォーム判定
+	switch (tl_acc.platform) {
+		case 'Mastodon': // Mastodon
+			binding_key = timeline.timeline_type == 'notification'
+				? 'Mastodon-notification' : 'Mastodon-toot';
+			sort_date = data.created_at;
+			// ローカルリモート関係なくアカウントのフルアドレスを生成
+			user_address = data.account.acct.match(/@/)
+				? data.account.acct : (data.account.acct + '@' + timeline.host);
+			break;
+		case 'Misskey': // Misskey
+			console.log(data);
+			binding_key = timeline.timeline_type == 'notification'
+				? 'Misskey-notification' : 'Misskey-note';
+			sort_date = data.createdAt;
+			// ローカルリモート関係なくアカウントのフルアドレスを生成
+			// TODO: 実績が来ると落ちるのでOptionalにしとく
+			user_address = data?.user?.username + '@'
+				+ (data?.user?.host ? data?.user?.host : timeline?.host);
+			break;
+		default:
+			break;
+	}
+	// 投稿オブジェクトを含めるJSONオブジェクトとして返却
+	return {
+		'binding_key': binding_key,
+		'sort_date': sort_date,
+		// 投稿日付(小数点以下切り捨て)+ユーザーフルアドレスを投稿のユニークキーとする
+		'post_key': sort_date.substring(0, sort_date.lastIndexOf('.')) + '@' + user_address,
+		'post': data
+	};
+}
+
+/**
+ * #Renderer #jQuery
  * カラムのテンプレートを生成する
  * 中身は後入れ
  * 
@@ -35,6 +81,41 @@ function createColumn(col_json) {
 	// カラムヘッダの色を変更
 	$("#columns>table>thead>tr>#" + col_json.column_id + "_head")
 		.css("background-color", "#" + col_json.col_color);
+
+	// カラムの幅を変更
+	$("#columns>table>thead>tr>#" + col_json.column_id + "_head")
+		.css("width", col_json.col_width + "px");
+}
+
+/**
+ * #Renderer #jQuery
+ * 統合用に整形した投稿データからタイムラインのDOMを生成
+ * 
+ * @param array_json 統合用に整形された投稿配列JSON
+ * @param bind_id バインド先のID
+ */
+function createIntegratedTimeline(array_json, bind_id) {
+	var html = '';
+	$.each(array_json, (index, value) => {
+		// binding_keyによって呼び出し関数を変える
+		switch (value.binding_key) {
+			case 'Mastodon-toot': // Mastodon-投稿タイムライン
+				html += createTimelineMastLine(value.post);
+				break;
+			case 'Mastodon-notification': // Mastodon-通知欄
+				html += createNotificationMastLine(value.post);
+				break;
+			case 'Misskey-note': // Misskey-投稿タイムライン
+				html += createTimelineMskyLine(value.post);
+				break;
+			case 'Misskey-notification': // Misskey-通知欄
+				html += createNotificationMskyLine(value.post);
+				break;
+			default:
+				break;
+		}
+	});
+	$("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
 }
 
 /*================================================================================================*/
@@ -260,9 +341,13 @@ function createTimelineMskyLine(value) {
 	if (viewdata.files.length > 0) {
 		// 添付画像がある場合は画像を表示
 		html += '<div class="media">';
-		if (viewdata.sensitive) {
-			// 閲覧注意設定の場合は画像を隠す
+		if (viewdata.files.filter(f => f.isSensitive).length > 0) {
+			// 閲覧注意設定のある場合が含まれている場合は画像を隠す
 			html += '<a class="expand_header label_sensitive">閲覧注意の画像があります</a>'
+				+ '<div class="media_content cw_content">';
+		} else if (viewdata.files.length > 4) {
+			// 画像ファイルが5枚以上ある場合も隠す
+			html += '<a class="expand_header label_cw">添付画像が5枚以上あります</a>'
 				+ '<div class="media_content cw_content">';
 		} else {
 			html += '<div class="media_content">';

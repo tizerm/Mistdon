@@ -93,7 +93,7 @@
 #columns>table>tbody>tr>.timeline>ul {
 	margin: 0px;
 	padding: 0px;
-	height: calc(100vh - 192px);
+	height: calc(100vh - 208px);
 	overflow-y: auto;
 }
 
@@ -177,6 +177,7 @@
 #columns>table>tbody>tr>.timeline>ul>li>.content>.main_content {
 	font-size: 13px;
 	margin: 6px 18px;
+	overflow-wrap: break-word;
 }
 #columns>table>tbody>tr>.timeline>ul>li>.content>.main_content a:not([class*="mention"]) {
 	display: inline-block;

@@ -1,0 +1,103 @@
+button {
+	background-color: #4f4f4f;
+	color: #ffffff;
+}
+button:hover {
+	background-color: #6f6f6f;
+}
+button:active {
+	background-color: #222222;
+	color: #a0a0a0;
+}
+button[disabled] {
+	background-color: #222222;
+	color: #666666;
+}
+
+#header>.head_buttons {
+	margin: 12px;
+	text-align: center;
+}
+#header>.head_buttons>button {
+	border-radius: 8px;
+	border: solid 2px #ffffff;
+	padding: 6px 32px;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+#columns input, #columns select {
+	background-color: #4f4f4f;
+	color: #ffffff;
+	border: solid 1px #ffffff;
+}
+#columns>table>thead>tr>.head {
+	background-color: #5a46d9;
+}
+
+#columns>table>thead>tr>.head {
+	position: relative;
+}
+#columns>table>thead>tr>.head>h2,
+#columns>table>thead>tr>.head>h3 {
+	margin: 0px;
+	text-align: left;
+	font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
+}
+
+#columns>table>thead>tr>.head>.col_layout {
+	position: absolute;
+	right: 24px;
+	top: 12px;
+}
+
+#columns>table>tbody>tr>.timeline button {
+	border-radius: 6px;
+	border: solid 1px #ffffff;
+	padding: 2px 8px;
+	font-size: 13px;
+	font-weight: bold;
+}
+#columns>table>tbody>tr>.timeline select {
+	border-radius: 4px;
+	padding: 2px 8px;
+}
+#columns>table>tbody>tr>.timeline>.col_option {
+	margin: 4px;
+	text-align: center;
+}
+#columns>table>tbody>tr>.timeline>ul {
+	margin: 0px;
+	padding: 0px;
+	height: calc(100vh - 192px);
+	overflow-y: auto;
+}
+
+#columns>table>tbody>tr>.timeline>ul>li>h4 {
+	position: relative;
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;
+	color: #ffffff;
+	font-size: 18px;
+	font-weight: bold;
+	margin: -12px -12px 12px;
+	padding: 8px 24px;
+	background-color: #5a46d9;
+}
+#columns>table>tbody>tr>.timeline>ul>li>h4>.tl_color {
+	position: absolute;
+	right: 24px;
+	top: 8px;
+}
+
+#columns>table>tbody>tr>.timeline>ul>li>.tl_option {
+	font-size: 14px;
+	margin: 6px 12px;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.tl_option>div {
+	margin: 12px 0px;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.tl_option>.foot_button {
+	text-align: right;
+	margin: 12px 0px;
+}

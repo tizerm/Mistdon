@@ -11,13 +11,190 @@
 		content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
 	/>
 	<link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
+	<link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
 	<link rel="stylesheet" type="text/css" href="css/mm_pref_col.css"/>
 	<script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
+	<script type="text/javascript" src="js/mm_pref_col_viewbind.js"></script>
 	<script type="text/javascript" src="js/mm_pref_col.js"></script>
-	<title>MMchan - Authorize</title>
+	<title>MMchan - Column Setting</title>
 <head>
 <body>
-<section id="content">
+<nav id="navi">
+	<ul>
+		<li class="current_icon"><img src="{current_icon}" class="current_icon"/></li>
+		<li><a href="auth.html">Auth</a></li>
+		<li><a href="pref_col.html">Col</a></li>
+		<li>R</li>
+	</ul>
+</nav>
+<header id="header">
+	<h1>Column Setting - MMchan</h1>
+	<div class="head_buttons">
+		<button type="button" id="on_add_column">カラムを追加</button>
+		<button type="button" id="on_save_pref">設定を保存</button>
+		<button type="button" id="on_close">戻る</button>
+	</div>
+</header>
+<section id="columns">
+<table>
+	<thead>
+		<tr>
+<!--			<th id="col1_head" class="head">
+				<h2><input type="text" id="col1_label" size="50"/></h2>
+				<h3><input type="text" id="col1_type" size="50"/></h3>
+				<div id="col1_layout_option" class="col_layout">
+					#<input type="text" id="col1_color" class="txt_col_color" size="8"/><br/>
+					<input type="text" id="col1_width" class="txt_col_width" size="8"/>px
+				</div>
+			</th>
+			<th id="colX_head" class="head">
+				<h2><input type="text" id="col1_label" size="50"/></h2>
+				<h3><input type="text" id="col1_type" size="50"/></h3>
+				<div id="col1_layout_option" class="col_layout">
+					#<input type="text" id="col1_color" size="8"/><br/>
+					<input type="text" id="col1_width" size="8"/>px
+				</div>
+			</th>
+-->		</tr>
+	</thead>
+	<tbody>
+		<tr>
+<!--			<td id="col1_body" class="timeline">
+				<div id="col1_option" class="col_option">
+					<button type="button" id="col1_to_left" class="btn_to_left">＜</button>
+					<button type="button" id="col1_do_add" class="btn_add_tl">TL追加</button>
+					<button type="button" id="col1_do_add" class="btn_del_col">列削除</button>
+					<button type="button" id="col1_to_right" class="btn_to_right">＞</button>
+				</div>
+				<ul>
+					<li>
+						<h4>Timeline 1
+							<div id="col1_layout_option" class="tl_color">
+								#<input type="text" id="col1_color" size="8"/>
+							</div>
+						</h4>
+						<div class="tl_option">
+							<div id="lbl_type">
+								表示アカウント:<br/>
+								<select id="cmb_tl1_account">
+									<option value="">(認証アカウントがありません)</option>
+								</select>
+							</div>
+							<div id="lbl_type">
+								追加するカラムの種類:<br/>
+								<input type="radio" id="opt_timeline_type1" name="opt_timeline_type" value="home" checked/>
+								<label for="opt_timeline_type1">ホーム</label>
+								<input type="radio" id="opt_timeline_type2" name="opt_timeline_type" value="local"/>
+								<label for="opt_timeline_type2">ローカル</label>
+								<input type="radio" id="opt_timeline_type3" name="opt_timeline_type" value="federation"/>
+								<label for="opt_timeline_type3">連合</label>
+								<input type="radio" id="opt_timeline_type4" name="opt_timeline_type" value="notification"/>
+								<label for="opt_timeline_type4">通知</label>
+							</div>
+							<div id="lbl_type" class="foot_button">
+								<button type="button" id="col1_tl1_do_delete" class="btn_del_tl">タイムラインを削除</button>
+							</div>
+						</div>
+					</li>
+					<li>
+						<h4>Timeline 1
+							<div id="col1_layout_option" class="tl_color">
+								#<input type="text" id="col1_color" size="8"/>
+							</div>
+						</h4>
+						<div class="tl_option">
+							<div id="lbl_type">
+								表示アカウント:<br/>
+								<select id="cmb_tl1_account">
+									<option value="">(認証アカウントがありません)</option>
+								</select>
+							</div>
+							<div id="lbl_type">
+								追加するカラムの種類:<br/>
+								<input type="radio" id="opt_timeline_type1" name="opt_timeline_type" value="home" checked/>
+								<label for="opt_timeline_type1">ホーム</label>
+								<input type="radio" id="opt_timeline_type2" name="opt_timeline_type" value="local"/>
+								<label for="opt_timeline_type2">ローカル</label>
+								<input type="radio" id="opt_timeline_type3" name="opt_timeline_type" value="federation"/>
+								<label for="opt_timeline_type3">連合</label>
+								<input type="radio" id="opt_timeline_type4" name="opt_timeline_type" value="notification"/>
+								<label for="opt_timeline_type4">通知</label>
+							</div>
+							<button type="button" id="col1_tl1_do_delete">タイムラインを削除</button>
+						</div>
+					</li>
+				</ul>
+			</td>
+			<td id="colX_body" class="timeline">
+				<div id="col1_option" class="col_option">
+					<button type="button" id="col1_to_left">＜</button>
+					<button type="button" id="col1_do_add">タイムラインを追加</button>
+					<button type="button" id="col1_do_add">カラムを削除</button>
+					<button type="button" id="col1_to_right">＞</button>
+				</div>
+				<ul>
+					<li>
+						<h4>Timeline 1
+							<div id="col1_layout_option" class="tl_color">
+								#<input type="text" id="col1_color" size="8"/>
+							</div>
+						</h4>
+						<div class="tl_option">
+							<div id="lbl_type">
+								表示アカウント:<br/>
+								<select id="cmb_tl1_account">
+									<option value="">(認証アカウントがありません)</option>
+								</select>
+							</div>
+							<div id="lbl_type">
+								追加するカラムの種類:<br/>
+								<input type="radio" id="opt_timeline_type1" name="opt_timeline_type" value="home" checked/>
+								<label for="opt_timeline_type1">ホーム</label>
+								<input type="radio" id="opt_timeline_type2" name="opt_timeline_type" value="local"/>
+								<label for="opt_timeline_type2">ローカル</label>
+								<input type="radio" id="opt_timeline_type3" name="opt_timeline_type" value="federation"/>
+								<label for="opt_timeline_type3">連合</label>
+								<input type="radio" id="opt_timeline_type4" name="opt_timeline_type" value="notification"/>
+								<label for="opt_timeline_type4">通知</label>
+							</div>
+							<button type="button" id="col1_tl1_do_delete">タイムラインを削除</button>
+						</div>
+					</li>
+					<li>
+						<h4>Timeline 1
+							<div id="col1_layout_option" class="tl_color">
+								#<input type="text" id="col1_color" size="8"/>
+							</div>
+						</h4>
+						<div class="tl_option">
+							<div id="lbl_type">
+								表示アカウント:<br/>
+								<select id="cmb_tl1_account">
+									<option value="">(認証アカウントがありません)</option>
+								</select>
+							</div>
+							<div id="lbl_type">
+								追加するカラムの種類:<br/>
+								<input type="radio" id="opt_timeline_type1" name="opt_timeline_type" value="home" checked/>
+								<label for="opt_timeline_type1">ホーム</label>
+								<input type="radio" id="opt_timeline_type2" name="opt_timeline_type" value="local"/>
+								<label for="opt_timeline_type2">ローカル</label>
+								<input type="radio" id="opt_timeline_type3" name="opt_timeline_type" value="federation"/>
+								<label for="opt_timeline_type3">連合</label>
+								<input type="radio" id="opt_timeline_type4" name="opt_timeline_type" value="notification"/>
+								<label for="opt_timeline_type4">通知</label>
+							</div>
+							<button type="button" id="col1_tl1_do_delete">タイムラインを削除</button>
+						</div>
+					</li>
+				</ul>
+			</td>
+-->		</tr>
+	</tbody>
+</table>
+</section>
+
+<!--<section id="content">
 	<h2>カラムの追加</h2>
 	<div id="form">
 		<div id="instance_form">
@@ -49,5 +226,6 @@
 	</div>
 	<a href="index.html">設定をやめて戻る</a>
 </section>
+-->
 </body>
 <html>
