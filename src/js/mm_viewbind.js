@@ -35,7 +35,6 @@ function getIntegratedPost(data, timeline, tl_acc) {
 				? data.account.acct : (data.account.acct + '@' + timeline.host);
 			break;
 		case 'Misskey': // Misskey
-			console.log(data);
 			binding_key = timeline.timeline_type == 'notification'
 				? 'Misskey-notification' : 'Misskey-note';
 			sort_date = data.createdAt;
@@ -159,7 +158,8 @@ function createTimelineMastLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + viewdata.account.avatar + '" class="usericon"/>'
-		+ '<h4 class="username">' + display_name + '</h4>'
+		// 絵文字置換
+		+ '<h4 class="username">' + replaceEmojiMast(display_name, viewdata.account.emojis) + '</h4>'
 		+ '<a class="userid">@' + viewdata.account.acct + '</a>'
 		+ '</div><div class="content">';
 	if (viewdata.spoiler_text) {
@@ -171,7 +171,8 @@ function createTimelineMastLine(value) {
 		html += '<div class="main_content">';
 	}
 	// 本文
-	html += viewdata.content + '</div></div>';
+	html += replaceEmojiMast(viewdata.content, viewdata.emojis) // 絵文字置換
+		+ '</div></div>';
 	if (viewdata.media_attachments.length > 0) {
 		// 添付画像がある場合は画像を表示
 		html += '<div class="media">';
@@ -246,15 +247,15 @@ function createNotificationMastLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + value.account.avatar + '" class="usericon"/>'
-		+ '<h4 class="username">' + display_name + '</h4>'
+		+ '<h4 class="username">' + replaceEmojiMast(display_name, value.account.emojis) + '</h4>'
 		+ '<a class="userid">@' + value.account.acct + '</a>'
 		+ '</div><div class="content"><div class="main_content">';
 		// 本文
 	if (value.type == 'follow') {
 		// フォローの場合はユーザーのプロフを表示
-		html += value.account.note;
+		html += replaceEmojiMast(value.account.note, value.account.emojis);
 	} else {
-		html += value.status.content;
+		html += replaceEmojiMast(value.status.content, value.status.emojis);
 	}
 	html += '</div></div><div class="post_footer">';
 	// 通知タイプによって表示を変更
@@ -282,6 +283,21 @@ function createNotificationMastLine(value) {
 	return html;
 }
 
+/**
+ * #Renderer #jQuery
+ * Mastodonのテキストから絵文字のショートコードを絵文字に変換
+ * 
+ * @param text 変換対象テキスト
+ * @param emojis レスポンスに含まれる絵文字配列
+ */
+function replaceEmojiMast(text, emojis) {
+	emojis.forEach((emoji) => {
+		text = text.replace(new RegExp(':' + emoji.shortcode + ':', 'g'),
+			'<img src="' + emoji.url + '" class="inline_emoji"/>');
+	});
+	return text;
+}
+
 /*================================================================================================*/
 
 /**
@@ -307,15 +323,17 @@ function createTimelineMsky(array_json, bind_id) {
  */
 function createTimelineMskyLine(value) {
 	var html = '';
+	// リノート先があり本文もある場合は引用フラグを立てる
+	var quote_flg = value.renote && value.text;
 	// リノートならリノート先を、通常なら本体を参照先にする
-	var viewdata = value.renote ? value.renote : value;
+	var viewdata = !quote_flg && value.renote ? value.renote : value;
 	// toot_url = value.uri
 	// account_url = (そのままだとアクセスできない)
 	var date = yyyymmdd.format(new Date(viewdata.createdAt));
 	var display_name = viewdata.user.name ? viewdata.user.name : viewdata.user.username;
 	var user_address = viewdata.user.username + (viewdata.user.host ? ('@' + viewdata.user.host) : '');
 	html += '<li>';
-	if (value.renote) {
+	if (!quote_flg && value.renote) {
 		// リノートの場合はリノートヘッダを表示
 		var renote_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
 		html += '<div class="label_head label_reblog">'
@@ -325,7 +343,7 @@ function createTimelineMskyLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + viewdata.user.avatarUrl + '" class="usericon"/>'
-		+ '<h4 class="username">' + viewdata.user.name + '</h4>'
+		+ '<h4 class="username">' + replaceEmojiMsky(display_name, viewdata.user.emojis) + '</h4>'
 		+ '<a class="userid">@' + user_address + '</a>'
 		+ '</div><div class="content">';
 	if (viewdata.cw) {
@@ -337,7 +355,16 @@ function createTimelineMskyLine(value) {
 		html += '<div class="main_content">';
 	}
 	// 本文
-	html += viewdata.text + '</div></div>';
+	html += replaceEmojiMsky(viewdata.text, viewdata.emojis)
+		+ '</div></div>';
+	if (quote_flg) {
+		// 引用フラグがある場合は引用先を表示
+		html += '<div class="post_quote">'
+			+ '<div>' + viewdata.renote.user.name +  '</div>'
+			+ '<div>@' + viewdata.renote.user.username +  '</div>'
+			+ '<div>' + replaceEmojiMsky(viewdata.renote.text, viewdata.renote.emojis) +  '</div>'
+			+ '</div>';
+	}
 	if (viewdata.files.length > 0) {
 		// 添付画像がある場合は画像を表示
 		html += '<div class="media">';
@@ -390,6 +417,10 @@ function createNotificationMsky(array_json, bind_id) {
  */
 function createNotificationMskyLine(value) {
 	var html = '';
+	if (value.type == 'achievementEarned') {
+		// TODO: 実績は無視！とりあえず当面の間は
+		return html;
+	}
 	var date = yyyymmdd.format(new Date(value.createdAt));
 	var display_name = value.user.name ? value.user.name : value.user.username;
 	var user_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
@@ -417,16 +448,16 @@ function createNotificationMskyLine(value) {
 	html += '<div class="user">'
 		// ユーザーアカウント情報
 		+ '<img src="' + value.user.avatarUrl + '" class="usericon"/>'
-		+ '<h4 class="username">' + value.user.name + '</h4>'
+		+ '<h4 class="username">' + replaceEmojiMsky(display_name, value.user.emojis) + '</h4>'
 		+ '<a class="userid">@' + user_address + '</a>'
 		+ '</div><div class="content"><div class="main_content">';
 		// 本文
 	if (value.type == 'renote') {
 		// リノートの場合は二重ネストしているノートを見に行くの場合は内容を表示
-		html += value.note.renote.text;
+		html += replaceEmojiMsky(value.note.renote.text, value.note.renote.emojis);
 	} else if (value.type != 'follow' && value.type != 'followRequestAccepted') {
 		// フォロー以外の場合は内容を表示
-		html += value.note.text;
+		html += replaceEmojiMsky(value.note.text, value.note.emojis);
 	}
 	html += '</div></div><div class="post_footer">';
 	// 通知タイプによって表示を変更
@@ -453,4 +484,22 @@ function createNotificationMskyLine(value) {
 	}
 	html += '</div></li>';
 	return html;
+}
+
+/**
+ * #Renderer #jQuery
+ * Misskeyのテキストから絵文字のショートコードを絵文字に変換
+ * 
+ * @param text 変換対象テキスト
+ * @param emojis レスポンスに含まれる絵文字オブジェクト
+ */
+function replaceEmojiMsky(text, emojis) {
+	if (!emojis) { // 絵文字がない場合はそのまま返却
+		return text;
+	}
+	Object.keys(emojis).forEach((key) => {
+		text = text.replace(new RegExp(':' + key + ':', 'g'),
+			'<img src="' + emojis[key] + '" class="inline_emoji"/>');
+	});
+	return text;
 }

@@ -98,6 +98,8 @@ $(() => {
 										.prepend(createNotificationMastLine(integrated.post));
 								}
 							}
+							// TODO: debug
+							console.log(col.column_id + 'size: ' + $("#columns>table>tbody>tr>#" + col.column_id + "_body>ul>li").length);
 						});
 						// ソケットパラメータに受信開始の設定をセット
 						tl.socket_param.type = "subscribe";
@@ -170,6 +172,8 @@ $(() => {
 										.prepend(createNotificationMskyLine(integrated.post));
 								}
 							}
+							// TODO: debug
+							console.log(col.column_id + 'size: ' + $("#columns>table>tbody>tr>#" + col.column_id + "_body>ul>li").length);
 						});
 						// ソケットパラメータに受信開始の設定をセット
 						tl.socket_param.id = uuid;
@@ -203,7 +207,7 @@ $(() => {
 						}
 					});
 				});
-				//*
+				/*
 				console.log(col.label_head); // TODO: debug
 				console.log(keyset); // TODO: debug
 				console.log(postlist); // TODO: debug

@@ -137,7 +137,7 @@
 	border-radius: 12px;
 	width: 48px;
 	height: 48px;
-	margin-right: 16px;
+	margin-right: 12px;
 	float: left;
 }
 
@@ -146,6 +146,16 @@
 	font-size: 18px;
 	font-weight: bold;
 	margin: 0px;
+	width: calc(100% - 60px);
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.user>.username .inline_emoji {
+	display: inline-block;
+	height: 24px;
+	width: auto;
+	vertical-align: text-bottom;
 }
 
 #columns>table>tbody>tr>.timeline>ul>li>.user>.userid {
@@ -179,17 +189,35 @@
 	margin: 6px 18px;
 	overflow-wrap: break-word;
 }
+
+#columns>table>tbody>tr>.timeline>ul>li>.content>.main_content .inline_emoji {
+	display: inline-block;
+	height: 24px;
+	width: auto;
+	vertical-align: text-bottom;
+
+}
+
 #columns>table>tbody>tr>.timeline>ul>li>.content>.main_content a:not([class*="mention"]) {
 	display: inline-block;
 	max-width: 240px;
 	overflow: hidden;
+	white-space: nowrap;
 	text-overflow: ellipsis;
+	vertical-align: text-bottom;
 }
 #columns>table>tbody>tr>.timeline>ul>li>.media .media_preview {
 	border-radius: 8px;
 	display: inline;
-	width: 128px;
-	height: 128px;
+	height: 96px;
+	width: auto;
+}
+#columns>table>tbody>tr>.timeline>ul>li>.post_quote {
+	border-radius: 8px;
+	background-color: rgba(255,255,255,0.1);
+	overflow-wrap: break-word;
+	font-size: 13px;
+	padding: 8px 12px;
 }
 .cw_content {
 	display: none;
