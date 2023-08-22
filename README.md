@@ -1,50 +1,44 @@
 # This is Electron base Mastodon and Misskey client.
-<h3>ŠJ”­ƒR[ƒhƒl[ƒ€: MMchan</h3>
+<h3>é–‹ç™ºã‚³ãƒ¼ãƒ‰ãƒãƒ¼ãƒ : MMchan</h3>
 
 <p>
-Electron‚ðŽg‚Á‚ÄŠJ”­‚µ‚Ä‚¢‚éMastodon‚ÆMisskey‚ª‚¢‚Á‚Ø‚ñ‚ÉŒ©‚ç‚ê‚éFediverseƒNƒ‰ƒCƒAƒ“ƒg‚Å‚·B<br/>
-‚Ü‚¾‚¶‚¥‚ñ‚¶‚¥‚ñì‚è‚©‚¯‚È‚Ì‚Å×‚©‚­i’»‚ð‚ ‚°‚È‚ª‚çì‚Á‚Ä‚¢‚±‚¤‚ÆŽv‚¢‚Ü‚·B<br/>
-\•ª‚È‹@”\‚ª®‚Á‚½‚ÆŽv‚Á‚½‚çƒpƒbƒP[ƒW‰»‚µ‚ÄƒŠƒŠ[ƒX‚·‚é‚©‚à‚ËIH
+Electronã‚’ä½¿ã£ã¦é–‹ç™ºã—ã¦ã„ã‚‹Mastodonã¨MisskeyãŒã„ã£ãºã‚“ã«è¦‹ã‚‰ã‚Œã‚‹Fediverseã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã§ã™ã€‚<br/>
+ã¾ã ã˜ã‡ã‚“ã˜ã‡ã‚“ä½œã‚Šã‹ã‘ãªã®ã§ç´°ã‹ãé€²æ—ã‚’ã‚ã’ãªãŒã‚‰ä½œã£ã¦ã„ã“ã†ã¨æ€ã„ã¾ã™ã€‚<br/>
+ååˆ†ãªæ©Ÿèƒ½ãŒæ•´ã£ãŸã¨æ€ã£ãŸã‚‰ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸åŒ–ã—ã¦ãƒªãƒªãƒ¼ã‚¹ã™ã‚‹ã‹ã‚‚ã­ï¼ï¼Ÿ
 </p>
 
 <p>
-ƒŠƒ|ƒWƒgƒŠ‚©‚çƒ`ƒFƒbƒNƒAƒEƒg‚µ‚ÄŽg‚Á‚Ä‚Ý‚Ä‚à‚©‚Ü‚í‚È‚¢‚¯‚ÇA<br/>
-Electron‚ÆNode.js‚ð—p‚¢‚ÄŠJ”­‚µ‚Ä‚¢‚é‚Ì‚ÅAƒpƒbƒP[ƒW‚µ‚Ä‚¢‚È‚¢ŠJ”­’†‚ÌŒ»Ý‚ÍA<br/>
-‚¨Žg‚¢‚Ìƒpƒ\ƒRƒ“‚ÉNode.js‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚é‚±‚Æ‚ª‘O’ñðŒ‚Æ‚È‚è‚Ü‚·B<br/>
-ƒ[ƒJƒ‹‚Éƒ`ƒFƒbƒNƒAƒEƒg‚µ‚½ƒtƒHƒ‹ƒ_‚ÉˆÚ“®‚µ‚Ä<br/>
+ãƒªãƒã‚¸ãƒˆãƒªã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚¢ã‚¦ãƒˆã—ã¦ä½¿ã£ã¦ã¿ã¦ã‚‚ã‹ã¾ã‚ãªã„ã‘ã©ã€<br/>
+Electronã¨Node.jsã‚’ç”¨ã„ã¦é–‹ç™ºã—ã¦ã„ã‚‹ã®ã§ã€ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã—ã¦ã„ãªã„é–‹ç™ºä¸­ã®ç¾åœ¨ã¯ã€<br/>
+ãŠä½¿ã„ã®ãƒ‘ã‚½ã‚³ãƒ³ã«Node.jsãŒã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã‚‹ã“ã¨ãŒå‰ææ¡ä»¶ã¨ãªã‚Šã¾ã™ã€‚<br/>
+ãƒ­ãƒ¼ã‚«ãƒ«ã«ãƒã‚§ãƒƒã‚¯ã‚¢ã‚¦ãƒˆã—ãŸãƒ•ã‚©ãƒ«ãƒ€ã«ç§»å‹•ã—ã¦<br/>
 npm install electron --save-dev<br/>
-‚ðŽÀs‚µ‚Äƒ‚ƒWƒ…[ƒ‹‚ðƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚©‚ç<br/>
+ã‚’å®Ÿè¡Œã—ã¦ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ã‹ã‚‰<br/>
 npm run start<br/>
-‚Å“®‚­‚ñ‚¶‚á‚È‚¢‚©‚ÈccŠO•”‚©‚ç‚â‚Á‚Ä‚È‚¢‚©‚ç‚í‚©‚ç‚ñB<br/>
-‚ ‚Æ‰½‚ª‹N‚«‚Ä‚àÓ”CŽæ‚ê‚Ü‚¹‚ñBƒAƒNƒZƒXƒg[ƒNƒ“˜R‚ê‚½‚çÅˆ«Cæ‚ÁŽæ‚ç‚ê‚é‚æI
+ã§å‹•ãã‚“ã˜ã‚ƒãªã„ã‹ãªâ€¦â€¦å¤–éƒ¨ã‹ã‚‰ã‚„ã£ã¦ãªã„ã‹ã‚‰ã‚ã‹ã‚‰ã‚“ã€‚<br/>
+ã‚ã¨ä½•ãŒèµ·ãã¦ã‚‚è²¬ä»»å–ã‚Œã¾ã›ã‚“ã€‚ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³æ¼ã‚ŒãŸã‚‰æœ€æ‚ªåž¢ä¹—ã£å–ã‚‰ã‚Œã‚‹ã‚ˆï¼
 </p>
 
-<h2>Œ»ÝŽÀ‘•‚³‚ê‚Ä‚¢‚é‹@”\</h2>
+<h2>ç¾åœ¨å®Ÿè£…ã•ã‚Œã¦ã„ã‚‹æ©Ÿèƒ½</h2>
 <p>
-EMastodonƒAƒJƒEƒ“ƒg‚Ì”FØ<br/>
-EMisskeyƒAƒJƒEƒ“ƒg‚Ì”FØ<br/>
-EMastodon‚ÌƒJƒ‰ƒ€Ý’è<br/>
-EMisskey‚ÌƒJƒ‰ƒ€Ý’è<br/>
-EMastodon‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“•\Ž¦(ƒŠƒAƒ‹ƒ^ƒCƒ€XV‘Î‰ž)<br/>
-EMisskey‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“•\Ž¦(ƒŠƒAƒ‹ƒ^ƒCƒ€‚Í‚Ü‚¾A’Ê’mƒoƒO‚Á‚Ä‚é)<br/>
-EMastodonƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ì‰æ‘œ•\Ž¦‚Æ‰{——’ˆÓ‚ÌŽ©“®ƒNƒ[ƒY<br/>
-EMastodonƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌCW‚ÌŽ©“®ƒNƒ[ƒY
+ãƒ»Mastodonã¨Misskeyã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®èªè¨¼<br/>
+ãƒ»Mastodonã¨Misskeyã®çµ±åˆã‚«ãƒ©ãƒ è¨­å®š(ã‚«ãƒ©ãƒ ã«è¤‡æ•°ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’åŒæ™‚ã«æµã›ã‚‹ã‚ˆã†ã«ãªã‚Šã¾ã—ãŸ)<br/>
+ãƒ»Mastodonã¨Misskeyã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³è¡¨ç¤º(ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ æ›´æ–°å¯¾å¿œ)<br/>
+ãƒ»Mastodonã¨Misskeyã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ç”»åƒè¡¨ç¤ºã¨é–²è¦§æ³¨æ„ã®è‡ªå‹•ã‚¯ãƒ­ãƒ¼ã‚º<br/>
+ãƒ»Mastodonã¨Misskeyã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®CWã®è‡ªå‹•ã‚¯ãƒ­ãƒ¼ã‚º
 </p>
 
-<h2>‚Ü‚¾ŽÀ‘•‚³‚ê‚Ä‚¢‚È‚¢Šî–{‹@”\</h2>
+<h2>ã¾ã å®Ÿè£…ã•ã‚Œã¦ã„ãªã„åŸºæœ¬æ©Ÿèƒ½</h2>
 <p>
-EƒAƒJƒEƒ“ƒg‚Ì”FØ‰ðœ(ƒAƒNƒZƒXƒg[ƒNƒ“¶¬‚ÌŠÖŒW‚Åauth.jsonƒtƒ@ƒCƒ‹‚ðÁ‚µ‚ÄƒŠƒZƒbƒg‚Í‚â‚ß‚Ä‚ËI)<br/>
-EƒJƒ‰ƒ€‚ÌíœAˆÚ“®(‚±‚ê‚Ícolumns.jsonƒtƒ@ƒCƒ‹íœ‚µ‚Äì‚è’¼‚µ‚Ä‚­‚¾‚³‚¢)<br/>
-E“Še<br/>
-EMisskeyƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌƒŠƒm[ƒg•\Ž¦<br/>
-E‚Ó‚Ÿ‚Ú<br/>
-EMisskeyƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌStreaming API‚É‚æ‚éƒŠƒAƒ‹ƒ^ƒCƒ€XV<br/>
-EƒŠƒ“ƒN‚ðŠO•”ƒuƒ‰ƒEƒU‚ÅŠJ‚­<br/>
-EƒXƒNƒ[ƒ‹‚µ‚ÄXV(Œ»óWebSocket Streaming API‚ÅXV‚µ‚½‚Ô‚ñ‚ð•ÛŽ‚·‚é‚¾‚¯)<br/>
-Eƒ}ƒXƒRƒbƒgƒLƒƒƒ‰ƒNƒ^[‚ÌƒfƒUƒCƒ“‚Æ‘fÞƒCƒ‰ƒXƒg§ì
+ãƒ»ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®èªè¨¼è§£é™¤(ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ç”Ÿæˆã®é–¢ä¿‚ã§auth.jsonãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ¶ˆã—ã¦ãƒªã‚»ãƒƒãƒˆã¯ã‚„ã‚ã¦ã­ï¼)<br/>
+ãƒ»æŠ•ç¨¿<br/>
+ãƒ»ãµãã¼<br/>
+ãƒ»ãƒªãƒ³ã‚¯ã‚’å¤–éƒ¨ãƒ–ãƒ©ã‚¦ã‚¶ã§é–‹ã<br/>
+ãƒ»ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã—ã¦æ›´æ–°(ç¾çŠ¶WebSocket Streaming APIã§æ›´æ–°ã—ãŸã¶ã‚“ã‚’ä¿æŒã™ã‚‹ã ã‘)(ã“ã‚Œå¤šåˆ†å®Ÿè£…ç„¡ç†ãªæ°—ãŒã™ã‚‹)<br/>
+ãƒ»ãƒžã‚¹ã‚³ãƒƒãƒˆã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®ãƒ‡ã‚¶ã‚¤ãƒ³ã¨ç´ æã‚¤ãƒ©ã‚¹ãƒˆåˆ¶ä½œ
 </p>
 
 <p>
-¦‘½‚­‚ÌŠî–{“I‚È‚±‚Æ‚à‚Å‚«‚Ä‚È‚¢Œ»ó‚Åƒvƒ‹ƒŠƒN‘—‚é‚Ì‚Í‚È‚é‚×‚­‚¨‚â‚ß‚­‚¾‚³‚¢B<br/>
-@­‚È‚­‚Æ‚àƒÀ”Å‚ªƒŠƒŠ[ƒX‚Å‚«‚é‚æ‚¤‚É‚È‚Á‚Ä‚©‚çccB
+â€»å¤šãã®åŸºæœ¬çš„ãªã“ã¨ã‚‚ã§ãã¦ãªã„ç¾çŠ¶ã§ãƒ—ãƒ«ãƒªã‚¯é€ã‚‹ã®ã¯ãªã‚‹ã¹ããŠã‚„ã‚ãã ã•ã„ã€‚<br/>
+ã€€å°‘ãªãã¨ã‚‚Î²ç‰ˆãŒãƒªãƒªãƒ¼ã‚¹ã§ãã‚‹ã‚ˆã†ã«ãªã£ã¦ã‹ã‚‰â€¦â€¦ã€‚
 </p>
