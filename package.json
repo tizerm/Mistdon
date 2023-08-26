@@ -1,5 +1,5 @@
 {
-  "name": "mm-chan-electron",
+  "name": "mistdon-electron",
   "version": "0.0.1",
   "description": "This is Electron base Mastodon and Misskey client.",
   "main": "main.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "MMchan"
+    "url": "https://github.com/tizerm/Mistdon.git"
   },
   "author": "tizerm",
   "license": "ISC",
