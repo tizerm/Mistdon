@@ -1,80 +1,12 @@
 // 日付フォーマッター
-const yyyymmdd = new Intl.DateTimeFormat(undefined,
-    {
-        year:   'numeric',
-        month:  '2-digit',
-        day:    '2-digit',
-        hour:   '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        //fractionalSecondDigits: 3,
-    }
-)
-
-/**
- * #Renderer #jQuery
- * MastodonとMisskeyのタイムラインデータをソートマップ可能なデータとして返す
- * 
- * @param data ポスト情報のJSON
- * @param timeline 流れてきたタイムラインJSON
- * @param tl_acc 流れてきたアカウントJSON
- */
-function getIntegratedPost(data, timeline, tl_acc) {
-    var binding_key = null;
-    var sort_date = null;
-    var user_address = null;
-
-    // プラットフォーム判定
-    switch (tl_acc.platform) {
-        case 'Mastodon': // Mastodon
-            binding_key = timeline.timeline_type == 'notification'
-                ? 'Mastodon-notification' : 'Mastodon-toot';
-            sort_date = data.created_at;
-            // ローカルリモート関係なくアカウントのフルアドレスを生成
-            user_address = data.account.acct.match(/@/)
-                ? data.account.acct : (data.account.acct + '@' + timeline.host);
-            break;
-        case 'Misskey': // Misskey
-            binding_key = timeline.timeline_type == 'notification'
-                ? 'Misskey-notification' : 'Misskey-note';
-            sort_date = data.createdAt;
-            // ローカルリモート関係なくアカウントのフルアドレスを生成
-            // TODO: 実績が来ると落ちるのでOptionalにしとく
-            user_address = data?.user?.username + '@'
-                + (data?.user?.host ? data?.user?.host : timeline?.host);
-            break;
-        default:
-            break;
-    }
-    // 投稿オブジェクトを含めるJSONオブジェクトとして返却
-    return {
-        'binding_key': binding_key,
-        'sort_date': sort_date,
-        // 投稿日付(小数点以下切り捨て)+ユーザーフルアドレスを投稿のユニークキーとする
-        'post_key': sort_date.substring(0, sort_date.lastIndexOf('.')) + '@' + user_address,
-        'post': data
-    };
-}
-
-/**
- * #Renderer #jQuery
- * WebSocketから受け取った通知をもとに投稿をタイムラインに追加
- * 
- * @param data ポスト情報のJSON
- * @param column_id カラムのID先頭
- * @param keyset 投稿ユニークキーセット
- * @param timeline 流れてきたタイムラインJSON
- * @param tl_acc 流れてきたアカウントJSON
- * @param bindFunc バインドHTMLを生成するコールバック関数
- */
-function prependPost(data, column_id, keyset, timeline, tl_acc, bindFunc) {
-    const integrated = getIntegratedPost(data, timeline, tl_acc);
-    // 重複している投稿を除外する
-    if (!keyset.has(integrated.post_key)) {
-        keyset.add(integrated.post_key);
-        $("#columns>table>tbody>tr>#" + column_id + "_body>ul").prepend(bindFunc(integrated.post));
-    }
-}
+const yyyymmdd = new Intl.DateTimeFormat(undefined, {
+    year:   'numeric',
+    month:  '2-digit',
+    day:    '2-digit',
+    hour:   '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+})
 
 /**
  * #Renderer #jQuery
@@ -85,7 +17,7 @@ function prependPost(data, column_id, keyset, timeline, tl_acc, bindFunc) {
  */
 function createColumn(col_json) {
     // カラムヘッダを生成
-    var html = '<th id="'
+    let html = '<th id="'
         + col_json.column_id + '_head" class="head">'
         + '<h2>' + col_json.label_head + '</h2>'
         + '<h3>' + col_json.label_type + '</h3>'
@@ -108,51 +40,115 @@ function createColumn(col_json) {
 
 /**
  * #Renderer #jQuery
+ * MastodonとMisskeyのタイムラインデータをソートマップ可能なデータとして返す
+ * 
+ * @param data ポスト情報のJSON
+ * @param timeline 流れてきたタイムラインJSON
+ * @param tl_acc 流れてきたアカウントJSON
+ * @param multi_flg カラムがマルチアカウントの場合はtrue
+ */
+function getIntegratedPost(data, timeline, tl_acc, multi_flg) {
+    let binding_key = null;
+    let sort_date = null;
+    let user_address = null;
+
+    // プラットフォーム判定
+    switch (tl_acc.platform) {
+        case 'Mastodon': // Mastodon
+            binding_key = timeline.timeline_type == 'notification'
+                ? 'Mastodon-notification' : 'Mastodon-toot';
+            sort_date = data.created_at;
+            // ローカルリモート関係なくアカウントのフルアドレスを生成
+            user_address = data.account.acct.match(/@/)
+                ? data.account.acct : (data.account.acct + '@' + timeline.host);
+            break;
+        case 'Misskey': // Misskey
+            binding_key = timeline.timeline_type == 'notification'
+                ? 'Misskey-notification' : 'Misskey-note';
+            sort_date = data.createdAt;
+            // ローカルリモート関係なくアカウントのフルアドレスを生成
+            // TODO: 実績が来ると落ちるのでOptionalにしとく
+            user_address = data.user?.username + '@'
+                + (data.user?.host ? data.user?.host : timeline?.host);
+            // URLを生成するためにホスト情報を強引にノートデータにねじ込む
+            data.__host_address = timeline?.host;
+            break;
+        default:
+            break;
+    }
+    // 投稿オブジェクトを含めるJSONオブジェクトとして返却
+    return {
+        'binding_key': binding_key,
+        'sort_date': sort_date,
+        // 投稿日付(小数点以下切り捨て)+ユーザーフルアドレスを投稿のユニークキーとする
+        'post_key': sort_date.substring(0, sort_date.lastIndexOf('.')) + '@' + user_address,
+        // カラムがマルチユーザーの場合のみ取得元ユーザーを設定
+        'from_address': multi_flg ? timeline.key_address : null,
+        'post': data
+    };
+}
+
+/**
+ * #Renderer #jQuery
+ * WebSocketから受け取った通知をもとに投稿をタイムラインに追加
+ * 
+ * @param arg パラメータ一括指定JSON
+ * @param keyset 投稿ユニークキーセット
+ * @param tl_acc 流れてきたアカウントJSON
+ */
+function prependPost(arg, keyset, tl_acc) {
+    const ul = $("#columns>table>tbody>tr>#" + arg.column_id + "_body>ul");
+    const integrated = getIntegratedPost(arg.data, arg.timeline, tl_acc, arg.multi_flg);
+    // 重複している投稿を除外する
+    if (!keyset.has(integrated.post_key)) {
+        keyset.add(integrated.post_key);
+        if (ul.find("li").length >= arg.limit) {
+            // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
+            ul.find("li:last-child").remove();
+        }
+        ul.prepend(arg.bindFunc(integrated.post, integrated.from_address));
+        // アカウントラベルの背景を変更
+        ul.find("li:first-child>.post_footer>.from_address").css("background-color", "#" + tl_acc.acc_color);
+    }
+}
+
+/**
+ * #Renderer #jQuery
  * 統合用に整形した投稿データからタイムラインのDOMを生成
  * 
  * @param array_json 統合用に整形された投稿配列JSON
  * @param bind_id バインド先のID
+ * @param accounts アカウントマップ
  */
-function createIntegratedTimeline(array_json, bind_id) {
-    var html = '';
+function createIntegratedTimeline(array_json, bind_id, accounts) {
+    let html = '';
     $.each(array_json, (index, value) => {
         // binding_keyによって呼び出し関数を変える
         switch (value.binding_key) {
             case 'Mastodon-toot': // Mastodon-投稿タイムライン
-                html += createTimelineMastLine(value.post);
+                html += createTimelineMastLine(value.post, value.from_address);
                 break;
             case 'Mastodon-notification': // Mastodon-通知欄
-                html += createNotificationMastLine(value.post);
+                html += createNotificationMastLine(value.post, value.from_address);
                 break;
             case 'Misskey-note': // Misskey-投稿タイムライン
-                html += createTimelineMskyLine(value.post);
+                html += createTimelineMskyLine(value.post, value.from_address);
                 break;
             case 'Misskey-notification': // Misskey-通知欄
-                html += createNotificationMskyLine(value.post);
+                html += createNotificationMskyLine(value.post, value.from_address);
                 break;
             default:
                 break;
         }
     });
     $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
+    // フッタのアカウントラベルに色を付ける
+    $("#columns>table>tbody>tr>#" + bind_id + ">ul>li>.post_footer>.from_address").each((index, elm) => {
+        $(elm).css("background-color", "#" + accounts.get($(elm).attr("name")).acc_color);
+    });
 }
 
 /*================================================================================================*/
-
-/**
- * #Renderer #jQuery
- * Mastodonから受け取ったタイムラインJSONをHTMLとして生成
- * 
- * @param array_json APIから返却された投稿配列JSON
- * @param bind_id バインド先のID
- */
-function createTimelineMast(array_json, bind_id) {
-    var html = '';
-    $.each(array_json, (index, value) => {
-        html += createTimelineMastLine(value);
-    });
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
-}
 
 /**
  * #Renderer #jQuery
@@ -160,15 +156,14 @@ function createTimelineMast(array_json, bind_id) {
  * 
  * @param value 個別status JSON
  */
-function createTimelineMastLine(value) {
-    var html = '';
+function createTimelineMastLine(value, from_address) {
+    let html = '';
     // ブーストツートならブースト先を、通常なら本体を参照先にする
-    var viewdata = value.reblog ? value.reblog : value;
-    // toot_url = value.url
-    // account_url = value.account.url
-    var date = yyyymmdd.format(new Date(viewdata.created_at));
-    var display_name = viewdata.account.display_name ? viewdata.account.display_name : viewdata.account.username;
-    html += '<li>';
+    const viewdata = value.reblog ?? value;
+    const date = yyyymmdd.format(new Date(viewdata.created_at));
+    const display_name = viewdata.account.display_name ?? viewdata.account.username;
+    // Mastdonの場合URLはdata.urlを参照すればオッケー
+    html += '<li name="' + viewdata.url + '">';
     if (value.reblog) {
         // ブーストツートの場合はブーストヘッダを表示
         html += '<div class="label_head label_reblog">'
@@ -220,30 +215,13 @@ function createTimelineMastLine(value) {
         html += '</div></div>';
     }
     html += '<div class="post_footer">'
-        + '<a href="' + viewdata.url + '" target="_blank" class="created_at">' + date + '</a>'
-        /*
-        + '<a class="buttons option">OPT</a>'
-        + '<a class="buttons favorite">FAV</a>'
-        + '<a class="buttons boost">BT</a>'
-        + '<a class="buttons reply">RP</a>'
-        //*/
-        + '</div></li>';
+        + '<a href="' + viewdata.url + '" target="_blank" class="created_at">' + date + '</a>';
+    // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
+    if (from_address) {
+        html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
+    }
+    html += '</div></li>';
     return html;
-}
-
-/**
- * #Renderer #jQuery
- * Mastodonから受け取った通知JSONをHTMLとして生成
- * 
- * @param array_json APIから返却された投稿配列JSON
- * @param bind_id バインド先のID
- */
-function createNotificationMast(array_json, bind_id) {
-    var html = '';
-    $.each(array_json, (index, value) => {
-        html += createNotificationMastLine(value);
-    });
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
 }
 
 /**
@@ -252,11 +230,12 @@ function createNotificationMast(array_json, bind_id) {
  * 
  * @param value 個別status JSON
  */
-function createNotificationMastLine(value) {
-    var html = '';
-    var date = yyyymmdd.format(new Date(value.created_at));
-    var display_name = value.account.display_name ? value.account.display_name : value.account.username;
-    html += '<li>';
+function createNotificationMastLine(value, from_address) {
+    let html = '';
+    const date = yyyymmdd.format(new Date(value.created_at));
+    const display_name = value.account.display_name ?? value.account.username;
+    // Mastdonの場合URLはdata.urlを参照すればオッケー
+    html += '<li name="' + value.url + '">';
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'favourite': // お気に入り
@@ -290,31 +269,25 @@ function createNotificationMastLine(value) {
     } else {
         html += replaceEmojiMast(value.status.content, value.status.emojis);
     }
+
     html += '</div></div><div class="post_footer">';
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'mention': // リプライ
-            html += '<a href="' + value.status.url + '" target="_blank" class="created_at">' + date + '</a>'
-            /*
-                + '<a class="buttons option">OPT</a>'
-                + '<a class="buttons favorite">FAV</a>'
-                + '<a class="buttons boost">BT</a>'
-                + '<a class="buttons reply">RP</a>'//*/
-                ;
+            html += '<a href="' + value.status.url + '" target="_blank" class="created_at">' + date + '</a>';
             break;
         case 'follow': // フォロー通知
             html += '<div class="created_at">Post: ' + value.account.statuses_count
                 + ' / Follow: ' + value.account.following_count
-                + ' / Follower: ' + value.account.followers_count + '</div>'
-                /*
-                + '<a class="buttons option">OPT</a>'
-                + '<a class="buttons block">BL</a>'
-                + '<a class="buttons follow">FL</a>'//*/
-                ;
+                + ' / Follower: ' + value.account.followers_count + '</div>';
             break;
         default: // お気に入りとブーストは日付だけ
-            html += '<div class="created_at">' + date + '</a>';
+            html += '<div class="created_at">' + date + '</div>';
             break;
+    }
+    // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
+    if (from_address) {
+        html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
     }
     html += '</div></li>';
     return html;
@@ -339,40 +312,24 @@ function replaceEmojiMast(text, emojis) {
 
 /**
  * #Renderer #jQuery
- * Misskeyから受け取ったタイムラインJSONをHTMLとして生成
- * 
- * @param array_json APIから返却された投稿配列JSON
- * @param bind_id バインド先のID
- */
-function createTimelineMsky(array_json, bind_id) {
-    var html = '';
-    $.each(array_json, (index, value) => {
-        html += createTimelineMskyLine(value);
-    });
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
-}
-
-/**
- * #Renderer #jQuery
  * Misskeyから受け取ったタイムラインJSONをHTMLとして生成(1行だけ)
  * 
  * @param value 個別status JSON
  */
-function createTimelineMskyLine(value) {
-    var html = '';
+function createTimelineMskyLine(value, from_address) {
+    let html = '';
     // リノート先があり本文もある場合は引用フラグを立てる
-    var quote_flg = value.renote && value.text;
+    const quote_flg = value.renote && value.text;
     // リノートならリノート先を、通常なら本体を参照先にする
-    var viewdata = !quote_flg && value.renote ? value.renote : value;
-    // toot_url = value.uri
-    // account_url = (そのままだとアクセスできない)
-    var date = yyyymmdd.format(new Date(viewdata.createdAt));
-    var display_name = viewdata.user.name ? viewdata.user.name : viewdata.user.username;
-    var user_address = viewdata.user.username + (viewdata.user.host ? ('@' + viewdata.user.host) : '');
-    html += '<li>';
+    const viewdata = !quote_flg && value.renote ? value.renote : value;
+    const date = yyyymmdd.format(new Date(viewdata.createdAt));
+    const display_name = viewdata.user.name ?? viewdata.user.username;
+    const user_address = viewdata.user.username + (viewdata.user.host ? ('@' + viewdata.user.host) : '');
+
+    html += '<li name="' + createMisskeyUrl(viewdata, value.__host_address) + '">';
     if (!quote_flg && value.renote) {
         // リノートの場合はリノートヘッダを表示
-        var renote_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
+        const renote_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
         html += '<div class="label_head label_reblog">'
             + '<span>Renoted by @' + renote_address + '</span>'
             + '</div>';
@@ -433,30 +390,13 @@ function createTimelineMskyLine(value) {
         html += '</div></div>';
     }
     html += '<div class="post_footer">'
-        + '<a href="' + viewdata.id + '" target="_blank" class="created_at">' + date + '</a>'
-        /*
-        + '<a class="buttons option">OPT</a>'
-        + '<a class="buttons favorite">ACT</a>'
-        + '<a class="buttons boost">RN</a>'
-        + '<a class="buttons reply">RP</a>'
-        //*/
-        + '</div></li>';
+        + '<a href="' + viewdata.id + '" target="_blank" class="created_at">' + date + '</a>';
+    // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
+    if (from_address) {
+        html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
+    }
+    html += '</div></li>';
     return html;
-}
-
-/**
- * #Renderer #jQuery
- * Misskeyから受け取った通知JSONをHTMLとして生成
- * 
- * @param array_json APIから返却された投稿配列JSON
- * @param bind_id バインド先のID
- */
-function createNotificationMsky(array_json, bind_id) {
-    var html = '';
-    $.each(array_json, (index, value) => {
-        html += createNotificationMskyLine(value);
-    });
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
 }
 
 /**
@@ -465,16 +405,17 @@ function createNotificationMsky(array_json, bind_id) {
  * 
  * @param value 個別status JSON
  */
-function createNotificationMskyLine(value) {
-    var html = '';
+function createNotificationMskyLine(value, from_address) {
+    let html = '';
     if (value.type == 'achievementEarned') {
         // TODO: 実績は無視！とりあえず当面の間は
         return html;
     }
-    var date = yyyymmdd.format(new Date(value.createdAt));
-    var display_name = value.user.name ? value.user.name : value.user.username;
-    var user_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
-    html += '<li>';
+    const date = yyyymmdd.format(new Date(value.createdAt));
+    const display_name = value.user.name ?? value.user.username;
+    const user_address = value.user.username + (value.user.host ? ('@' + value.user.host) : '');
+
+    html += '<li name="' + createMisskeyUrl(value, value.__host_address) + '">';
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'reaction': // 絵文字リアクション
@@ -513,26 +454,18 @@ function createNotificationMskyLine(value) {
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'mention': // リプライ
-            html += '<a href="' + value.note.id + '" target="_blank" class="created_at">' + date + '</a>'
-            /*
-                + '<a class="buttons option">OPT</a>'
-                + '<a class="buttons favorite">ACT</a>'
-                + '<a class="buttons boost">RN</a>'
-                + '<a class="buttons reply">RP</a>'//*/
-                ;
+            html += '<a href="' + value.note.id + '" target="_blank" class="created_at">' + date + '</a>';
             break;
         case 'follow': // フォロー通知
-        /*
-            html += '<div class="created_at">Post: ' + value.account.statuses_count
-                + ' / Follow: ' + value.account.following_count
-                + ' / Follower: ' + value.account.followers_count + '</div>'
-                + '<a class="buttons option">OPT</a>'
-                + '<a class="buttons block">BL</a>'
-                + '<a class="buttons follow">FL</a>';//*/
+            // TODO: Misskeyのフォロー通知は一旦なにも表示しない
             break;
         default: // お気に入りとブーストは日付だけ
-            html += '<div class="created_at">' + date + '</a>';
+            html += '<div class="created_at">' + date + '</div>';
             break;
+    }
+    // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
+    if (from_address) {
+        html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
     }
     html += '</div></li>';
     return html;
@@ -556,6 +489,30 @@ function replaceEmojiMsky(text, emojis) {
     return text;
 }
 
+/**
+ * #Renderer #jQuery
+ * Misskeyの投稿URLを取得(Mastodonと違って判定がめんどくさいのでメソッド化)
+ * 
+ * @param data 対象ノート
+ * @param host ホストドメイン
+ */
+function createMisskeyUrl(data, host) {
+    let note_url = null;
+    if (!data.uri) {
+        // そもそもURLが入ってない⇒Misskeyのローカル投稿なので自前で生成
+        // 強引にねじ込んだホスト情報を使ってURLを生成
+        note_url = "https://" + host + "/notes/" + data.id;
+    } else if (data.user?.instance?.softwareName == "misskey") {
+        // URLが入っていてMisskeyのノートの場合⇒data.uriに参照先のURLが入ってる
+        note_url = data.uri;
+    } else {
+        // Mastodonの場合⇒data.urlに参照先のURLが入ってる
+        // TODO: これだとMastodonのMisskey以外のプラットフォームに対応できないので後で対応
+        note_url = data.url;
+    }
+    return note_url;
+}
+
 /*================================================================================================*/
 
 /**
@@ -565,7 +522,7 @@ function replaceEmojiMsky(text, emojis) {
  * @param accounts アカウントマップ
  */
 function createSelectableAccounts(accounts) {
-    html = '<div class="account_list">';
+let html = '<div class="account_list">';
     accounts.forEach((v, k) => {
         html += '<a name="' + k + '" class="__lnk_account_elm">'
             + '<img src="' + v.avatar_url + '" class="user_icon"/>'
@@ -574,5 +531,19 @@ function createSelectableAccounts(accounts) {
             + '</a>';
     });
     html += '</div>';
+    return html;
+}
+
+/**
+ * #Renderer #jQuery
+ * メニューに入れるアカウントリストを生成
+ * 
+ * @param accounts アカウントマップ
+ */
+function createContextMenuAccounts(accounts) {
+let html = '';
+    accounts.forEach((v, k) => {
+        html += '<li name="' + k + '"><div>' + v.username + ' - ' + k + '</div></li>';
+    });
     return html;
 }

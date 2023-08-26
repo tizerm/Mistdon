@@ -1,0 +1,118 @@
+input[type="text"] {
+    font-family: Arial, "メイリオ", sans-selif;
+    background-color: #434343;
+    border: solid 1px #aaaaaa;
+    color: #ffffff;
+}
+
+#header {
+    position: absolute;
+    top: 0px;
+    left: 66px;
+    width: calc(100% - 66px);
+}
+#header>h1 {
+    margin: 0px;
+    padding: 2px 32px;
+    text-align: left;
+    font-family: Arial, "メイリオ", sans-selif;
+    font-size: 18px;
+    background-color: #325c9c;
+    color: #ffffff;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+#content {
+    position: absolute;
+    top: 36px;
+    left: 72px;
+    width: calc(100% - 70px);
+}
+#content>#account_list {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 380px;
+    text-align: center;
+}
+#content>#account_list>button {
+    padding: 2px 24px;
+    border-radius: 6px;
+    border: solid 1px #ffffff;
+}
+#content>#account_list>h2 {
+    border-radius: 18px;
+    background-color: #638042;
+    text-align: center;
+    color: #ffffff;
+    margin: 0px;
+    padding: 12px 24px;
+}
+
+#content>#account_list>ul {
+    margin: 0px;
+    padding: 0px;
+    height: calc(100vh - 124px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#content>#account_list>ul::-webkit-scrollbar{
+   width: 8px;
+}
+#content>#account_list>ul::-webkit-scrollbar-track{
+   background-color: transparent;
+}
+#content>#account_list>ul::-webkit-scrollbar-thumb{
+   background-color: #808080;
+}
+
+#content>#account_list>ul>li {
+    background-color: rgba(67,67,67,0.95);
+    border-radius: 12px;
+    list-style-type: none;
+    margin: 6px;
+    padding: 8px 12px;
+    text-align: left;
+}
+#content>#account_list>ul>li>h3 {
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    background-color: #808080;
+    font-size: 18px;
+    color: #ffffff;
+    margin: -8px -12px 12px;
+    padding: 8px 32px;
+}
+#content>#account_list>ul>li>.user>.usericon {
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+    float: left;
+}
+#content>#account_list>ul>li>.user>.username {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0px;
+    width: calc(100% - 60px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+#content>#account_list>ul>li>.user>.userid {
+    color: #cccccc;
+    font-size: 14px;
+}
+#content>#account_list>ul>li>.option {
+    margin: 8px 12px;
+    font-size: 14px;
+}
+
+#content>#account_auth {
+    position: absolute;
+    top: 0px;
+    left: 420px;
+}

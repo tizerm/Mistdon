@@ -16,7 +16,7 @@
     border: solid 1px #ffffff;
 }
 #columns>table>thead>tr>.head {
-    background-color: #5a46d9;
+    background-color: #808080;
 }
 
 #columns>table>thead>tr>.head {
@@ -25,8 +25,9 @@
 #columns>table>thead>tr>.head>h2,
 #columns>table>thead>tr>.head>h3 {
     margin: 0px;
-    text-align: left;
-    font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
+}
+.__txt_col_head, .__txt_col_type {
+    width: calc(100% - 112px);
 }
 
 #columns>table>thead>tr>.head>.col_layout {
@@ -66,7 +67,7 @@
     font-weight: bold;
     margin: -12px -12px 12px;
     padding: 8px 24px;
-    background-color: #5a46d9;
+    background-color: #808080;
 }
 #columns>table>tbody>tr>.timeline>ul>li>h4>.tl_color {
     position: absolute;

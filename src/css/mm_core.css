@@ -7,6 +7,7 @@ body {
     color: #ffffff;
     margin: 0px;
     padding: 0px;
+    overflow: hidden;
 }
 
 a:link, a:visited {
@@ -36,8 +37,7 @@ button[disabled] {
     position: absolute;
     top: 0px;
     left: 0px;
-    background-color: rgba(255,255,255,0.15);
-    border-bottom-right-radius: 18px;
+    background-color: rgba(67,85,107,0.85);
     border-top-right-radius: 18px;
     width: 64px;
     height: 100vh;

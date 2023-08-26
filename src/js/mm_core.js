@@ -4,8 +4,10 @@ $(() => {
     var sockets = null;
     var send_params = null;
     var post_keysets = null;
+    // タイムラインキャッシュ カラムひとつあたりこの数を超えたら後ろから自動的に消える
+    const timeline_limit = 150;
     // ロードされた段階でカラムを生成(非同期)
-    const proc = async () => {
+    (async () => {
         // メインプロセスメソッドが非同期なのでawaitかけてアカウント情報を取得
         accounts = await window.accessApi.readPrefAccs();
         // 認証情報がなかったら何もせずに終わる
@@ -23,6 +25,7 @@ $(() => {
             $("#header>#head_postarea>.__lnk_postuser>img").attr('src', accounts.get(key_address).avatar_url);
             $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
             $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
+            $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
         }
         
         // 投稿アイコンクリック時のメニュー生成と表示
@@ -37,6 +40,7 @@ $(() => {
             $("#header>#head_postarea>.__lnk_postuser>img").attr('src', accounts.get(key_address).avatar_url);
             $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
             $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
+            $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
             $("#header>#pop_postuser").css("visibility", "hidden");
         });
         
@@ -46,6 +50,8 @@ $(() => {
             $(".__lnk_visibility>img").removeClass("selected");
             $(e.target).closest("img").addClass("selected");
         });
+
+        /*========================================================================================*/
 
         // 投稿処理
         const procPost = async () => {
@@ -154,7 +160,143 @@ $(() => {
         send_params = new Map();
         post_keysets = new Map();
         $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle());
-        
+        // 投稿右クリック時のコンテキストメニュー表示イベント
+        $("#header>#pop_context_menu>.ui_menu>li ul").html(createContextMenuAccounts(accounts));
+        $("#header>#pop_context_menu>.ui_menu").menu();
+        $(document).on("contextmenu", "#columns>table>tbody>tr>.timeline>ul>li", (e) => {
+            $("#header>#pop_context_menu")
+                .css('top', e.pageY + 'px')
+                .css('left', (e.pageX - 72) + 'px')
+                .css('visibility', 'visible');
+            $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
+            return false;
+        });
+        $("body").on("click", (e) => {
+            $("#header>#pop_context_menu").css('visibility', 'hidden');
+        });
+        // メニュー項目クリック時処理
+        $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", (e) => {
+            const target_account = accounts.get($(e.target).closest("li").attr("name"));
+            const target_mode = $(e.target).closest("ul").attr("id");
+            const target_url = $("#header>#pop_context_menu").attr("name");
+            
+            $("#header>#pop_context_menu").css('visibility', 'hidden');
+            // 取得からアクションまでの一連の流れは非同期で実行
+            (async () => {
+                let request_promise = null;
+                let target_post = null;
+                // ターゲットの投稿データを取得
+                switch (target_account.platform) {
+                    case 'Mastodon': // Mastodon
+                        request_promise = $.ajax({ // 検索から投稿を取得
+                            type: "GET",
+                            url: "https://" + target_account.domain + "/api/v2/search",
+                            dataType: "json",
+                            headers: {
+                                "Authorization": "Bearer " + target_account.access_token
+                            },
+                            data: {
+                                "q": target_url,
+                                "type": "statuses",
+                                "resolve": true
+                            }
+                        }).then((data) => {
+                            // 取得データをPromiseで返却
+                            return data.statuses[0];
+                        }).catch((jqXHR, textStatus, errorThrown) => {
+                            // 取得失敗時
+                            alert("投稿の取得でエラーが発生しました。");
+                        });
+                        break;
+                    case 'Misskey': // Misskey
+                        request_promise = $.ajax({
+                            type: "POST",
+                            url: "https://" + target_account.domain + "/api/ap/show",
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": target_account.access_token,
+                                "uri": target_url
+                            })
+                        }).then((data) => {
+                            // 取得データをPromiseで返却
+                            return data.object;
+                        }).catch((jqXHR, textStatus, errorThrown) => {
+                            // 取得失敗時
+                            alert("投稿の取得でエラーが発生しました。");
+                        });
+                        break;
+                    default:
+                        break;
+                }
+                // データが取得されるのを待ってtarget_postに代入
+                target_post = await request_promise;
+                if (!target_post) { // 投稿を取得できなかったらなにもしない
+                    return;
+                }
+                switch (target_account.platform) {
+                    case 'Mastodon': // Mastodon
+                        if (target_mode == "__menu_reblog") { // ブースト
+                            $.ajax({
+                                type: "POST",
+                                url: "https://" + target_account.domain
+                                    + "/api/v1/statuses/" + target_post.id + "/reblog",
+                                dataType: "json",
+                                headers: {
+                                    "Authorization": "Bearer " + target_account.access_token
+                                }
+                            }).then((data) => {
+                                console.log("Boost Success: " + target_post.id);
+                            }).catch((jqXHR, textStatus, errorThrown) => {
+                                // 取得失敗時
+                                alert("ブーストに失敗しました。");
+                            });
+                        } else { // お気に入り
+                            $.ajax({
+                                type: "POST",
+                                url: "https://" + target_account.domain
+                                    + "/api/v1/statuses/" + target_post.id + "/favourite",
+                                dataType: "json",
+                                headers: {
+                                    "Authorization": "Bearer " + target_account.access_token
+                                }
+                            }).then((data) => {
+                                console.log("Favorite Success: " + target_post.id);
+                            }).catch((jqXHR, textStatus, errorThrown) => {
+                                // 取得失敗時
+                                alert("お気に入りに失敗しました。");
+                            });
+                        }
+                        break;
+                    case 'Misskey': // Misskey
+                        if (target_mode == "__menu_reblog") { // リノート
+                            $.ajax({
+                                type: "POST",
+                                url: "https://" + target_account.domain + "/api/notes/create",
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": target_account.access_token,
+                                    "renoteId": target_post.id
+                                })
+                            }).then((data) => {
+                                console.log("Renote Success: " + target_post.id);
+                            }).catch((jqXHR, textStatus, errorThrown) => {
+                                // 取得失敗時
+                                alert("リノートに失敗しました。");
+                            });
+                        } else { // お気に入り
+                            alert("Misskeyでお気に入りは現状非対応です……。");
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            })()
+        });
+
+        /*========================================================================================*/
+
         // カラム生成処理
         columns.forEach((col) => {
             // カラム本体を生成
@@ -181,13 +323,13 @@ $(() => {
                                 headers: { "Authorization": "Bearer " + tl_acc.access_token },
                                 data: tl.query_param
                             }).then((data) => {
-                                const mapFunc = async () => {
+                                return (async () => {
                                     // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
                                     const toots = [];
-                                    data.forEach((toot) => toots.push(getIntegratedPost(toot, tl, tl_acc)));
+                                    data.forEach((toot) => toots.push(
+                                        getIntegratedPost(toot, tl, tl_acc, col.multi_user)));
                                     return toots;
-                                }
-                                return mapFunc();
+                                })();
                             }));
                         // REST API呼び出してる間にStreaming API用のWebSocketを準備
                         var socket_exist_flg = sockets.has(tl.key_address);
@@ -205,18 +347,27 @@ $(() => {
                                 // TLと違うStreamは無視
                                 return;
                             }
-                            // 別のデータが来たときに余計な処理を挟まないよう同じ処理だけどif内で書く
                             if (data.event == "update") {
                                 // タイムラインの更新通知
-                                prependPost(JSON.parse(data.payload),
-                                    col.column_id, keyset, tl, tl_acc, createTimelineMastLine);
+                                prependPost({
+                                    data: JSON.parse(data.payload),
+                                    column_id: col.column_id,
+                                    multi_flg: col.multi_user,
+                                    timeline: tl,
+                                    limit: timeline_limit,
+                                    bindFunc: createTimelineMastLine
+                                }, keyset, tl_acc);
                             } else if (tl.timeline_type == "notification" && data.event == "notification") {
                                 // 通知の更新通知
-                                prependPost(JSON.parse(data.payload),
-                                    col.column_id, keyset, tl, tl_acc, createNotificationMastLine);
+                                prependPost({
+                                    data: JSON.parse(data.payload),
+                                    column_id: col.column_id,
+                                    multi_flg: col.multi_user,
+                                    timeline: tl,
+                                    limit: timeline_limit,
+                                    bindFunc: createNotificationMastLine
+                                }, keyset, tl_acc);
                             }
-                            // TODO: debug
-                            console.log(col.column_id + 'size: ' + $("#columns>table>tbody>tr>#" + col.column_id + "_body>ul>li").length);
                         });
                         // ソケットパラメータに受信開始の設定をセット
                         tl.socket_param.type = "subscribe";
@@ -242,13 +393,13 @@ $(() => {
                                 headers: { "Content-Type": "application/json" },
                                 data: JSON.stringify(tl.query_param)
                             }).then((data) => {
-                                const mapFunc = async () => {
+                                return (async () => {
                                     // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
                                     const notes = [];
-                                    data.forEach((note) => notes.push(getIntegratedPost(note, tl, tl_acc)));
+                                    data.forEach((note) => notes.push(
+                                        getIntegratedPost(note, tl, tl_acc, col.multi_user)));
                                     return notes;
-                                }
-                                return mapFunc();
+                                })();
                             }));
                         // REST API呼び出してる間にStreaming API用のWebSocketを準備
                         var socket_exist_flg = sockets.has(tl.key_address);
@@ -270,15 +421,25 @@ $(() => {
                             // 別のデータが来たときに余計な処理を挟まないよう同じ処理だけどif内で書く
                             if (data.body.type == "note") {
                                 // タイムラインの更新通知
-                                prependPost(data.body.body,
-                                    col.column_id, keyset, tl, tl_acc, createTimelineMskyLine);
+                                prependPost({
+                                    data: data.body.body,
+                                    column_id: col.column_id,
+                                    multi_flg: col.multi_user,
+                                    timeline: tl,
+                                    limit: timeline_limit,
+                                    bindFunc: createTimelineMskyLine
+                                }, keyset, tl_acc);
                             } else if (tl.timeline_type == "notification" && data.body.type == "notification") {
                                 // 通知の更新通知
-                                prependPost(data.body.body, col.column_id,
-                                    keyset, tl, tl_acc, createNotificationMskyLine);
+                                prependPost({
+                                    data: data.body.body,
+                                    column_id: col.column_id,
+                                    multi_flg: col.multi_user,
+                                    timeline: tl,
+                                    limit: timeline_limit,
+                                    bindFunc: createNotificationMskyLine
+                                }, keyset, tl_acc);
                             }
-                            // TODO: debug
-                            console.log(col.column_id + 'size: ' + $("#columns>table>tbody>tr>#" + col.column_id + "_body>ul>li").length);
                         });
                         // ソケットパラメータに受信開始の設定をセット
                         tl.socket_param.id = uuid;
@@ -312,7 +473,7 @@ $(() => {
                         }
                     });
                 });
-                //*
+                /*
                 console.log(col.label_head); // TODO: debug
                 console.log(keyset); // TODO: debug
                 console.log(postlist); // TODO: debug
@@ -322,7 +483,7 @@ $(() => {
                     postlist.sort((a, b) => new Date(b.sort_date) - new Date(a.sort_date));
                 }
                 // ソートが終わったらタイムラインをDOMに反映
-                createIntegratedTimeline(postlist,  col.column_id + "_body");
+                createIntegratedTimeline(postlist,  col.column_id + "_body", accounts);
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // 取得失敗時
                 console.log('!ERR: timeline get failed. ' + textStatus);
@@ -334,6 +495,5 @@ $(() => {
                 send_params.get(k).forEach((p) => v.send(p));
             });
         });
-    }
-    proc()
+    })()
 });

@@ -10,9 +10,11 @@
         http-equiv="X-Content-Security-Policy"
         content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
     />
+    <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
-    <script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_viewbind.js"></script>
     <script type="text/javascript" src="js/mm_core.js"></script>
     <title>MMchan - The Integrated Mastodon and Misskey Client</title>
@@ -20,10 +22,9 @@
 <body>
 <nav id="navi">
     <ul>
-        <li class="current_icon"><img src="{current_icon}" class="current_icon"/></li>
-        <li><a href="auth.html">Auth</a></li>
-        <li><a href="pref_col.html">Col</a></li>
-        <li>R</li>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="auth.html">認証</a></li>
+        <li><a href="pref_col.html">カラム</a></li>
     </ul>
 </nav>
 <header id="header">
@@ -41,6 +42,17 @@
     </div>
     <div id="pop_postuser">
     </div>
+    <div id="pop_context_menu" name="{post_id}">
+        <ul class="ui_menu">
+            <li><div>ブースト/リノート</div>
+                <ul id="__menu_reblog"></ul>
+            </li>
+            <li><div>お気に入り(Mastodonのみ)</div>
+                <ul id="__menu_favorite"></ul>
+            </li>
+        </ul>
+    </div>
+    
 </header>
 <section id="columns">
 <table>

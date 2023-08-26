@@ -46,6 +46,7 @@
 }
 #header>#head_postarea>.visibility_icon>.__lnk_visibility:hover>img {
     background-color: #225588;
+    cursor: pointer;
 }
 #header>#head_postarea>.visibility_icon>.__lnk_visibility>img.selected {
     background-color: #3388cc;
@@ -80,6 +81,9 @@
     width: 72px;
     height: 72px;
 }
+
+/*================================================================================================*/
+
 #header>#pop_postuser {
     visibility: hidden;
     z-index: 10;
@@ -88,16 +92,18 @@
     top: 108px;
     left: 12px;
 }
+
 .account_list>.__lnk_account_elm {
     display: block;
     margin: 4px 0px;
     padding: 8px 16px 16px;
     border-radius: 8px;
-    background-color: rgba(48,48,48,0.85);
+    background-color: rgba(32,32,32,0.85);
     font-size: 14px;
 }
 .account_list>.__lnk_account_elm:hover {
-    background-color: rgba(48,67,96,0.85);
+    background-color: rgba(32,67,96,0.85);
+    cursor: pointer;
 }
 .account_list>.__lnk_account_elm>.user_icon {
     border-radius: 12px;
@@ -111,6 +117,27 @@
 }
 .account_list>.__lnk_account_elm>.user_domain {
     font-size: 13px;
+}
+
+#header>#pop_context_menu {
+    visibility: hidden;
+    z-index: 8;
+    position: absolute;
+    top: 108px;
+    left: 12px;
+}
+#header>#pop_context_menu ul {
+    border-radius: 8px;
+    background-color: #222222;
+    border: solid 1px #aaaaaa;
+    color: #ffffff;
+    font-size: 14px;
+}
+#header>#pop_context_menu ul>li>div {
+    padding: 4px 12px;
+}
+#header>#pop_context_menu>ul>li>ul {
+    width: 360px;
 }
 
 /*================================================================================================*/
@@ -254,6 +281,7 @@
     font-size: 13px;
 }
 #columns>table>tbody>tr>.timeline>ul>li .expand_header:hover {
+    cursor: pointer;
     padding-left: 24px;
 }
 .label_cw {
@@ -313,18 +341,11 @@
     display: block;
     color: #cccccc;
     font-size: 12px;
-    text-align: right;
 }
-/*
-#columns>table>tbody>tr>.timeline>ul>li>.post_footer>.buttons {
-    display: block;
-    background-color: rgba(255,255,255,0.1);
-    border-radius: 8px;
-    color: #cccccc;
-    font-size: 14px;
-    text-align: center;
-    margin: 4px;
-    padding: 2px;
-    float: right;
-    width: 20%;
-}//*/
+#columns>table>tbody>tr>.timeline>ul>li>.post_footer>.from_address {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 2px 18px;
+    margin: 6px -12px -8px;
+    font-size: 12px;
+}

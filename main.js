@@ -4,7 +4,7 @@
  */
 
 // モジュールのインポート
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, shell } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
@@ -23,18 +23,18 @@ var pref_columns = null
  * @return アカウント認証情報(マップで返却)
  */
 function readPrefAccs() {
-	// 変数キャッシュがある場合はキャッシュを使用
-	if (pref_accounts) {
-		console.log('@INF: use prefs/auth.json cache.')
-		return pref_accounts
-	}
-	var content = readFile('prefs/auth.json')
-	if (!content) { // ファイルが見つからなかったらnullを返却
-		return null
-	}
-	pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
-	console.log('@INF: read prefs/auth.json.')
-	return pref_accounts
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_accounts) {
+        console.log('@INF: use prefs/auth.json cache.')
+        return pref_accounts
+    }
+    const content = readFile('prefs/auth.json')
+    if (!content) { // ファイルが見つからなかったらnullを返却
+        return null
+    }
+    pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
+    console.log('@INF: read prefs/auth.json.')
+    return pref_accounts
 }
 
 /**
@@ -46,29 +46,29 @@ function readPrefAccs() {
  * @param json_data 書き込むJSONデータ
  */
 function writePrefMstdAccs(event, json_data) {
-	// JSONを生成(あとでキャッシュに入れるので)
-	const write_json = {
-		'domain': json_data.domain,
-		'platform': 'Mastodon',
-		'user_id': json_data.user_id,
-		'username': json_data.username,
-		'socket_url': 'wss://' + json_data.domain + '/api/v1/streaming',
-		'client_id': json_data.client_id,
-		'client_secret': json_data.client_secret,
-		'access_token': json_data.access_token,
-		'avatar_url': json_data.avatar_url
-	}
+    // JSONを生成(あとでキャッシュに入れるので)
+    const write_json = {
+        'domain': json_data.domain,
+        'platform': 'Mastodon',
+        'user_id': json_data.user_id,
+        'username': json_data.username,
+        'socket_url': 'wss://' + json_data.domain + '/api/v1/streaming',
+        'client_id': json_data.client_id,
+        'client_secret': json_data.client_secret,
+        'access_token': json_data.access_token,
+        'avatar_url': json_data.avatar_url
+    }
 
-	// ファイルに書き込み
-	var content = writeFileArrayJson('prefs/auth.json', write_json)
+    // ファイルに書き込み
+    const content = writeFileArrayJson('prefs/auth.json', write_json)
 
-	// キャッシュを更新
-	if (!pref_accounts) {
-		// キャッシュがない場合はファイルを読み込んでキャッシュを生成
-		pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
-	} else {
-		pref_accounts.set('@' + json_data.user_id + '@' + json_data.domain, write_json)
-	}
+    // キャッシュを更新
+    if (!pref_accounts) {
+        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+        pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
+    } else {
+        pref_accounts.set('@' + json_data.user_id + '@' + json_data.domain, write_json)
+    }
 }
 
 /**
@@ -80,33 +80,58 @@ function writePrefMstdAccs(event, json_data) {
  * @param json_data 書き込むJSONデータ
  */
 function writePrefMskyAccs(event, json_data) {
-	// まずはaccessTokenとappSecretからiを生成
-	const i = crypto.createHash("sha256")
-		.update(json_data.access_token + json_data.app_secret, "utf8")
-		.digest("hex")
-	// JSONを生成(あとでキャッシュに入れるので)
-	const write_json = {
-		'domain': json_data.domain,
-		'platform': 'Misskey',
-		'user_id': json_data.user.username,
-		'username': json_data.user.name,
-		'socket_url': 'wss://' + json_data.domain + '/streaming',
-		'client_id': null,
-		'client_secret': json_data.app_secret,
-		'access_token': i,
-		'avatar_url': json_data.user.avatarUrl
-	}
+    // まずはaccessTokenとappSecretからiを生成
+    const i = crypto.createHash("sha256")
+        .update(json_data.access_token + json_data.app_secret, "utf8")
+        .digest("hex")
+    // JSONを生成(あとでキャッシュに入れるので)
+    const write_json = {
+        'domain': json_data.domain,
+        'platform': 'Misskey',
+        'user_id': json_data.user.username,
+        'username': json_data.user.name,
+        'socket_url': 'wss://' + json_data.domain + '/streaming',
+        'client_id': null,
+        'client_secret': json_data.app_secret,
+        'access_token': i,
+        'avatar_url': json_data.user.avatarUrl
+    }
 
-	// ファイルに書き込み
-	var content = writeFileArrayJson('prefs/auth.json', write_json)
+    // ファイルに書き込み
+    const content = writeFileArrayJson('prefs/auth.json', write_json)
 
-	// キャッシュを更新
-	if (!pref_accounts) {
-		// キャッシュがない場合はファイルを読み込んでキャッシュを生成
-		pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
-	} else {
-		pref_accounts.set('@' + write_json.user_id + '@' + write_json.domain, write_json)
-	}
+    // キャッシュを更新
+    if (!pref_accounts) {
+        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+        pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
+    } else {
+        pref_accounts.set('@' + write_json.user_id + '@' + write_json.domain, write_json)
+    }
+}
+
+/**
+ * #IPC
+ * アカウント認証情報に色情報を書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
+function writePrefAccColor(event, json_data) {
+    console.log('@INF: use prefs/auth.json cache.')
+    // 返却JSONを走査して色情報をキャッシュに保存
+    const write_json = []
+    json_data.forEach((color) => {
+        let acc = pref_accounts.get(color.key_address)
+        acc.acc_color = color.acc_color
+        write_json.push(acc)
+    })
+
+    // ファイルに書き込み
+    const content = overwriteFile('prefs/auth.json', write_json)
+
+    // キャッシュを更新
+    pref_accounts = jsonToMap(JSON.parse(content), (elm) => '@' + elm.user_id + '@' + elm.domain)
 }
 
 /**
@@ -117,18 +142,18 @@ function writePrefMskyAccs(event, json_data) {
  * @return アカウント認証情報(マップで返却)
  */
 function readPrefCols() {
-	// 変数キャッシュがある場合はキャッシュを使用
-	if (pref_columns) {
-		console.log('@INF: use prefs/columns.json cache.')
-		return pref_columns
-	}
-	var content = readFile('prefs/columns.json')
-	if (!content) { // ファイルが見つからなかったらnullを返却
-		return null
-	}
-	pref_columns = JSON.parse(content)
-	console.log('@INF: read prefs/columns.json.')
-	return pref_columns
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_columns) {
+        console.log('@INF: use prefs/columns.json cache.')
+        return pref_columns
+    }
+    const content = readFile('prefs/columns.json')
+    if (!content) { // ファイルが見つからなかったらnullを返却
+        return null
+    }
+    pref_columns = JSON.parse(content)
+    console.log('@INF: read prefs/columns.json.')
+    return pref_columns
 }
 
 /**
@@ -140,109 +165,116 @@ function readPrefCols() {
  * @param json_data 整形前の書き込むJSONデータ
  */
 function writePrefCols(event, json_data) {
-	// ファイル書き込み用にJSONファイルを再生成
-	var write_json = []
-	json_data.forEach((col, index) => {
-		var tl_list = []
-		col.timelines.forEach((tl) => {
-			// タイムラインのJSONを再生成
-			var rest_url = null
-			var socket_url = null
-			var query_param = null
-			var socket_param = null
+    // ファイル書き込み用にJSONファイルを再生成
+    const write_json = []
+    json_data.forEach((col, index) => {
+        const tl_list = []
+        const unique_address = col.timelines[0].key_address
+        let multi_account_flg = false
+        col.timelines.forEach((tl) => {
+            // タイムラインのJSONを再生成
+            let rest_url = null
+            let socket_url = null
+            let query_param = null
+            let socket_param = null
 
-			// プラットフォームの種類によってAPIの形式が違うので個別に設定
-			switch (tl.account.platform) {
-				case 'Mastodon': // Mastodon
-					// タイムラインタイプによって設定値を変える
-					switch (tl.timeline_type) {
-						case 'home': // ホームタイムライン
-							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/home"
-							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user"
-							query_param = {}
-							socket_param = { 'stream': 'user' }
-							break
-						case 'local': // ローカルタイムライン
-							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
-							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:local"
-							query_param = { 'local': true }
-							socket_param = { 'stream': 'public:local' }
-							break
-						case 'federation': // 連合タイムライン
-							rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
-							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:remote"
-							query_param = { 'remote': true }
-							socket_param = { 'stream': 'public:remote' }
-							break
-						case 'notification': // 通知
-							rest_url = "https://" + tl.account.domain + "/api/v1/notifications"
-							socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user:notification"
-							query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
-							socket_param = { 'stream': 'user:notification' }
-							break
-						default:
-							break
-					}
-					break;
-				case 'Misskey': // Misskey
-					// タイムラインタイプによって設定値を変える
-					switch (tl.timeline_type) {
-						case 'home': // ホームタイムライン
-							rest_url = "https://" + tl.account.domain + "/api/notes/timeline"
-							query_param = {}
-							socket_param = { 'channel': 'homeTimeline' }
-							break
-						case 'local': // ローカルタイムライン
-							rest_url = "https://" + tl.account.domain + "/api/notes/local-timeline"
-							query_param = {}
-							socket_param = { 'channel': 'localTimeline' }
-							break
-						case 'federation': // 連合タイムライン
-							rest_url = "https://" + tl.account.domain + "/api/notes/global-timeline"
-							query_param = {}
-							socket_param = { 'channel': 'globalTimeline' }
-							break
-						case 'notification': // 通知
-							rest_url = "https://" + tl.account.domain + "/api/i/notifications"
-							query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
-							socket_param = { 'channel': 'main' }
-							break
-						default:
-							break
-					}
-					// WebSocket URLは共通なので外に出す
-					socket_url = "wss://" + tl.account.domain + "/streaming"
-					break
-				default:
-					break
-			}
-			// タイムラインリストに追加
-			tl_list.push({
-				'key_address': tl.key_address,
-				'host': tl.account.domain,
-				'timeline_type': tl.timeline_type,
-				'rest_url': rest_url,
-				'socket_url': socket_url,
-				'query_param': query_param,
-				'socket_param': socket_param,
-				'tl_color': tl.tl_color
-			})
-		})
-		// カラムリストに追加
-		write_json.push({
-			'column_id': 'col' + (index + 1),
-			'label_head': col.label_head,
-			'label_type': col.label_type,
-			'timelines': tl_list,
-			'col_color': col.col_color,
-			'col_width': col.col_width
-		})
-	})
-	// 最終的な設定ファイルをJSONファイルに書き込み
-	var content = overwriteFile('prefs/columns.json', write_json)
-	
-	// キャッシュを更新
-	pref_columns = JSON.parse(content)
+            if (tl.key_address != unique_address) {
+                // ひとつのタイムラインに2アカウント以上混在する場合はマルチフラグを立てる
+                multi_account_flg = true
+            }
+            // プラットフォームの種類によってAPIの形式が違うので個別に設定
+            switch (tl.account.platform) {
+                case 'Mastodon': // Mastodon
+                    // タイムラインタイプによって設定値を変える
+                    switch (tl.timeline_type) {
+                        case 'home': // ホームタイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/v1/timelines/home"
+                            socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user"
+                            query_param = {}
+                            socket_param = { 'stream': 'user' }
+                            break
+                        case 'local': // ローカルタイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
+                            socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:local"
+                            query_param = { 'local': true }
+                            socket_param = { 'stream': 'public:local' }
+                            break
+                        case 'federation': // 連合タイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/v1/timelines/public"
+                            socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=public:remote"
+                            query_param = { 'remote': true }
+                            socket_param = { 'stream': 'public:remote' }
+                            break
+                        case 'notification': // 通知
+                            rest_url = "https://" + tl.account.domain + "/api/v1/notifications"
+                            socket_url = "wss://" + tl.account.domain + "/api/v1/streaming?stream=user:notification"
+                            query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+                            socket_param = { 'stream': 'user:notification' }
+                            break
+                        default:
+                            break
+                    }
+                    break;
+                case 'Misskey': // Misskey
+                    // タイムラインタイプによって設定値を変える
+                    switch (tl.timeline_type) {
+                        case 'home': // ホームタイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/notes/timeline"
+                            query_param = {}
+                            socket_param = { 'channel': 'homeTimeline' }
+                            break
+                        case 'local': // ローカルタイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/notes/local-timeline"
+                            query_param = {}
+                            socket_param = { 'channel': 'localTimeline' }
+                            break
+                        case 'federation': // 連合タイムライン
+                            rest_url = "https://" + tl.account.domain + "/api/notes/global-timeline"
+                            query_param = {}
+                            socket_param = { 'channel': 'globalTimeline' }
+                            break
+                        case 'notification': // 通知
+                            rest_url = "https://" + tl.account.domain + "/api/i/notifications"
+                            query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
+                            socket_param = { 'channel': 'main' }
+                            break
+                        default:
+                            break
+                    }
+                    // WebSocket URLは共通なので外に出す
+                    socket_url = "wss://" + tl.account.domain + "/streaming"
+                    break
+                default:
+                    break
+            }
+            // タイムラインリストに追加
+            tl_list.push({
+                'key_address': tl.key_address,
+                'host': tl.account.domain,
+                'timeline_type': tl.timeline_type,
+                'rest_url': rest_url,
+                'socket_url': socket_url,
+                'query_param': query_param,
+                'socket_param': socket_param
+            })
+        })
+        // カラムリストに追加
+        write_json.push({
+            'column_id': 'col' + (index + 1),
+            'label_head': col.label_head,
+            'label_type': col.label_type,
+            'timelines': tl_list,
+            'multi_user': multi_account_flg,
+            'multi_timeline': tl_list.length > 1,
+            'col_color': col.col_color,
+            'col_width': col.col_width
+        })
+    })
+    // 最終的な設定ファイルをJSONファイルに書き込み
+    const content = overwriteFile('prefs/columns.json', write_json)
+    
+    // キャッシュを更新
+    pref_columns = JSON.parse(content)
 }
 
 /*================================================================================================*/
@@ -256,13 +288,13 @@ function writePrefCols(event, json_data) {
  * @return 読み込んだファイル(string形式) 失敗した場合null
  */
 function readFile(path) {
-	var content = null
-	try {
-		content = fs.readFileSync(path, 'utf8')
-	} catch(err) {
-		console.log('!ERR: file read failed.')
-	}
-	return content
+    let content = null
+    try {
+        content = fs.readFileSync(path, 'utf8')
+    } catch(err) {
+        console.log('!ERR: file read failed.')
+    }
+    return content
 }
 
 /**
@@ -275,22 +307,22 @@ function readFile(path) {
  * @return 最終的に書き込んだファイル内容string
  */
 function writeFileArrayJson(path, json_data) {
-	var content = readFile(path)
-	if (content) {
-		// ファイルが存在する場合(引数のJSONをpush)
-		var pre_json = JSON.parse(content)
-		pre_json.push(json_data)
-		content = JSON.stringify(pre_json)
-	} else {
-		// ファイルが存在しない場合(配列化してstring化)
-		content = JSON.stringify([json_data])
-	}
+    let content = readFile(path)
+    if (content) {
+        // ファイルが存在する場合(引数のJSONをpush)
+        let pre_json = JSON.parse(content)
+        pre_json.push(json_data)
+        content = JSON.stringify(pre_json)
+    } else {
+        // ファイルが存在しない場合(配列化してstring化)
+        content = JSON.stringify([json_data])
+    }
 
-	fs.writeFile(path, content, 'utf8', (err) => {
-		if (err) throw err;
-		console.log('@INF: file write successed.')
-	})
-	return content
+    fs.writeFile(path, content, 'utf8', (err) => {
+        if (err) throw err;
+        console.log('@INF: file write successed.')
+    })
+    return content
 }
 
 /**
@@ -303,13 +335,13 @@ function writeFileArrayJson(path, json_data) {
  * @return 最終的に書き込んだファイル内容string
  */
 function overwriteFile(path, json_data) {
-	var content = JSON.stringify(json_data)
+    const content = JSON.stringify(json_data)
 
-	fs.writeFile(path, content, 'utf8', (err) => {
-		if (err) throw err;
-		console.log('@INF: file write successed.')
-	})
-	return content
+    fs.writeFile(path, content, 'utf8', (err) => {
+        if (err) throw err;
+        console.log('@INF: file write successed.')
+    })
+    return content
 }
 
 /**
@@ -321,11 +353,9 @@ function overwriteFile(path, json_data) {
  * @return 生成したmap
  */
 function jsonToMap(json_data, key_func) {
-	var map = new Map()
-	json_data.forEach((elm) => {
-		map.set(key_func(elm), elm)
-	})
-	return map;
+    const map = new Map()
+    json_data.forEach(elm => map.set(key_func(elm), elm))
+    return map;
 }
 
 /*================================================================================================*/
@@ -335,16 +365,25 @@ function jsonToMap(json_data, key_func) {
  * メインウィンドウ生成処理
  */
 const createWindow = () => {
-	const win = new BrowserWindow({
-		width: 1920,
-		height: 1080,
-		webPreferences: {
-			nodeIntegration: false,
-			preload: path.join(__dirname, 'preload.js')
-		}
-	})
-	// 最初に表示するページを指定
-	win.loadFile('src/index.html')
+    const win = new BrowserWindow({
+        width: 1920,
+        height: 1080,
+        webPreferences: {
+            nodeIntegration: false,
+            preload: path.join(__dirname, 'preload.js')
+        }
+    })
+
+    // 画面内で新規ウィンドウリンクを踏んだときのイベント
+    win.webContents.on('new-window', (e, url) => {
+        // 標準ブラウザで開く
+        event.preventDefault()
+        console.log('@INF: web-' + url)
+        shell.openExternal(url)
+    })
+
+    // 最初に表示するページを指定
+    win.loadFile('src/index.html')
 }
 
 /**
@@ -353,23 +392,24 @@ const createWindow = () => {
  * IPC通信を仲介するAPIもここで定義
  */
 app.whenReady().then(() => {
-	// IPC通信で呼び出すメソッド定義
-	ipcMain.handle('read-pref-accs', readPrefAccs)
-	ipcMain.handle('read-pref-cols', readPrefCols)
-	ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
-	ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
-	ipcMain.on('write-pref-cols', writePrefCols)
+    // IPC通信で呼び出すメソッド定義
+    ipcMain.handle('read-pref-accs', readPrefAccs)
+    ipcMain.handle('read-pref-cols', readPrefCols)
+    ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
+    ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
+    ipcMain.on('write-pref-acc-color', writePrefAccColor)
+    ipcMain.on('write-pref-cols', writePrefCols)
 
-	// ウィンドウ生成
-	createWindow()
-	app.on('activate', () => {
-		if (BrowserWindow.getAllWindows().length === 0) {
-			createWindow()
-		}
-	})
+    // ウィンドウ生成
+    createWindow()
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow()
+        }
+    })
 })
 app.on('window-all-closed', () => {
-	if (process.platform !== 'darwin') {
-		app.quit()
-	}
+    if (process.platform !== 'darwin') {
+        app.quit()
+    }
 })
