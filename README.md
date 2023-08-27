@@ -3,8 +3,21 @@
 
 <p>
 Electronを使って開発しているMastodonとMisskeyがいっぺんに見られるFediverseクライアントです。<br/>
-ついにアルファリリースできました！<br/>
+ついにアルファリリースできました！(現在v0.0.2)<br/>
 使ってみたい方はGoogle Driveの<a href="https://drive.google.com/drive/folders/16xwNbQCl5kRLfJdK3DT84652JdvTHfFP?usp=drive_link" target="_blank">こちら</a>からダウンロードしてください。
+</p>
+
+<h3>Change Log</h3>
+
+<p>
+2023/08/28 v0.0.2 (alpha)<br/>
+・任意のアカウントからリプライ機能の追加<br/>
+・投稿、ブーストなどの送信系処理実行時に左上に通知が出るように<br/>
+・カラムにトップへ移動ボタンを追加<br/>
+<br/>
+2023/08/27 v0.0.1 (alpha)<br/>
+・アルファバージョン正式リリース<br/>
+・基本機能については下を見てね……
 </p>
 
 <h2>現在実装されている機能</h2>
