@@ -26,6 +26,9 @@ function createColumn(col_json) {
     
     // カラム本体を空の状態で生成
     html = '<td id="' + col_json.column_id + '_body" class="timeline">'
+        + '<div class="col_action">'
+        + '<button type="button" class="__on_column_top">▲</button>'
+        + '</div>'
         + '<ul></ul></td>';
     $("#columns>table>tbody>tr").append(html);
     
@@ -42,36 +45,33 @@ function createColumn(col_json) {
  * #Renderer #jQuery
  * MastodonとMisskeyのタイムラインデータをソートマップ可能なデータとして返す
  * 
- * @param data ポスト情報のJSON
- * @param timeline 流れてきたタイムラインJSON
- * @param tl_acc 流れてきたアカウントJSON
- * @param multi_flg カラムがマルチアカウントの場合はtrue
+ * @param arg パラメータ一括指定JSON
  */
-function getIntegratedPost(data, timeline, tl_acc, multi_flg) {
+function getIntegratedPost(arg) {
     let binding_key = null;
     let sort_date = null;
     let user_address = null;
 
     // プラットフォーム判定
-    switch (tl_acc.platform) {
+    switch (arg.tl_account.platform) {
         case 'Mastodon': // Mastodon
-            binding_key = timeline.timeline_type == 'notification'
+            binding_key = arg.timeline.timeline_type == 'notification'
                 ? 'Mastodon-notification' : 'Mastodon-toot';
-            sort_date = data.created_at;
+            sort_date = arg.data.created_at;
             // ローカルリモート関係なくアカウントのフルアドレスを生成
-            user_address = data.account.acct.match(/@/)
-                ? data.account.acct : (data.account.acct + '@' + timeline.host);
+            user_address = arg.data.account.acct.match(/@/)
+                ? arg.data.account.acct : (arg.data.account.acct + '@' + arg.timeline.host);
             break;
         case 'Misskey': // Misskey
-            binding_key = timeline.timeline_type == 'notification'
+            binding_key = arg.timeline.timeline_type == 'notification'
                 ? 'Misskey-notification' : 'Misskey-note';
-            sort_date = data.createdAt;
+            sort_date = arg.data.createdAt;
             // ローカルリモート関係なくアカウントのフルアドレスを生成
             // TODO: 実績が来ると落ちるのでOptionalにしとく
-            user_address = data.user?.username + '@'
-                + (data.user?.host ? data.user?.host : timeline?.host);
+            user_address = arg.data.user?.username + '@'
+                + (arg.data.user?.host ? arg.data.user?.host : arg.timeline?.host);
             // URLを生成するためにホスト情報を強引にノートデータにねじ込む
-            data.__host_address = timeline?.host;
+            arg.data.__host_address = arg.timeline?.host;
             break;
         default:
             break;
@@ -83,8 +83,8 @@ function getIntegratedPost(data, timeline, tl_acc, multi_flg) {
         // 投稿日付(小数点以下切り捨て)+ユーザーフルアドレスを投稿のユニークキーとする
         'post_key': sort_date.substring(0, sort_date.lastIndexOf('.')) + '@' + user_address,
         // カラムがマルチユーザーの場合のみ取得元ユーザーを設定
-        'from_address': multi_flg ? timeline.key_address : null,
-        'post': data
+        'from_address': arg.tl_account ? arg.timeline.key_address : null,
+        'post': arg.data
     };
 }
 
@@ -94,21 +94,30 @@ function getIntegratedPost(data, timeline, tl_acc, multi_flg) {
  * 
  * @param arg パラメータ一括指定JSON
  * @param keyset 投稿ユニークキーセット
- * @param tl_acc 流れてきたアカウントJSON
  */
-function prependPost(arg, keyset, tl_acc) {
+function prependPost(arg, keyset) {
     const ul = $("#columns>table>tbody>tr>#" + arg.column_id + "_body>ul");
-    const integrated = getIntegratedPost(arg.data, arg.timeline, tl_acc, arg.multi_flg);
+    const integrated = getIntegratedPost({
+        data: arg.data,
+        timeline: arg.timeline,
+        tl_account: arg.tl_account,
+        multi_flg: arg.multi_flg
+    });
     // 重複している投稿を除外する
     if (!keyset.has(integrated.post_key)) {
         keyset.add(integrated.post_key);
         if (ul.find("li").length >= arg.limit) {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
             ul.find("li:last-child").remove();
+            // キーセットのキャッシュも消しとく(重複判定はすでに終わっているので全消しでおｋ)
+            if (keyset.size >= arg.limit) {
+                keyset.clear();
+            }
         }
         ul.prepend(arg.bindFunc(integrated.post, integrated.from_address));
         // アカウントラベルの背景を変更
-        ul.find("li:first-child>.post_footer>.from_address").css("background-color", "#" + tl_acc.acc_color);
+        ul.find("li:first-child>.post_footer>.from_address")
+            .css("background-color", "#" + arg.tl_account.acc_color);
     }
 }
 
@@ -301,6 +310,9 @@ function createNotificationMastLine(value, from_address) {
  * @param emojis レスポンスに含まれる絵文字配列
  */
 function replaceEmojiMast(text, emojis) {
+    if (!text) { // 文字の入力がない場合は空文字を返却
+        return "";
+    }
     emojis.forEach((emoji) => {
         text = text.replace(new RegExp(':' + emoji.shortcode + ':', 'g'),
             '<img src="' + emoji.url + '" class="inline_emoji"/>');
@@ -479,6 +491,9 @@ function createNotificationMskyLine(value, from_address) {
  * @param emojis レスポンスに含まれる絵文字オブジェクト
  */
 function replaceEmojiMsky(text, emojis) {
+    if (!text) { // 文字の入力がない場合は空文字を返却
+        return "";
+    }
     if (!emojis) { // 絵文字がない場合はそのまま返却
         return text;
     }
@@ -522,7 +537,7 @@ function createMisskeyUrl(data, host) {
  * @param accounts アカウントマップ
  */
 function createSelectableAccounts(accounts) {
-let html = '<div class="account_list">';
+    let html = '<div class="account_list">';
     accounts.forEach((v, k) => {
         html += '<a name="' + k + '" class="__lnk_account_elm">'
             + '<img src="' + v.avatar_url + '" class="user_icon"/>'
@@ -541,9 +556,45 @@ let html = '<div class="account_list">';
  * @param accounts アカウントマップ
  */
 function createContextMenuAccounts(accounts) {
-let html = '';
+    let html = '';
     accounts.forEach((v, k) => {
         html += '<li name="' + k + '"><div>' + v.username + ' - ' + k + '</div></li>';
     });
+    return html;
+}
+
+/**
+ * #Renderer #jQuery
+ * リプライウィンドウの生成
+ * 
+ * @param arg パラメータ一括指定JSON
+ */
+function createReplyColumn(arg) {
+    let to_address = null;
+    let bindFunc = null;
+    switch (arg.platform) {
+        case 'Mastodon': // Mastodon
+            to_address = '@' + arg.post.account.acct;
+            bindFunc = createTimelineMastLine;
+            break;
+        case 'Misskey': // Misskey
+            to_address = '@' + arg.post.user.username + (arg.post.user.host ? ('@' + arg.post.user.host) : '');
+            bindFunc = createTimelineMskyLine;
+            break;
+        default:
+            break;
+    }
+    let html = '<div class="reply_col">'
+        + '<h2>From ' + arg.key_address + '</h2>'
+        + '<div class="reply_form">'
+        + '<input type="hidden" id="__hdn_reply_id" value="' + arg.post.id + '"/>'
+        + '<input type="hidden" id="__hdn_reply_account" value="' + arg.key_address + '"/>'
+        + '<textarea id="__txt_replyarea" placeholder="(Ctrl+Enterでも投稿できます)">' + to_address + ' </textarea>'
+        + '<button type="button" id="__on_reply_submit">投稿</button>'
+        + '</div><div class="timeline"><ul>'
+        + bindFunc(arg.post, null)
+        + '</ul></div>'
+        + '<button type="button" id="__on_reply_close">×</button>'
+        + '</div>';
     return html;
 }

@@ -83,10 +83,10 @@ $(() => {
             dataType: "json",
             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
             data: {
-                "client_name": "MMchan",
+                "client_name": "Mistdon",
                 "redirect_uris": "urn:ietf:wg:oauth:2.0:oob",
                 "scopes": permission,
-                "website": "https://github.com/tizerm/MMchan"
+                "website": "https://github.com/tizerm/Mistdon"
             }
         }).then((data) => {
             // 認証に成功したらクライアントIDを保存してウィンドウを開く
@@ -171,7 +171,7 @@ $(() => {
             dataType: "json",
             headers: { "Content-Type": "application/json" },
             data: JSON.stringify({
-                'name': 'MMchan',
+                'name': 'Mistdon',
                 'description': 'This is Electron base Mastodon and Misskey client.',
                 'permission': permission
             })

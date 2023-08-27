@@ -131,13 +131,58 @@
     background-color: #222222;
     border: solid 1px #aaaaaa;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
 }
 #header>#pop_context_menu ul>li>div {
+    border-radius: 8px;
     padding: 4px 12px;
 }
 #header>#pop_context_menu>ul>li>ul {
     width: 360px;
+}
+
+/*================================================================================================*/
+
+#header>#pop_extend_column {
+    visibility: hidden;
+    z-index: 6;
+    border-radius: 12px;
+    background-color: rgba(34,34,34,0.8);
+    padding: 4px 0px 4px 4px;
+    position: absolute;
+    top: 72px;
+    right: 0px;
+}
+#header>#pop_extend_column>.reply_col {
+    opacity: 0.95;
+    width: 400px;
+}
+#header>#pop_extend_column>.reply_col>h2 {
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    color: #ffffff;
+    margin: 0px;
+    padding: 12px 24px;
+}
+#header>#pop_extend_column>.reply_col #__txt_replyarea {
+    display: block;
+    padding: 2px;
+    font-family: "ƒƒCƒŠƒI", sans-selif;
+    text-align: left;
+    background-color: #434343;
+    color: #ffffff;
+    margin-top: 6px;
+    width: 100%;
+    height: 108px;
+}
+#header>#pop_extend_column>.reply_col ul {
+    height: auto;
+}
+#header>#pop_extend_column>.reply_col button {
+    display: block;
+    padding: 6px;
+    text-align: center;
+    width: 100%;
 }
 
 /*================================================================================================*/
@@ -183,10 +228,17 @@
 }
 
 #columns>table>tbody>tr>.timeline {
+    position: relative;
     background-color: rgba(255,255,255,0.1);
     padding: 2px 0px;
 }
-#columns>table>tbody>tr>.timeline>ul {
+#columns>table>tbody>tr>.timeline>.col_action {
+    position: absolute;
+    top: -64px;
+    right: 8px;
+}
+
+.timeline>ul {
     margin: 0px;
     padding: 0px;
     height: calc(100vh - 228px);
@@ -194,17 +246,17 @@
     overflow-x: hidden;
 }
 
-#columns>table>tbody>tr>.timeline>ul::-webkit-scrollbar{
+.timeline>ul::-webkit-scrollbar{
    width: 8px;
 }
-#columns>table>tbody>tr>.timeline>ul::-webkit-scrollbar-track{
+.timeline>ul::-webkit-scrollbar-track{
    background-color: transparent;
 }
-#columns>table>tbody>tr>.timeline>ul::-webkit-scrollbar-thumb{
+.timeline>ul::-webkit-scrollbar-thumb{
    background-color: #808080;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li {
+.timeline>ul>li {
     background-color: rgba(67,67,67,0.95);
     border-radius: 12px;
     list-style-type: none;
@@ -212,7 +264,7 @@
     padding: 8px 12px;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.label_head {
+.timeline>ul>li>.label_head {
     border-radius: 12px;
     padding: 2px 24px;
     margin: -8px -12px 6px;
@@ -224,16 +276,16 @@
     background-color: #408a08;
 }
 .label_favorite {
-    background-color: #a85e0a;
+    background-color: #a8880a;
 }
 .label_follow {
     background-color: #0a64a8;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.user {
+.timeline>ul>li>.user {
     position: relative;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.user>.usericon {
+.timeline>ul>li>.user>.usericon {
     border-radius: 12px;
     width: 48px;
     height: 48px;
@@ -241,7 +293,7 @@
     float: left;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.user>.username {
+.timeline>ul>li>.user>.username {
     color: #ffffff;
     font-size: 18px;
     font-weight: bold;
@@ -251,36 +303,36 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.user>.username .inline_emoji {
+.timeline>ul>li>.user>.username .inline_emoji {
     display: inline-block;
     height: 24px;
     width: auto;
     vertical-align: text-bottom;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.user>.userid {
+.timeline>ul>li>.user>.userid {
     color: #cccccc;
     font-size: 14px;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.user>.visibilityicon {
+.timeline>ul>li>.user>.visibilityicon {
     position: absolute;
     top: -6px;
     right: 0px;
     opacity: 0.25;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.content {
+.timeline>ul>li>.content {
     color: #ffffff;
     line-height: 1.15em;
 }
-#columns>table>tbody>tr>.timeline>ul>li .expand_header {
+.timeline>ul>li .expand_header {
     display: block;
     border-radius: 6px;
     padding: 2px 18px;
     margin: 6px 0px;
     font-size: 13px;
 }
-#columns>table>tbody>tr>.timeline>ul>li .expand_header:hover {
+.timeline>ul>li .expand_header:hover {
     cursor: pointer;
     padding-left: 24px;
 }
@@ -291,13 +343,13 @@
     background-color: #a10000;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.content>.main_content {
+.timeline>ul>li>.content>.main_content {
     font-size: 13px;
     margin: 6px 18px;
     overflow-wrap: break-word;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.content>.main_content .inline_emoji {
+.timeline>ul>li>.content>.main_content .inline_emoji {
     display: inline-block;
     height: 24px;
     width: auto;
@@ -305,7 +357,7 @@
 
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.content>.main_content a:not([class*="mention"]) {
+.timeline>ul>li>.content>.main_content a:not([class*="mention"]) {
     display: inline-block;
     max-width: 240px;
     overflow: hidden;
@@ -313,13 +365,13 @@
     text-overflow: ellipsis;
     vertical-align: text-bottom;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.media .media_preview {
+.timeline>ul>li>.media .media_preview {
     border-radius: 8px;
     display: inline;
     height: 96px;
     width: auto;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.post_quote {
+.timeline>ul>li>.post_quote {
     border-radius: 8px;
     background-color: rgba(255,255,255,0.1);
     overflow-wrap: break-word;
@@ -330,19 +382,19 @@
     display: none;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.content p {
+.timeline>ul>li>.content p {
     margin: 0px;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.post_footer {
+.timeline>ul>li>.post_footer {
     text-align: right;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.post_footer>.created_at {
+.timeline>ul>li>.post_footer>.created_at {
     display: block;
     color: #cccccc;
     font-size: 12px;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.post_footer>.from_address {
+.timeline>ul>li>.post_footer>.from_address {
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     padding: 2px 18px;

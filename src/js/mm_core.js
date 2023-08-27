@@ -53,97 +53,18 @@ $(() => {
 
         /*========================================================================================*/
 
-        // 投稿処理
-        const procPost = async () => {
-            const content = $("#__txt_postarea").val();
-            if (!content) {
-                // 何も書いてなかったら何もしない
-                return;
-            }
-            const tl_acc = accounts.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name"));
-            const cw_text = $("#__txt_content_warning").val();
-            const visibility_id = $("#header>#head_postarea>.visibility_icon .selected").attr("id");
-            let visibility = null;
-            let request_promise = null;
-            switch (tl_acc.platform) {
-                case 'Mastodon': // Mastodon
-                    var request_param = {
-                        "status": content
-                    };
-                    if (cw_text) {
-                        // CWがある場合はCWテキストも追加
-                        request_param.spoiler_text = cw_text;
-                    }
-                    // 公開範囲を取得
-                    switch (visibility_id) {
-                        case 'visibility_public': // 公開
-                            visibility = "public";
-                            break;
-                        case 'visibility_unlisted': // ホーム
-                            visibility = "unlisted";
-                            break;
-                        case 'visibility_followers': // フォロ限
-                            visibility = "private";
-                            break;
-                        default:
-                            break;
-                    }
-                    request_param.visibility = visibility;
-                    request_promise = $.ajax({ // APIに投稿を投げる
-                        type: "POST",
-                        url: "https://" + tl_acc.domain + "/api/v1/statuses",
-                        dataType: "json",
-                        headers: {
-                            "Authorization": "Bearer " + tl_acc.access_token,
-                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-                        },
-                        data: request_param
-                    });
-                    break;
-                case 'Misskey': // Misskey
-                    var request_param = {
-                        "i": tl_acc.access_token,
-                        "text": content
-                    };
-                    if (cw_text) {
-                        // CWがある場合はCWテキストも追加
-                        request_param.cw = cw_text;
-                    }
-                    // 公開範囲を取得
-                    switch (visibility_id) {
-                        case 'visibility_public': // 公開
-                            visibility = "public";
-                            break;
-                        case 'visibility_unlisted': // ホーム
-                            visibility = "home";
-                            break;
-                        case 'visibility_followers': // フォロ限
-                            visibility = "followers";
-                            break;
-                        default:
-                            break;
-                    }
-                    request_param.visibility = visibility;
-                    request_promise = $.ajax({ // APIに投稿を投げる
-                        type: "POST",
-                        url: "https://" + tl_acc.domain + "/api/notes/create",
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify(request_param)
-                    });
-                    break;
-                default:
-                    break;
-            }
-            request_promise.then(() => {
+        // 投稿処理(煩雑なので実際の処理はメソッド化)
+        const procPost = async () => post({
+            content: $("#__txt_postarea").val(),
+            cw_text: $("#__txt_content_warning").val(),
+            visibility_id: $("#header>#head_postarea>.visibility_icon .selected").attr("id"),
+            post_account: accounts.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")),
+            success: () => {
                 // 投稿成功時(書いた内容を消す)
                 $("#__txt_postarea").val("");
                 $("#__txt_content_warning").val("");
-            }).catch((jqXHR, textStatus, errorThrown) => {
-                // 投稿失敗時
-                console.log('!ERR: 投稿に失敗しました. ' + textStatus);
-            });
-        };
+            }
+        });
         $("#header #on_submit").on("click", (e) => procPost());
         $("#header>#head_postarea").keydown((e) => {
             // Ctrl+Enterを押したときに投稿処理を実行
@@ -151,6 +72,30 @@ $(() => {
                 procPost();
                 return false;
             }
+        });
+
+        // リプライ投稿処理(煩雑なので実際の処理はメソッド化)
+        const procMentionPost = async () => post({
+            content: $("#__txt_replyarea").val(),
+            visibility_id: 'visibility_public', // TODO: 一旦公開にする
+            post_account: accounts.get($("#__hdn_reply_account").val()),
+            reply_id: $("#__hdn_reply_id").val(),
+            success: () => {
+                // 投稿成功時(リプライウィンドウを閉じる)
+                $("#header>#pop_extend_column").css('visibility', 'hidden');
+            }
+        });
+        // 
+        $(document).on("click", "#__on_reply_submit", (e) => procMentionPost());
+        $(document).on("keydown", "#__txt_replyarea", (e) => {
+            // Ctrl+Enterを押したときに投稿処理を実行
+            if (event.ctrlKey && e.keyCode === 13) {
+                procMentionPost();
+                return false;
+            }
+        });
+        $(document).on("click", "#__on_reply_close", (e) => { // 閉じるボタン
+            $("#header>#pop_extend_column").css('visibility', 'hidden');
         });
 
         /*========================================================================================*/
@@ -176,123 +121,25 @@ $(() => {
         });
         // メニュー項目クリック時処理
         $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", (e) => {
-            const target_account = accounts.get($(e.target).closest("li").attr("name"));
-            const target_mode = $(e.target).closest("ul").attr("id");
-            const target_url = $("#header>#pop_context_menu").attr("name");
-            
+            const key_address = $(e.target).closest("li").attr("name");
+            const target_account = accounts.get(key_address);
             $("#header>#pop_context_menu").css('visibility', 'hidden');
-            // 取得からアクションまでの一連の流れは非同期で実行
-            (async () => {
-                let request_promise = null;
-                let target_post = null;
-                // ターゲットの投稿データを取得
-                switch (target_account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({ // 検索から投稿を取得
-                            type: "GET",
-                            url: "https://" + target_account.domain + "/api/v2/search",
-                            dataType: "json",
-                            headers: {
-                                "Authorization": "Bearer " + target_account.access_token
-                            },
-                            data: {
-                                "q": target_url,
-                                "type": "statuses",
-                                "resolve": true
-                            }
-                        }).then((data) => {
-                            // 取得データをPromiseで返却
-                            return data.statuses[0];
-                        }).catch((jqXHR, textStatus, errorThrown) => {
-                            // 取得失敗時
-                            alert("投稿の取得でエラーが発生しました。");
-                        });
-                        break;
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: "https://" + target_account.domain + "/api/ap/show",
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": target_account.access_token,
-                                "uri": target_url
-                            })
-                        }).then((data) => {
-                            // 取得データをPromiseで返却
-                            return data.object;
-                        }).catch((jqXHR, textStatus, errorThrown) => {
-                            // 取得失敗時
-                            alert("投稿の取得でエラーが発生しました。");
-                        });
-                        break;
-                    default:
-                        break;
+            // リアクション実行(煩雑なので実際の処理はメソッド化)
+            reaction({
+                target_account: target_account,
+                target_mode: $(e.target).closest("ul").attr("id"),
+                target_url: $("#header>#pop_context_menu").attr("name"),
+                replyFunc: (target_post) => {
+                    // リプライカラムを表示するための処理
+                    $("#header>#pop_extend_column").html(createReplyColumn({
+                        post: target_post,
+                        key_address: key_address,
+                        platform: target_account.platform
+                    }));
+                    $("#header>#pop_extend_column h2").css("background-color", "#" + target_account.acc_color);
+                    $("#header>#pop_extend_column").css('visibility', 'visible');
                 }
-                // データが取得されるのを待ってtarget_postに代入
-                target_post = await request_promise;
-                if (!target_post) { // 投稿を取得できなかったらなにもしない
-                    return;
-                }
-                switch (target_account.platform) {
-                    case 'Mastodon': // Mastodon
-                        if (target_mode == "__menu_reblog") { // ブースト
-                            $.ajax({
-                                type: "POST",
-                                url: "https://" + target_account.domain
-                                    + "/api/v1/statuses/" + target_post.id + "/reblog",
-                                dataType: "json",
-                                headers: {
-                                    "Authorization": "Bearer " + target_account.access_token
-                                }
-                            }).then((data) => {
-                                console.log("Boost Success: " + target_post.id);
-                            }).catch((jqXHR, textStatus, errorThrown) => {
-                                // 取得失敗時
-                                alert("ブーストに失敗しました。");
-                            });
-                        } else { // お気に入り
-                            $.ajax({
-                                type: "POST",
-                                url: "https://" + target_account.domain
-                                    + "/api/v1/statuses/" + target_post.id + "/favourite",
-                                dataType: "json",
-                                headers: {
-                                    "Authorization": "Bearer " + target_account.access_token
-                                }
-                            }).then((data) => {
-                                console.log("Favorite Success: " + target_post.id);
-                            }).catch((jqXHR, textStatus, errorThrown) => {
-                                // 取得失敗時
-                                alert("お気に入りに失敗しました。");
-                            });
-                        }
-                        break;
-                    case 'Misskey': // Misskey
-                        if (target_mode == "__menu_reblog") { // リノート
-                            $.ajax({
-                                type: "POST",
-                                url: "https://" + target_account.domain + "/api/notes/create",
-                                dataType: "json",
-                                headers: { "Content-Type": "application/json" },
-                                data: JSON.stringify({
-                                    "i": target_account.access_token,
-                                    "renoteId": target_post.id
-                                })
-                            }).then((data) => {
-                                console.log("Renote Success: " + target_post.id);
-                            }).catch((jqXHR, textStatus, errorThrown) => {
-                                // 取得失敗時
-                                alert("リノートに失敗しました。");
-                            });
-                        } else { // お気に入り
-                            alert("Misskeyでお気に入りは現状非対応です……。");
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            })()
+            });
         });
 
         /*========================================================================================*/
@@ -326,8 +173,12 @@ $(() => {
                                 return (async () => {
                                     // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
                                     const toots = [];
-                                    data.forEach((toot) => toots.push(
-                                        getIntegratedPost(toot, tl, tl_acc, col.multi_user)));
+                                    data.forEach((toot) => toots.push(getIntegratedPost({
+                                        data: toot,
+                                        timeline: tl,
+                                        tl_account: tl_acc,
+                                        multi_flg: col.multi_user
+                                    })));
                                     return toots;
                                 })();
                             }));
@@ -343,6 +194,7 @@ $(() => {
                         // 更新通知のイベントハンドラーを作る
                         skt.addEventListener("message", (event) => {
                             const data = JSON.parse(event.data);
+                            //console.log(data); // TODO: debug
                             if (data.stream[0] != tl.socket_param.stream) {
                                 // TLと違うStreamは無視
                                 return;
@@ -354,9 +206,10 @@ $(() => {
                                     column_id: col.column_id,
                                     multi_flg: col.multi_user,
                                     timeline: tl,
+                                    tl_account: tl_acc,
                                     limit: timeline_limit,
                                     bindFunc: createTimelineMastLine
-                                }, keyset, tl_acc);
+                                }, keyset);
                             } else if (tl.timeline_type == "notification" && data.event == "notification") {
                                 // 通知の更新通知
                                 prependPost({
@@ -364,9 +217,10 @@ $(() => {
                                     column_id: col.column_id,
                                     multi_flg: col.multi_user,
                                     timeline: tl,
+                                    tl_account: tl_acc,
                                     limit: timeline_limit,
                                     bindFunc: createNotificationMastLine
-                                }, keyset, tl_acc);
+                                }, keyset);
                             }
                         });
                         // ソケットパラメータに受信開始の設定をセット
@@ -396,8 +250,12 @@ $(() => {
                                 return (async () => {
                                     // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
                                     const notes = [];
-                                    data.forEach((note) => notes.push(
-                                        getIntegratedPost(note, tl, tl_acc, col.multi_user)));
+                                    data.forEach((note) => notes.push(getIntegratedPost({
+                                        data: note,
+                                        timeline: tl,
+                                        tl_account: tl_acc,
+                                        multi_flg: col.multi_user
+                                    })));
                                     return notes;
                                 })();
                             }));
@@ -414,6 +272,7 @@ $(() => {
                         // 更新通知のイベントハンドラーを作る
                         skt.addEventListener("message", (event) => {
                             const data = JSON.parse(event.data);
+                            //console.log(data); // TODO: debug
                             if (data.body.id != uuid) {
                                 // TLと違うStreamは無視
                                 return;
@@ -426,9 +285,10 @@ $(() => {
                                     column_id: col.column_id,
                                     multi_flg: col.multi_user,
                                     timeline: tl,
+                                    tl_account: tl_acc,
                                     limit: timeline_limit,
                                     bindFunc: createTimelineMskyLine
-                                }, keyset, tl_acc);
+                                }, keyset);
                             } else if (tl.timeline_type == "notification" && data.body.type == "notification") {
                                 // 通知の更新通知
                                 prependPost({
@@ -436,9 +296,10 @@ $(() => {
                                     column_id: col.column_id,
                                     multi_flg: col.multi_user,
                                     timeline: tl,
+                                    tl_account: tl_acc,
                                     limit: timeline_limit,
                                     bindFunc: createNotificationMskyLine
-                                }, keyset, tl_acc);
+                                }, keyset);
                             }
                         });
                         // ソケットパラメータに受信開始の設定をセット
@@ -475,7 +336,6 @@ $(() => {
                 });
                 /*
                 console.log(col.label_head); // TODO: debug
-                console.log(keyset); // TODO: debug
                 console.log(postlist); // TODO: debug
                 //*/
                 // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)

@@ -16,8 +16,9 @@
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_viewbind.js"></script>
+    <script type="text/javascript" src="js/mm_core_func.js"></script>
     <script type="text/javascript" src="js/mm_core.js"></script>
-    <title>MMchan - The Integrated Mastodon and Misskey Client</title>
+    <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 <head>
 <body>
 <nav id="navi">
@@ -44,6 +45,9 @@
     </div>
     <div id="pop_context_menu" name="{post_id}">
         <ul class="ui_menu">
+            <li><div>リプライ/ツリー</div>
+                <ul id="__menu_reply"></ul>
+            </li>
             <li><div>ブースト/リノート</div>
                 <ul id="__menu_reblog"></ul>
             </li>
@@ -52,131 +56,18 @@
             </li>
         </ul>
     </div>
-    
+    <div id="pop_extend_column">
+    </div>
 </header>
 <section id="columns">
 <table>
     <thead>
         <tr>
-<!--            <th id="col1_head" class="head">
-                <h2>{instance_domain}</h2>
-                <h3>{timeline_type}</h3>
-            </th>
-            <th id="colX_head" class="head">
-                <h2>{instance_domain}</h2>
-                <h3>{timeline_type}</h3>
-            </th>
--->        </tr>
+        </tr>
     </thead>
     <tbody>
         <tr>
-<!--            <td id="col1_body" class="timeline">
-                <ul>
-                    <li>
-                        <div class="user">
-                            <img src="{usericon}" class="usericon"/>
-                            <h4 class="username">{username}</h4>
-                            <a class="userid">{userid}</a>
-                        </div>
-                        <div class="content">
-                            {content}
-                        </div>
-                        <div class="post_footer">
-                            <a class="created_at">{created_at}</a>
-                            <a class="buttons option">OPT</a>
-                            <a class="buttons favorite">FAV</a>
-                            <a class="buttons boost">BT</a>
-                            <a class="buttons reply">RP</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="label_head label_reblog">
-                            <span>Boosted by {user_id}</span>
-                        </div>
-                        <div class="user">
-                            <img src="{usericon}" class="usericon"/>
-                            <h4 class="username">{username}</h4>
-                            <a class="userid">{userid}</a>
-                        </div>
-                        <div class="content">
-                            <a class="expand_header label_cw">Content Warning</a>
-                            <div class="main_content cw_content">
-                                {content}
-                            </div>
-                        </div>
-                        <div class="media">
-                            <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-                            <div class="media_content cw_content">
-                                <img src="{media}" class="media_preview"/>
-                            </div>
-                        </div>
-                        <div class="post_footer">
-                            <a class="created_at">{created_at}</a>
-                            <a class="buttons option">OPT</a>
-                            <a class="buttons favorite">FAV</a>
-                            <a class="buttons boost">BT</a>
-                            <a class="buttons reply">RP</a>
-                        </div>
-                    </li>
-                </ul>
-            </td>
-            <td id="colX_body" class="timeline">
-                <ul>
-                    <li>
-                        <div class="user">
-                            <img src="{usericon}" class="usericon"/>
-                            <h4 class="username">{username}</h4>
-                            <a class="userid">{userid}</a>
-                        </div>
-                        <div class="content">
-                            {content}
-                        </div>
-                        <div class="post_footer">
-                            <a class="created_at">{created_at}</a>
-                            <a class="buttons option">OPT</a>
-                            <a class="buttons favorite">ACT</a>
-                            <a class="buttons boost">RN</a>
-                            <a class="buttons reply">RP</a>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="label_head label_favorite">
-                            <span>Favorited by {user_id}</span>
-                        </div>
-                        <div class="user">
-                            <img src="{usericon}" class="usericon"/>
-                            <h4 class="username">{username}</h4>
-                            <a class="userid">{userid}</a>
-                        </div>
-                        <div class="content">
-                            {content}
-                        </div>
-                        <div class="post_footer">
-                            <div class="created_at">{created_at}</div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="label_head label_follow">
-                            <span>Followed by {user_id}</span>
-                        </div>
-                        <div class="user">
-                            <img src="{usericon}" class="usericon"/>
-                            <h4 class="username">{username}</h4>
-                            <a class="userid">{userid}</a>
-                        </div>
-                        <div class="content">
-                            {content}
-                        </div>
-                        <div class="post_footer">
-                            <div class="created_at">Post: XXX / Follow: XXX / Follower: XXX</div>
-                            <a class="buttons option">OPT</a>
-                            <a class="buttons block">BL</a>
-                            <a class="buttons follow">FL</a>
-                        </div>
-                    </li>
-                </ul>
-            </td>
--->        </tr>
+        </tr>
     </tbody>
 </table>
 </section>
