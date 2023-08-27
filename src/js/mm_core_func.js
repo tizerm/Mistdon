@@ -12,6 +12,8 @@ async function post(arg) {
     let visibility = null;
     let request_param = null;
     let request_promise = null;
+    // 先にtoast表示
+    toast("投稿中です...", "progress");
     switch (arg.post_account.platform) {
         case 'Mastodon': // Mastodon
             // 公開範囲を取得
@@ -93,9 +95,10 @@ async function post(arg) {
     request_promise.then(() => {
         // 投稿成功時(コールバック関数実行)
         arg.success();
+        toast("投稿しました.", "done");
     }).catch((jqXHR, textStatus, errorThrown) => {
         // 投稿失敗時
-        console.log('!ERR: 投稿に失敗しました. ' + textStatus);
+        toast("投稿に失敗しました.", "error");
     });
 }
 
@@ -108,6 +111,8 @@ async function post(arg) {
 async function reaction(arg) {
     let request_promise = null;
     let target_post = null;
+    // 先にtoast表示
+    toast("対象の投稿を取得中です...", "progress");
     // ターゲットの投稿データを取得
     switch (arg.target_account.platform) {
         case 'Mastodon': // Mastodon
@@ -128,7 +133,7 @@ async function reaction(arg) {
                 return data.statuses[0];
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // 取得失敗時
-                alert("投稿の取得でエラーが発生しました。");
+                toast("投稿の取得でエラーが発生しました.", "error");
             });
             break;
         case 'Misskey': // Misskey
@@ -146,7 +151,7 @@ async function reaction(arg) {
                 return data.object;
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // 取得失敗時
-                alert("投稿の取得でエラーが発生しました。");
+                toast("投稿の取得でエラーが発生しました.", "error");
             });
             break;
         default:
@@ -162,6 +167,7 @@ async function reaction(arg) {
             switch (arg.target_mode) {
                 case '__menu_reply': // リプライ
                     arg.replyFunc(target_post);
+                    toast(null, "hide"); // toastを消す
                     break;
                 case '__menu_reblog': // ブースト
                     $.ajax({
@@ -173,10 +179,10 @@ async function reaction(arg) {
                             "Authorization": "Bearer " + arg.target_account.access_token
                         }
                     }).then((data) => {
-                        console.log("Boost Success: " + target_post.id);
+                        toast("投稿をブーストしました.", "done");
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // 取得失敗時
-                        alert("ブーストに失敗しました。");
+                        toast("ブーストに失敗しました.", "error");
                     });
                     break;
                 case '__menu_favorite': // お気に入り
@@ -189,10 +195,10 @@ async function reaction(arg) {
                             "Authorization": "Bearer " + arg.target_account.access_token
                         }
                     }).then((data) => {
-                        console.log("Favorite Success: " + target_post.id);
+                        toast("投稿をお気に入りしました.", "done");
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // 取得失敗時
-                        alert("お気に入りに失敗しました。");
+                        toast("お気に入りに失敗しました.", "error");
                     });
                     break;
                 default:
@@ -203,6 +209,7 @@ async function reaction(arg) {
             switch (arg.target_mode) {
                 case '__menu_reply': // リプライ
                     arg.replyFunc(target_post);
+                    toast(null, "hide"); // toastを消す
                     break;
                 case '__menu_reblog': // リノート
                     $.ajax({
@@ -215,14 +222,14 @@ async function reaction(arg) {
                             "renoteId": target_post.id
                         })
                     }).then((data) => {
-                        console.log("Renote Success: " + target_post.id);
+                        toast("投稿をリノートしました.", "done");
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // 取得失敗時
-                        alert("リノートに失敗しました。");
+                        toast("リノートに失敗しました.", "error");
                     });
                     break;
                 case '__menu_favorite': // お気に入り
-                    alert("Misskeyでお気に入りは現状非対応です……。");
+                    toast("Misskeyでお気に入りは現状非対応です…….", "error");
                     break;
                 default:
                     break;

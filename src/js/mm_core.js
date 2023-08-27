@@ -100,11 +100,13 @@ $(() => {
 
         /*========================================================================================*/
 
-        // 事前にWebSocketマップとCWと閲覧注意のイベントを設定
+        // 事前にWebSocketマップとCWと閲覧注意のイベントとトップへ移動処理を設定
         sockets = new Map();
         send_params = new Map();
         post_keysets = new Map();
         $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle());
+        $(document).on("click", ".__on_column_top", (e) => $(e.target).closest("td").find("ul").scrollTop(0));
+
         // 投稿右クリック時のコンテキストメニュー表示イベント
         $("#header>#pop_context_menu>.ui_menu>li ul").html(createContextMenuAccounts(accounts));
         $("#header>#pop_context_menu>.ui_menu").menu();
@@ -119,7 +121,7 @@ $(() => {
         $("body").on("click", (e) => {
             $("#header>#pop_context_menu").css('visibility', 'hidden');
         });
-        // メニュー項目クリック時処理
+        // コンテキストメニュー項目クリック時処理
         $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", (e) => {
             const key_address = $(e.target).closest("li").attr("name");
             const target_account = accounts.get(key_address);
@@ -230,7 +232,7 @@ $(() => {
                             // ソケットを初めて作る場合はエラーハンドルもする
                             skt.addEventListener("error", (event) => {
                                 // HTTPエラーハンドルした場合
-                                alert(tl.key_address + "で接続エラーが発生しました、再接続してください。");
+                                toast(tl.key_address + "で接続エラーが発生しました、再接続してください。", "error");
                                 console.log(event);
                             });
                         }
@@ -312,7 +314,7 @@ $(() => {
                             // ソケットを初めて作る場合はエラーハンドルもする
                             skt.addEventListener("error", (event) => {
                                 // HTTPエラーハンドルした場合
-                                alert(tl.key_address + "で接続エラーが発生しました、再接続してください。");
+                                toast(tl.key_address + "で接続エラーが発生しました、再接続してください。", "error");
                                 console.log(event);
                             });
                         }
@@ -346,7 +348,7 @@ $(() => {
                 createIntegratedTimeline(postlist,  col.column_id + "_body", accounts);
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // 取得失敗時
-                console.log('!ERR: timeline get failed. ' + textStatus);
+                toast("タイムラインの取得に失敗したカラムがあります。", "error");
             });
         });
         // すべてのカラムを生成し終えたタイミングでWebSocketのopenイベントに送信処理をバインド

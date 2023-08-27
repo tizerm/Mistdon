@@ -83,7 +83,7 @@ function getIntegratedPost(arg) {
         // 投稿日付(小数点以下切り捨て)+ユーザーフルアドレスを投稿のユニークキーとする
         'post_key': sort_date.substring(0, sort_date.lastIndexOf('.')) + '@' + user_address,
         // カラムがマルチユーザーの場合のみ取得元ユーザーを設定
-        'from_address': arg.tl_account ? arg.timeline.key_address : null,
+        'from_address': arg.multi_flg ? arg.timeline.key_address : null,
         'post': arg.data
     };
 }

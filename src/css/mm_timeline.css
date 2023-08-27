@@ -237,6 +237,19 @@
     top: -64px;
     right: 8px;
 }
+#columns>table>tbody>tr>.timeline>.col_action>button {
+    border-style: none;
+    font-size: 24px;
+    border-radius: 8px;
+    background-color: rgba(34,34,34,0.25);
+    padding: 8px;
+}
+#columns>table>tbody>tr>.timeline>.col_action>button:hover {
+    background-color: rgba(34,34,34,0.4);
+}
+#columns>table>tbody>tr>.timeline>.col_action>button:active {
+    background-color: rgba(34,34,34,0.8);
+}
 
 .timeline>ul {
     margin: 0px;
