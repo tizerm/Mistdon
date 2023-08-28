@@ -239,3 +239,209 @@ async function reaction(arg) {
             break;
     }
 }
+
+/**
+ * #Ajax #jQuery
+ * タイムライン取得処理(REST)
+ * 
+ * @param arg パラメータJSON
+ */
+function getTimeline(arg) {
+    let rest_promise = null;
+    // プラットフォーム判定
+    switch (arg.tl_account.platform) {
+        case 'Mastodon': // Mastodon
+            // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+            rest_promise = $.ajax({
+                type: "GET",
+                url: arg.timeline.rest_url,
+                dataType: "json",
+                headers: { "Authorization": "Bearer " + arg.tl_account.access_token },
+                data: arg.timeline.query_param
+            }).then((data) => {
+                return (async () => {
+                    // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
+                    const toots = [];
+                    data.forEach((toot) => toots.push(getIntegratedPost({
+                        data: toot,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        multi_flg: arg.column.multi_user
+                    })));
+                    return toots;
+                })();
+            });
+            break;
+        case 'Misskey': // Misskey
+            // クエリパラメータにアクセストークンをセット
+            arg.timeline.query_param.i = arg.tl_account.access_token;
+            // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+            rest_promise = $.ajax({
+                type: "POST",
+                url: arg.timeline.rest_url,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify(arg.timeline.query_param)
+            }).then((data) => {
+                return (async () => {
+                    // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
+                    const notes = [];
+                    data.forEach((note) => notes.push(getIntegratedPost({
+                        data: note,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        multi_flg: arg.column.multi_user
+                    })));
+                    return notes;
+                })();
+            });
+            break;
+        default:
+            break;
+    }
+    // Promiseを返却(実質非同期)
+    return rest_promise;
+}
+
+/**
+ * #WebSocket
+ * WebSocket接続を行うための設定値とコールバック関数を生成
+ * 
+ * @param arg パラメータJSON
+ * @param params WebSocket設定を保存するためのSet
+ * @param keyset タイムライン重複削除のためのkeyset
+ */
+function createConnectPref(arg, params, keyset) {
+    let socket_url = null;
+    let message_callback = null;
+    let send_param = null;
+    
+    // プラットフォーム判定
+    switch (arg.tl_account.platform) {
+        case 'Mastodon': // Mastodon
+            socket_url = arg.tl_account.socket_url + "?access_token=" + arg.tl_account.access_token;
+            // メッセージ受信時のコールバック関数
+            message_callback = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.stream[0] != arg.timeline.socket_param.stream) {
+                    // TLと違うStreamは無視
+                    return;
+                }
+                if (data.event == "update") {
+                    // タイムラインの更新通知
+                    prependPost({
+                        data: JSON.parse(data.payload),
+                        column_id: arg.column.column_id,
+                        multi_flg: arg.column.multi_user,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        limit: arg.timeline_limit,
+                        bindFunc: createTimelineMastLine
+                    }, keyset);
+                } else if (arg.timeline.timeline_type == "notification" && data.event == "notification") {
+                    // 通知の更新通知
+                    prependPost({
+                        data: JSON.parse(data.payload),
+                        column_id: arg.column.column_id,
+                        multi_flg: arg.column.multi_user,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        limit: arg.timeline_limit,
+                        bindFunc: createNotificationMastLine
+                    }, keyset);
+                }
+            }
+            // 購読パラメータの設定
+            arg.timeline.socket_param.type = "subscribe";
+            send_param = JSON.stringify(arg.timeline.socket_param);
+            break;
+        case 'Misskey': // Misskey
+            const uuid = crypto.randomUUID();
+            socket_url = arg.tl_account.socket_url + "?i=" + arg.tl_account.access_token;
+            message_callback = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.body.id != uuid) {
+                    // TLと違うStreamは無視
+                    return;
+                }
+                if (data.body.type == "note") {
+                    // タイムラインの更新通知
+                    prependPost({
+                        data: data.body.body,
+                        column_id: arg.column.column_id,
+                        multi_flg: arg.column.multi_user,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        limit: arg.timeline_limit,
+                        bindFunc: createTimelineMskyLine
+                    }, keyset);
+                } else if (arg.timeline.timeline_type == "notification" && data.body.type == "notification") {
+                    // 通知の更新通知
+                    prependPost({
+                        data: data.body.body,
+                        column_id: arg.column.column_id,
+                        multi_flg: arg.column.multi_user,
+                        timeline: arg.timeline,
+                        tl_account: arg.tl_account,
+                        limit: arg.timeline_limit,
+                        bindFunc: createNotificationMskyLine
+                    }, keyset);
+                }
+            }
+            // 購読パラメータの設定
+            arg.timeline.socket_param.id = uuid;
+            send_param = JSON.stringify({
+                'type': 'connect',
+                'body': arg.timeline.socket_param
+            });
+            break;
+        default:
+            break;
+    }
+    // パラメータセットにデータがなかったらセットに配列を作る
+    if (!params.has(arg.timeline.key_address)) {
+        params.set(arg.timeline.key_address, {
+            socket_url: socket_url,
+            subscribes: []
+        });
+    }
+    // subscribesにソケット設定を追加
+    params.get(arg.timeline.key_address).subscribes.push({
+        target_col: arg.column,
+        send_param: send_param,
+        messageFunc: message_callback
+    });
+}
+
+/**
+ * #WebSocket
+ * WebSocket接続を開始して一連のイベント設定をする
+ * 
+ * @param arg パラメータJSON
+ */
+async function connect(arg) {
+    // WebSocket接続を開始
+    const socket = new WebSocket(arg.pref.socket_url);
+    console.log(arg.key_address + ": socket create."); // TODO: debug
+    
+    // WebSocket接続開始時処理
+    socket.addEventListener("open", (event) => {
+        console.log(arg.key_address + ": socket opened."); // TODO: debug
+        // ソケットに受信設定を送信
+        arg.pref.subscribes.forEach((p) => socket.send(p.send_param));
+    });
+    // エラーハンドラ
+    socket.addEventListener("error", (event) => {
+        toast(arg.key_address + "で接続エラーが発生しました、再接続してください。", "error");
+        console.log(event);
+    });
+    // WebSocket接続停止時処理
+    socket.addEventListener("close", (event) => {
+        // 接続停止用コールバック関数を実行
+        arg.closeFunc();
+        console.log(arg.key_address + ": socket closed."); // TODO: debug
+        console.log(event);
+    });
+    // 受信処理を設定
+    arg.pref.subscribes.forEach((p) => socket.addEventListener("message", p.messageFunc));
+}

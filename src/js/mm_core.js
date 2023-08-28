@@ -1,8 +1,7 @@
 $(() => {
     var accounts = null;
     var columns = null;
-    var sockets = null;
-    var send_params = null;
+    var socket_prefs = null;
     var post_keysets = null;
     // タイムラインキャッシュ カラムひとつあたりこの数を超えたら後ろから自動的に消える
     const timeline_limit = 150;
@@ -101,9 +100,6 @@ $(() => {
         /*========================================================================================*/
 
         // 事前にWebSocketマップとCWと閲覧注意のイベントとトップへ移動処理を設定
-        sockets = new Map();
-        send_params = new Map();
-        post_keysets = new Map();
         $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle());
         $(document).on("click", ".__on_column_top", (e) => $(e.target).closest("td").find("ul").scrollTop(0));
 
@@ -147,6 +143,8 @@ $(() => {
         /*========================================================================================*/
 
         // カラム生成処理
+        socket_prefs = new Map();
+        post_keysets = new Map();
         columns.forEach((col) => {
             // カラム本体を生成
             createColumn(col);
@@ -159,169 +157,20 @@ $(() => {
                 // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
                 tl.query_param.limit = 30;
                 const tl_acc = accounts.get(tl.key_address);
-                
-                // プラットフォームによって通信様式が違うので個別に設定
-                switch (tl_acc.platform) {
-                    case 'Mastodon': // Mastodon
-                        // 最初にREST APIで最新TLを30件取得、する処理をプロミス配列に追加
-                        rest_promises.push(
-                            $.ajax({
-                                type: "GET",
-                                url: tl.rest_url,
-                                dataType: "json",
-                                headers: { "Authorization": "Bearer " + tl_acc.access_token },
-                                data: tl.query_param
-                            }).then((data) => {
-                                return (async () => {
-                                    // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                                    const toots = [];
-                                    data.forEach((toot) => toots.push(getIntegratedPost({
-                                        data: toot,
-                                        timeline: tl,
-                                        tl_account: tl_acc,
-                                        multi_flg: col.multi_user
-                                    })));
-                                    return toots;
-                                })();
-                            }));
-                        // REST API呼び出してる間にStreaming API用のWebSocketを準備
-                        var socket_exist_flg = sockets.has(tl.key_address);
-                        if (!socket_exist_flg) {
-                            // アカウントのWebSocket存在しない場合はコネクションの確立から始める
-                            sockets.set(tl.key_address, new WebSocket(
-                                tl_acc.socket_url + "?access_token=" + tl_acc.access_token));
-                            send_params.set(tl.key_address, []);
-                        }
-                        var skt = sockets.get(tl.key_address);
-                        // 更新通知のイベントハンドラーを作る
-                        skt.addEventListener("message", (event) => {
-                            const data = JSON.parse(event.data);
-                            //console.log(data); // TODO: debug
-                            if (data.stream[0] != tl.socket_param.stream) {
-                                // TLと違うStreamは無視
-                                return;
-                            }
-                            if (data.event == "update") {
-                                // タイムラインの更新通知
-                                prependPost({
-                                    data: JSON.parse(data.payload),
-                                    column_id: col.column_id,
-                                    multi_flg: col.multi_user,
-                                    timeline: tl,
-                                    tl_account: tl_acc,
-                                    limit: timeline_limit,
-                                    bindFunc: createTimelineMastLine
-                                }, keyset);
-                            } else if (tl.timeline_type == "notification" && data.event == "notification") {
-                                // 通知の更新通知
-                                prependPost({
-                                    data: JSON.parse(data.payload),
-                                    column_id: col.column_id,
-                                    multi_flg: col.multi_user,
-                                    timeline: tl,
-                                    tl_account: tl_acc,
-                                    limit: timeline_limit,
-                                    bindFunc: createNotificationMastLine
-                                }, keyset);
-                            }
-                        });
-                        // ソケットパラメータに受信開始の設定をセット
-                        tl.socket_param.type = "subscribe";
-                        send_params.get(tl.key_address).push(JSON.stringify(tl.socket_param));
-                        if (!socket_exist_flg) {
-                            // ソケットを初めて作る場合はエラーハンドルもする
-                            skt.addEventListener("error", (event) => {
-                                // HTTPエラーハンドルした場合
-                                toast(tl.key_address + "で接続エラーが発生しました、再接続してください。", "error");
-                                console.log(event);
-                            });
-                        }
-                        break;
-                    case 'Misskey': // Misskey
-                        // クエリパラメータにアクセストークンをセット
-                        tl.query_param.i = tl_acc.access_token;
-                        // 最初にREST APIで最新TLを30件取得、する処理をプロミス配列に追加
-                        rest_promises.push(
-                            $.ajax({
-                                type: "POST",
-                                url: tl.rest_url,
-                                dataType: "json",
-                                headers: { "Content-Type": "application/json" },
-                                data: JSON.stringify(tl.query_param)
-                            }).then((data) => {
-                                return (async () => {
-                                    // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                                    const notes = [];
-                                    data.forEach((note) => notes.push(getIntegratedPost({
-                                        data: note,
-                                        timeline: tl,
-                                        tl_account: tl_acc,
-                                        multi_flg: col.multi_user
-                                    })));
-                                    return notes;
-                                })();
-                            }));
-                        // REST API呼び出してる間にStreaming API用のWebSocketを準備
-                        var socket_exist_flg = sockets.has(tl.key_address);
-                        if (!socket_exist_flg) {
-                            // アカウントのWebSocket存在しない場合はコネクションの確立から始める
-                            sockets.set(tl.key_address, new WebSocket(
-                                tl_acc.socket_url + "?i=" + tl_acc.access_token));
-                            send_params.set(tl.key_address, []);
-                        }
-                        var skt = sockets.get(tl.key_address);
-                        var uuid = crypto.randomUUID();
-                        // 更新通知のイベントハンドラーを作る
-                        skt.addEventListener("message", (event) => {
-                            const data = JSON.parse(event.data);
-                            //console.log(data); // TODO: debug
-                            if (data.body.id != uuid) {
-                                // TLと違うStreamは無視
-                                return;
-                            }
-                            // 別のデータが来たときに余計な処理を挟まないよう同じ処理だけどif内で書く
-                            if (data.body.type == "note") {
-                                // タイムラインの更新通知
-                                prependPost({
-                                    data: data.body.body,
-                                    column_id: col.column_id,
-                                    multi_flg: col.multi_user,
-                                    timeline: tl,
-                                    tl_account: tl_acc,
-                                    limit: timeline_limit,
-                                    bindFunc: createTimelineMskyLine
-                                }, keyset);
-                            } else if (tl.timeline_type == "notification" && data.body.type == "notification") {
-                                // 通知の更新通知
-                                prependPost({
-                                    data: data.body.body,
-                                    column_id: col.column_id,
-                                    multi_flg: col.multi_user,
-                                    timeline: tl,
-                                    tl_account: tl_acc,
-                                    limit: timeline_limit,
-                                    bindFunc: createNotificationMskyLine
-                                }, keyset);
-                            }
-                        });
-                        // ソケットパラメータに受信開始の設定をセット
-                        tl.socket_param.id = uuid;
-                        send_params.get(tl.key_address).push(JSON.stringify({
-                            'type': 'connect',
-                            'body': tl.socket_param
-                        }));
-                        if (!socket_exist_flg) {
-                            // ソケットを初めて作る場合はエラーハンドルもする
-                            skt.addEventListener("error", (event) => {
-                                // HTTPエラーハンドルした場合
-                                toast(tl.key_address + "で接続エラーが発生しました、再接続してください。", "error");
-                                console.log(event);
-                            });
-                        }
-                        break;
-                    default:
-                        break;
-                }
+
+                // 最初にREST APIで最新TLを30件取得、する処理をプロミス配列に追加
+                rest_promises.push(getTimeline({
+                    timeline: tl,
+                    tl_account: tl_acc,
+                    column: col
+                }));
+                // WebSocketのタイムライン設定を保存
+                createConnectPref({
+                    timeline: tl,
+                    tl_account: tl_acc,
+                    column: col,
+                    timeline_limit: timeline_limit
+                }, socket_prefs, keyset);
             });
             // カラムのすべてのタイムラインのREST APIが呼び出し終わったか判定するためにPromise.allを使用
             Promise.all(rest_promises).then((datas) => {
@@ -351,11 +200,13 @@ $(() => {
                 toast("タイムラインの取得に失敗したカラムがあります。", "error");
             });
         });
-        // すべてのカラムを生成し終えたタイミングでWebSocketのopenイベントに送信処理をバインド
-        sockets.forEach((v, k) => {
-            v.addEventListener("open", (event) => {
-                send_params.get(k).forEach((p) => v.send(p));
-            });
-        });
+        // すべてのカラムを生成し終えたタイミングでWebSocketの接続を開始
+        socket_prefs.forEach((v, k) => connect({
+            pref: v,
+            key_address: k,
+            closeFunc: () => {
+                toast(v.key_address + "との接続が切断されました。", "error");
+            }
+        }));
     })()
 });
