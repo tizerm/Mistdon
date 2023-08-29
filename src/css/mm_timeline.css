@@ -276,6 +276,11 @@
     margin: 6px;
     padding: 8px 12px;
 }
+.timeline>ul>li.inserted_info {
+    font-size: 12px;
+    color: #aaaaaa;
+    text-align: center;
+}
 
 .timeline>ul>li>.label_head {
     border-radius: 12px;

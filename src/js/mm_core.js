@@ -102,6 +102,21 @@ $(() => {
         // 事前にWebSocketマップとCWと閲覧注意のイベントとトップへ移動処理を設定
         $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle());
         $(document).on("click", ".__on_column_top", (e) => $(e.target).closest("td").find("ul").scrollTop(0));
+        $(document).on("click", ".__on_media_expand", (e) => {
+            // アプリケーションのアス比を計算
+            const window_aspect = window.innerWidth / window.innerHeight;
+            const link = $(e.target).closest(".__on_media_expand");
+            createImageWindow({
+                url: link.attr("href"),
+                image_aspect: link.attr("name"),
+                window_aspect: window_aspect,
+            });
+            // リンク先に飛ばないようにする
+            return false;
+        });
+        // 画像を拡大表示したときだけどこクリックしても閉じるようにする
+        $("body").on("click", (e) => $("#header>#pop_extend_column>.expand_image_col")
+            .closest("#pop_extend_column").css('visibility', 'hidden'));
 
         // 投稿右クリック時のコンテキストメニュー表示イベント
         $("#header>#pop_context_menu>.ui_menu>li ul").html(createContextMenuAccounts(accounts));
@@ -185,7 +200,7 @@ $(() => {
                         }
                     });
                 });
-                /*
+                //*
                 console.log(col.label_head); // TODO: debug
                 console.log(postlist); // TODO: debug
                 //*/
@@ -205,8 +220,12 @@ $(() => {
             pref: v,
             key_address: k,
             closeFunc: () => {
-                toast(v.key_address + "との接続が切断されました。", "error");
-            }
+                toast(k + "との接続が切断されました。", "error");
+                // 対象カラムに接続が切れた通知を出す
+                v.subscribes.forEach((s) => $("#columns>table>tbody>tr>#" + s.target_col.column_id + "_body>ul")
+                    .prepend('<li class="inserted_info">' + k + 'との接続が切断されました。</li>'));
+            },
+            reconnect: true
         }));
     })()
 });

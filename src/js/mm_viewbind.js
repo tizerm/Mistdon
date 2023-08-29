@@ -219,7 +219,9 @@ function createTimelineMastLine(value, from_address) {
             html += '<div class="media_content">';
         }
         viewdata.media_attachments.forEach((media) => {
-            html += '<img src="' + media.preview_url + '" class="media_preview"/>';
+            // アスペクト比をリンクオプションとして設定
+            html += '<a href="' + media.url + '" name="' + media.meta.original.aspect + '" class="__on_media_expand">'
+                + '<img src="' + media.preview_url + '" class="media_preview"/></a>';
         });
         html += '</div></div>';
     }
@@ -397,7 +399,10 @@ function createTimelineMskyLine(value, from_address) {
             html += '<div class="media_content">';
         }
         viewdata.files.forEach((media) => {
-            html += '<img src="' + media.thumbnailUrl + '" class="media_preview"/>';
+            // アスペクト比をリンクオプションとして設定
+            const aspect = media.properties.width / media.properties.height;
+            html += '<a href="' + media.url + '" name="' + aspect + '" class="__on_media_expand">'
+                + '<img src="' + media.thumbnailUrl + '" class="media_preview"/></a>';
         });
         html += '</div></div>';
     }
@@ -597,4 +602,26 @@ function createReplyColumn(arg) {
         + '<button type="button" id="__on_reply_close">×</button>'
         + '</div>';
     return html;
+}
+
+/**
+ * #Renderer #jQuery
+ * 画像拡大ウィンドウの生成
+ * 
+ * @param arg パラメータ一括指定JSON
+ */
+function createImageWindow(arg) {
+    let html = '<div class="expand_image_col">'
+        + '<img src="' + arg.url + '"/>'
+        + '</div>';
+    $("#header>#pop_extend_column").html(html).css('visibility', 'visible');
+    if (arg.image_aspect > arg.window_aspect) {
+        // ウィンドウよりも画像のほうが横幅ながめ
+        $("#header>#pop_extend_column>.expand_image_col>img")
+            .css('width', '80vw').css('height', 'auto');
+    } else {
+        // ウィンドウよりも画像のほうが縦幅ながめ
+        $("#header>#pop_extend_column>.expand_image_col>img")
+            .css('height', '80vh').css('width', 'auto');
+    }
 }

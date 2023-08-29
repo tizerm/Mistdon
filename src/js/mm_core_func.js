@@ -433,6 +433,8 @@ async function connect(arg) {
     // エラーハンドラ
     socket.addEventListener("error", (event) => {
         toast(arg.key_address + "で接続エラーが発生しました、再接続してください。", "error");
+        // エラーで切れた場合は再接続しない
+        arg.reconnect = false;
         console.log(event);
     });
     // WebSocket接続停止時処理
@@ -440,6 +442,10 @@ async function connect(arg) {
         // 接続停止用コールバック関数を実行
         arg.closeFunc();
         console.log(arg.key_address + ": socket closed."); // TODO: debug
+        if (arg.reconnect) {
+            // 自身を呼び出して再接続
+            connect(arg);
+        }
         console.log(event);
     });
     // 受信処理を設定
