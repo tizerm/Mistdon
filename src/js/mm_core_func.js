@@ -13,7 +13,8 @@ async function post(arg) {
     let request_param = null;
     let request_promise = null;
     // æ‚Étoast•\¦
-    toast("“Še’†‚Å‚·...", "progress");
+    const toast_uuid = crypto.randomUUID();
+    toast("“Še’†‚Å‚·...", "progress", toast_uuid);
     switch (arg.post_account.platform) {
         case 'Mastodon': // Mastodon
             // ŒöŠJ”ÍˆÍ‚ğæ“¾
@@ -95,10 +96,10 @@ async function post(arg) {
     request_promise.then(() => {
         // “Še¬Œ÷(ƒR[ƒ‹ƒoƒbƒNŠÖ”Às)
         arg.success();
-        toast("“Še‚µ‚Ü‚µ‚½.", "done");
+        toast("“Še‚µ‚Ü‚µ‚½.", "done", toast_uuid);
     }).catch((jqXHR, textStatus, errorThrown) => {
         // “Še¸”s
-        toast("“Še‚É¸”s‚µ‚Ü‚µ‚½.", "error");
+        toast("“Še‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid);
     });
 }
 
@@ -111,8 +112,8 @@ async function post(arg) {
 async function reaction(arg) {
     let request_promise = null;
     let target_post = null;
-    // æ‚Étoast•\¦
-    toast("‘ÎÛ‚Ì“Še‚ğæ“¾’†‚Å‚·...", "progress");
+    const toast_uuid = crypto.randomUUID();
+    toast("‘ÎÛ‚Ì“Še‚ğæ“¾’†‚Å‚·...", "progress", toast_uuid);
     // ƒ^[ƒQƒbƒg‚Ì“Šeƒf[ƒ^‚ğæ“¾
     switch (arg.target_account.platform) {
         case 'Mastodon': // Mastodon
@@ -133,7 +134,7 @@ async function reaction(arg) {
                 return data.statuses[0];
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // æ“¾¸”s
-                toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error");
+                toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error", toast_uuid);
             });
             break;
         case 'Misskey': // Misskey
@@ -151,7 +152,7 @@ async function reaction(arg) {
                 return data.object;
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // æ“¾¸”s
-                toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error");
+                toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error", toast_uuid);
             });
             break;
         default:
@@ -167,7 +168,7 @@ async function reaction(arg) {
             switch (arg.target_mode) {
                 case '__menu_reply': // ƒŠƒvƒ‰ƒC
                     arg.replyFunc(target_post);
-                    toast(null, "hide"); // toast‚ğÁ‚·
+                    toast(null, "hide", toast_uuid);
                     break;
                 case '__menu_reblog': // ƒu[ƒXƒg
                     $.ajax({
@@ -179,10 +180,10 @@ async function reaction(arg) {
                             "Authorization": "Bearer " + arg.target_account.access_token
                         }
                     }).then((data) => {
-                        toast("“Še‚ğƒu[ƒXƒg‚µ‚Ü‚µ‚½.", "done");
+                        toast("“Še‚ğƒu[ƒXƒg‚µ‚Ü‚µ‚½.", "done", toast_uuid);
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // æ“¾¸”s
-                        toast("ƒu[ƒXƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error");
+                        toast("ƒu[ƒXƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid);
                     });
                     break;
                 case '__menu_favorite': // ‚¨‹C‚É“ü‚è
@@ -195,10 +196,10 @@ async function reaction(arg) {
                             "Authorization": "Bearer " + arg.target_account.access_token
                         }
                     }).then((data) => {
-                        toast("“Še‚ğ‚¨‹C‚É“ü‚è‚µ‚Ü‚µ‚½.", "done");
+                        toast("“Še‚ğ‚¨‹C‚É“ü‚è‚µ‚Ü‚µ‚½.", "done", toast_uuid);
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // æ“¾¸”s
-                        toast("‚¨‹C‚É“ü‚è‚É¸”s‚µ‚Ü‚µ‚½.", "error");
+                        toast("‚¨‹C‚É“ü‚è‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid);
                     });
                     break;
                 default:
@@ -209,7 +210,7 @@ async function reaction(arg) {
             switch (arg.target_mode) {
                 case '__menu_reply': // ƒŠƒvƒ‰ƒC
                     arg.replyFunc(target_post);
-                    toast(null, "hide"); // toast‚ğÁ‚·
+                    toast(null, "hide", toast_uuid);
                     break;
                 case '__menu_reblog': // ƒŠƒm[ƒg
                     $.ajax({
@@ -222,14 +223,14 @@ async function reaction(arg) {
                             "renoteId": target_post.id
                         })
                     }).then((data) => {
-                        toast("“Še‚ğƒŠƒm[ƒg‚µ‚Ü‚µ‚½.", "done");
+                        toast("“Še‚ğƒŠƒm[ƒg‚µ‚Ü‚µ‚½.", "done", toast_uuid);
                     }).catch((jqXHR, textStatus, errorThrown) => {
                         // æ“¾¸”s
-                        toast("ƒŠƒm[ƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error");
+                        toast("ƒŠƒm[ƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid);
                     });
                     break;
                 case '__menu_favorite': // ‚¨‹C‚É“ü‚è
-                    toast("Misskey‚Å‚¨‹C‚É“ü‚è‚ÍŒ»ó”ñ‘Î‰‚Å‚·cc.", "error");
+                    toast("Misskey‚Å‚¨‹C‚É“ü‚è‚ÍŒ»ó”ñ‘Î‰‚Å‚·cc.", "error", toast_uuid);
                     break;
                 default:
                     break;
@@ -311,7 +312,7 @@ function getTimeline(arg) {
  * @param params WebSocketİ’è‚ğ•Û‘¶‚·‚é‚½‚ß‚ÌSet
  * @param keyset ƒ^ƒCƒ€ƒ‰ƒCƒ“d•¡íœ‚Ì‚½‚ß‚Ìkeyset
  */
-function createConnectPref(arg, params, keyset) {
+function createConnectPref(arg, params, cache) {
     let socket_url = null;
     let message_callback = null;
     let send_param = null;
@@ -337,7 +338,7 @@ function createConnectPref(arg, params, keyset) {
                         tl_account: arg.tl_account,
                         limit: arg.timeline_limit,
                         bindFunc: createTimelineMastLine
-                    }, keyset);
+                    }, cache);
                 } else if (arg.timeline.timeline_type == "notification" && data.event == "notification") {
                     // ’Ê’m‚ÌXV’Ê’m
                     prependPost({
@@ -348,7 +349,7 @@ function createConnectPref(arg, params, keyset) {
                         tl_account: arg.tl_account,
                         limit: arg.timeline_limit,
                         bindFunc: createNotificationMastLine
-                    }, keyset);
+                    }, cache);
                 }
             }
             // w“Çƒpƒ‰ƒ[ƒ^‚Ìİ’è
@@ -374,7 +375,7 @@ function createConnectPref(arg, params, keyset) {
                         tl_account: arg.tl_account,
                         limit: arg.timeline_limit,
                         bindFunc: createTimelineMskyLine
-                    }, keyset);
+                    }, cache);
                 } else if (arg.timeline.timeline_type == "notification" && data.body.type == "notification") {
                     // ’Ê’m‚ÌXV’Ê’m
                     prependPost({
@@ -385,7 +386,7 @@ function createConnectPref(arg, params, keyset) {
                         tl_account: arg.tl_account,
                         limit: arg.timeline_limit,
                         bindFunc: createNotificationMskyLine
-                    }, keyset);
+                    }, cache);
                 }
             }
             // w“Çƒpƒ‰ƒ[ƒ^‚Ìİ’è
@@ -426,6 +427,8 @@ async function connect(arg) {
     
     // WebSocketÚ‘±ŠJnˆ—
     socket.addEventListener("open", (event) => {
+        // Ú‘±ŠJn—pƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀs
+        arg.openFunc();
         console.log(arg.key_address + ": socket opened."); // TODO: debug
         // ƒ\ƒPƒbƒg‚ÉóMİ’è‚ğ‘—M
         arg.pref.subscribes.forEach((p) => socket.send(p.send_param));

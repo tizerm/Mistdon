@@ -85,7 +85,7 @@
 /*================================================================================================*/
 
 #header>#pop_postuser {
-    visibility: hidden;
+    display: none;
     z-index: 10;
     width: 400px;
     position: absolute;
@@ -120,7 +120,7 @@
 }
 
 #header>#pop_context_menu {
-    visibility: hidden;
+    display: none;
     z-index: 8;
     position: absolute;
     top: 108px;
@@ -130,12 +130,18 @@
     border-radius: 8px;
     background-color: #222222;
     border: solid 1px #aaaaaa;
+    padding: 4px;
     color: #ffffff;
     font-size: 13px;
 }
 #header>#pop_context_menu ul>li>div {
     border-radius: 8px;
+    margin: 2px 0px;
     padding: 4px 12px;
+}
+#header>#pop_context_menu ul>li>div.ui-state-active {
+    border: solid 1px rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.15);
 }
 #header>#pop_context_menu>ul>li>ul {
     width: 360px;
@@ -144,7 +150,7 @@
 /*================================================================================================*/
 
 #header>#pop_extend_column {
-    visibility: hidden;
+    display: none;
     z-index: 6;
     border-radius: 12px;
     background-color: rgba(34,34,34,0.8);
@@ -208,53 +214,91 @@
     width: 100%;
     table-layout: fixed;
 }
-#columns>table>thead>tr>.head {
+
+.col_action>a:hover>img {
+    border-radius: 8px;
+    background-color: rgba(255,255,255,0.15);
+    cursor: pointer;
+}
+
+#columns>table .closed_col {
+    display: none;
+    position: relative;
+    border-radius: 18px;
+    padding: 0px;
+    width: 48px;
+    max-width: 48px;
+    background-color: #888888;
+}
+#columns>table .closed_col>.col_action {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+}
+#columns>table .closed_col>h2 {
+    position: absolute;
+    top: 64px;
+    left: 44px;
+    transform: rotate(90deg);
+    transform-origin: left top;
+    white-space: nowrap;
+    margin: 0px;
+    padding: 0px;
+    font-size: 32px;
+    text-align: left;
+}
+#columns>table .closed_col>h2>span {
+    display: inline-block;
+    border-radius: 12px;
+    background-color: rgba(255,255,255,0.2);
+    margin-left: 32px;
+    margin-bottom: 8px;
+    padding: 2px 12px;
+    font-size: 16px;
+    vertical-align: middle;
+}
+#columns>table .timeline {
+    position: relative;
+    padding: 0px;
+}
+#columns>table .timeline>.col_head {
+    position: relative;
     border-top-left-radius: 18px;
     border-top-right-radius: 18px;
     color: #ffffff;
-    margin: 0px;
+    margin: 0px 0px 2px;
     padding: 12px 24px;
-    width: 360px;
+    height: 54px;
 }
 
-#columns>table>thead>tr>.head>h2,
-#columns>table>thead>tr>.head>h3 {
+#columns>table .timeline>.col_head>h2,
+#columns>table .timeline>.col_head>h3 {
     margin: 0px;
+    padding: 0px;
     text-align: left;
     font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
 }
-#columns>table>thead>tr>.head>h2 {
-    margin-bottom: 8px;
+#columns>table .col_head>h2 {
+    font-size: 20px;
+    margin-bottom: 4px;
 }
-
-#columns>table>tbody>tr>.timeline {
-    position: relative;
-    background-color: rgba(255,255,255,0.1);
-    padding: 2px 0px;
+#columns>table .col_head>h3 {
+    font-size: 16px;
 }
-#columns>table>tbody>tr>.timeline>.col_action {
+#columns>table .timeline>.col_head>.col_action {
     position: absolute;
-    top: -64px;
-    right: 8px;
+    bottom: 0px;
+    right: 4px;
 }
-#columns>table>tbody>tr>.timeline>.col_action>button {
-    border-style: none;
-    font-size: 24px;
-    border-radius: 8px;
-    background-color: rgba(34,34,34,0.25);
-    padding: 8px;
-}
-#columns>table>tbody>tr>.timeline>.col_action>button:hover {
-    background-color: rgba(34,34,34,0.4);
-}
-#columns>table>tbody>tr>.timeline>.col_action>button:active {
-    background-color: rgba(34,34,34,0.8);
+#columns>table .timeline>.col_head>.col_action>a {
+    margin: 0px 2px;
 }
 
 .timeline>ul {
+    background-color: rgba(255,255,255,0.1);
     margin: 0px;
     padding: 0px;
-    height: calc(100vh - 228px);
+    height: calc(100vh - 204px);
     overflow-y: auto;
     overflow-x: hidden;
 }

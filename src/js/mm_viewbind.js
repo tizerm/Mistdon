@@ -16,29 +16,29 @@ const yyyymmdd = new Intl.DateTimeFormat(undefined, {
  * @param col_json カラム情報のJSON
  */
 function createColumn(col_json) {
-    // カラムヘッダを生成
-    let html = '<th id="'
-        + col_json.column_id + '_head" class="head">'
+    // カラム本体を空の状態で生成
+    let html = '<td id="' + col_json.column_id + '_closed" class="closed_col">'
+        + '<div class="col_action"><a class="__on_column_open" title="カラムを開く">'
+        + '<img src="resources/ic_right.png" alt="カラムを開く"/></a></div>'
+        + '<h2>' + col_json.label_head + '<span></span></h2>'
+        + '</td><td id="' + col_json.column_id + '" class="timeline">'
+        + '<div class="col_head">'
         + '<h2>' + col_json.label_head + '</h2>'
         + '<h3>' + col_json.label_type + '</h3>'
-        + '</th>';
-    $("#columns>table>thead>tr").append(html);
-    
-    // カラム本体を空の状態で生成
-    html = '<td id="' + col_json.column_id + '_body" class="timeline">'
         + '<div class="col_action">'
-        + '<button type="button" class="__on_column_top">▲</button>'
-        + '</div>'
-        + '<ul></ul></td>';
-    $("#columns>table>tbody>tr").append(html);
+        + '<a class="__on_column_close" title="カラムを閉じる"><img src="resources/ic_left.png" alt="カラムを閉じる"/></a>'
+        + '<a class="__on_column_top" title="トップへ移動"><img src="resources/ic_top.png" alt="トップへ移動"/></a>'
+        + '</div></div><ul></ul></td>';
+    $("#columns>table tr").append(html);
     
     // カラムヘッダの色を変更
-    $("#columns>table>thead>tr>#" + col_json.column_id + "_head")
+    $("#columns>table #" + col_json.column_id + ">.col_head")
+        .css("background-color", "#" + col_json.col_color);
+    $("#columns>table #" + col_json.column_id + "_closed")
         .css("background-color", "#" + col_json.col_color);
 
     // カラムの幅を変更
-    $("#columns>table>thead>tr>#" + col_json.column_id + "_head")
-        .css("width", col_json.col_width + "px");
+    $("#columns>table #" + col_json.column_id).css("width", col_json.col_width + "px");
 }
 
 /**
@@ -95,8 +95,8 @@ function getIntegratedPost(arg) {
  * @param arg パラメータ一括指定JSON
  * @param keyset 投稿ユニークキーセット
  */
-function prependPost(arg, keyset) {
-    const ul = $("#columns>table>tbody>tr>#" + arg.column_id + "_body>ul");
+function prependPost(arg, cache) {
+    const ul = $("#columns>table #" + arg.column_id + ">ul");
     const integrated = getIntegratedPost({
         data: arg.data,
         timeline: arg.timeline,
@@ -104,20 +104,49 @@ function prependPost(arg, keyset) {
         multi_flg: arg.multi_flg
     });
     // 重複している投稿を除外する
-    if (!keyset.has(integrated.post_key)) {
-        keyset.add(integrated.post_key);
+    if (!cache.post_keyset.has(integrated.post_key)) {
+        cache.post_keyset.add(integrated.post_key);
         if (ul.find("li").length >= arg.limit) {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
             ul.find("li:last-child").remove();
             // キーセットのキャッシュも消しとく(重複判定はすでに終わっているので全消しでおｋ)
-            if (keyset.size >= arg.limit) {
-                keyset.clear();
+            if (cache.post_keyset.size >= arg.limit) {
+                cache.post_keyset.clear();
             }
         }
         ul.prepend(arg.bindFunc(integrated.post, integrated.from_address));
+        // 未読カウンターを上げる
+        const unread_counter = cache.unread + 1;
+        $("#columns>table #" + arg.column_id + "_closed>h2>span").text(unread_counter);
+        cache.unread = unread_counter;
+        
+        const added = ul.find("li:first-child");
         // アカウントラベルの背景を変更
-        ul.find("li:first-child>.post_footer>.from_address")
-            .css("background-color", "#" + arg.tl_account.acc_color);
+        added.find(".post_footer>.from_address").css("background-color", "#" + arg.tl_account.acc_color);
+        // 追加アニメーション
+        added.hide();
+        added.show("slide", { direction: "up" }, 180);
+    }
+}
+
+/**
+ * #Renderer #jQuery
+ * 特殊通知をタイムラインに追加
+ * 
+ * @param arg パラメータ一括指定JSON
+ */
+function prependInfo(arg) {
+    const ul = $("#columns>table #" + arg.column_id + ">ul");
+    ul.prepend('<li class="inserted_info">' + arg.text +  '</li>')
+
+    const added = ul.find("li:first-child");
+    // 追加アニメーション
+    added.hide();
+    added.show("slide", { direction: "up" }, 200);
+    if (arg.clear) {
+        // インフォ一覧を消す場合は5秒後にすべて消滅させる
+        const infos = ul.find(".inserted_info");
+        (async () => setTimeout(() => ul.find(".inserted_info").remove(), 10000))()
     }
 }
 
@@ -150,9 +179,9 @@ function createIntegratedTimeline(array_json, bind_id, accounts) {
                 break;
         }
     });
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul").append(html);
+    $("#columns>table #" + bind_id + ">ul").append(html);
     // フッタのアカウントラベルに色を付ける
-    $("#columns>table>tbody>tr>#" + bind_id + ">ul>li>.post_footer>.from_address").each((index, elm) => {
+    $("#columns>table #" + bind_id + ">ul>li>.post_footer>.from_address").each((index, elm) => {
         $(elm).css("background-color", "#" + accounts.get($(elm).attr("name")).acc_color);
     });
 }
@@ -226,7 +255,7 @@ function createTimelineMastLine(value, from_address) {
         html += '</div></div>';
     }
     html += '<div class="post_footer">'
-        + '<a href="' + viewdata.url + '" target="_blank" class="created_at">' + date + '</a>';
+        + '<a class="created_at __on_datelink">' + date + '</a>';
     // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
     if (from_address) {
         html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
@@ -285,7 +314,7 @@ function createNotificationMastLine(value, from_address) {
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'mention': // リプライ
-            html += '<a href="' + value.status.url + '" target="_blank" class="created_at">' + date + '</a>';
+            html += '<a class="created_at __on_datelink">' + date + '</a>';
             break;
         case 'follow': // フォロー通知
             html += '<div class="created_at">Post: ' + value.account.statuses_count
@@ -407,7 +436,7 @@ function createTimelineMskyLine(value, from_address) {
         html += '</div></div>';
     }
     html += '<div class="post_footer">'
-        + '<a href="' + viewdata.id + '" target="_blank" class="created_at">' + date + '</a>';
+        + '<a class="created_at __on_datelink">' + date + '</a>';
     // 取得元ユーザーが渡されている場合は取得元ユーザーを表示
     if (from_address) {
         html += '<div class="from_address" name="' + from_address + '">From ' + from_address + '</div>';
@@ -471,7 +500,7 @@ function createNotificationMskyLine(value, from_address) {
     // 通知タイプによって表示を変更
     switch (value.type) {
         case 'mention': // リプライ
-            html += '<a href="' + value.note.id + '" target="_blank" class="created_at">' + date + '</a>';
+            html += '<a class="created_at __on_datelink">' + date + '</a>';
             break;
         case 'follow': // フォロー通知
             // TODO: Misskeyのフォロー通知は一旦なにも表示しない
@@ -614,7 +643,7 @@ function createImageWindow(arg) {
     let html = '<div class="expand_image_col">'
         + '<img src="' + arg.url + '"/>'
         + '</div>';
-    $("#header>#pop_extend_column").html(html).css('visibility', 'visible');
+    $("#header>#pop_extend_column").html(html).show("slide", { direction: "right" }, 100);
     if (arg.image_aspect > arg.window_aspect) {
         // ウィンドウよりも画像のほうが横幅ながめ
         $("#header>#pop_extend_column>.expand_image_col>img")

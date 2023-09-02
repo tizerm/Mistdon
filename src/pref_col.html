@@ -10,10 +10,13 @@
         http-equiv="X-Content-Security-Policy"
         content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
     />
+    <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_pref_col.css"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/mm_ui.js"></script>
     <script type="text/javascript" src="js/mm_pref_col_viewbind.js"></script>
     <script type="text/javascript" src="js/mm_pref_col.js"></script>
     <title>Mistdon - カラム設定</title>
@@ -21,9 +24,9 @@
 <body>
 <nav id="navi">
     <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="auth.html">認証</a></li>
-        <li><a href="pref_col.html">カラム</a></li>
+        <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
+        <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
+        <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
     </ul>
 </nav>
 <header id="header">
@@ -38,14 +41,8 @@
 </header>
 <section id="columns">
 <table>
-    <thead>
-        <tr>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-        </tr>
-    </tbody>
+<tbody><tr>
+</tr></tbody>
 </table>
 </section>
 </body>

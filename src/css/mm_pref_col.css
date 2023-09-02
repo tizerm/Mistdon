@@ -15,50 +15,46 @@
     color: #ffffff;
     border: solid 1px #ffffff;
 }
-#columns>table>thead>tr>.head {
+#columns>table .timeline>.col_head {
     background-color: #808080;
-}
-
-#columns>table>thead>tr>.head {
     position: relative;
 }
-#columns>table>thead>tr>.head>h2,
-#columns>table>thead>tr>.head>h3 {
+#columns>table .timeline>.col_head>h2,
+#columns>table .timeline>.col_head>h3 {
     margin: 0px;
 }
 .__txt_col_head, .__txt_col_type {
     width: calc(100% - 112px);
 }
-
-#columns>table>thead>tr>.head>.col_layout {
+#columns>table .timeline>.col_head>.col_layout {
     position: absolute;
     right: 24px;
     top: 12px;
 }
 
-#columns>table>tbody>tr>.timeline button {
+.timeline button {
     border-radius: 6px;
     border: solid 1px #ffffff;
     padding: 2px 8px;
     font-size: 13px;
     font-weight: bold;
 }
-#columns>table>tbody>tr>.timeline select {
+.timeline select {
     border-radius: 4px;
     padding: 2px 8px;
 }
-#columns>table>tbody>tr>.timeline>.col_option {
+.timeline>.col_option {
     margin: 4px;
     text-align: center;
 }
-#columns>table>tbody>tr>.timeline>ul {
+.timeline>ul {
     margin: 0px;
     padding: 0px;
-    height: calc(100vh - 192px);
+    height: calc(100vh - 232px);
     overflow-y: auto;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>h4 {
+.timeline>ul>li>h4 {
     position: relative;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
@@ -69,20 +65,20 @@
     padding: 8px 24px;
     background-color: #808080;
 }
-#columns>table>tbody>tr>.timeline>ul>li>h4>.tl_color {
+.timeline>ul>li>h4>.tl_color {
     position: absolute;
     right: 24px;
     top: 8px;
 }
 
-#columns>table>tbody>tr>.timeline>ul>li>.tl_option {
+.timeline>ul>li>.tl_option {
     font-size: 14px;
     margin: 6px 12px;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.tl_option>div {
+.timeline>ul>li>.tl_option>div {
     margin: 12px 0px;
 }
-#columns>table>tbody>tr>.timeline>ul>li>.tl_option>.foot_button {
+.timeline>ul>li>.tl_option>.foot_button {
     text-align: right;
     margin: 12px 0px;
 }

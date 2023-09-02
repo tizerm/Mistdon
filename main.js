@@ -361,6 +361,18 @@ function jsonToMap(json_data, key_func) {
 /*================================================================================================*/
 
 /**
+ * #Utils #Electron
+ * リンクを外部ブラウザで開く
+ * 
+ * @param event イベント
+ * @param url 移動先のURL
+ */
+function openExternalBrowser(event, url) {
+    console.log('@INF: web-' + url)
+    shell.openExternal(url)
+}
+
+/**
  * #Main #Electron
  * メインウィンドウ生成処理
  */
@@ -372,14 +384,6 @@ const createWindow = () => {
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
-    })
-
-    // 画面内で新規ウィンドウリンクを踏んだときのイベント
-    win.webContents.on('new-window', (e, url) => {
-        // 標準ブラウザで開く
-        event.preventDefault()
-        console.log('@INF: web-' + url)
-        shell.openExternal(url)
     })
 
     // 最初に表示するページを指定
@@ -399,6 +403,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
+    ipcMain.on('open-external-browser', openExternalBrowser)
 
     // ウィンドウ生成
     createWindow()

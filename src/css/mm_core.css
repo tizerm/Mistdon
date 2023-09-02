@@ -32,7 +32,13 @@ button[disabled] {
     background-color: #222222;
     color: #666666;
 }
-
+.ui-tooltip {
+    background-color: rgba(34,34,34,0.85);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+}
 #navi {
     position: absolute;
     top: 0px;
@@ -43,25 +49,34 @@ button[disabled] {
     height: 100vh;
 }
 #navi>ul {
-    margin: 0px;
+    margin: 32px 8px;
     padding: 0px;
 }
 #navi>ul>li {
     list-style-type: none;
-    margin: 6px;
-    padding: 12px;
+    margin: 32px 0px;
+    padding: 0px;
+}
+#navi>ul>li>a:hover>img {
+    border-radius: 12px;
+    background-color: rgba(255,255,255,0.15);
 }
 
 #header>#pop_toast {
-    visibility: hidden;
     z-index: 9;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    background-color: rgba(32,32,32,0.85);
-    padding: 8px 32px;
     font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
     font-size: 18px;
     position: absolute;
-    top: 0px;
-    left: 96px;
+    top: 6px;
+    left: 88px;
+}
+#header>#pop_toast>span {
+    display: inline-block;
+    border-radius: 12px;
+    border: solid 1px #ffffff;
+    margin-left: 6px;
+    margin-right: 50vw;
+    margin-bottom: 8px;
+    background-color: rgba(34,34,34,0.85);
+    padding: 8px 32px;
 }

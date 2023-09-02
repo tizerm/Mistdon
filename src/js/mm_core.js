@@ -2,7 +2,7 @@ $(() => {
     var accounts = null;
     var columns = null;
     var socket_prefs = null;
-    var post_keysets = null;
+    var column_cache = null;
     // タイムラインキャッシュ カラムひとつあたりこの数を超えたら後ろから自動的に消える
     const timeline_limit = 150;
     // ロードされた段階でカラムを生成(非同期)
@@ -31,7 +31,7 @@ $(() => {
         $("#header>#pop_postuser").html(createSelectableAccounts(accounts));
         $("#header>#head_postarea>.__lnk_postuser").on("click", (e) => {
             // アイコンをクリックするとアカウントリストを表示
-            $("#header>#pop_postuser").css("visibility", "visible");
+            $("#header>#pop_postuser").show("slide", { direction: "up" }, 150);
         });
         $(document).on("click", ".__lnk_account_elm", (e) => {
             // クリックしたアカウントのアイコンとkey_addressをセットしてリスト表示を消す
@@ -40,7 +40,7 @@ $(() => {
             $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
             $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
             $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
-            $("#header>#pop_postuser").css("visibility", "hidden");
+            $("#header>#pop_postuser").hide("slide", { direction: "up" }, 150);
         });
         
         // 公開範囲クリック時
@@ -81,7 +81,7 @@ $(() => {
             reply_id: $("#__hdn_reply_id").val(),
             success: () => {
                 // 投稿成功時(リプライウィンドウを閉じる)
-                $("#header>#pop_extend_column").css('visibility', 'hidden');
+                $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
             }
         });
         // 
@@ -93,15 +93,44 @@ $(() => {
                 return false;
             }
         });
-        $(document).on("click", "#__on_reply_close", (e) => { // 閉じるボタン
-            $("#header>#pop_extend_column").css('visibility', 'hidden');
-        });
+        // 閉じるボタン
+        $(document).on("click", "#__on_reply_close", (e) => $("#header>#pop_extend_column")
+            .hide("slide", { direction: "right" }, 150));
 
         /*========================================================================================*/
 
         // 事前にWebSocketマップとCWと閲覧注意のイベントとトップへ移動処理を設定
-        $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle());
+        $(document).on("click", ".content>.main_content a", (e) => {
+            const url = $(e.target).closest("a").attr("href");
+            // 外部ブラウザでリンクを開く
+            window.accessApi.openExternalBrowser(url);
+            // リンク先に飛ばないようにする
+            return false;
+        });
+        $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle("slide", { direction: "up" }, 100));
         $(document).on("click", ".__on_column_top", (e) => $(e.target).closest("td").find("ul").scrollTop(0));
+        $(document).on("click", ".__on_column_open", (e) => {
+            // 自身を閉じて右隣の本体カラムを表示
+            const target_col = $(e.target).closest("td");
+            
+            target_col.hide();
+            target_col.next().show();
+        });
+        $(document).on("click", ".__on_column_close", (e) => {
+            if ($(e.target).closest("tr").find("td.timeline:visible").length <= 1) {
+                // 全部のカラムを閉じようとしたら止める
+                toast("すべてのカラムを閉じることはできません。", "error");
+                return false;
+            }
+            // 自身を閉じて左隣の短縮カラムを表示
+            const target_col = $(e.target).closest("td");
+            const closed_col = target_col.prev();
+            target_col.hide();
+            // 未読数をリセットしてから表示
+            column_cache.get(target_col.attr("id")).unread = 0;
+            closed_col.find("h2>span").empty();
+            closed_col.show();
+        });
         $(document).on("click", ".__on_media_expand", (e) => {
             // アプリケーションのアス比を計算
             const window_aspect = window.innerWidth / window.innerHeight;
@@ -116,7 +145,7 @@ $(() => {
         });
         // 画像を拡大表示したときだけどこクリックしても閉じるようにする
         $("body").on("click", (e) => $("#header>#pop_extend_column>.expand_image_col")
-            .closest("#pop_extend_column").css('visibility', 'hidden'));
+            .closest("#pop_extend_column").hide("slide", { direction: "right" }, 100));
 
         // 投稿右クリック時のコンテキストメニュー表示イベント
         $("#header>#pop_context_menu>.ui_menu>li ul").html(createContextMenuAccounts(accounts));
@@ -125,18 +154,18 @@ $(() => {
             $("#header>#pop_context_menu")
                 .css('top', e.pageY + 'px')
                 .css('left', (e.pageX - 72) + 'px')
-                .css('visibility', 'visible');
+                .show("slide", { direction: "up" }, 100);
             $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
             return false;
         });
         $("body").on("click", (e) => {
-            $("#header>#pop_context_menu").css('visibility', 'hidden');
+            $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
         });
         // コンテキストメニュー項目クリック時処理
         $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", (e) => {
             const key_address = $(e.target).closest("li").attr("name");
             const target_account = accounts.get(key_address);
-            $("#header>#pop_context_menu").css('visibility', 'hidden');
+            $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
             // リアクション実行(煩雑なので実際の処理はメソッド化)
             reaction({
                 target_account: target_account,
@@ -150,7 +179,7 @@ $(() => {
                         platform: target_account.platform
                     }));
                     $("#header>#pop_extend_column h2").css("background-color", "#" + target_account.acc_color);
-                    $("#header>#pop_extend_column").css('visibility', 'visible');
+                    $("#header>#pop_extend_column").show("slide", { direction: "right" }, 150);
                 }
             });
         });
@@ -159,14 +188,17 @@ $(() => {
 
         // カラム生成処理
         socket_prefs = new Map();
-        post_keysets = new Map();
+        column_cache = new Map();
         columns.forEach((col) => {
             // カラム本体を生成
             createColumn(col);
             // タイムライン取得処理のプロミスを格納する配列と投稿のユニークキーを格納するセット
             const rest_promises = [];
-            post_keysets.set(col.column_id, new Set());
-            const keyset = post_keysets.get(col.column_id);
+            column_cache.set(col.column_id, {
+                post_keyset: new Set(),
+                unread: 0
+            });
+            const cache = column_cache.get(col.column_id);
             col.timelines.forEach((tl) => {
                 // 配列のAPI呼び出しパラメータを使ってタイムラインを生成
                 // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
@@ -185,7 +217,7 @@ $(() => {
                     tl_account: tl_acc,
                     column: col,
                     timeline_limit: timeline_limit
-                }, socket_prefs, keyset);
+                }, socket_prefs, cache);
             });
             // カラムのすべてのタイムラインのREST APIが呼び出し終わったか判定するためにPromise.allを使用
             Promise.all(rest_promises).then((datas) => {
@@ -194,22 +226,18 @@ $(() => {
                 datas.forEach((posts) => {
                     posts.forEach((p) => {
                         // 重複している投稿を除外する
-                        if (!keyset.has(p.post_key)) {
+                        if (!cache.post_keyset.has(p.post_key)) {
                             postlist.push(p);
-                            keyset.add(p.post_key);
+                            cache.post_keyset.add(p.post_key);
                         }
                     });
                 });
-                //*
-                console.log(col.label_head); // TODO: debug
-                console.log(postlist); // TODO: debug
-                //*/
                 // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)
                 if (datas.length > 1) {
                     postlist.sort((a, b) => new Date(b.sort_date) - new Date(a.sort_date));
                 }
                 // ソートが終わったらタイムラインをDOMに反映
-                createIntegratedTimeline(postlist,  col.column_id + "_body", accounts);
+                createIntegratedTimeline(postlist,  col.column_id, accounts);
             }).catch((jqXHR, textStatus, errorThrown) => {
                 // 取得失敗時
                 toast("タイムラインの取得に失敗したカラムがあります。", "error");
@@ -219,13 +247,23 @@ $(() => {
         socket_prefs.forEach((v, k) => connect({
             pref: v,
             key_address: k,
+            openFunc: () => v.subscribes.forEach((s) => prependInfo({
+                column_id: s.target_col.column_id,
+                text: k + "との接続を開始しました。",
+                clear: true
+            })),
             closeFunc: () => {
                 toast(k + "との接続が切断されました。", "error");
                 // 対象カラムに接続が切れた通知を出す
-                v.subscribes.forEach((s) => $("#columns>table>tbody>tr>#" + s.target_col.column_id + "_body>ul")
-                    .prepend('<li class="inserted_info">' + k + 'との接続が切断されました。</li>'));
+                v.subscribes.forEach((s) => prependInfo({
+                    column_id: s.target_col.column_id,
+                    text: k + "との接続が切断されました。",
+                    clear: false
+                }));
             },
             reconnect: true
         }));
+        // カラムオプションにツールチップをセット
+        setColumnTooltip();
     })()
 });

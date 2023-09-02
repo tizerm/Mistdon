@@ -6,19 +6,15 @@
  * @param col_json カラム情報のJSON
  */
 function createColumn(col_json, index) {
-    // カラムヘッダを生成
-    let html = '<th id="col' + index + '_head" class="head">'
+    // カラム本体を空の状態で生成
+    html = '<td id="col' + index + '" class="timeline">'
+        + '<div class="col_head">'
         + '<h2><input type="text" class="__txt_col_head" value="' + (col_json?.label_head ?? '') + '"/></h2>'
         + '<h3><input type="text" class="__txt_col_type" value="' + (col_json?.label_type ?? '') + '"/></h3>'
         + '<div class="col_layout">'
         + '#<input type="text" class="__txt_col_color" value="' + (col_json?.col_color ?? '') + '" size="6"/><br/>'
         + '<input type="text" class="__txt_col_width" value="' + (col_json?.col_width ?? '') + '" size="5"/>px'
-        + '</div></th>';
-    $("#columns>table>thead>tr").append(html);
-    
-    // カラム本体を空の状態で生成
-    html = '<td id="col' + index + '_body" class="timeline">'
-        + '<div class="col_option">'
+        + '</div></div><div class="col_option">'
         + '<button type="button" class="__btn_to_left">＜</button>'
         + '<button type="button" class="__btn_add_tl">TL追加</button>'
         + '<button type="button" class="__btn_del_col">列削除</button>'
@@ -28,11 +24,11 @@ function createColumn(col_json, index) {
     
     // カラムレイアウトを変更
     if (col_json?.col_color) {
-        $("#columns>table>thead>tr>#col" + index + "_head")
+        $("#columns>table #col" + index + ">.col_head")
             .css("background-color", "#" + col_json.col_color);
     }
     if (col_json?.col_width) {
-        $("#columns>table>thead>tr>#col" + index + "_head")
+        $("#columns>table #col" + index)
             .css("width", col_json.col_width + "px");
     }
 }
@@ -50,7 +46,7 @@ function createTimelineOptions(array_json, j, accounts) {
     $.each(array_json, (index, value) => {
         html += createTimelineOptionLine(value, index + 1, accounts);
     });
-    $("#columns>table>tbody>tr>#col" + j + "_body>ul").append(html);
+    $("#columns>table #col" + j + ">ul").append(html);
 }
 
 /**
@@ -91,9 +87,6 @@ function createTimelineOptionLine(value, index, accounts) {
  * @param target_td 削除対象のtd要素のjQueryオブジェクト
  */
 function removeColumn(target_td) {
-    // カラムの番号を指定して削除
-    const index = target_td.index();
-    $("#columns>table>thead>tr>th").eq(index).remove();
     target_td.remove();
 }
 
@@ -105,18 +98,12 @@ function removeColumn(target_td) {
  * @param move 移動方向(-1が左、1が右)
  */
 function moveColumn(target_td, move) {
-    // まず移動対象のヘッダも取得
-    const index = target_td.index();
-    const target_th = $("#columns>table>thead>tr>th").eq(index);
-    
     switch (move) {
         case 1: // 右に移動
             target_td.insertAfter(target_td.next());
-            target_th.insertAfter(target_th.next());
             break;
         case -1: // 左に移動
             target_td.insertBefore(target_td.prev());
-            target_th.insertBefore(target_th.prev());
             break;
         default:
             break;
