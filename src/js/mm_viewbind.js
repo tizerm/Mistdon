@@ -26,6 +26,8 @@ function createColumn(col_json) {
         + '<h2>' + col_json.label_head + '</h2>'
         + '<h3>' + col_json.label_type + '</h3>'
         + '<div class="col_action">'
+        + '<a class="__on_column_reload" title="カラムをリロード"><img src="resources/ic_reload.png" alt="カラムをリロード"/></a>'
+        + '<a class="__on_column_flex" title="可変幅ON/OFF"><img src="resources/ic_flex_off.png" alt="可変幅ON/OFF"/></a>'
         + '<a class="__on_column_close" title="カラムを閉じる"><img src="resources/ic_left.png" alt="カラムを閉じる"/></a>'
         + '<a class="__on_column_top" title="トップへ移動"><img src="resources/ic_top.png" alt="トップへ移動"/></a>'
         + '</div></div><ul></ul></td>';
@@ -126,6 +128,10 @@ function prependPost(arg, cache) {
         // 追加アニメーション
         added.hide();
         added.show("slide", { direction: "up" }, 180);
+    }
+    if (integrated.binding_key == 'Mastodon-notification' || integrated.binding_key == 'Misskey-notification') {
+        // 通知が来た場合は通知ウィンドウに追加
+        prependNotification(integrated.from_address + "に対して通知があります。", false);
     }
 }
 
@@ -653,4 +659,19 @@ function createImageWindow(arg) {
         $("#header>#pop_extend_column>.expand_image_col>img")
             .css('height', '80vh').css('width', 'auto');
     }
+}
+
+/**
+ * #Renderer #jQuery
+ * 通知ウィンドウに通知を追加
+ * 
+ * @param text 通知テキスト
+ * @param error_flg エラーの場合はtrue
+ */
+function prependNotification(text, error_flg) {
+    const ymd = yyyymmdd.format(new Date());
+    const span = error_flg ? '<span class="console_error">' : '<span>';
+    $("#pop_notification_console").prepend(span + ymd + '@' + (error_flg ? 'ERR' : 'INF') + ': ' + text + '</span><br/>');
+    const count = Number($(".__on_show_notifications").text()) + 1;
+    $(".__on_show_notifications").text(count);
 }

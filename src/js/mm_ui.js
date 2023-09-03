@@ -67,7 +67,7 @@ function toast(text, type, progress_id) {
     if (type != 'progress' && progress_id) {
         // progressモード以外でIDが渡ってきた場合は対象toastを削除
         const target_toast = toast_block.find("#" + progress_id);
-        target_toast.hide("slide", 500, () => target_toast.remove());
+        target_toast.hide("slide", 1000, () => target_toast.remove());
     }
     if (type == 'hide') {
         // hideの場合はそのまま終了
@@ -84,6 +84,7 @@ function toast(text, type, progress_id) {
         // 実行中トースト以外は3秒後に消去する
         if (type == 'error') {
             added.css("background-color", "rgba(115,68,68,0.85)");
+            prependNotification(text, true);
         } else {
             added.css("background-color", "rgba(68,83,115,0.85)");
         }

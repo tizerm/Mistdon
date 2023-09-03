@@ -23,14 +23,20 @@
 <head>
 <body>
 <nav id="navi">
-    <ul>
+    <ul id="top_navi">
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
     </ul>
+    <ul id="bottom_navi">
+        <li><button type="button" class="__on_show_notifications">0</button></li>
+    </ul>
+    <div id="pop_notification_console">
+    <!-- hidden: 通知ボックス -->
+    </div>
 </nav>
 <header id="header">
-    <h1>{target_instance} - MMchan</h1>
+    <h1>{target_instance} - {target_domain}</h1>
     <div id="head_postarea">
         <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
         <div class="visibility_icon">
@@ -46,8 +52,10 @@
         <button type="button" id="on_submit">投稿</button>
     </div>
     <div id="pop_postuser">
+    <!-- hidden: ユーザー一覧 -->
     </div>
     <div id="pop_context_menu" name="{post_id}">
+        <!-- hidden: 右クリックコンテキストメニュー -->
         <ul class="ui_menu">
             <li><div>リプライ/ツリー</div>
                 <ul id="__menu_reply"></ul>
@@ -61,8 +69,10 @@
         </ul>
     </div>
     <div id="pop_toast">
+    <!-- hidden: トースト -->
     </div>
     <div id="pop_extend_column">
+    <!-- hidden: 拡張カラム -->
     </div>
 </header>
 <section id="columns">

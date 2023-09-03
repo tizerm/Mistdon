@@ -305,6 +305,70 @@ function getTimeline(arg) {
 }
 
 /**
+ * #Ajax #jQuery
+ * 取得した複数のタイムラインを統合してDOMにバインドする処理
+ * 
+ * @param arg パラメータJSON
+ */
+async function bindTimeline(arg) {
+    // カラムのすべてのタイムラインのREST APIが呼び出し終わったか判定するためにPromise.allを使用
+    Promise.all(arg.rest_promises).then((datas) => {
+        // タイムラインのPromise配列を走査
+        const postlist = [];
+        datas.forEach((posts) => {
+            posts.forEach((p) => {
+                // 重複している投稿を除外する
+                if (!arg.column_cache.post_keyset.has(p.post_key)) {
+                    postlist.push(p);
+                    arg.column_cache.post_keyset.add(p.post_key);
+                }
+            });
+        });
+        // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)
+        if (datas.length > 1) {
+            postlist.sort((a, b) => new Date(b.sort_date) - new Date(a.sort_date));
+        }
+        // ソートが終わったらタイムラインをDOMに反映
+        createIntegratedTimeline(postlist,  arg.column_cache.pref.column_id, arg.accounts);
+    }).catch((jqXHR, textStatus, errorThrown) => {
+        // 取得失敗時
+        toast("タイムラインの取得に失敗したカラムがあります。", "error");
+    });
+}
+
+/**
+ * #Ajax #jQuery
+ * 対象カラムを再読み込みする処理
+ * 
+ * @param column_cache カラムの情報とキャッシュデータ
+ * @param accounts アカウントマップ
+ */
+async function reload(column_cache, accounts) {
+    const rest_promises = [];
+    column_cache.post_keyset = new Set();
+    // カラムのタイムラインを走査
+    column_cache.pref.timelines.forEach((tl) => {
+        // 配列のAPI呼び出しパラメータを使ってタイムラインを生成
+        // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
+        tl.query_param.limit = 30;
+        const tl_acc = accounts.get(tl.key_address);
+
+        // 最初にREST APIで最新TLを30件取得、する処理をプロミス配列に追加
+        rest_promises.push(getTimeline({
+            timeline: tl,
+            tl_account: tl_acc,
+            column: column_cache.pref
+        }));
+    });
+    // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
+    bindTimeline({
+        rest_promises: rest_promises,
+        column_cache: column_cache,
+        accounts: accounts
+    });
+}
+
+/**
  * #WebSocket
  * WebSocket接続を行うための設定値とコールバック関数を生成
  * 

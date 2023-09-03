@@ -18,14 +18,19 @@ $(() => {
         // カラム情報がなかったら何もせずに終わる
         if (!columns) {
             return;
-        } else {
-            // 投稿アイコンとnameだけ先に設定
-            const key_address = columns[0].timelines[0].key_address;
+        }
+
+        /*========================================================================================*/
+
+        // 投稿アカウント変更処理(何回も使うのでメソッド化)
+        const changeAccount = async (key_address) => {
             $("#header>#head_postarea>.__lnk_postuser>img").attr('src', accounts.get(key_address).avatar_url);
             $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
             $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
             $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
         }
+        // 投稿アイコンとnameだけ先に設定
+        changeAccount(columns[0].timelines[0].key_address);
         
         // 投稿アイコンクリック時のメニュー生成と表示
         $("#header>#pop_postuser").html(createSelectableAccounts(accounts));
@@ -33,16 +38,12 @@ $(() => {
             // アイコンをクリックするとアカウントリストを表示
             $("#header>#pop_postuser").show("slide", { direction: "up" }, 150);
         });
+        // アカウントリストのアカウント選択時に投稿先アカウントを変更
         $(document).on("click", ".__lnk_account_elm", (e) => {
-            // クリックしたアカウントのアイコンとkey_addressをセットしてリスト表示を消す
-            const key_address = $(e.target).closest(".__lnk_account_elm").attr('name');
-            $("#header>#head_postarea>.__lnk_postuser>img").attr('src', accounts.get(key_address).avatar_url);
-            $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
-            $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
-            $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
+            changeAccount($(e.target).closest(".__lnk_account_elm").attr('name'))
             $("#header>#pop_postuser").hide("slide", { direction: "up" }, 150);
         });
-        
+
         // 公開範囲クリック時
         $("#header>#head_postarea .__lnk_visibility").on("click", (e) => {
             // 選択中のオプションにselectedクラスを付与
@@ -65,11 +66,46 @@ $(() => {
             }
         });
         $("#header #on_submit").on("click", (e) => procPost());
+        // 現在選択中の投稿アカウントの前後のアカウントアドレスを取得するメソッド
+        const getNeiborAccount = (move) => {
+            const key_address = $("#header>#head_postarea>.__lnk_postuser>img").attr("name");
+            const current_link = $('#header>#pop_postuser>.account_list>a[name="' + key_address + '"]');
+            let neibor_link = null;
+            switch (move) {
+                case 1: // 下へ移動
+                    neibor_link = current_link.next();
+                    if (neibor_link.length == 0) {
+                        // なかったら一番上
+                        neibor_link = $('#header>#pop_postuser>.account_list>a:first-child');
+                    }
+                    break;
+                case -1: // 上へ移動
+                    neibor_link = current_link.prev();
+                    if (neibor_link.length == 0) {
+                        // なかったら一番下
+                        neibor_link = $('#header>#pop_postuser>.account_list>a:last-child');
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return neibor_link.attr('name');
+        }
         $("#header>#head_postarea").keydown((e) => {
             // Ctrl+Enterを押したときに投稿処理を実行
             if (event.ctrlKey && e.keyCode === 13) {
                 procPost();
                 return false;
+            }
+            // Alt+↑↓でアカウントを切り替え
+            if (event.altKey) {
+                if (e.keyCode === 38) { // ↑
+                    changeAccount(getNeiborAccount(-1));
+                    return false;
+                } else if (e.keyCode === 40) { // ↓
+                    changeAccount(getNeiborAccount(1));
+                    return false;
+                }
             }
         });
 
@@ -99,16 +135,39 @@ $(() => {
 
         /*========================================================================================*/
 
-        // 事前にWebSocketマップとCWと閲覧注意のイベントとトップへ移動処理を設定
+        // 画面全体としてのキーボードショートカット
+        $("body").keydown((e) => {
+            if (event.altKey) { // 基本的にはAltと併用します
+                switch (e.keyCode) {
+                    case 78: // Alt+N: 投稿テキストボックスにフォーカス
+                        $("#__txt_postarea").focus();
+                        return false;
+                    case 67: // Alt+C: CWテキストボックスにフォーカス
+                        $("#__txt_content_warning").focus();
+                        return false;
+                    default:
+                        break;
+                }
+            }
+        });
+
+        /*========================================================================================*/
+
+        // 全般イベント処理
+        // 本文コンテンツ内のリンクを外部ブラウザで開く
         $(document).on("click", ".content>.main_content a", (e) => {
             const url = $(e.target).closest("a").attr("href");
-            // 外部ブラウザでリンクを開く
             window.accessApi.openExternalBrowser(url);
             // リンク先に飛ばないようにする
             return false;
         });
-        $(document).on("click", ".expand_header", (e) => $(e.target).next().toggle("slide", { direction: "up" }, 100));
-        $(document).on("click", ".__on_column_top", (e) => $(e.target).closest("td").find("ul").scrollTop(0));
+        // 本文コンテンツ内のCWと閲覧注意のオープン/クローズイベント
+        $(document).on("click", ".expand_header",
+            (e) => $(e.target).next().toggle("slide", { direction: "up" }, 100));
+        // カラムのトップへ移動ボタン
+        $(document).on("click", ".__on_column_top",
+            (e) => $(e.target).closest("td").find("ul").scrollTop(0));
+        // カラムオープンボタン
         $(document).on("click", ".__on_column_open", (e) => {
             // 自身を閉じて右隣の本体カラムを表示
             const target_col = $(e.target).closest("td");
@@ -116,6 +175,7 @@ $(() => {
             target_col.hide();
             target_col.next().show();
         });
+        // カラムクローズボタン
         $(document).on("click", ".__on_column_close", (e) => {
             if ($(e.target).closest("tr").find("td.timeline:visible").length <= 1) {
                 // 全部のカラムを閉じようとしたら止める
@@ -131,6 +191,31 @@ $(() => {
             closed_col.find("h2>span").empty();
             closed_col.show();
         });
+        // 可変幅カラムのON/OFFイベント
+        $(document).on("click", ".__on_column_flex", (e) => {
+            const target_col = $(e.target).closest("td");
+            const column = column_cache.get(target_col.attr("id"));
+            const img = $(e.target).closest("img");
+            if (!column.flex) {
+                // OFF⇒ON
+                target_col.css('width', 'auto');
+                img.attr('src', 'resources/ic_flex_on.png');
+                column.flex = true;
+            } else {
+                // ON⇒OFF
+                target_col.css('width', column.pref.col_width + 'px');
+                img.attr('src', 'resources/ic_flex_off.png');
+                column.flex = false;
+            }
+        });
+        // カラムリロードボタン
+        $(document).on("click", ".__on_column_reload", (e) => {
+            const column = column_cache.get($(e.target).closest("td").attr("id"));
+            // カラムの中身を全部消す
+            $(e.target).closest("td").find("ul").empty();
+            reload(column, accounts);
+        });
+        // 画像を拡大表示するイベント
         $(document).on("click", ".__on_media_expand", (e) => {
             // アプリケーションのアス比を計算
             const window_aspect = window.innerWidth / window.innerHeight;
@@ -183,6 +268,11 @@ $(() => {
                 }
             });
         });
+        // 通知ボタンクリック時
+        $(document).on("click", ".__on_show_notifications", (e) => {
+            $(".__on_show_notifications").text("0");
+            $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
+        });
 
         /*========================================================================================*/
 
@@ -195,8 +285,10 @@ $(() => {
             // タイムライン取得処理のプロミスを格納する配列と投稿のユニークキーを格納するセット
             const rest_promises = [];
             column_cache.set(col.column_id, {
+                pref: col,
                 post_keyset: new Set(),
-                unread: 0
+                unread: 0,
+                flex: false
             });
             const cache = column_cache.get(col.column_id);
             col.timelines.forEach((tl) => {
@@ -219,39 +311,26 @@ $(() => {
                     timeline_limit: timeline_limit
                 }, socket_prefs, cache);
             });
-            // カラムのすべてのタイムラインのREST APIが呼び出し終わったか判定するためにPromise.allを使用
-            Promise.all(rest_promises).then((datas) => {
-                // タイムラインのPromise配列を走査
-                const postlist = [];
-                datas.forEach((posts) => {
-                    posts.forEach((p) => {
-                        // 重複している投稿を除外する
-                        if (!cache.post_keyset.has(p.post_key)) {
-                            postlist.push(p);
-                            cache.post_keyset.add(p.post_key);
-                        }
-                    });
-                });
-                // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)
-                if (datas.length > 1) {
-                    postlist.sort((a, b) => new Date(b.sort_date) - new Date(a.sort_date));
-                }
-                // ソートが終わったらタイムラインをDOMに反映
-                createIntegratedTimeline(postlist,  col.column_id, accounts);
-            }).catch((jqXHR, textStatus, errorThrown) => {
-                // 取得失敗時
-                toast("タイムラインの取得に失敗したカラムがあります。", "error");
+            // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
+            bindTimeline({
+                rest_promises: rest_promises,
+                column_cache: cache,
+                accounts: accounts
             });
         });
         // すべてのカラムを生成し終えたタイミングでWebSocketの接続を開始
         socket_prefs.forEach((v, k) => connect({
             pref: v,
             key_address: k,
-            openFunc: () => v.subscribes.forEach((s) => prependInfo({
-                column_id: s.target_col.column_id,
-                text: k + "との接続を開始しました。",
-                clear: true
-            })),
+            openFunc: () => {
+                const text = k + "との接続を開始しました。";
+                v.subscribes.forEach((s) => prependInfo({
+                    column_id: s.target_col.column_id,
+                    text: text,
+                    clear: true
+                }));
+                prependNotification(text, false);
+            },
             closeFunc: () => {
                 toast(k + "との接続が切断されました。", "error");
                 // 対象カラムに接続が切れた通知を出す
