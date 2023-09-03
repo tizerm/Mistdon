@@ -10,7 +10,6 @@ function createColumn(col_json, index) {
     html = '<td id="col' + index + '" class="timeline">'
         + '<div class="col_head">'
         + '<h2><input type="text" class="__txt_col_head" value="' + (col_json?.label_head ?? '') + '"/></h2>'
-        + '<h3><input type="text" class="__txt_col_type" value="' + (col_json?.label_type ?? '') + '"/></h3>'
         + '<div class="col_layout">'
         + '#<input type="text" class="__txt_col_color" value="' + (col_json?.col_color ?? '') + '" size="6"/><br/>'
         + '<input type="text" class="__txt_col_width" value="' + (col_json?.col_width ?? '') + '" size="5"/>px'

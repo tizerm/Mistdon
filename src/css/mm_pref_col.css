@@ -15,6 +15,9 @@
     color: #ffffff;
     border: solid 1px #ffffff;
 }
+#columns>table .timeline {
+    width: 330px;
+}
 #columns>table .timeline>.col_head {
     background-color: #808080;
     position: relative;

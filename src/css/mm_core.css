@@ -97,7 +97,7 @@ button[disabled] {
     color: #ff6978;
 }
 #navi>#pop_notification_console::-webkit-scrollbar{
-   height: 8px;
+   width: 8px;
 }
 #navi>#pop_notification_console::-webkit-scrollbar-track{
    background-color: transparent;

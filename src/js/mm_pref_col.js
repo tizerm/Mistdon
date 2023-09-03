@@ -30,10 +30,9 @@ $(() => {
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", (e) => {
         // カラム数を取得してカラムDOM生成と単体のタイムラインDOM生成を実行
-        const index = $("#columns>table>thead>tr>th").length;
-        createColumn(null, index + 1);
-        $("#columns>table>tbody>tr>td").eq(index)
-            .find("ul").append(createTimelineOptionLine(null, 1, accounts));
+        const index = $("#columns>table td").length + 1;
+        createColumn(null, index);
+        $("#columns>table #col" + index + ">ul").append(createTimelineOptionLine(null, 1, accounts));
         setButtonPermission();
     });
 
@@ -81,11 +80,8 @@ $(() => {
     });
     
     // カラムカラー変更イベント(動的バインド)
-    $(document).on("blur", ".__txt_col_color", (e) => {
-        // カラムカラーを入力した色にする
-        const target = $(e.target);
-        target.closest("th").css("background-color", "#" + target.val());
-    });
+    $(document).on("blur", ".__txt_col_color",
+        (e) => $(e.target).closest(".col_head").css("background-color", "#" + $(e.target).val()));
 
     // タイムラインカラー変更イベント(動的バインド)
     $(document).on("change", ".__cmb_tl_account", (e) => {
@@ -98,21 +94,17 @@ $(() => {
     });
 
     // カラム幅変更イベント(動的バインド)
-    $(document).on("blur", ".__txt_col_width", (e) => {
-        // カラム幅を入力した幅にする
-        const target = $(e.target);
-        target.closest("th").css("width", target.val() + "px");
-    });
+    $(document).on("blur", ".__txt_col_width",
+        (e) => $(e.target).closest("td").css("width", $(e.target).val() + "px"));
 
     // 設定を保存ボタンイベント
     $("#on_save_pref").on("click", (e) => {
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = [];
-        $("#columns>table>thead>tr>th").each((col_index, col_elm) => {
-            const target_th = $(col_elm);
+        $("#columns>table td").each((col_index, col_elm) => {
             // タイムライン一覧を走査
             const tl_list = [];
-            $("#columns>table>tbody>tr>td").eq(target_th.index()).find("li").each((tl_index, tl_elm) => {
+            $(col_elm).find("ul>li").each((tl_index, tl_elm) => {
                 // アカウントコンボボックスの値を取得
                 const acc_address = $(tl_elm).find(".__cmb_tl_account").val();
                 // 各フォームの情報をJSONでリストに追加
@@ -124,11 +116,14 @@ $(() => {
             });
             // 各フォームの情報をJSONでリストに追加
             col_list.push({
-                'label_head': $(col_elm).find(".__txt_col_head").val(),
-                'label_type': $(col_elm).find(".__txt_col_type").val(),
+                // デフォルトカラム名は「Column XX」
+                'label_head': $(col_elm).find(".__txt_col_head").val() || ('Column ' + (col_index + 1)),
+                'label_type': 'Col ' + (col_index + 1),
                 'timelines': tl_list,
-                'col_color': $(col_elm).find(".__txt_col_color").val(),
-                'col_width': $(col_elm).find(".__txt_col_width").val(),
+                // デフォルトカラムカラーは#808080(グレー)
+                'col_color': $(col_elm).find(".__txt_col_color").val() || '808080',
+                // デフォルトカラム長は330px
+                'col_width': $(col_elm).find(".__txt_col_width").val() || '330',
             });
         });
         // ファイルに追加する処理を書く(整形はメインプロセスで)
