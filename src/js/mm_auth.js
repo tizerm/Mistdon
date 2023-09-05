@@ -43,6 +43,32 @@ $(() => {
             
         });
     })()
+    
+    /*============================================================================================*/
+
+    // プラットフォーム選択でMastodonを選択したときのイベント
+    $("#on_platform_mastodon").on("click",
+        (e) => $("#select_platform").hide("slide", { direction: "right" }, 200,
+        () => $("#form_mastodon").show("slide", { direction: "right" }, 200)));
+    // プラットフォーム選択でMisskeyを選択したときのイベント
+    $("#on_platform_misskey").on("click",
+        (e) => $("#select_platform").hide("slide", { direction: "right" }, 200,
+        () => $("#form_misskey").show("slide", { direction: "right" }, 200)));
+    // 前に戻るボタン
+    $(".__on_return").on("click",
+        (e) => $(e.target).closest(".platform_section").hide("slide", { direction: "right" }, 200,
+        () => $("#select_platform").show("slide", { direction: "right" }, 200)));
+    // 前に戻るボタン(認証コード画面版)
+    $(".__on_instance_return").on("click",
+        (e) => $(e.target).closest(".auth_form").hide("slide", { direction: "right" }, 200,
+        () => $(".instance_form").show("slide", { direction: "right" }, 200)));
+    // 最初に戻るボタン
+    $(".__on_return_top").on("click",
+        (e) => $(e.target).closest(".platform_section").hide("slide", { direction: "right" }, 200, () => {
+            $("#select_platform").show("slide", { direction: "right" }, 200);
+            $(".instance_form").show();
+            $(".auth_form").hide();
+        }));
 
     // ドメイン入力時のイベント
     $("#txt_mst_instance_domain").on("blur", (e) => {
@@ -89,13 +115,16 @@ $(() => {
                 "website": "https://github.com/tizerm/Mistdon"
             }
         }).then((data) => {
-            // 認証に成功したらクライアントIDを保存してウィンドウを開く
+            // 認証に成功したらクライアントIDを保存して外部ブラウザで認証画面を開く
             $("#hdn_client_id").val(data.client_id);
             $("#hdn_client_secret").val(data.client_secret);
-            window.open("https://" + instance_domain
+            window.accessApi.openExternalBrowser("https://" + instance_domain
                 + "/oauth/authorize?client_id=" + data.client_id
                 + "&scope=" + encodeURIComponent(permission)
-                + "&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob", "_blank");
+                + "&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob");
+            // 画面を認証コード画面に遷移
+            $("#form_mastodon>.instance_form").hide("fade", 500,
+                () => $("#form_mastodon>.auth_form").show("fade", 500));
         }).catch((jqXHR, textStatus, errorThrown) => {
             // 取得失敗時
             alert( "Request failed: " + textStatus );
@@ -190,7 +219,12 @@ $(() => {
         }).then((data) => {
             // 無事にレスポンスが返ったらtokenを保存して認証許可ウィンドウを生成
             $("#hdn_app_token").val(data.token);
-            window.open(data.url, "_blank");
+            window.accessApi.openExternalBrowser(data.url);
+            // 画面を認証コード画面に遷移
+            $("#form_misskey>.instance_form").hide("fade", 500,
+                () => $("#form_misskey>.auth_form").show("fade", 500));
+
+            //window.open(data.url, "_blank");
         }).catch((jqXHR, textStatus, errorThrown) => {
             // 取得失敗時
             alert( "Request failed: " + textStatus );

@@ -38,50 +38,66 @@
         <h2>アカウント一覧</h2>
         <button type="button" id="on_save_color">色を保存</button>
         <ul>
+        <!-- jQueryでバインド -->
         </ul>
     </div>
     <div id="account_auth">
         <h2>アカウントの追加</h2>
-        <div id="form_mastodon">
-            <h3>Mastodonアカウントの追加</h3>
-            <div class="instance_form">
-                <span id="top_text">
-                追加したいアカウントのインスタンス(サーバー)の<br/>
-                URLを入力してください。</span>
-                <div id="instance_box">https://<input type="text" id="txt_mst_instance_domain" name="txt_mst_instance_domain" size="50"/>/</div>
-                <div id="lbl_mst_instance_name">(Instance Name)</div>
-                <button type="button" id="on_mst_auth_instance">認証</button>
+        <div id="transition_section">
+            <div id="select_platform">
+                <span id="top_text">追加するアカウントのプラットフォームを選択してください。</span>
+                <div class="platform_selector">
+                    <button type="button" id="on_platform_mastodon">Mastodon</button>
+                    <button type="button" id="on_platform_misskey">Misskey</button>
+                </div>
             </div>
-            <div class="auth_form">
-                <span id="top_text">
-                別画面に表示されたコードを入力(コピペ)してください
-                </span><br/>
-                <input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
-                <input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
-                <input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
-                <button type="button" id="on_mst_auth_token">登録</button>
+            <div id="form_mastodon" class="platform_section">
+                <h3>Mastodonアカウントの追加</h3>
+                <div class="instance_form">
+                    <span id="top_text">
+                    追加したいアカウントのインスタンス(サーバー)の<br/>
+                    URLを入力してください。</span>
+                    <div class="instance_box">https://<input type="text" id="txt_mst_instance_domain" name="txt_mst_instance_domain" size="50"/>/</div>
+                    <div id="lbl_mst_instance_name">(Instance Name)</div>
+                    <button type="button" id="on_mst_auth_instance">認証</button><br/>
+                    <button type="button" class="__on_return">前に戻る</button>
+                </div>
+                <div class="auth_form">
+                    <span id="top_text">
+                    別画面に表示されたコードを入力(コピペ)してください
+                    </span><br/>
+                    <input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
+                    <input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
+                    <input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
+                    <button type="button" id="on_mst_auth_token">登録</button><br/>
+                    <button type="button" class="__on_instance_return">前に戻る</button>
+                    <button type="button" class="__on_return_top">最初に戻る</button>
+                </div>
+            </div>
+            <div id="form_misskey" class="platform_section">
+                <h3>Misskeyアカウントの追加</h3>
+                <div class="instance_form">
+                    <span id="top_text">
+                    追加したいアカウントのインスタンス(サーバー)の<br/>
+                    URLを入力してください。</span>
+                    <div class="instance_box">https://<input type="text" id="txt_msk_instance_domain" name="txt_msk_instance_domain" size="50"/>/</div>
+                    <div id="lbl_msk_instance_name">(Instance Name)</div>
+                    <button type="button" id="on_msk_auth_instance">認証</button><br/>
+                    <button type="button" class="__on_return">前に戻る</button>
+                </div>
+                <div class="auth_form">
+                    <span id="top_text">
+                    別画面で認証ボタンを押して完了してから下のボタンを押してください。
+                    </span><br/>
+                    <input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
+                    <input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
+                    <button type="button" id="on_msk_auth_token">登録</button><br/>
+                    <button type="button" class="__on_instance_return">前に戻る</button>
+                    <button type="button" class="__on_return_top">最初に戻る</button>
+                </div>
             </div>
         </div>
-        <div id="form_misskey">
-            <h3>Misskeyアカウントの追加</h3>
-            <div class="instance_form">
-                <span id="top_text">
-                追加したいアカウントのインスタンス(サーバー)の<br/>
-                URLを入力してください。</span>
-                <div id="instance_box">https://<input type="text" id="txt_msk_instance_domain" name="txt_msk_instance_domain" size="50"/>/</div>
-                <div id="lbl_msk_instance_name">(Instance Name)</div>
-                <button type="button" id="on_msk_auth_instance">認証</button>
-            </div>
-            <div class="auth_form">
-                <span id="top_text">
-                別画面で認証ボタンを押して完了してから下のボタンを押してください。
-                </span><br/>
-                <input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
-                <input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
-                <button type="button" id="on_msk_auth_token">登録</button>
-            </div>
-        </div>
-        <a href="index.html">認証をやめて戻る</a>
+        <a href="index.html" class="close_link">認証をやめて戻る</a>
     </div>
 </section>
 </body>

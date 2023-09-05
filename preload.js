@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('accessApi', {
     writePrefMskyAccs: (json_data) => ipcRenderer.send('write-pref-msky-accs', json_data),
     writePrefAccColor: (json_data) => ipcRenderer.send('write-pref-acc-color', json_data),
     writePrefCols: (json_data) => ipcRenderer.send('write-pref-cols', json_data),
-    openExternalBrowser: (url) => ipcRenderer.send('open-external-browser', url)
+    openExternalBrowser: (url) => ipcRenderer.send('open-external-browser', url),
+    notification: (arg) => ipcRenderer.send('notification', arg)
 })

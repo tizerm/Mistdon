@@ -4,7 +4,7 @@
  */
 
 // モジュールのインポート
-const { app, BrowserWindow, ipcMain, shell } = require('electron')
+const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
@@ -373,6 +373,17 @@ function openExternalBrowser(event, url) {
 }
 
 /**
+ * #Utils #Electron
+ * 通知を発生させる
+ * 
+ * @param event イベント
+ * @param arg 通知パラメータ
+ */
+function notification(event, arg) {
+    new Notification(arg).show()
+}
+
+/**
  * #Main #Electron
  * メインウィンドウ生成処理
  */
@@ -404,6 +415,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('open-external-browser', openExternalBrowser)
+    ipcMain.on('notification', notification)
 
     // ウィンドウ生成
     createWindow()

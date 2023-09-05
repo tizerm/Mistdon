@@ -132,6 +132,10 @@ function prependPost(arg, cache) {
     if (integrated.binding_key == 'Mastodon-notification' || integrated.binding_key == 'Misskey-notification') {
         // 通知が来た場合は通知ウィンドウに追加
         prependNotification(integrated.from_address + "に対して通知があります。", false);
+        window.accessApi.notification({
+            title: integrated.from_address,
+            body: integrated.from_address + "に対して通知があります。"
+        });
     }
 }
 
