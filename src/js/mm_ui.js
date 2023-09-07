@@ -1,3 +1,9 @@
+const color_palette = [
+    // デフォルトで選択できるカラーパレット
+    '8a3f3f', '8a543f', '8a683f', '8a873f', '708a3f', '3f8a43', '3f8a63',
+    '3f8a84', '3f6b8a', '3f4f8a', '573f8a', '7a3f8a', '8a3f77', '8a3f5b', '666666'
+]
+
 $(() => {
     // ナビゲーションメニューホバー時にツールチップ表示
     $("#navi").tooltip({
@@ -51,6 +57,36 @@ function setColumnTooltip() {
             effect: "slideUp",
             duration: 100
         }
+    });
+}
+
+/**
+ * #Renderer #jQuery
+ * カラーフォームにカラーパレット表示機能を追加
+ * (動的に生成する関係で後付しないと動かないので関数化)
+ */
+function setColorPalette() {
+    // カラーパレットを設定
+    const palette_dom = $("#header>#pop_palette");
+    color_palette.forEach((color) => {
+        palette_dom.append('<a id="' + color + '" class="__on_select_color">&nbsp;</a>');
+        palette_dom.find('.__on_select_color:last-child').css("background-color", "#" + color);
+    });
+    // カラーパレット表示(フォーカス時)
+    $(document).on("focus", ".__pull_color_palette", (e) => {
+        let pos = $(e.target).offset();
+        $(".__pull_color_palette").removeClass("__target_color_box");
+        $(e.target).addClass("__target_color_box");
+        pos.left -= 132; // 表示位置を微調整
+        pos.top += 24;
+        $("#header>#pop_palette").css(pos).show("slide", { direction: "up" }, 120);
+    });
+    // カラーパレット消去(フォーカスアウト時)
+    $(document).on("blur", ".__pull_color_palette", (e) => $("#header>#pop_palette").hide());
+    // カラーパレットの色をフォームに適用(パレットクリック時)
+    $(document).on("click", ".__on_select_color", (e) => {
+        $(".__target_color_box").val($(e.target).attr("id")).blur();
+        $("#header>#pop_palette").hide("slide", { direction: "up" }, 150);
     });
 }
 

@@ -20,7 +20,11 @@
 }
 #columns>table .timeline>.col_head {
     background-color: #808080;
+    background-image: url("../resources/ic_sort_x.png");
+    background-position: right 12px bottom 5px;
+    background-repeat: no-repeat;
     position: relative;
+    cursor: move;
 }
 #columns>table .timeline>.col_head>h2,
 #columns>table .timeline>.col_head>h3 {
@@ -31,7 +35,7 @@
 }
 #columns>table .timeline>.col_head>.col_layout {
     position: absolute;
-    right: 24px;
+    right: 18px;
     top: 12px;
 }
 
@@ -47,13 +51,17 @@
     padding: 2px 8px;
 }
 .timeline>.col_option {
-    margin: 4px;
+    background-color: rgba(67,67,67,0.8);
+    border-radius: 12px;
+    margin: 2px 0px;
+    padding: 4px 0px;
+    font-size: 13px;
     text-align: center;
 }
 .timeline>ul {
     margin: 0px;
     padding: 0px;
-    height: calc(100vh - 232px);
+    height: calc(100vh - 288px);
     overflow-y: auto;
 }
 

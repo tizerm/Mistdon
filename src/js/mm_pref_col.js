@@ -24,7 +24,17 @@ $(() => {
             $(elm).closest("li").find("h4")
                 .css("background-color", "#" + accounts.get(key_address).acc_color);
         });
+        // カラムをSortableにする
+        $("#columns>table>tbody>tr").sortable({
+            axis: "x",
+            delay: 100,
+            distance: 48,
+            handle: ".col_head",
+            revert: 50,
+            tolerance: "pointer"
+        });
         setButtonPermission();
+        setColorPalette();
     })()
     
     // カラム追加ボタンイベント
@@ -32,7 +42,12 @@ $(() => {
         // カラム数を取得してカラムDOM生成と単体のタイムラインDOM生成を実行
         const index = $("#columns>table td").length + 1;
         createColumn(null, index);
-        $("#columns>table #col" + index + ">ul").append(createTimelineOptionLine(null, 1, accounts));
+        $("#columns>table #col" + index + ">ul").append(createTimelineOptionLine({
+            value: null,
+            col_num: index,
+            index: 1,
+            accounts: accounts
+        }));
         setButtonPermission();
     });
 
@@ -43,26 +58,16 @@ $(() => {
         setButtonPermission();
     });
 
-    // カラム左移動ボタンイベント(動的バインド)
-    $(document).on("click", ".__btn_to_left", (e) => {
-        // ボタンを押したカラムのtdを取得してタイムラインDOM生成を実行
-        moveColumn($(e.target).closest("td"), -1);
-        setButtonPermission();
-    });
-
-    // カラム右移動ボタンイベント(動的バインド)
-    $(document).on("click", ".__btn_to_right", (e) => {
-        // ボタンを押したカラムのtdを取得してタイムラインDOM生成を実行
-        moveColumn($(e.target).closest("td"), 1);
-        setButtonPermission();
-    });
-
     // タイムライン追加ボタンイベント(動的バインド)
     $(document).on("click", ".__btn_add_tl", (e) => {
         // ボタンを押したカラムのulリストを取得してタイムラインDOM生成を実行
-        const ul = $(e.target).closest("td").find("ul");
-        const index = ul.children().length + 1;
-        ul.append(createTimelineOptionLine(null, index, accounts));
+        const col_td = $(e.target).closest("td");
+        ul.append(createTimelineOptionLine({
+            value: null,
+            col_num: col_td.index() + 1,
+            index: col_td.find("ul").children().length + 1,
+            accounts: accounts
+        }));
         setButtonPermission();
     });
 
@@ -111,7 +116,8 @@ $(() => {
                 tl_list.push({
                     'key_address': acc_address,
                     'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
-                    'account': accounts.get(acc_address)
+                    'account': accounts.get(acc_address),
+                    'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked")
                 });
             });
             // 各フォームの情報をJSONでリストに追加
@@ -124,6 +130,8 @@ $(() => {
                 'col_color': $(col_elm).find(".__txt_col_color").val() || '808080',
                 // デフォルトカラム長は330px
                 'col_width': $(col_elm).find(".__txt_col_width").val() || '330',
+                'd_hide': $(col_elm).find(".__chk_default_hide").prop("checked"),
+                'd_flex': $(col_elm).find(".__chk_default_flex").prop("checked")
             });
         });
         // ファイルに追加する処理を書く(整形はメインプロセスで)

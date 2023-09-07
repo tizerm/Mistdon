@@ -255,7 +255,8 @@ function writePrefCols(event, json_data) {
                 'rest_url': rest_url,
                 'socket_url': socket_url,
                 'query_param': query_param,
-                'socket_param': socket_param
+                'socket_param': socket_param,
+                'exclude_reblog': tl.exclude_reblog
             })
         })
         // カラムリストに追加
@@ -267,7 +268,9 @@ function writePrefCols(event, json_data) {
             'multi_user': multi_account_flg,
             'multi_timeline': tl_list.length > 1,
             'col_color': col.col_color,
-            'col_width': col.col_width
+            'col_width': col.col_width,
+            'd_hide': col.d_hide,
+            'd_flex': col.d_flex
         })
     })
     // 最終的な設定ファイルをJSONファイルに書き込み

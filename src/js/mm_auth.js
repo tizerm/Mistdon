@@ -11,11 +11,18 @@ $(() => {
         
         // アカウント情報をもとにアカウントリストを生成
         let html = '';
-        accounts.forEach((v, k) => {
-            html += createAccountLine(v);
+        accounts.forEach((v, k) => html += createAccountLine(v));
+        // アカウント一覧をバインドしてSortableにする
+        $("#content>#account_list>ul").html(html).sortable({
+            axis: "y",
+            delay: 100,
+            distance: 48,
+            handle: "h3",
+            revert: 50,
+            tolerance: "pointer"
         });
-        $("#content>#account_list>ul").html(html);
-        
+        setColorPalette();
+
         // アカウントカラー変更時イベントを追加
         $(document).on("blur", ".__txt_acc_color", (e) => {
             // アカウントカラーを入力した色にする

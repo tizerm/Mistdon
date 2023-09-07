@@ -7,17 +7,20 @@
  */
 function createColumn(col_json, index) {
     // カラム本体を空の状態で生成
-    html = '<td id="col' + index + '" class="timeline">'
+    html = '<td id="col' + index + '" class="timeline ui-sortable">'
         + '<div class="col_head">'
         + '<h2><input type="text" class="__txt_col_head" value="' + (col_json?.label_head ?? '') + '"/></h2>'
-        + '<div class="col_layout">'
-        + '#<input type="text" class="__txt_col_color" value="' + (col_json?.col_color ?? '') + '" size="6"/><br/>'
+        + '<div class="col_pref">'
+        + '#<input type="text" class="__txt_col_color __pull_color_palette" value="' + (col_json?.col_color ?? '') + '" size="6"/>'
+        + '</div><div class="col_layout">'
         + '<input type="text" class="__txt_col_width" value="' + (col_json?.col_width ?? '') + '" size="5"/>px'
         + '</div></div><div class="col_option">'
-        + '<button type="button" class="__btn_to_left">＜</button>'
         + '<button type="button" class="__btn_add_tl">TL追加</button>'
         + '<button type="button" class="__btn_del_col">列削除</button>'
-        + '<button type="button" class="__btn_to_right">＞</button>'
+        + '<br/><input type="checkbox" id="dh_' + index + '" class="__chk_default_hide"' + (col_json?.d_hide ? ' checked' : '') + '/>'
+        + '<label for="dh_' + index + '">デフォルトで閉じる</label>'
+        + '<br/><input type="checkbox" id="df_' + index + '" class="__chk_default_flex"' + (col_json?.d_flex ? ' checked' : '') + '/>'
+        + '<label for="df_' + index + '">デフォルトで可変幅にする</label>'
         + '</div><ul></ul></td>';
     $("#columns>table>tbody>tr").append(html);
     
@@ -43,7 +46,12 @@ function createColumn(col_json, index) {
 function createTimelineOptions(array_json, j, accounts) {
     let html = '';
     $.each(array_json, (index, value) => {
-        html += createTimelineOptionLine(value, index + 1, accounts);
+        html += createTimelineOptionLine({
+            value: value,
+            col_num: j,
+            index: index + 1,
+            accounts: accounts
+        });
     });
     $("#columns>table #col" + j + ">ul").append(html);
 }
@@ -56,24 +64,27 @@ function createTimelineOptions(array_json, j, accounts) {
  * @param index タイムライン番号
  * @param accounts アカウントマップ
  */
-function createTimelineOptionLine(value, index, accounts) {
+function createTimelineOptionLine(arg) {
     let html = '<li>'
-        + '<h4><span class="tl_header_label">Timeline ' + index
+        + '<h4><span class="tl_header_label">Timeline ' + arg.index
         + '</span></h4>'
         + '<div class="tl_option"><div class="lbl_disp_account">'
         + '表示アカウント:<br/><select class="__cmb_tl_account">';
         // アカウントセット
-        accounts?.forEach((v, k) => {
-            html += '<option value="' + k + '"' + (value?.key_address == k ? ' selected' : '') + '>'
+        arg.accounts?.forEach((v, k) => {
+            html += '<option value="' + k + '"' + (arg.value?.key_address == k ? ' selected' : '') + '>'
                 + v.username + ' - ' + k + '</option>';
         });
     html += '</select></div><div class="lbl_tl_type">'
         + '追加するカラムの種類:<br/><select class="__cmb_tl_type">'
-        + '<option value="home"' + (value?.timeline_type == 'home' ? ' selected' : '') + '>ホーム</option>'
-        + '<option value="local"' + (value?.timeline_type == 'local' ? ' selected' : '') + '>ローカル</option>'
-        + '<option value="federation"' + (value?.timeline_type == 'federation' ? ' selected' : '') + '>連合</option>'
-        + '<option value="notification"' + (value?.timeline_type == 'notification' ? ' selected' : '') + '>通知</option>'
-        + '</select></div><div class="foot_button">'
+        + '<option value="home"' + (arg.value?.timeline_type == 'home' ? ' selected' : '') + '>ホーム</option>'
+        + '<option value="local"' + (arg.value?.timeline_type == 'local' ? ' selected' : '') + '>ローカル</option>'
+        + '<option value="federation"' + (arg.value?.timeline_type == 'federation' ? ' selected' : '') + '>連合</option>'
+        + '<option value="notification"' + (arg.value?.timeline_type == 'notification' ? ' selected' : '') + '>通知</option>'
+        + '</select></div><div class="lbl_checkbox">'
+        + '<input type="checkbox" id="xr_' + arg.col_num + '_' + arg.index + '" class="__chk_exclude_reblog"' + (arg.value?.exclude_reblog ? ' checked' : '') + '/>'
+        + '<label for="xr_' + arg.col_num + '_' + arg.index + '">ブースト/リノートを非表示</label>'
+        + '</div><div class="foot_button">'
         + '<button type="button" class="__btn_del_tl">タイムラインを削除</button>'
         + '</div></div></li>';
     return html;
@@ -89,25 +100,6 @@ function removeColumn(target_td) {
     target_td.remove();
 }
 
-/**
- * #Renderer #jQuery
- * カラムを左右に移動
- * 
- * @param target_td 移動対象のtd要素のjQueryオブジェクト
- * @param move 移動方向(-1が左、1が右)
- */
-function moveColumn(target_td, move) {
-    switch (move) {
-        case 1: // 右に移動
-            target_td.insertAfter(target_td.next());
-            break;
-        case -1: // 左に移動
-            target_td.insertBefore(target_td.prev());
-            break;
-        default:
-            break;
-    }
-}
 /**
  * #Renderer #jQuery
  * 使えるボタンと使えないボタンを再設定

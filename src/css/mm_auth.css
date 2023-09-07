@@ -61,10 +61,14 @@ input[type="text"] {
     border-top-left-radius: 18px;
     border-top-right-radius: 18px;
     background-color: #808080;
+    background-image: url("../resources/ic_sort_y.png");
+    background-position: right 12px bottom 5px;
+    background-repeat: no-repeat;
     font-size: 18px;
     color: #ffffff;
     margin: -8px -12px 12px;
     padding: 8px 32px;
+    cursor: move;
 }
 #content>#account_list>ul>li>.user>.usericon {
     border-radius: 12px;
