@@ -70,7 +70,7 @@ function setColorPalette() {
     const palette_dom = $("#header>#pop_palette");
     color_palette.forEach((color) => {
         palette_dom.append('<a id="' + color + '" class="__on_select_color">&nbsp;</a>');
-        palette_dom.find('.__on_select_color:last-child').css("background-color", "#" + color);
+        palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
     });
     // カラーパレット表示(フォーカス時)
     $(document).on("focus", ".__pull_color_palette", (e) => {
@@ -80,13 +80,21 @@ function setColorPalette() {
         pos.left -= 132; // 表示位置を微調整
         pos.top += 24;
         $("#header>#pop_palette").css(pos).show("slide", { direction: "up" }, 120);
+        // カラーパレット表示中は一時的にソート無効化
+        $(".__ui_sortable").sortable("disable");
     });
     // カラーパレット消去(フォーカスアウト時)
-    $(document).on("blur", ".__pull_color_palette", (e) => $("#header>#pop_palette").hide());
+    $(document).on("blur", ".__pull_color_palette", (e) => {
+        $("#header>#pop_palette").hide();
+        // ソート有効化
+        $(".__ui_sortable").sortable("enable");
+    });
     // カラーパレットの色をフォームに適用(パレットクリック時)
     $(document).on("click", ".__on_select_color", (e) => {
         $(".__target_color_box").val($(e.target).attr("id")).blur();
         $("#header>#pop_palette").hide("slide", { direction: "up" }, 150);
+        // ソート有効化
+        $(".__ui_sortable").sortable("enable");
     });
 }
 
@@ -102,7 +110,7 @@ function toast(text, type, progress_id) {
     const toast_block = $("#header>#pop_toast");
     if (type != 'progress' && progress_id) {
         // progressモード以外でIDが渡ってきた場合は対象toastを削除
-        const target_toast = toast_block.find("#" + progress_id);
+        const target_toast = toast_block.find(`#${progress_id}`);
         target_toast.hide("slide", 1000, () => target_toast.remove());
     }
     if (type == 'hide') {
@@ -111,9 +119,9 @@ function toast(text, type, progress_id) {
     }
     // トーストを画面に追加
     if (type == 'progress' && progress_id) {
-        toast_block.append('<span id="' + progress_id + '">' + text + '</span>');
+        toast_block.append(`<span id="${progress_id}">${text}</span>`);
     } else {
-        toast_block.append('<span>' + text + '</span>');
+        toast_block.append(`<span>${text}</span>`);
     }
     const added = toast_block.find("span:last-child");
     if (type != 'progress') {

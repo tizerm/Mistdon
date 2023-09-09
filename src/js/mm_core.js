@@ -4,7 +4,7 @@ $(() => {
     var socket_prefs = null;
     var column_cache = null;
     // タイムラインキャッシュ カラムひとつあたりこの数を超えたら後ろから自動的に消える
-    const timeline_limit = 150;
+    const timeline_limit = 200;
     // ロードされた段階でカラムを生成(非同期)
     (async () => {
         // メインプロセスメソッドが非同期なのでawaitかけてアカウント情報を取得
@@ -20,24 +20,23 @@ $(() => {
             return;
         }
 
-        /*========================================================================================*/
+        /*============================================================================================================*/
 
         // 投稿アカウント変更処理(何回も使うのでメソッド化)
         const changeAccount = async (key_address) => {
             $("#header>#head_postarea>.__lnk_postuser>img").attr('src', accounts.get(key_address).avatar_url);
             $("#header>#head_postarea>.__lnk_postuser>img").attr('name', key_address);
-            $("#header>h1").text(accounts.get(key_address).username + ' - ' + key_address);
-            $("#header>h1").css("background-color", "#" + accounts.get(key_address).acc_color);
+            $("#header>h1").text(`${accounts.get(key_address).username} - ${key_address}`);
+            $("#header>h1").css("background-color", `#${accounts.get(key_address).acc_color}`);
         }
         // 投稿アイコンとnameだけ先に設定
         changeAccount(columns[0].timelines[0].key_address);
         
         // 投稿アイコンクリック時のメニュー生成と表示
         $("#header>#pop_postuser").html(createSelectableAccounts(accounts));
-        $("#header>#head_postarea>.__lnk_postuser").on("click", (e) => {
-            // アイコンをクリックするとアカウントリストを表示
-            $("#header>#pop_postuser").show("slide", { direction: "up" }, 150);
-        });
+        // アイコンをクリックするとアカウントリストを表示
+        $("#header>#head_postarea>.__lnk_postuser").on("click",
+            (e) => $("#header>#pop_postuser").show("slide", { direction: "up" }, 150));
         // アカウントリストのアカウント選択時に投稿先アカウントを変更
         $(document).on("click", ".__lnk_account_elm", (e) => {
             changeAccount($(e.target).closest(".__lnk_account_elm").attr('name'))
@@ -51,7 +50,7 @@ $(() => {
             $(e.target).closest("img").addClass("selected");
         });
 
-        /*========================================================================================*/
+        /*============================================================================================================*/
 
         // 投稿処理(煩雑なので実際の処理はメソッド化)
         const procPost = async () => post({
@@ -69,7 +68,7 @@ $(() => {
         // 現在選択中の投稿アカウントの前後のアカウントアドレスを取得するメソッド
         const getNeiborAccount = (move) => {
             const key_address = $("#header>#head_postarea>.__lnk_postuser>img").attr("name");
-            const current_link = $('#header>#pop_postuser>.account_list>a[name="' + key_address + '"]');
+            const current_link = $(`#header>#pop_postuser>.account_list>a[name="${key_address}"]`);
             let neibor_link = null;
             switch (move) {
                 case 1: // 下へ移動
@@ -89,7 +88,7 @@ $(() => {
                 default:
                     break;
             }
-            return neibor_link.attr('name');
+            return neibor_link.attr("name");
         }
         $("#header>#head_postarea").keydown((e) => {
             // Ctrl+Enterを押したときに投稿処理を実行
@@ -115,12 +114,9 @@ $(() => {
             visibility_id: 'visibility_public', // TODO: 一旦公開にする
             post_account: accounts.get($("#__hdn_reply_account").val()),
             reply_id: $("#__hdn_reply_id").val(),
-            success: () => {
-                // 投稿成功時(リプライウィンドウを閉じる)
-                $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
-            }
+            // 投稿成功時(リプライウィンドウを閉じる)
+            success: () => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150)
         });
-        // 
         $(document).on("click", "#__on_reply_submit", (e) => procMentionPost());
         $(document).on("keydown", "#__txt_replyarea", (e) => {
             // Ctrl+Enterを押したときに投稿処理を実行
@@ -130,10 +126,10 @@ $(() => {
             }
         });
         // 閉じるボタン
-        $(document).on("click", "#__on_reply_close", (e) => $("#header>#pop_extend_column")
-            .hide("slide", { direction: "right" }, 150));
+        $(document).on("click", "#__on_reply_close", 
+            (e) => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
 
-        /*========================================================================================*/
+        /*============================================================================================================*/
 
         // 画面全体としてのキーボードショートカット
         $("body").keydown((e) => {
@@ -151,7 +147,7 @@ $(() => {
             }
         });
 
-        /*========================================================================================*/
+        /*============================================================================================================*/
 
         // 全般イベント処理
         // 本文コンテンツ内のリンクを外部ブラウザで開く
@@ -203,7 +199,7 @@ $(() => {
                 column.flex = true;
             } else {
                 // ON⇒OFF
-                target_col.css('width', column.pref.col_width + 'px');
+                target_col.css('width', `${column.pref.col_width}px`);
                 img.attr('src', 'resources/ic_flex_off.png');
                 column.flex = false;
             }
@@ -243,9 +239,7 @@ $(() => {
             $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
             return false;
         });
-        $("body").on("click", (e) => {
-            $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
-        });
+        $("body").on("click", (e) => $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100));
         // コンテキストメニュー項目クリック時処理
         $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", (e) => {
             const key_address = $(e.target).closest("li").attr("name");
@@ -274,7 +268,7 @@ $(() => {
             $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
         });
 
-        /*========================================================================================*/
+        /*============================================================================================================*/
 
         // カラム生成処理
         socket_prefs = new Map();
@@ -288,7 +282,7 @@ $(() => {
                 pref: col,
                 post_keyset: new Set(),
                 unread: 0,
-                flex: false
+                flex: col.d_flex
             });
             const cache = column_cache.get(col.column_id);
             col.timelines.forEach((tl) => {
@@ -323,7 +317,7 @@ $(() => {
             pref: v,
             key_address: k,
             openFunc: () => {
-                const text = k + "との接続を開始しました。";
+                const text = `${k}との接続を開始しました。`;
                 v.subscribes.forEach((s) => prependInfo({
                     column_id: s.target_col.column_id,
                     text: text,
@@ -332,11 +326,12 @@ $(() => {
                 prependNotification(text, false);
             },
             closeFunc: () => {
-                toast(k + "との接続が切断されました。", "error");
+                const text = `${k}との接続が切断されました。`;
+                toast(text, "error");
                 // 対象カラムに接続が切れた通知を出す
                 v.subscribes.forEach((s) => prependInfo({
                     column_id: s.target_col.column_id,
-                    text: k + "との接続が切断されました。",
+                    text: text,
                     clear: false
                 }));
             },

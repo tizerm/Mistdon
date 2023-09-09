@@ -45,10 +45,10 @@ async function post(arg) {
             }
             request_promise = $.ajax({ // APIに投稿を投げる
                 type: "POST",
-                url: "https://" + arg.post_account.domain + "/api/v1/statuses",
+                url: `https://${arg.post_account.domain}/api/v1/statuses`,
                 dataType: "json",
                 headers: {
-                    "Authorization": "Bearer " + arg.post_account.access_token,
+                    "Authorization": `Bearer ${arg.post_account.access_token}`,
                     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                 },
                 data: request_param
@@ -84,7 +84,7 @@ async function post(arg) {
             }
             request_promise = $.ajax({ // APIに投稿を投げる
                 type: "POST",
-                url: "https://" + arg.post_account.domain + "/api/notes/create",
+                url: `https://${arg.post_account.domain}/api/notes/create`,
                 dataType: "json",
                 headers: { "Content-Type": "application/json" },
                 data: JSON.stringify(request_param)
@@ -119,11 +119,9 @@ async function reaction(arg) {
         case 'Mastodon': // Mastodon
             request_promise = $.ajax({ // 検索から投稿を取得
                 type: "GET",
-                url: "https://" + arg.target_account.domain + "/api/v2/search",
+                url: `https://${arg.target_account.domain}/api/v2/search`,
                 dataType: "json",
-                headers: {
-                    "Authorization": "Bearer " + arg.target_account.access_token
-                },
+                headers: { "Authorization": `Bearer ${arg.target_account.access_token}` },
                 data: {
                     "q": arg.target_url,
                     "type": "statuses",
@@ -140,7 +138,7 @@ async function reaction(arg) {
         case 'Misskey': // Misskey
             request_promise = $.ajax({
                 type: "POST",
-                url: "https://" + arg.target_account.domain + "/api/ap/show",
+                url: `https://${arg.target_account.domain}/api/ap/show`,
                 dataType: "json",
                 headers: { "Content-Type": "application/json" },
                 data: JSON.stringify({
@@ -173,12 +171,9 @@ async function reaction(arg) {
                 case '__menu_reblog': // ブースト
                     $.ajax({
                         type: "POST",
-                        url: "https://" + arg.target_account.domain
-                            + "/api/v1/statuses/" + target_post.id + "/reblog",
+                        url: `https://${arg.target_account.domain}/api/v1/statuses/${target_post.id}/reblog`,
                         dataType: "json",
-                        headers: {
-                            "Authorization": "Bearer " + arg.target_account.access_token
-                        }
+                        headers: { "Authorization": `Bearer ${arg.target_account.access_token}` }
                     }).then((data) => {
                         toast("投稿をブーストしました.", "done", toast_uuid);
                     }).catch((jqXHR, textStatus, errorThrown) => {
@@ -189,12 +184,9 @@ async function reaction(arg) {
                 case '__menu_favorite': // お気に入り
                     $.ajax({
                         type: "POST",
-                        url: "https://" + arg.target_account.domain
-                            + "/api/v1/statuses/" + target_post.id + "/favourite",
+                        url: `https://${arg.target_account.domain}/api/v1/statuses/${target_post.id}/favourite`,
                         dataType: "json",
-                        headers: {
-                            "Authorization": "Bearer " + arg.target_account.access_token
-                        }
+                        headers: { "Authorization": `Bearer ${arg.target_account.access_token}` }
                     }).then((data) => {
                         toast("投稿をお気に入りしました.", "done", toast_uuid);
                     }).catch((jqXHR, textStatus, errorThrown) => {
@@ -215,7 +207,7 @@ async function reaction(arg) {
                 case '__menu_reblog': // リノート
                     $.ajax({
                         type: "POST",
-                        url: "https://" + arg.target_account.domain + "/api/notes/create",
+                        url: `https://${arg.target_account.domain}/api/notes/create`,
                         dataType: "json",
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
@@ -257,7 +249,7 @@ function getTimeline(arg) {
                 type: "GET",
                 url: arg.timeline.rest_url,
                 dataType: "json",
-                headers: { "Authorization": "Bearer " + arg.tl_account.access_token },
+                headers: { "Authorization": `Bearer ${arg.tl_account.access_token}` },
                 data: arg.timeline.query_param
             }).then((data) => {
                 return (async () => {
@@ -317,8 +309,8 @@ async function bindTimeline(arg) {
         const postlist = [];
         datas.forEach((posts) => {
             posts.forEach((p) => {
-                // 重複している投稿を除外する
-                if (!arg.column_cache.post_keyset.has(p.post_key)) {
+                // 重複している投稿とミュート対象の投稿を除外する
+                if (!arg.column_cache.post_keyset.has(p.post_key) && !p.muted) {
                     postlist.push(p);
                     arg.column_cache.post_keyset.add(p.post_key);
                 }
@@ -384,7 +376,7 @@ function createConnectPref(arg, params, cache) {
     // プラットフォーム判定
     switch (arg.tl_account.platform) {
         case 'Mastodon': // Mastodon
-            socket_url = arg.tl_account.socket_url + "?access_token=" + arg.tl_account.access_token;
+            socket_url = `${arg.tl_account.socket_url}?access_token=${arg.tl_account.access_token}`;
             // メッセージ受信時のコールバック関数
             message_callback = (event) => {
                 const data = JSON.parse(event.data);
@@ -422,7 +414,7 @@ function createConnectPref(arg, params, cache) {
             break;
         case 'Misskey': // Misskey
             const uuid = crypto.randomUUID();
-            socket_url = arg.tl_account.socket_url + "?i=" + arg.tl_account.access_token;
+            socket_url = `${arg.tl_account.socket_url}?i=${arg.tl_account.access_token}`;
             message_callback = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.body.id != uuid) {
@@ -487,19 +479,17 @@ function createConnectPref(arg, params, cache) {
 async function connect(arg) {
     // WebSocket接続を開始
     const socket = new WebSocket(arg.pref.socket_url);
-    console.log(arg.key_address + ": socket create."); // TODO: debug
-    
+
     // WebSocket接続開始時処理
     socket.addEventListener("open", (event) => {
         // 接続開始用コールバック関数を実行
         arg.openFunc();
-        console.log(arg.key_address + ": socket opened."); // TODO: debug
         // ソケットに受信設定を送信
         arg.pref.subscribes.forEach((p) => socket.send(p.send_param));
     });
     // エラーハンドラ
     socket.addEventListener("error", (event) => {
-        toast(arg.key_address + "で接続エラーが発生しました、再接続してください。", "error");
+        toast(`${arg.key_address}で接続エラーが発生しました、再接続してください。`, "error");
         // エラーで切れた場合は再接続しない
         arg.reconnect = false;
         console.log(event);
@@ -508,7 +498,6 @@ async function connect(arg) {
     socket.addEventListener("close", (event) => {
         // 接続停止用コールバック関数を実行
         arg.closeFunc();
-        console.log(arg.key_address + ": socket closed."); // TODO: debug
         if (arg.reconnect) {
             // 自身を呼び出して再接続
             connect(arg);

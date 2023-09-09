@@ -13,7 +13,8 @@ $(() => {
         let html = '';
         accounts.forEach((v, k) => html += createAccountLine(v));
         // アカウント一覧をバインドしてSortableにする
-        $("#content>#account_list>ul").html(html).sortable({
+        $("#content>#account_list>ul").html(html);
+        $(".__ui_sortable").sortable({
             axis: "y",
             delay: 100,
             distance: 48,
@@ -27,12 +28,12 @@ $(() => {
         $(document).on("blur", ".__txt_acc_color", (e) => {
             // アカウントカラーを入力した色にする
             const target = $(e.target);
-            target.closest("li").find("h3").css("background-color", "#" + target.val());
+            target.closest("li").find("h3").css("background-color", `#${target.val()}`);
         });
         // アカウントカラー初期設定
         $(".__txt_acc_color").each((index, elm) => {
             const target = $(elm);
-            target.closest("li").find("h3").css("background-color", "#" + target.val());
+            target.closest("li").find("h3").css("background-color", `#${target.val()}`);
         });
         
         // アカウントカラー反映ボタン
@@ -47,11 +48,10 @@ $(() => {
             // アカウントカラーをファイルに書き込み
             window.accessApi.writePrefAccColor(param_json);
             alert("アカウントカラーを変更しました。");
-            
         });
     })()
-    
-    /*============================================================================================*/
+
+    /*================================================================================================================*/
 
     // プラットフォーム選択でMastodonを選択したときのイベント
     $("#on_platform_mastodon").on("click",
@@ -85,11 +85,11 @@ $(() => {
             $("#lbl_mst_instance_name").text("(Instance Name)");
             return;
         }
-    
+
         // ajaxでインスタンス情報を取得
         $.ajax({
             type: "GET",
-            url: "https://" + instance_domain + "/api/v2/instance",
+            url: `https://${instance_domain}/api/v2/instance`,
             dataType: "json"
         }).then((data) => {
             // 取得できたらインスタンス情報をセット
@@ -101,18 +101,18 @@ $(() => {
         });
     });
 
-    /*============================================================================================*/
+    /*================================================================================================================*/
     // ↓Mastodonの認証ロジック↓
 
     // 認証ボタンイベント(インスタンスを検索)
     $("#on_mst_auth_instance").on("click", (e) => {
         const instance_domain = $("#txt_mst_instance_domain").val();
         const permission = ["read", "write", "follow", "push"].join(" ");
-    
+
         // ajaxでアプリケーション登録
         $.ajax({
             type: "POST",
-            url: "https://" + instance_domain + "/api/v1/apps",
+            url: `https://${instance_domain}/api/v1/apps`,
             dataType: "json",
             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
             data: {
@@ -125,13 +125,11 @@ $(() => {
             // 認証に成功したらクライアントIDを保存して外部ブラウザで認証画面を開く
             $("#hdn_client_id").val(data.client_id);
             $("#hdn_client_secret").val(data.client_secret);
-            window.accessApi.openExternalBrowser("https://" + instance_domain
-                + "/oauth/authorize?client_id=" + data.client_id
-                + "&scope=" + encodeURIComponent(permission)
-                + "&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob");
+            window.accessApi.openExternalBrowser(
+                `https://${instance_domain}/oauth/authorize?client_id=${data.client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob`
+            );
             // 画面を認証コード画面に遷移
-            $("#form_mastodon>.instance_form").hide("fade", 500,
-                () => $("#form_mastodon>.auth_form").show("fade", 500));
+            $("#form_mastodon>.instance_form").hide("fade", 500, () => $("#form_mastodon>.auth_form").show("fade", 500));
         }).catch((jqXHR, textStatus, errorThrown) => {
             // 取得失敗時
             alert( "Request failed: " + textStatus );
@@ -150,7 +148,7 @@ $(() => {
         // ajaxでOAuth認証
         $.ajax({
             type: "POST",
-            url: "https://" + instance_domain + "/oauth/token",
+            url: `https://${instance_domain}/oauth/token`,
             dataType: "json",
             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
             data: {
@@ -165,9 +163,9 @@ $(() => {
             access_token = data.access_token;
             return $.ajax({
                 type: "GET",
-                url: "https://" + instance_domain + "/api/v1/accounts/verify_credentials",
+                url: `https://${instance_domain}/api/v1/accounts/verify_credentials`,
                 dataType: "json",
-                headers: { "Authorization": "Bearer " + access_token }
+                headers: { "Authorization": `Bearer ${access_token}` }
             });
         }).then((data) => {
             // アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
@@ -189,7 +187,7 @@ $(() => {
         });
     });
 
-    /*============================================================================================*/
+    /*================================================================================================================*/
     // ↓Misskeyの認証ロジック↓
 
     // 認証ボタンイベント(アプリ登録と認証)
@@ -203,7 +201,7 @@ $(() => {
         // ajaxでアプリケーション登録
         $.ajax({
             type: "POST",
-            url: "https://" + instance_domain + "/api/app/create",
+            url: `https://${instance_domain}/api/app/create`,
             dataType: "json",
             headers: { "Content-Type": "application/json" },
             data: JSON.stringify({
@@ -216,7 +214,7 @@ $(() => {
             $("#hdn_app_secret").val(data.secret);
             return $.ajax({
                 type: "POST",
-                url: "https://" + instance_domain + "/api/auth/session/generate",
+                url: `https://${instance_domain}/api/auth/session/generate`,
                 dataType: "json",
                 headers: { "Content-Type": "application/json" },
                 data: JSON.stringify({
@@ -228,10 +226,7 @@ $(() => {
             $("#hdn_app_token").val(data.token);
             window.accessApi.openExternalBrowser(data.url);
             // 画面を認証コード画面に遷移
-            $("#form_misskey>.instance_form").hide("fade", 500,
-                () => $("#form_misskey>.auth_form").show("fade", 500));
-
-            //window.open(data.url, "_blank");
+            $("#form_misskey>.instance_form").hide("fade", 500, () => $("#form_misskey>.auth_form").show("fade", 500));
         }).catch((jqXHR, textStatus, errorThrown) => {
             // 取得失敗時
             alert( "Request failed: " + textStatus );
@@ -247,7 +242,7 @@ $(() => {
         // ajaxでアクセストークン取得
         $.ajax({
             type: "POST",
-            url: "https://" + instance_domain + "/api/auth/session/userkey",
+            url: `https://${instance_domain}/api/auth/session/userkey`,
             dataType: "json",
             headers: { "Content-Type": "application/json" },
             data: JSON.stringify({
