@@ -213,14 +213,19 @@
     max-width: 48px;
     background-color: #888888;
 }
-#columns>table .closed_col>.col_action {
+#columns>table .closed_col>.ic_column_num {
     position: absolute;
     top: 8px;
     left: 8px;
 }
+#columns>table .closed_col>.col_action {
+    position: absolute;
+    top: 48px;
+    left: 8px;
+}
 #columns>table .closed_col>h2 {
     position: absolute;
-    top: 64px;
+    top: 108px;
     left: 44px;
     transform: rotate(90deg);
     transform-origin: left top;
@@ -276,6 +281,13 @@
 }
 #columns>table .timeline>.col_head>.col_action>a {
     margin: 0px;
+}
+#columns>table .timeline>.col_head>.ic_column_cursor {
+    position: absolute;
+    bottom: 0px;
+    left: 24px;
+    margin: 0px;
+    padding: 0px;
 }
 
 /*================================================================================================*/

@@ -128,8 +128,8 @@ button[disabled] {
     font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
     font-size: 18px;
     position: absolute;
-    top: 6px;
-    left: 88px;
+    top: 118px;
+    left: 8px;
 }
 #header>#pop_toast>span {
     display: inline-block;
@@ -141,7 +141,7 @@ button[disabled] {
     background-color: rgba(34,34,34,0.85);
     padding: 8px 32px;
 }
-#header>#pop_palette {
+#header>#pop_palette>div {
     position: absolute;
     display: none;
     z-index: 9;
@@ -151,7 +151,7 @@ button[disabled] {
     width: 332px;
     padding: 6px 6px 2px;
 }
-#header>#pop_palette>.__on_select_color {
+#header>#pop_palette .__on_select_color {
     display: inline-block;
     border-radius: 4px;
     width: 18px;
@@ -159,7 +159,7 @@ button[disabled] {
     border: solid 1px #808080;
     margin: 0px 1px;
 }
-#header>#pop_palette>.__on_select_color:hover {
+#header>#pop_palette .__on_select_color:hover {
     border-color: #ffffff;
     cursor: pointer;
 }
