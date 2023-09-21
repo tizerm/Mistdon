@@ -10,6 +10,7 @@ class Timeline {
     constructor(pref, column) {
         this.pref = pref
         this.__column_id = column.id
+        this.status_key_map = new Map()
     }
 
     // Getter: このタイムラインのホスト(サーバードメイン)
@@ -21,6 +22,9 @@ class Timeline {
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
 
+    // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
+    set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
+
     /**
      * #Method
      * このタイムラインの最新の投稿を30件取得する
@@ -29,7 +33,6 @@ class Timeline {
     getTimeline() {
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
         this.pref.query_param.limit = 30
-
         let rest_promise = null
         // プラットフォーム判定
         switch (this.target_account.platform) {
@@ -97,6 +100,8 @@ class Timeline {
                     if (data.event == "update"
                         || (this.pref.timeline_type == "notification" && data.event == "notification"))
                         this.parent_column.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
+                    // 削除された投稿を検知
+                    else if (data.event == "delete") this.removeStatus(data.payload)
                 }
                 // 購読パラメータの設定
                 this.pref.socket_param.type = "subscribe"
@@ -129,6 +134,12 @@ class Timeline {
             messageFunc: message_callback
         })
     }
+
+    removeStatus(id) {
+        const status_key = this.status_key_map.get(id)
+        // タイムラインに存在する投稿だけ削除対象とする
+        if (status_key) this.parent_column.removeStatus(this.parent_column.getStatusElement(status_key))
+    }
 }
 
 /*====================================================================================================================*/
@@ -145,7 +156,7 @@ class Column {
     constructor(pref) {
         this.pref = pref
         this.index = pref.index
-        this.status_set = new Set()
+        this.status_map = new Map()
         this.unread = 0
         this.flex = pref.d_flex
         this.open_flg = !pref.d_hide
@@ -382,9 +393,7 @@ class Column {
      * @param post カラムに追加するステータスデータ
      */
     append(post) {
-        const ul = $(`#${this.id}>ul`)
-        ul.append(post.element)
-        ul.find('li:last-child .post_footer>.from_address').css("background-color", `#${post.account_color}`)
+        $(`#${this.id}>ul`).append(post.element)
     }
 
     /**
@@ -398,14 +407,9 @@ class Column {
         const ul = $(`#${this.id}>ul`)
         // 重複している投稿を除外する
         this.addStatus(post, () => {
-            if (ul.find("li").length >= Column.TIMELINE_LIMIT) {
-                // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-                ul.find("li:last-child").remove()
-                // キーセットのキャッシュも消しとく(重複判定はすでに終わっているので全消しでおｋ)
-                if (this.status_set.size >= Column.TIMELINE_LIMIT) this.status_set.clear()
-            }
+            // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
+            if (ul.find("li").length >= Column.TIMELINE_LIMIT) this.removeStatus(ul.find("li:last-child"))
             ul.prepend(post.element)
-            ul.find('li:first-child .post_footer>.from_address').css("background-color", `#${post.account_color}`)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
             $(`#${this.id}_closed>h2>span`).text(++this.unread)
@@ -413,6 +417,10 @@ class Column {
 
         // 通知が来た場合は通知ウィンドウに追加
         if (post.type == 'notification') window.accessApi.notification(post.notification)
+    }
+
+    getStatusElement(status_key) {
+        return $(`#${this.id}>ul>li[id="${status_key}"]`)
     }
 
     /**
@@ -425,10 +433,19 @@ class Column {
      */
     addStatus(post, callback) {
         // 重複している、もしくはミュート対象の場合はコールバック関数の実行を無視する
-        if (!this.status_set.has(post.status_key) && !post.muted) {
-            this.status_set.add(post.status_key)
+        if (!this.status_map.has(post.status_key) && !post.muted) {
+            // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
+            this.status_map.set(post.status_key, post)
+            post.from_timeline.id_list = post
             callback()
         }
+    }
+
+    removeStatus(jqelm) {
+        const post = this.status_map.get(jqelm.attr("id"))
+        post.from_timeline.status_key_map.delete(post.status_id)
+        this.status_map.delete(post.status_key)
+        jqelm.remove()
     }
 
     /**
@@ -553,7 +570,7 @@ class Column {
         $(`#${this.id}`).find("ul").empty()
 
         const rest_promises = []
-        this.status_set = new Set()
+        this.status_map = new Map()
         // カラムのタイムラインを走査して配列のAPI呼び出しパラメータを使ってタイムラインを生成
         this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
         // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド

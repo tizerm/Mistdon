@@ -12,6 +12,7 @@ class Status {
         this.from_timeline = timeline
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
+        this.status_id = json.id // 投稿ではなく元のステータスデータに対応するID
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
 
         // プラットフォーム判定
@@ -144,6 +145,11 @@ class Status {
     get account_color() { return this.from_account.pref.acc_color }
     // Getter: ミュート判定(現状はBTRN除外のみ)
     get muted() { return this.from_timeline?.pref?.exclude_reblog && this.reblog }
+    // Getter: 本文をHTML解析して文章の部分だけを抜き出す
+    get content_text() { return $($.parseHTML(this.content)).text() }
+
+    // 最後に投稿した投稿データを保持する領域
+    static post_stack = []
 
     // 日付フォーマッターはstaticプロパティにする
     static {
@@ -155,6 +161,16 @@ class Status {
             minute: '2-digit',
             second: '2-digit',
         })
+    }
+
+    pushStack() {
+        Status.post_stack.push(this)
+    }
+
+    static lastStatusIf(presentCallback, absentCallback) {
+        const last_status = Status.post_stack.pop()
+        if (last_status) presentCallback(last_status)
+        else absentCallback()
     }
 
     // Getter: 投稿データからHTMLを生成して返却
@@ -285,7 +301,45 @@ class Status {
                 </div>
             </li>
         `
-        return html
+
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(html))
+        jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        return jqelm
+    }
+
+    delete(callback) {
+        // 先にtoast表示
+        const toast_uuid = crypto.randomUUID()
+        toast("投稿を削除しています...", "progress", toast_uuid)
+
+        let request_promise = null
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
+                    type: "DELETE",
+                    url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
+                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
+                })
+                break
+            case 'Misskey': // Misskey
+                const request_param = {
+                    "i": this.from_account.pref.access_token,
+                    "noteId": this.status_id
+                }
+                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
+                    type: "POST",
+                    url: `https://${this.from_account.pref.domain}/api/notes/delete`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify(request_param)
+                })
+                break
+            default:
+                break
+        }
+        request_promise.then(() => callback(this, toast_uuid)).catch(
+            (jqXHR, textStatus, errorThrown) => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
     /**
@@ -294,7 +348,7 @@ class Status {
      */
     createReplyWindow() {
         // リプライウィンドウのDOM生成
-        $("#header>#pop_extend_column").html(`
+        const jqelm = $($.parseHTML(`
             <div class="reply_col">
                 <h2>From ${this.from_account.full_address}</h2>
                 <div class="reply_form">
@@ -305,13 +359,17 @@ class Status {
                     <button type="button" id="__on_reply_submit">投稿</button>
                 </div>
                 <div class="timeline">
-                    <ul>${this.element}</ul>
+                    <ul></ul>
                 </div>
                 <button type="button" id="__on_reply_close">×</button>
             </div>
-        `)
-        $("#header>#pop_extend_column h2").css("background-color", `#${this.account_color}`)
-        $("#header>#pop_extend_column").show("slide", { direction: "right" }, 150)
+        `))
+        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
+        jqelm.find('h2').css("background-color", `#${this.account_color}`)
+        jqelm.find('.timeline>ul').append(this.element)
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        // 表示後にリプライカラムのテキストボックスにフォーカスする
+        $("#header>#pop_extend_column #__txt_replyarea").focus()
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
@@ -339,8 +397,6 @@ class Status {
                         body = this.content
                         break
                 }
-                // HTMLのテキストだけ抽出
-                body = $.parseHTML(body).text()
                 break
             case 'Misskey': // Misskey
                 // 通知タイプによって表示を変更
@@ -370,7 +426,8 @@ class Status {
         // 通知を返却
         return {
             title: title,
-            body: body
+            // HTMLとして解析して中身の文章だけを取り出す
+            body: $($.parseHTML(body)).text()
         }
     }
 }

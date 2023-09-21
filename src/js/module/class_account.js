@@ -124,7 +124,7 @@ class Account {
                 if (arg.cw_text) request_param.spoiler_text = arg.cw_text
                 // リプライの場合はリプライ先ツートIDを設定
                 if (arg.reply_id) request_param.in_reply_to_id = arg.reply_id
-                request_promise = $.ajax({ // APIに投稿を投げる
+                request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/v1/statuses`,
                     dataType: "json",
@@ -133,7 +133,7 @@ class Account {
                         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                     },
                     data: request_param
-                })
+                }).then(data => new Status(data, null, this).pushStack())
                 break
             case 'Misskey': // Misskey
                 // 公開範囲を取得
@@ -159,18 +159,18 @@ class Account {
                 if (arg.cw_text) request_param.cw = arg.cw_text
                 // リプライの場合はリプライ先ツートIDを設定
                 if (arg.reply_id) request_param.replyId = arg.reply_id
-                request_promise = $.ajax({ // APIに投稿を投げる
+                request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(request_param)
-                })
+                }).then(data => new Status(data.createdNote, null, this).pushStack())
                 break
             default:
                 break
         }
-        request_promise.then(() => {
+        request_promise.then(data => {
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
@@ -355,6 +355,31 @@ class Account {
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
     }
 
+    unauthorize(callback) {
+        switch (this.pref.platform) {
+            case 'Mastodon': // Mastodon
+                // 認証解除プロセスに成功したらコールバック関数を実行
+                $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/oauth/revoke`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                    data: {
+                        "client_id": this.pref.client_id,
+                        "client_secret": this.pref.client_secret,
+                        "token": this.pref.access_token
+                    }
+                }).then(callback)
+                break
+            case 'Misskey': // Misskey
+                // 認証解除APIがないのでそのままコールバックを実行
+                callback()
+                break
+            default:
+                break
+        }
+    }
+
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得
     get next() {
         let index = this.index + 1
@@ -395,6 +420,28 @@ class Account {
     static createContextMenuAccountList() {
         let html = ''
         Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
+        return html
+    }
+
+    static createAccountPrefList() {
+        let html = ''
+        Account.map.forEach((v, k) => html += `
+            <li class="ui-sortable" name="${v.full_address}">
+                <h3>${v.pref.domain}</h3>
+                <div class="user">
+                    <img src="${v.pref.avatar_url}" class="usericon"/>
+                    <h4 class="username">${v.pref.username}</h4>
+                    <div class="userid">${v.full_address}</div>
+                </div>
+                <div class="option">
+                    アカウントカラー: 
+                    #<input type="text" class="__txt_acc_color __pull_color_palette" value="${v.pref.acc_color}" size="6"/>
+                </div>
+                <div class="foot_button">
+                    <button type="button" class="__btn_unauth_acc">認証解除</button>
+                </div>
+            </li>
+        `)
         return html
     }
 }

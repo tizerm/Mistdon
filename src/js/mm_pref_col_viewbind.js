@@ -14,9 +14,6 @@ function createColumn(column) {
             <div class="col_head">
                 <h2><input type="text" class="__txt_col_head" value="${column?.label_head ?? ''}"/></h2>
                 <div class="col_pref">
-                    #<input type="text" class="__txt_col_color __pull_color_palette" value="${column?.col_color ?? ''}" size="6"/>
-                </div>
-                <div class="col_layout">
                     <input type="text" class="__txt_col_width" value="${column?.col_width ?? ''}" size="5"/>px
                 </div>
             </div>
@@ -26,7 +23,9 @@ function createColumn(column) {
                 <input type="checkbox" id="dh_${column_uuid}" class="__chk_default_hide"${column?.d_hide ? ' checked' : ''}/>
                 <label for="dh_${column_uuid}">デフォルトで閉じる</label><br/>
                 <input type="checkbox" id="df_${column_uuid}" class="__chk_default_flex"${column?.d_flex ? ' checked' : ''}/>
-                <label for="df_${column_uuid}">デフォルトで可変幅にする</label>
+                <label for="df_${column_uuid}">デフォルトで可変幅にする</label><br/>
+                カラムカラー:
+                #<input type="text" class="__txt_col_color __pull_color_palette" value="${column?.col_color ?? ''}" size="6"/>
             </div>
             <ul></ul>
         </td>

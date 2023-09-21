@@ -1,19 +1,11 @@
 $(() => {
-    var accounts = null;
     // ロードされた段階でアカウントリストを生成(非同期)
     (async () => {
-        // メインプロセスメソッドが非同期なのでawaitかけてアカウント情報を取得
-        accounts = await window.accessApi.readPrefAccs();
-        // 認証情報がなかったら何もせずに終わる
-        if (!accounts) {
-            return;
-        }
+        // 保険用にアカウント情報とカラム情報が読めてなかったら一時停止
+        if (!await window.accessApi.readPrefAccs()) return;
         
         // アカウント情報をもとにアカウントリストを生成
-        let html = '';
-        accounts.forEach((v, k) => html += createAccountLine(v));
-        // アカウント一覧をバインドしてSortableにする
-        $("#content>#account_list>ul").html(html);
+        $("#content>#account_list>ul").html(Account.createAccountPrefList());
         $(".__ui_sortable").sortable({
             axis: "y",
             delay: 100,
@@ -48,6 +40,18 @@ $(() => {
             // アカウントカラーをファイルに書き込み
             window.accessApi.writePrefAccColor(param_json);
             alert("アカウントカラーを変更しました。");
+        });
+
+        // アカウント認証解除ボタンイベント
+        $(document).on("click", ".__btn_unauth_acc", e => {
+            if (confirm("このアカウントのこのアプリケーションとの認証を解除します。\nよろしいですか？")) {
+                const target_li = $(e.target).closest("li");
+                const target_account = Account.get(target_li.attr("name"));
+                target_account.unauthorize(() => {
+                    target_li.remove();
+                    $("#on_save_color").click();
+                });
+            }
         });
     })()
 

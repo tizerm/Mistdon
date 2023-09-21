@@ -80,7 +80,7 @@ $(() => {
 
     // カラムカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_color",
-        (e) => $(e.target).closest(".col_head").css("background-color", `#${$(e.target).val()}`));
+        (e) => $(e.target).closest("td").find(".col_head").css("background-color", `#${$(e.target).val()}`));
 
     // タイムラインカラー変更イベント(動的バインド)
     $(document).on("change", ".__cmb_tl_account", (e) => {

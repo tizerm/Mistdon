@@ -50,7 +50,27 @@ $(() => {
         }));
         // 閉じるボタンクリックイベント
         $(document).on("click", "#__on_reply_close", 
-            (e) => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
+            e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
+
+        // オプションボタンイベント: 直前の投稿を削除
+        $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
+            last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid)),
+            () => toast("直前の投稿がありません.", "error")));
+        // オプションボタンイベント: 直前の投稿を削除して編集
+        $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
+            last => last.delete((post, uuid) => {
+                post.from_account.setPostAccount();
+                $("#__txt_postarea").val(post.content_text);
+                $("#__txt_content_warning").val(post.cw_text);
+                toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid);
+            }), () => toast("直前の投稿がありません.", "error")));
+        // オプションボタンイベント: 直前の投稿をコピー
+        $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
+            $("#__txt_postarea").val(last.content_text);
+            $("#__txt_content_warning").val(last.cw_text);
+            toast("直前の投稿内容を再展開しました.", "done");
+        }, () => toast("直前の投稿がありません.", "error")));
+
 
         /*============================================================================================================*/
 
@@ -64,7 +84,7 @@ $(() => {
         $(document).on("contextmenu", "#columns>table>tbody>tr>.column_td>ul>li", e => {
             $("#header>#pop_context_menu")
                 .css('top', e.pageY + 'px')
-                .css('left', (e.pageX - 72) + 'px')
+                .css('left', (e.pageX - 48) + 'px')
                 .show("slide", { direction: "up" }, 100);
             $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
             return false;

@@ -57,12 +57,10 @@
     width: calc(100% - 338px);
     height: 68px;
 }
-#header>#head_postarea>#on_submit {
+#header>#head_postarea>.submit_buttons {
     position: absolute;
-    top: 0px;
+    top: 48px;
     right: 0px;
-    width: 72px;
-    height: 72px;
 }
 
 /*================================================================================================*/
@@ -149,6 +147,8 @@
 #header>#pop_extend_column>.reply_col>h2 {
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
+    font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
+    font-size: 20px;
     color: #ffffff;
     margin: 0px;
     padding: 12px 24px;
@@ -212,6 +212,7 @@
     width: 48px;
     max-width: 48px;
     background-color: #888888;
+    opacity: 0.85;
 }
 #columns>table .closed_col>.ic_column_num {
     position: absolute;

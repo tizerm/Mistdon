@@ -30,13 +30,8 @@
 #columns>table .timeline>.col_head>h3 {
     margin: 0px;
 }
-.__txt_col_head, .__txt_col_type {
-    width: calc(100% - 112px);
-}
-#columns>table .timeline>.col_head>.col_layout {
-    position: absolute;
-    right: 18px;
-    top: 12px;
+.__txt_col_head {
+    width: calc(100% - 12px);
 }
 
 .timeline button {

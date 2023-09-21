@@ -95,7 +95,17 @@ input[type="text"] {
     margin: 8px 12px;
     font-size: 14px;
 }
-
+#content>#account_list>ul>li>.foot_button {
+    text-align: right;
+    margin: 12px 0px;
+}
+#content>#account_list>ul>li>.foot_button button {
+    border-radius: 6px;
+    border: solid 1px #ffffff;
+    padding: 2px 8px;
+    font-size: 13px;
+    font-weight: bold;
+}
 #content>#account_auth {
     position: absolute;
     top: 0px;

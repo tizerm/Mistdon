@@ -1,7 +1,6 @@
 const color_palette = [
     // デフォルトで選択できるカラーパレット
-    '8a3f3f', '8a543f', '8a683f', '8a873f', '708a3f', '3f8a43', '3f8a63',
-    '3f8a84', '3f6b8a', '3f4f8a', '573f8a', '7a3f8a', '8a3f77', '8a3f5b', '666666'
+    'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667', '666666'
 ]
 
 $(() => {
@@ -43,39 +42,49 @@ $(() => {
  * (動的に生成する関係で後付しないと動かないので関数化)
  */
 function setColorPalette() {
-    /* TODO: バグの温床になっているので一旦カラーパレット機能をオミットします……
-    // カラーパレットの生成と表示(フォーカス時)
-    $(document).on("focus", ".__pull_color_palette", (e) => {
-        // 最初にカラーパレットを生成
-        $("#header>#pop_palette").append("<div></div>");
-        const palette_dom = $("#header>#pop_palette>div:last-child");
-        color_palette.forEach((color) => {
-            palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
-            palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
-        });
+    const palette_dom = $("#header>#pop_palette");
+    color_palette.forEach(color => {
+        palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
+        palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
+    });
+    // カラーパレットの直後にパレット呼び出しボタンをセット
+    $(".__pull_color_palette").each((index, elm) => {
+        $(elm).after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
+        $(elm).next().css("background-color", `#${$(elm).val()}`);
+    });
+    $(".__on_call_palette").tooltip({
+        position: {
+            my: "left+6 bottom+18",
+            at: "right center"
+        },
+        show: {
+            effect: "slide",
+            duration: 80
+        },
+        hide: {
+            effect: "slide",
+            duration: 80
+        }
+    });
 
-        // 対象フォームの位置を取得して配置
-        let pos = $(e.target).offset();
-        pos.left -= 132; // 表示位置を微調整
-        pos.top += 24;
-        palette_dom.css(pos).show("slide", { direction: "up" }, 50);
-
+    $(document).on("mousedown", ".__on_call_palette", e => {
         // イベントターゲットにするためのクラスを付与
-        $(e.target).addClass("__target_color_box");
+        $(e.target).addClass("__target_color_button").prev().addClass("__target_color_box");
+
+        palette_dom.css('top', (e.pageY + 12) + 'px').css('left', (e.pageX - 132) + 'px')
+            .show("slide", { direction: "up" }, 50);
+        return false;
     });
-    // カラーパレットの非表示と削除(フォーカスアウト時)
-    $(document).on("blur", ".__pull_color_palette", (e) => {
-        const palette_dom = $("#header>#pop_palette>div:first-child");
-        (async () => setTimeout(() => palette_dom.hide("slide", { direction: "up" }, 50, () => {
-            // 完全に消えたらDOM自体を消去してターゲットからクラスを外す
-            palette_dom.remove();
-            $(e.target).removeClass("__target_color_box");
-        }), 100))()
+    $("body *").on("mouseup", e => {
+        const target = $(e.target);
+        if (target.is(".__on_select_color")) {
+            const color = target.attr("id");
+            $(".__target_color_box").val(color).blur();
+            $(".__target_color_button").css("background-color", `#${color}`);
+        }
+        $("body *").removeClass("__target_color_button __target_color_box");
+        palette_dom.hide("slide", { direction: "up" }, 50);
     });
-    // カラーパレットの色をフォームに適用(パレットクリック時)
-    $(document).on("click", ".__on_select_color",
-        (e) => $(".__target_color_box").val($(e.target).attr("id")).blur());
-        //*/
 }
 
 /**

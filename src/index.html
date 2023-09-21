@@ -53,7 +53,13 @@
         </div>
         <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
         <textarea id="__txt_postarea" class="__ignore_keyborad" placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
-        <button type="button" id="on_submit">投稿</button>
+        <div class="submit_buttons">
+            <button type="button" id="on_submit">投稿</button>
+            <button type="button" id="on_last_delete">直前を削除</button>
+            <button type="button" id="on_last_delete_paste">直前を削除編集</button>
+            <button type="button" id="on_last_copy">直前をコピー</button>
+            <button type="button" id="on_last_replychain">(未実装)</button>
+        </div>
     </div>
     <div id="pop_postuser">
     <!-- hidden: ユーザー一覧 -->
