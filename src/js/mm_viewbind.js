@@ -1,18 +1,18 @@
-/**
+ï»¿/**
  * #Renderer #jQuery #TemplateLiteral
- * “Áê’Ê’m‚ğƒ^ƒCƒ€ƒ‰ƒCƒ“‚É’Ç‰Á
+ * ç‰¹æ®Šé€šçŸ¥ã‚’ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«è¿½åŠ 
  * 
- * @param arg ƒpƒ‰ƒ[ƒ^ˆêŠ‡w’èJSON
+ * @param arg ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ä¸€æ‹¬æŒ‡å®šJSON
  */
 function prependInfo(arg) {
     const ul = $(`#columns>table #${arg.column_id}>ul`);
     ul.prepend(`<li class="inserted_info">${arg.text}</li>`)
 
     const added = ul.find("li:first-child");
-    // ’Ç‰ÁƒAƒjƒ[ƒVƒ‡ƒ“
+    // è¿½åŠ ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
     added.hide().show("slide", { direction: "up" }, 200);
     if (arg.clear) {
-        // ƒCƒ“ƒtƒHˆê——‚ğÁ‚·ê‡‚Í5•bŒã‚É‚·‚×‚ÄÁ–Å‚³‚¹‚é
+        // ã‚¤ãƒ³ãƒ•ã‚©ä¸€è¦§ã‚’æ¶ˆã™å ´åˆã¯5ç§’å¾Œã«ã™ã¹ã¦æ¶ˆæ»…ã•ã›ã‚‹
         const infos = ul.find(".inserted_info");
         (async () => setTimeout(() => ul.find(".inserted_info").remove(), 10000))()
     }
@@ -20,10 +20,10 @@ function prependInfo(arg) {
 
 /**
  * #Renderer #jQuery
- * ’Ê’mƒEƒBƒ“ƒhƒE‚É’Ê’m‚ğ’Ç‰Á
+ * é€šçŸ¥ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã«é€šçŸ¥ã‚’è¿½åŠ 
  * 
- * @param text ’Ê’mƒeƒLƒXƒg
- * @param error_flg ƒGƒ‰[‚Ìê‡‚Ítrue
+ * @param text é€šçŸ¥ãƒ†ã‚­ã‚¹ãƒˆ
+ * @param error_flg ã‚¨ãƒ©ãƒ¼ã®å ´åˆã¯true
  */
 function prependNotification(text, error_flg) {
     const ymd = Status.DATE_FORMATTER.format(new Date());

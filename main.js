@@ -1,15 +1,15 @@
-/**
+ï»¿/**
  * Electron Run Module.
- * Electron‚ÌŽÀs/ƒEƒBƒ“ƒhƒE‚Ì¶¬‚ÆIPC’ÊMƒƒ\ƒbƒh‚Ì’è‹`‚ðs‚¢‚Ü‚·B
+ * Electronã®å®Ÿè¡Œ/ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ç”Ÿæˆã¨IPCé€šä¿¡ãƒ¡ã‚½ãƒƒãƒ‰ã®å®šç¾©ã‚’è¡Œã„ã¾ã™ã€‚
  */
 
-// ƒ‚ƒWƒ…[ƒ‹‚ÌƒCƒ“ƒ|[ƒg
+// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
 
-// ƒAƒvƒŠ•ÛŽ—pÝ’èƒf[ƒ^‚ÌŠÇ—
+// ã‚¢ãƒ—ãƒªä¿æŒç”¨è¨­å®šãƒ‡ãƒ¼ã‚¿ã®ç®¡ç†
 var pref_accounts = null
 var pref_columns = null
 
@@ -17,19 +17,19 @@ var pref_columns = null
 
 /**
  * #IPC
- * •Û‘¶‚µ‚Ä‚ ‚éƒAƒJƒEƒ“ƒg”FØî•ñ‚ð“Ç‚Ýž‚Þ
- * ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ª‚ ‚é‚Î‚ ‚¢‚Í‚»‚¿‚ç‚ð—Dæ
+ * ä¿å­˜ã—ã¦ã‚ã‚‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
+ * ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒã‚ã‚‹ã°ã‚ã„ã¯ãã¡ã‚‰ã‚’å„ªå…ˆ
  * 
- * @return ƒAƒJƒEƒ“ƒg”FØî•ñ(ƒ}ƒbƒv‚Å•Ô‹p)
+ * @return ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±(ãƒžãƒƒãƒ—ã§è¿”å´)
  */
 function readPrefAccs() {
-    // •Ï”ƒLƒƒƒbƒVƒ…‚ª‚ ‚éê‡‚ÍƒLƒƒƒbƒVƒ…‚ðŽg—p
+    // å¤‰æ•°ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒã‚ã‚‹å ´åˆã¯ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ä½¿ç”¨
     if (pref_accounts) {
         console.log('@INF: use prefs/auth.json cache.')
         return pref_accounts
     }
     const content = readFile('prefs/auth.json')
-    if (!content) { // ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çnull‚ð•Ô‹p
+    if (!content) { // ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰nullã‚’è¿”å´
         return null
     }
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
@@ -39,14 +39,14 @@ function readPrefAccs() {
 
 /**
  * #IPC
- * ƒAƒJƒEƒ“ƒg”FØî•ñ‚ðÝ’èƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ(Mastodon—p)
- * ‘‚«ž‚ñ‚¾ŒãƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ðXV
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±ã‚’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€(Mastodonç”¨)
+ * æ›¸ãè¾¼ã‚“ã å¾Œã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
  * 
- * @param path ‘‚«ž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param json_data ‘‚«ž‚ÞJSONƒf[ƒ^
+ * @param path æ›¸ãè¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param json_data æ›¸ãè¾¼ã‚€JSONãƒ‡ãƒ¼ã‚¿
  */
 function writePrefMstdAccs(event, json_data) {
-    // JSON‚ð¶¬(‚ ‚Æ‚ÅƒLƒƒƒbƒVƒ…‚É“ü‚ê‚é‚Ì‚Å)
+    // JSONã‚’ç”Ÿæˆ(ã‚ã¨ã§ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«å…¥ã‚Œã‚‹ã®ã§)
     const write_json = {
         'domain': json_data.domain,
         'platform': 'Mastodon',
@@ -57,16 +57,16 @@ function writePrefMstdAccs(event, json_data) {
         'client_secret': json_data.client_secret,
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
-        // ƒAƒJƒEƒ“ƒgƒJƒ‰[‚Í‰Šú’lƒOƒŒ[
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã¯åˆæœŸå€¤ã‚°ãƒ¬ãƒ¼
         'acc_color': '808080'
     }
 
-    // ƒtƒ@ƒCƒ‹‚É‘‚«ž‚Ý
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã¿
     const content = writeFileArrayJson('prefs/auth.json', write_json)
 
-    // ƒLƒƒƒbƒVƒ…‚ðXV
+    // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
     if (!pref_accounts) {
-        // ƒLƒƒƒbƒVƒ…‚ª‚È‚¢ê‡‚Íƒtƒ@ƒCƒ‹‚ð“Ç‚Ýž‚ñ‚ÅƒLƒƒƒbƒVƒ…‚ð¶¬
+        // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒãªã„å ´åˆã¯ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚“ã§ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆ
         pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
     } else {
         pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
@@ -75,18 +75,18 @@ function writePrefMstdAccs(event, json_data) {
 
 /**
  * #IPC
- * ƒAƒJƒEƒ“ƒg”FØî•ñ‚ðÝ’èƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ(Misskey—p)
- * ‘‚«ž‚ñ‚¾ŒãƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ðXV
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±ã‚’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€(Misskeyç”¨)
+ * æ›¸ãè¾¼ã‚“ã å¾Œã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
  * 
- * @param path ‘‚«ž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param json_data ‘‚«ž‚ÞJSONƒf[ƒ^
+ * @param path æ›¸ãè¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param json_data æ›¸ãè¾¼ã‚€JSONãƒ‡ãƒ¼ã‚¿
  */
 function writePrefMskyAccs(event, json_data) {
-    // ‚Ü‚¸‚ÍaccessToken‚ÆappSecret‚©‚çi‚ð¶¬
+    // ã¾ãšã¯accessTokenã¨appSecretã‹ã‚‰iã‚’ç”Ÿæˆ
     const i = crypto.createHash("sha256")
         .update(json_data.access_token + json_data.app_secret, "utf8")
         .digest("hex")
-    // JSON‚ð¶¬(‚ ‚Æ‚ÅƒLƒƒƒbƒVƒ…‚É“ü‚ê‚é‚Ì‚Å)
+    // JSONã‚’ç”Ÿæˆ(ã‚ã¨ã§ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«å…¥ã‚Œã‚‹ã®ã§)
     const write_json = {
         'domain': json_data.domain,
         'platform': 'Misskey',
@@ -97,16 +97,16 @@ function writePrefMskyAccs(event, json_data) {
         'client_secret': json_data.app_secret,
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
-        // ƒAƒJƒEƒ“ƒgƒJƒ‰[‚Í‰Šú’lƒOƒŒ[
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã¯åˆæœŸå€¤ã‚°ãƒ¬ãƒ¼
         'acc_color': '808080'
     }
 
-    // ƒtƒ@ƒCƒ‹‚É‘‚«ž‚Ý
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã¿
     const content = writeFileArrayJson('prefs/auth.json', write_json)
 
-    // ƒLƒƒƒbƒVƒ…‚ðXV
+    // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
     if (!pref_accounts) {
-        // ƒLƒƒƒbƒVƒ…‚ª‚È‚¢ê‡‚Íƒtƒ@ƒCƒ‹‚ð“Ç‚Ýž‚ñ‚ÅƒLƒƒƒbƒVƒ…‚ð¶¬
+        // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒãªã„å ´åˆã¯ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚“ã§ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ç”Ÿæˆ
         pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
     } else {
         pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
@@ -115,15 +115,15 @@ function writePrefMskyAccs(event, json_data) {
 
 /**
  * #IPC
- * ƒAƒJƒEƒ“ƒg”FØî•ñ‚ÉFî•ñ‚ð‘‚«ž‚Þ.
- * ‘‚«ž‚ñ‚¾ŒãƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ðXV
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±ã«è‰²æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€.
+ * æ›¸ãè¾¼ã‚“ã å¾Œã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
  * 
- * @param event ƒCƒxƒ“ƒg
- * @param json_data ‘‚«ž‚ÞJSONƒf[ƒ^
+ * @param event ã‚¤ãƒ™ãƒ³ãƒˆ
+ * @param json_data æ›¸ãè¾¼ã‚€JSONãƒ‡ãƒ¼ã‚¿
  */
 function writePrefAccColor(event, json_data) {
     console.log('@INF: use prefs/auth.json cache.')
-    // •Ô‹pJSON‚ð‘–¸‚µ‚ÄFî•ñ‚ðƒLƒƒƒbƒVƒ…‚É•Û‘¶
+    // è¿”å´JSONã‚’èµ°æŸ»ã—ã¦è‰²æƒ…å ±ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«ä¿å­˜
     const write_json = []
     json_data.forEach((color) => {
         let acc = pref_accounts.get(color.key_address)
@@ -131,28 +131,28 @@ function writePrefAccColor(event, json_data) {
         write_json.push(acc)
     })
 
-    // ƒtƒ@ƒCƒ‹‚É‘‚«ž‚Ý
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã¿
     const content = overwriteFile('prefs/auth.json', write_json)
 
-    // ƒLƒƒƒbƒVƒ…‚ðXV
+    // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
 }
 
 /**
  * #IPC
- * •Û‘¶‚µ‚Ä‚ ‚éƒJƒ‰ƒ€Ý’èî•ñ‚ð“Ç‚Ýž‚Þ
- * ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ª‚ ‚é‚Î‚ ‚¢‚Í‚»‚¿‚ç‚ð—Dæ
+ * ä¿å­˜ã—ã¦ã‚ã‚‹ã‚«ãƒ©ãƒ è¨­å®šæƒ…å ±ã‚’èª­ã¿è¾¼ã‚€
+ * ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒã‚ã‚‹ã°ã‚ã„ã¯ãã¡ã‚‰ã‚’å„ªå…ˆ
  * 
- * @return ƒAƒJƒEƒ“ƒg”FØî•ñ(ƒ}ƒbƒv‚Å•Ô‹p)
+ * @return ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼æƒ…å ±(ãƒžãƒƒãƒ—ã§è¿”å´)
  */
 function readPrefCols() {
-    // •Ï”ƒLƒƒƒbƒVƒ…‚ª‚ ‚éê‡‚ÍƒLƒƒƒbƒVƒ…‚ðŽg—p
+    // å¤‰æ•°ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒã‚ã‚‹å ´åˆã¯ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ä½¿ç”¨
     if (pref_columns) {
         console.log('@INF: use prefs/columns.json cache.')
         return pref_columns
     }
     const content = readFile('prefs/columns.json')
-    if (!content) { // ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çnull‚ð•Ô‹p
+    if (!content) { // ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰nullã‚’è¿”å´
         return null
     }
     pref_columns = JSON.parse(content)
@@ -162,51 +162,51 @@ function readPrefCols() {
 
 /**
  * #IPC
- * ƒJƒ‰ƒ€Ý’èî•ñ‚ðÝ’èƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ
- * ‘‚«ž‚ñ‚¾ŒãƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒLƒƒƒbƒVƒ…‚ðXV
+ * ã‚«ãƒ©ãƒ è¨­å®šæƒ…å ±ã‚’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€
+ * æ›¸ãè¾¼ã‚“ã å¾Œã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
  * 
- * @param path ‘‚«ž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param json_data ®Œ`‘O‚Ì‘‚«ž‚ÞJSONƒf[ƒ^
+ * @param path æ›¸ãè¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param json_data æ•´å½¢å‰ã®æ›¸ãè¾¼ã‚€JSONãƒ‡ãƒ¼ã‚¿
  */
 function writePrefCols(event, json_data) {
-    // ƒtƒ@ƒCƒ‹‘‚«ž‚Ý—p‚ÉJSONƒtƒ@ƒCƒ‹‚ðÄ¶¬
+    // ãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿ç”¨ã«JSONãƒ•ã‚¡ã‚¤ãƒ«ã‚’å†ç”Ÿæˆ
     const write_json = []
     json_data.forEach((col, index) => {
         const tl_list = []
         const unique_address = col.timelines[0].key_address
         let multi_account_flg = false
         col.timelines.forEach((tl) => {
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌJSON‚ðÄ¶¬
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®JSONã‚’å†ç”Ÿæˆ
             let rest_url = null
             let socket_url = null
             let query_param = null
             let socket_param = null
 
             if (tl.key_address != unique_address) {
-                // ‚Ð‚Æ‚Â‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚É2ƒAƒJƒEƒ“ƒgˆÈã¬Ý‚·‚éê‡‚Íƒ}ƒ‹ƒ`ƒtƒ‰ƒO‚ð—§‚Ä‚é
+                // ã²ã¨ã¤ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«2ã‚¢ã‚«ã‚¦ãƒ³ãƒˆä»¥ä¸Šæ··åœ¨ã™ã‚‹å ´åˆã¯ãƒžãƒ«ãƒãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
                 multi_account_flg = true
             }
-            // ƒvƒ‰ƒbƒgƒtƒH[ƒ€‚ÌŽí—Þ‚É‚æ‚Á‚ÄAPI‚ÌŒ`Ž®‚ªˆá‚¤‚Ì‚ÅŒÂ•Ê‚ÉÝ’è
+            // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã®ç¨®é¡žã«ã‚ˆã£ã¦APIã®å½¢å¼ãŒé•ã†ã®ã§å€‹åˆ¥ã«è¨­å®š
             switch (tl.account.platform) {
                 case 'Mastodon': // Mastodon
-                    // ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒ^ƒCƒv‚É‚æ‚Á‚ÄÝ’è’l‚ð•Ï‚¦‚é
+                    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦è¨­å®šå€¤ã‚’å¤‰ãˆã‚‹
                     switch (tl.timeline_type) {
-                        case 'home': // ƒz[ƒ€ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'home': // ãƒ›ãƒ¼ãƒ ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/v1/timelines/home`
                             query_param = {}
                             socket_param = { 'stream': 'user' }
                             break
-                        case 'local': // ƒ[ƒJƒ‹ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'local': // ãƒ­ãƒ¼ã‚«ãƒ«ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/v1/timelines/public`
                             query_param = { 'local': true }
                             socket_param = { 'stream': 'public:local' }
                             break
-                        case 'federation': // ˜A‡ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'federation': // é€£åˆã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/v1/timelines/public`
                             query_param = { 'remote': true }
                             socket_param = { 'stream': 'public:remote' }
                             break
-                        case 'notification': // ’Ê’m
+                        case 'notification': // é€šçŸ¥
                             rest_url = `https://${tl.account.domain}/api/v1/notifications`
                             query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
                             socket_param = { 'stream': 'user:notification' }
@@ -217,24 +217,24 @@ function writePrefCols(event, json_data) {
                     socket_url = `wss://${tl.account.domain}/api/v1/streaming`
                     break;
                 case 'Misskey': // Misskey
-                    // ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒ^ƒCƒv‚É‚æ‚Á‚ÄÝ’è’l‚ð•Ï‚¦‚é
+                    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦è¨­å®šå€¤ã‚’å¤‰ãˆã‚‹
                     switch (tl.timeline_type) {
-                        case 'home': // ƒz[ƒ€ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'home': // ãƒ›ãƒ¼ãƒ ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/notes/timeline`
                             query_param = {}
                             socket_param = { 'channel': 'homeTimeline' }
                             break
-                        case 'local': // ƒ[ƒJƒ‹ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'local': // ãƒ­ãƒ¼ã‚«ãƒ«ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/notes/local-timeline`
                             query_param = {}
                             socket_param = { 'channel': 'localTimeline' }
                             break
-                        case 'federation': // ˜A‡ƒ^ƒCƒ€ƒ‰ƒCƒ“
+                        case 'federation': // é€£åˆã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³
                             rest_url = `https://${tl.account.domain}/api/notes/global-timeline`
                             query_param = {}
                             socket_param = { 'channel': 'globalTimeline' }
                             break
-                        case 'notification': // ’Ê’m
+                        case 'notification': // é€šçŸ¥
                             rest_url = `https://${tl.account.domain}/api/i/notifications`
                             query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
                             socket_param = { 'channel': 'main' }
@@ -242,13 +242,13 @@ function writePrefCols(event, json_data) {
                         default:
                             break
                     }
-                    // WebSocket URL‚Í‹¤’Ê‚È‚Ì‚ÅŠO‚Éo‚·
+                    // WebSocket URLã¯å…±é€šãªã®ã§å¤–ã«å‡ºã™
                     socket_url = `wss://${tl.account.domain}/streaming`
                     break
                 default:
                     break
             }
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒŠƒXƒg‚É’Ç‰Á
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãƒªã‚¹ãƒˆã«è¿½åŠ 
             tl_list.push({
                 'key_address': tl.key_address,
                 'host': tl.account.domain,
@@ -260,9 +260,9 @@ function writePrefCols(event, json_data) {
                 'exclude_reblog': tl.exclude_reblog
             })
         })
-        // ƒJƒ‰ƒ€ƒŠƒXƒg‚É’Ç‰Á
+        // ã‚«ãƒ©ãƒ ãƒªã‚¹ãƒˆã«è¿½åŠ 
         write_json.push({
-            // ƒJƒ‰ƒ€ID‚ÍUUID‚ðŽg‚Á‚ÄˆêˆÓ‚ÉŒˆ’è(‘‚«ž‚Ý’¼‘O‚ÉÄ¶¬)
+            // ã‚«ãƒ©ãƒ IDã¯UUIDã‚’ä½¿ã£ã¦ä¸€æ„ã«æ±ºå®š(æ›¸ãè¾¼ã¿ç›´å‰ã«å†ç”Ÿæˆ)
             'column_id': `col_${crypto.randomUUID()}`,
             'label_head': col.label_head,
             'timelines': tl_list,
@@ -274,10 +274,10 @@ function writePrefCols(event, json_data) {
             'd_flex': col.d_flex
         })
     })
-    // ÅI“I‚ÈÝ’èƒtƒ@ƒCƒ‹‚ðJSONƒtƒ@ƒCƒ‹‚É‘‚«ž‚Ý
+    // æœ€çµ‚çš„ãªè¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã‚’JSONãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã¿
     const content = overwriteFile('prefs/columns.json', write_json)
     
-    // ƒLƒƒƒbƒVƒ…‚ðXV
+    // ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ›´æ–°
     pref_columns = JSON.parse(content)
 }
 
@@ -285,11 +285,11 @@ function writePrefCols(event, json_data) {
 
 /**
  * #Utils #Node.js
- * ”Ä—pƒtƒ@ƒCƒ‹‘‚«ž‚Ýƒƒ\ƒbƒh(“¯Šú)
- * “Ç‚Ýž‚Ý‚É¬Œ÷‚·‚ê‚Îƒtƒ@ƒCƒ‹‚Ìstring‚ªAŽ¸”s‚·‚é‚Ænull‚ª•Ô‚é
+ * æ±Žç”¨ãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿ãƒ¡ã‚½ãƒƒãƒ‰(åŒæœŸ)
+ * èª­ã¿è¾¼ã¿ã«æˆåŠŸã™ã‚Œã°ãƒ•ã‚¡ã‚¤ãƒ«ã®stringãŒã€å¤±æ•—ã™ã‚‹ã¨nullãŒè¿”ã‚‹
  * 
- * @param path “Ç‚Ýž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @return “Ç‚Ýž‚ñ‚¾ƒtƒ@ƒCƒ‹(stringŒ`Ž®) Ž¸”s‚µ‚½ê‡null
+ * @param path èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @return èª­ã¿è¾¼ã‚“ã ãƒ•ã‚¡ã‚¤ãƒ«(stringå½¢å¼) å¤±æ•—ã—ãŸå ´åˆnull
  */
 function readFile(path) {
     let content = null
@@ -303,22 +303,22 @@ function readFile(path) {
 
 /**
  * #Utils #Node.js
- * ”Ä—p”z—ñŒ^JSONƒtƒ@ƒCƒ‹‘‚«ž‚Ýƒƒ\ƒbƒh(”ñ“¯Šú)
- * ”ñ”z—ñŒ^JSON‚ð”z—ñŒ^JSONƒtƒ@ƒCƒ‹‚ÌŒã‚ë‚É’Ç‰Á‚·‚é
+ * æ±Žç”¨é…åˆ—åž‹JSONãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿ãƒ¡ã‚½ãƒƒãƒ‰(éžåŒæœŸ)
+ * éžé…åˆ—åž‹JSONã‚’é…åˆ—åž‹JSONãƒ•ã‚¡ã‚¤ãƒ«ã®å¾Œã‚ã«è¿½åŠ ã™ã‚‹
  * 
- * @param path “Ç‚Ýž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param json_data ƒtƒ@ƒCƒ‹‚É’Ç‰Á‚·‚éJSONƒf[ƒ^(”ñ”z—ñŒ^)
- * @return ÅI“I‚É‘‚«ž‚ñ‚¾ƒtƒ@ƒCƒ‹“à—estring
+ * @param path èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param json_data ãƒ•ã‚¡ã‚¤ãƒ«ã«è¿½åŠ ã™ã‚‹JSONãƒ‡ãƒ¼ã‚¿(éžé…åˆ—åž‹)
+ * @return æœ€çµ‚çš„ã«æ›¸ãè¾¼ã‚“ã ãƒ•ã‚¡ã‚¤ãƒ«å†…å®¹string
  */
 function writeFileArrayJson(path, json_data) {
     let content = readFile(path)
     if (content) {
-        // ƒtƒ@ƒCƒ‹‚ª‘¶Ý‚·‚éê‡(ˆø”‚ÌJSON‚ðpush)
+        // ãƒ•ã‚¡ã‚¤ãƒ«ãŒå­˜åœ¨ã™ã‚‹å ´åˆ(å¼•æ•°ã®JSONã‚’push)
         let pre_json = JSON.parse(content)
         pre_json.push(json_data)
         content = JSON.stringify(pre_json)
     } else {
-        // ƒtƒ@ƒCƒ‹‚ª‘¶Ý‚µ‚È‚¢ê‡(”z—ñ‰»‚µ‚Ästring‰»)
+        // ãƒ•ã‚¡ã‚¤ãƒ«ãŒå­˜åœ¨ã—ãªã„å ´åˆ(é…åˆ—åŒ–ã—ã¦stringåŒ–)
         content = JSON.stringify([json_data])
     }
 
@@ -328,12 +328,12 @@ function writeFileArrayJson(path, json_data) {
 
 /**
  * #Utils #Node.js
- * ”Ä—pJSONƒtƒ@ƒCƒ‹‘‚«ž‚Ýƒƒ\ƒbƒh(”ñ“¯Šú)
- * ˆø”‚ÌJSONƒtƒ@ƒCƒ‹‚ðƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þ(Š®‘Sã‘‚«ˆ—)
+ * æ±Žç”¨JSONãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿ãƒ¡ã‚½ãƒƒãƒ‰(éžåŒæœŸ)
+ * å¼•æ•°ã®JSONãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€(å®Œå…¨ä¸Šæ›¸ãå‡¦ç†)
  * 
- * @param path “Ç‚Ýž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param json_data ƒtƒ@ƒCƒ‹‚É‘‚«ž‚ÞJSONƒf[ƒ^(‚±‚Ì“à—e‚Åã‘‚«)
- * @return ÅI“I‚É‘‚«ž‚ñ‚¾ƒtƒ@ƒCƒ‹“à—estring
+ * @param path èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param json_data ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€JSONãƒ‡ãƒ¼ã‚¿(ã“ã®å†…å®¹ã§ä¸Šæ›¸ã)
+ * @return æœ€çµ‚çš„ã«æ›¸ãè¾¼ã‚“ã ãƒ•ã‚¡ã‚¤ãƒ«å†…å®¹string
  */
 function overwriteFile(path, json_data) {
     const content = JSON.stringify(json_data)
@@ -344,20 +344,20 @@ function overwriteFile(path, json_data) {
 
 /**
  * #Utils #Node.js
- * ”Ä—pƒtƒ@ƒCƒ‹‘‚«ž‚Ýƒƒ\ƒbƒh(”ñ“¯Šú)
- * ˆø”‚Ìcontent‚ðƒtƒ@ƒCƒ‹‚É‘‚«ž‚ÞAƒfƒBƒŒƒNƒgƒŠ‚ª‚È‚©‚Á‚½‚çŽ©“®‚Åì¬
+ * æ±Žç”¨ãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿ãƒ¡ã‚½ãƒƒãƒ‰(éžåŒæœŸ)
+ * å¼•æ•°ã®contentã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€ã€ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒãªã‹ã£ãŸã‚‰è‡ªå‹•ã§ä½œæˆ
  * 
- * @param path “Ç‚Ýž‚Þƒtƒ@ƒCƒ‹‚ÌƒpƒX
- * @param content ƒtƒ@ƒCƒ‹‚É‘‚«ž‚Þstring
+ * @param path èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+ * @param content ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚€string
  */
 function writeDirFile(path, content) {
     const dir_name = path.split('/')[0]
-    // ƒpƒXæ“ª‚ÌƒfƒBƒŒƒNƒgƒŠ‚ª–¢ì¬‚È‚çæ‚Éì¬
+    // ãƒ‘ã‚¹å…ˆé ­ã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒæœªä½œæˆãªã‚‰å…ˆã«ä½œæˆ
     if (!fs.existsSync(dir_name)) {
         fs.mkdirSync(dir_name)
     }
 
-    // ƒtƒ@ƒCƒ‹‘‚«ž‚Ý
+    // ãƒ•ã‚¡ã‚¤ãƒ«æ›¸ãè¾¼ã¿
     fs.writeFile(path, content, 'utf8', (err) => {
         if (err) throw err;
         console.log('@INF: file write successed.')
@@ -366,11 +366,11 @@ function writeDirFile(path, content) {
 
 /**
  * #Utils #JS
- * ”z—ñŒ^JSON‚ðmap‚É•ÏŠ·‚·‚é
+ * é…åˆ—åž‹JSONã‚’mapã«å¤‰æ›ã™ã‚‹
  * 
- * @param json_data map‰»‚·‚éJSON”z—ñ
- * @param key_func ƒL[‚ð¶¬‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
- * @return ¶¬‚µ‚½map
+ * @param json_data mapåŒ–ã™ã‚‹JSONé…åˆ—
+ * @param key_func ã‚­ãƒ¼ã‚’ç”Ÿæˆã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
+ * @return ç”Ÿæˆã—ãŸmap
  */
 function jsonToMap(json_data, key_func) {
     const map = new Map()
@@ -382,10 +382,10 @@ function jsonToMap(json_data, key_func) {
 
 /**
  * #Utils #Electron
- * ƒŠƒ“ƒN‚ðŠO•”ƒuƒ‰ƒEƒU‚ÅŠJ‚­
+ * ãƒªãƒ³ã‚¯ã‚’å¤–éƒ¨ãƒ–ãƒ©ã‚¦ã‚¶ã§é–‹ã
  * 
- * @param event ƒCƒxƒ“ƒg
- * @param url ˆÚ“®æ‚ÌURL
+ * @param event ã‚¤ãƒ™ãƒ³ãƒˆ
+ * @param url ç§»å‹•å…ˆã®URL
  */
 function openExternalBrowser(event, url) {
     console.log(`@INF: web-${url}`)
@@ -394,10 +394,10 @@ function openExternalBrowser(event, url) {
 
 /**
  * #Utils #Electron
- * ’Ê’m‚ð”­¶‚³‚¹‚é
+ * é€šçŸ¥ã‚’ç™ºç”Ÿã•ã›ã‚‹
  * 
- * @param event ƒCƒxƒ“ƒg
- * @param arg ’Ê’mƒpƒ‰ƒ[ƒ^
+ * @param event ã‚¤ãƒ™ãƒ³ãƒˆ
+ * @param arg é€šçŸ¥ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
  */
 function notification(event, arg) {
     new Notification(arg).show()
@@ -407,7 +407,7 @@ function notification(event, arg) {
 
 /**
  * #Main #Electron
- * ƒƒCƒ“ƒEƒBƒ“ƒhƒE¶¬ˆ—
+ * ãƒ¡ã‚¤ãƒ³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”Ÿæˆå‡¦ç†
  */
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -419,17 +419,17 @@ const createWindow = () => {
         }
     })
 
-    // Å‰‚É•\Ž¦‚·‚éƒy[ƒW‚ðŽw’è
+    // æœ€åˆã«è¡¨ç¤ºã™ã‚‹ãƒšãƒ¼ã‚¸ã‚’æŒ‡å®š
     win.loadFile('src/index.html')
 }
 
 /**
  * #Main #IPC #Electron
- * ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ŽÀsˆ—
- * IPC’ÊM‚ð’‡‰î‚·‚éAPI‚à‚±‚±‚Å’è‹`
+ * ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³å®Ÿè¡Œå‡¦ç†
+ * IPCé€šä¿¡ã‚’ä»²ä»‹ã™ã‚‹APIã‚‚ã“ã“ã§å®šç¾©
  */
 app.whenReady().then(() => {
-    // IPC’ÊM‚ÅŒÄ‚Ño‚·ƒƒ\ƒbƒh’è‹`
+    // IPCé€šä¿¡ã§å‘¼ã³å‡ºã™ãƒ¡ã‚½ãƒƒãƒ‰å®šç¾©
     ipcMain.handle('read-pref-accs', readPrefAccs)
     ipcMain.handle('read-pref-cols', readPrefCols)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
@@ -439,7 +439,7 @@ app.whenReady().then(() => {
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 
-    // ƒEƒBƒ“ƒhƒE¶¬
+    // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”Ÿæˆ
     createWindow()
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {

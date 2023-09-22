@@ -1,43 +1,43 @@
-/**
+ï»¿/**
  * #Class
- * ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğŠÇ—‚·‚éƒNƒ‰ƒX(ƒJƒ‰ƒ€‚É“à•ï)
+ * ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹(ã‚«ãƒ©ãƒ ã«å†…åŒ…)
  *
  * @autor tizerm@mofu.kemo.no
  */
 class Timeline {
-    #__column_id // ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ªŠ‘®‚·‚éƒJƒ‰ƒ€‚ÌID
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^: İ’èƒtƒ@ƒCƒ‹‚É‚ ‚éƒJƒ‰ƒ€İ’è’l‚ğg‚Á‚Ä‰Šú‰»
+    #__column_id // ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãŒæ‰€å±ã™ã‚‹ã‚«ãƒ©ãƒ ã®ID
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿: è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ã‚ã‚‹ã‚«ãƒ©ãƒ è¨­å®šå€¤ã‚’ä½¿ã£ã¦åˆæœŸåŒ–
     constructor(pref, column) {
         this.pref = pref
         this.__column_id = column.id
         this.status_key_map = new Map()
     }
 
-    // Getter: ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌƒzƒXƒg(ƒT[ƒo[ƒhƒƒCƒ“)
+    // Getter: ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ãƒ›ã‚¹ãƒˆ(ã‚µãƒ¼ãƒãƒ¼ãƒ‰ãƒ¡ã‚¤ãƒ³)
     get host() { return this.pref.host }
-    // Getter: ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌƒAƒJƒEƒ“ƒg‚Ìƒtƒ‹ƒAƒhƒŒƒX
+    // Getter: ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®ãƒ•ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹
     get account_key() { return this.pref.key_address }
-    // Getter: ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌƒAƒJƒEƒ“ƒg
+    // Getter: ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆ
     get target_account() { return Account.get(this.pref.key_address) }
-    // Getter: ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ªŠ‘®‚·‚éƒJƒ‰ƒ€
+    // Getter: ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãŒæ‰€å±ã™ã‚‹ã‚«ãƒ©ãƒ 
     get parent_column() { return Column.get(this.__column_id) }
 
-    // Setter: ƒXƒe[ƒ^ƒXID‚ğƒL[‚É‚ÂˆêˆÓ¯•Êq‚Ìƒ}ƒbƒv‚É‘}“ü
+    // Setter: ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹IDã‚’ã‚­ãƒ¼ã«æŒã¤ä¸€æ„è­˜åˆ¥å­ã®ãƒãƒƒãƒ—ã«æŒ¿å…¥
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
 
     /**
      * #Method
-     * ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌÅV‚Ì“Še‚ğ30Œæ“¾‚·‚é
-     * (•Ô‚è’l‚Íæ“¾ƒf[ƒ^‚Ìpromise)
+     * ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®æœ€æ–°ã®æŠ•ç¨¿ã‚’30ä»¶å–å¾—ã™ã‚‹
+     * (è¿”ã‚Šå€¤ã¯å–å¾—ãƒ‡ãƒ¼ã‚¿ã®promise)
      */
     getTimeline() {
-        // ƒNƒGƒŠƒpƒ‰ƒ[ƒ^‚ÉlimitƒvƒƒpƒeƒB‚ğ–‘O‚É’Ç‰Á(‚±‚ê‚ÍMastodon‚ÆMisskey‚Å‹¤’Ê)
+        // ã‚¯ã‚¨ãƒªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã«limitãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’äº‹å‰ã«è¿½åŠ (ã“ã‚Œã¯Mastodonã¨Misskeyã§å…±é€š)
         this.pref.query_param.limit = 30
         let rest_promise = null
-        // ƒvƒ‰ƒbƒgƒtƒH[ƒ€”»’è
+        // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ åˆ¤å®š
         switch (this.target_account.platform) {
             case 'Mastodon': // Mastodon
-                // REST API‚ÅÅVTL‚ğ30Œæ“¾A‚·‚éˆ—‚ğƒvƒƒ~ƒX‚Æ‚µ‚ÄŠi”[
+                // REST APIã§æœ€æ–°TLã‚’30ä»¶å–å¾—ã€ã™ã‚‹å‡¦ç†ã‚’ãƒ—ãƒ­ãƒŸã‚¹ã¨ã—ã¦æ ¼ç´
                 rest_promise = $.ajax({
                     type: "GET",
                     url: this.pref.rest_url,
@@ -46,7 +46,7 @@ class Timeline {
                     data: this.pref.query_param
                 }).then(data => {
                     return (async () => {
-                        // “Šeƒf[ƒ^‚ğƒ\[ƒgƒ}ƒbƒv‰Â”\‚É‚·‚éˆ—‚ğ”ñ“¯Šú‚ÅÀs(Promise•Ô‹p)
+                        // æŠ•ç¨¿ãƒ‡ãƒ¼ã‚¿ã‚’ã‚½ãƒ¼ãƒˆãƒãƒƒãƒ—å¯èƒ½ã«ã™ã‚‹å‡¦ç†ã‚’éåŒæœŸã§å®Ÿè¡Œ(Promiseè¿”å´)
                         const posts = []
                         data.forEach(p => posts.push(new Status(p, this, this.target_account)))
                         return posts
@@ -54,9 +54,9 @@ class Timeline {
                 })
                 break
             case 'Misskey': // Misskey
-                // ƒNƒGƒŠƒpƒ‰ƒ[ƒ^‚ÉƒAƒNƒZƒXƒg[ƒNƒ“‚ğƒZƒbƒg
+                // ã‚¯ã‚¨ãƒªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã«ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ã‚’ã‚»ãƒƒãƒˆ
                 this.pref.query_param.i = this.target_account.pref.access_token
-                // REST API‚ÅÅVTL‚ğ30Œæ“¾A‚·‚éˆ—‚ğƒvƒƒ~ƒX‚Æ‚µ‚ÄŠi”[
+                // REST APIã§æœ€æ–°TLã‚’30ä»¶å–å¾—ã€ã™ã‚‹å‡¦ç†ã‚’ãƒ—ãƒ­ãƒŸã‚¹ã¨ã—ã¦æ ¼ç´
                 rest_promise = $.ajax({
                     type: "POST",
                     url: this.pref.rest_url,
@@ -65,7 +65,7 @@ class Timeline {
                     data: JSON.stringify(this.pref.query_param)
                 }).then(data => {
                     return (async () => {
-                        // “Šeƒf[ƒ^‚ğƒ\[ƒgƒ}ƒbƒv‰Â”\‚É‚·‚éˆ—‚ğ”ñ“¯Šú‚ÅÀs(Promise•Ô‹p)
+                        // æŠ•ç¨¿ãƒ‡ãƒ¼ã‚¿ã‚’ã‚½ãƒ¼ãƒˆãƒãƒƒãƒ—å¯èƒ½ã«ã™ã‚‹å‡¦ç†ã‚’éåŒæœŸã§å®Ÿè¡Œ(Promiseè¿”å´)
                         const posts = []
                         data.forEach(p => posts.push(new Status(p, this, this.target_account)))
                         return posts
@@ -75,35 +75,35 @@ class Timeline {
             default:
                 break
         }
-        // Promise‚ğ•Ô‹p(À¿”ñ“¯Šú)
+        // Promiseã‚’è¿”å´(å®Ÿè³ªéåŒæœŸ)
         return rest_promise
     }
 
     /**
      * #Method
-     * ‚±‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌWebSocketİ’èƒpƒ‰ƒ[ƒ^‚ğƒAƒJƒEƒ“ƒgî•ñ‚É‚í‚½‚·
-     * (‚±‚Ì’iŠK‚Å‚ÍWebSocket‚Ö‚Í‚Ü‚¾Ú‘±‚µ‚È‚¢)
+     * ã“ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®WebSocketè¨­å®šãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã«ã‚ãŸã™
+     * (ã“ã®æ®µéšã§ã¯WebSocketã¸ã¯ã¾ã æ¥ç¶šã—ãªã„)
      */
     setSocketParam() {
         let message_callback = null
         let send_param = null
 
-        // ƒvƒ‰ƒbƒgƒtƒH[ƒ€”»’è
+        // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ åˆ¤å®š
         switch (this.target_account.platform) {
             case 'Mastodon': // Mastodon
-                // ƒƒbƒZ[ƒWóM‚ÌƒR[ƒ‹ƒoƒbƒNŠÖ”
+                // ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å—ä¿¡æ™‚ã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
-                    // TL‚Æˆá‚¤Stream‚Í–³‹
+                    // TLã¨é•ã†Streamã¯ç„¡è¦–
                     if (data.stream[0] != this.pref.socket_param.stream) return
-                    // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌXV’Ê’m
+                    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®æ›´æ–°é€šçŸ¥
                     if (data.event == "update"
                         || (this.pref.timeline_type == "notification" && data.event == "notification"))
                         this.parent_column.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
-                    // íœ‚³‚ê‚½“Še‚ğŒŸ’m
+                    // å‰Šé™¤ã•ã‚ŒãŸæŠ•ç¨¿ã‚’æ¤œçŸ¥
                     else if (data.event == "delete") this.removeStatus(data.payload)
                 }
-                // w“Çƒpƒ‰ƒ[ƒ^‚Ìİ’è
+                // è³¼èª­ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®è¨­å®š
                 this.pref.socket_param.type = "subscribe"
                 send_param = JSON.stringify(this.pref.socket_param)
                 break
@@ -111,13 +111,13 @@ class Timeline {
                 const uuid = crypto.randomUUID()
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
-                    // TL‚Æˆá‚¤Stream‚Í–³‹
+                    // TLã¨é•ã†Streamã¯ç„¡è¦–
                     if (data.body.id != uuid) return
                     if (data.body.type == "note"
                         || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
                         this.parent_column.prepend(new Status(data.body.body, this, this.target_account))
                 }
-                // w“Çƒpƒ‰ƒ[ƒ^‚Ìİ’è
+                // è³¼èª­ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®è¨­å®š
                 this.pref.socket_param.id = uuid
                 send_param = JSON.stringify({
                     'type': 'connect',
@@ -127,7 +127,7 @@ class Timeline {
             default:
                 break
         }
-        // ƒAƒJƒEƒ“ƒgî•ñ‚Éƒ\ƒPƒbƒgİ’è‚ğ’Ç‰Á
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã«ã‚½ã‚±ãƒƒãƒˆè¨­å®šã‚’è¿½åŠ 
         this.target_account.addSocketPref({
             target_col: this.parent_column,
             send_param: send_param,
@@ -137,7 +137,7 @@ class Timeline {
 
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
-        // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚É‘¶İ‚·‚é“Še‚¾‚¯íœ‘ÎÛ‚Æ‚·‚é
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«å­˜åœ¨ã™ã‚‹æŠ•ç¨¿ã ã‘å‰Šé™¤å¯¾è±¡ã¨ã™ã‚‹
         if (status_key) this.parent_column.removeStatus(this.parent_column.getStatusElement(status_key))
     }
 }
@@ -146,13 +146,13 @@ class Timeline {
 
 /**
  * #Class
- * ƒJƒ‰ƒ€‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * ã‚«ãƒ©ãƒ ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
  *
  * @autor tizerm@mofu.kemo.no
  */
 class Column {
     #open_flg
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^: İ’èƒtƒ@ƒCƒ‹‚É‚ ‚éƒJƒ‰ƒ€İ’è’l‚ğg‚Á‚Ä‰Šú‰»
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿: è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ã‚ã‚‹ã‚«ãƒ©ãƒ è¨­å®šå€¤ã‚’ä½¿ã£ã¦åˆæœŸåŒ–
     constructor(pref) {
         this.pref = pref
         this.index = pref.index
@@ -161,20 +161,20 @@ class Column {
         this.flex = pref.d_flex
         this.open_flg = !pref.d_hide
 
-        // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÍƒCƒ“ƒXƒ^ƒ“ƒX‚ğì‚Á‚ÄŠÇ—
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã¯ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œã£ã¦ç®¡ç†
         const tls = []
         pref.timelines.forEach(tl => tls.push(new Timeline(tl, this)))
         this.timelines = tls
     }
 
-    // Getter: ƒJƒ‰ƒ€‚ÌˆêˆÓ¯•ÊID‚ğæ“¾
+    // Getter: ã‚«ãƒ©ãƒ ã®ä¸€æ„è­˜åˆ¥IDã‚’å–å¾—
     get id() { return this.pref.column_id }
 
-    static TIMELINE_LIMIT = 200 // ƒJƒ‰ƒ€‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚É•\¦‚Å‚«‚éŒÀŠE—Ê
-    static SCROLL = 200         // wsƒXƒNƒ[ƒ‹‚ÅƒXƒNƒ[ƒ‹‚·‚éƒsƒNƒZƒ‹—Ê
-    static SHIFT_SCROLL = 800   // ƒVƒtƒgwsƒXƒNƒ[ƒ‹‚ÅƒXƒNƒ[ƒ‹‚·‚éƒsƒNƒZƒ‹—Ê
+    static TIMELINE_LIMIT = 200 // ã‚«ãƒ©ãƒ ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã«è¡¨ç¤ºã§ãã‚‹é™ç•Œé‡
+    static SCROLL = 200         // wsã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã§ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹ãƒ”ã‚¯ã‚»ãƒ«é‡
+    static SHIFT_SCROLL = 800   // ã‚·ãƒ•ãƒˆwsã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã§ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹ãƒ”ã‚¯ã‚»ãƒ«é‡
 
-    // ƒXƒ^ƒeƒBƒbƒNƒ}ƒbƒv‚ğ‰Šú‰»(”ñ“¯Šú)
+    // ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯ãƒãƒƒãƒ—ã‚’åˆæœŸåŒ–(éåŒæœŸ)
     static {
         (async () => {
             const columns = await window.accessApi.readPrefCols()
@@ -189,22 +189,22 @@ class Column {
 
     /**
      * #StaticMethod
-     * ƒJƒ‰ƒ€ƒvƒƒpƒeƒB‚ğæ“¾
+     * ã‚«ãƒ©ãƒ ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’å–å¾—
      * 
-     * @param arg æ“¾‚Ég‚¤ˆø”
+     * @param arg å–å¾—ã«ä½¿ã†å¼•æ•°
      */
     static get(arg) {
-        // ”’lŒ^‚¾‚Á‚½ê‡ƒCƒ“ƒfƒNƒX‚Æ‚µ‚Ä”Ô†‚©‚çƒvƒƒpƒeƒB‚ğæ“¾
+        // æ•°å€¤å‹ã ã£ãŸå ´åˆã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã¨ã—ã¦ç•ªå·ã‹ã‚‰ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’å–å¾—
         if (typeof arg == 'number') return Column.map.get($(".column_td").eq(arg).attr("id"))
-        // •¶š—ñŒ^‚¾‚Á‚½ê‡‚Í‚»‚Ì‚Ü‚ÜƒL[‚Æ‚µ‚ÄƒvƒƒpƒeƒB‚ğæ“¾
+        // æ–‡å­—åˆ—å‹ã ã£ãŸå ´åˆã¯ãã®ã¾ã¾ã‚­ãƒ¼ã¨ã—ã¦ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’å–å¾—
         else if (typeof arg == 'string') return Column.map.get(arg)
-        // ƒIƒuƒWƒFƒNƒg‚¾‚Á‚½ê‡jQueryƒIƒuƒWƒFƒNƒg‚Æ‚µ‚Äæ“¾
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸå ´åˆjQueryã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨ã—ã¦å–å¾—
         else return Column.map.get(arg.attr("id"))
     }
 
     /**
      * #StaticMethod
-     * ŠJ‚¢‚Ä‚¢‚éƒJƒ‰ƒ€‚Ì’†‚ÅÅ‰‚ÌƒJƒ‰ƒ€‚ğ•Ô‹p
+     * é–‹ã„ã¦ã„ã‚‹ã‚«ãƒ©ãƒ ã®ä¸­ã§æœ€åˆã®ã‚«ãƒ©ãƒ ã‚’è¿”å´
      */
     static getOpenedFirst() {
         return Column.get($(".column_td:visible").first())
@@ -212,9 +212,9 @@ class Column {
 
     /**
      * #StaticMethod
-     * ƒJƒ‰ƒ€ƒvƒƒpƒeƒB‚ğ‘–¸
+     * ã‚«ãƒ©ãƒ ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’èµ°æŸ»
      * 
-     * @param callback —v‘f‚²‚Æ‚ÉÀs‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
+     * @param callback è¦ç´ ã”ã¨ã«å®Ÿè¡Œã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
      */
     static each(callback) {
         Column.map.forEach((v, k) => callback(v))
@@ -222,9 +222,9 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“ƒvƒƒpƒeƒB‚ğ‘–¸
+     * ã“ã®ã‚«ãƒ©ãƒ ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’èµ°æŸ»
      * 
-     * @param callback —v‘f‚²‚Æ‚ÉÀs‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
+     * @param callback è¦ç´ ã”ã¨ã«å®Ÿè¡Œã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
      */
     eachTimeline(callback) {
         this.timelines.forEach(callback)
@@ -232,22 +232,22 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ÌDOM‚ğ¶¬‚µ‚Äƒe[ƒuƒ‹‚ÉƒAƒyƒ“ƒh‚·‚é
+     * ã“ã®ã‚«ãƒ©ãƒ ã®DOMã‚’ç”Ÿæˆã—ã¦ãƒ†ãƒ¼ãƒ–ãƒ«ã«ã‚¢ãƒšãƒ³ãƒ‰ã™ã‚‹
      */
     create() {
-        // ƒJƒ‰ƒ€–{‘Ì‚ğ‹ó‚Ìó‘Ô‚Å¶¬(ƒiƒ“ƒo[ƒAƒCƒRƒ“‚Í10–¢–‚ÌƒJƒ‰ƒ€‚Ì‚İ•\¦)
+        // ã‚«ãƒ©ãƒ æœ¬ä½“ã‚’ç©ºã®çŠ¶æ…‹ã§ç”Ÿæˆ(ãƒŠãƒ³ãƒãƒ¼ã‚¢ã‚¤ã‚³ãƒ³ã¯10æœªæº€ã®ã‚«ãƒ©ãƒ ã®ã¿è¡¨ç¤º)
         const num_img = this.index < 9 ? `<img src="resources/${this.index + 1}.png" class="ic_column_num"/>` : ''
-        let html /* •Â‚¶‚½ó‘Ô‚ÌƒJƒ‰ƒ€ */ = `
+        let html /* é–‰ã˜ãŸçŠ¶æ…‹ã®ã‚«ãƒ©ãƒ  */ = `
             <td id="${this.id}_closed" class="closed_col">
                 ${num_img}
                 <div class="col_action">
-                    <a class="__on_column_open" title="ƒJƒ‰ƒ€‚ğŠJ‚­">
-                        <img src="resources/ic_right.png" alt="ƒJƒ‰ƒ€‚ğŠJ‚­"/>
+                    <a class="__on_column_open" title="ã‚«ãƒ©ãƒ ã‚’é–‹ã">
+                        <img src="resources/ic_right.png" alt="ã‚«ãƒ©ãƒ ã‚’é–‹ã"/>
                     </a>
                 </div>
                 <h2>${this.pref.label_head}<span></span></h2>
             </td>
-        `; html /* ŠJ‚¢‚½ó‘Ô‚ÌƒJƒ‰ƒ€ */ += `
+        `; html /* é–‹ã„ãŸçŠ¶æ…‹ã®ã‚«ãƒ©ãƒ  */ += `
             <td id="${this.id}" class="timeline column_td">
                 <div class="col_head">
                     <h2>${this.pref.label_head}</h2>
@@ -255,29 +255,29 @@ class Column {
                         ${num_img}
                     </div>
                     <div class="col_action">
-                        <a class="__on_column_reload" title="ƒJƒ‰ƒ€‚ğƒŠƒ[ƒh"
-                            ><img src="resources/ic_reload.png" alt="ƒJƒ‰ƒ€‚ğƒŠƒ[ƒh"/></a>
-                        <a class="__on_column_flex" title="‰Â•Ï•ON/OFF"
+                        <a class="__on_column_reload" title="ã‚«ãƒ©ãƒ ã‚’ãƒªãƒ­ãƒ¼ãƒ‰"
+                            ><img src="resources/ic_reload.png" alt="ã‚«ãƒ©ãƒ ã‚’ãƒªãƒ­ãƒ¼ãƒ‰"/></a>
+                        <a class="__on_column_flex" title="å¯å¤‰å¹…ON/OFF"
                             ><img src="resources/${this.pref.d_flex ? 'ic_flex_on' : 'ic_flex_off'}.png"
-                                class="ic_column_flex" alt="‰Â•Ï•ON/OFF"/></a>
-                        <a class="__on_column_close" title="ƒJƒ‰ƒ€‚ğ•Â‚¶‚é"
-                            ><img src="resources/ic_left.png" alt="ƒJƒ‰ƒ€‚ğ•Â‚¶‚é"/></a>
-                        <a class="__on_column_top" title="ƒgƒbƒv‚ÖˆÚ“®"
-                            ><img src="resources/ic_top.png" alt="ƒgƒbƒv‚ÖˆÚ“®"/></a>
+                                class="ic_column_flex" alt="å¯å¤‰å¹…ON/OFF"/></a>
+                        <a class="__on_column_close" title="ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹"
+                            ><img src="resources/ic_left.png" alt="ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹"/></a>
+                        <a class="__on_column_top" title="ãƒˆãƒƒãƒ—ã¸ç§»å‹•"
+                            ><img src="resources/ic_top.png" alt="ãƒˆãƒƒãƒ—ã¸ç§»å‹•"/></a>
                     </div>
                 </div>
                 <ul></ul>
             </td>
         `
-        // ƒe[ƒuƒ‹‚ÉƒoƒCƒ“ƒh(‘ÎÛ‚ª•¡”‚É“n‚é‚Ì‚Åˆê“xƒoƒCƒ“ƒh‚µ‚Ä‚©‚ç•\¦§Œä)
+        // ãƒ†ãƒ¼ãƒ–ãƒ«ã«ãƒã‚¤ãƒ³ãƒ‰(å¯¾è±¡ãŒè¤‡æ•°ã«æ¸¡ã‚‹ã®ã§ä¸€åº¦ãƒã‚¤ãƒ³ãƒ‰ã—ã¦ã‹ã‚‰è¡¨ç¤ºåˆ¶å¾¡)
         $("#columns>table tr").append(html)
 
-        // ƒJƒ‰ƒ€‚ÌF‚Æ•‚ğ•ÏX
+        // ã‚«ãƒ©ãƒ ã®è‰²ã¨å¹…ã‚’å¤‰æ›´
         $(`#${this.id}>.col_head`).css("background-color", `#${this.pref.col_color}`)
         $(`#${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
         $(`#${this.id}`).css("width", this.pref.d_flex ? "auto" : `${this.pref.col_width}px`)
 
-        // ƒfƒtƒHƒ‹ƒg‚Å•Â‚¶‚éê‡‚Í•\¦‚ğ”½“]
+        // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§é–‰ã˜ã‚‹å ´åˆã¯è¡¨ç¤ºã‚’åè»¢
         if (this.pref.d_hide) {
             $(`#columns>table #${this.id}`).hide()
             $(`#columns>table #${this.id}_closed`).show()
@@ -286,42 +286,42 @@ class Column {
 
     /**
      * #StaticMethod
-     * ƒJƒ‰ƒ€‚âƒJƒ‰ƒ€‚É•\¦‚·‚é“à—e‚ÉŠÖ‚·‚éƒCƒxƒ“ƒg‚ğİ’è‚·‚é
+     * ã‚«ãƒ©ãƒ ã‚„ã‚«ãƒ©ãƒ ã«è¡¨ç¤ºã™ã‚‹å†…å®¹ã«é–¢ã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹
      */
     static bindEvent() {
-        // ƒRƒ“ƒeƒ“ƒc–{•¶: ƒŠƒ“ƒN‚ğŠO•”ƒuƒ‰ƒEƒU‚ÅŠJ‚­
+        // ã‚³ãƒ³ãƒ†ãƒ³ãƒ„æœ¬æ–‡: ãƒªãƒ³ã‚¯ã‚’å¤–éƒ¨ãƒ–ãƒ©ã‚¦ã‚¶ã§é–‹ã
         $(document).on("click", ".content>.main_content a", e => {
             const url = $(e.target).closest("a").attr("href")
             window.accessApi.openExternalBrowser(url)
-            // ƒŠƒ“ƒNæ‚É”ò‚Î‚È‚¢‚æ‚¤‚É‚·‚é
+            // ãƒªãƒ³ã‚¯å…ˆã«é£›ã°ãªã„ã‚ˆã†ã«ã™ã‚‹
             return false
         })
-        // ƒRƒ“ƒeƒ“ƒc–{•¶: ‰{——’ˆÓ‚ÆCW‚ÌƒI[ƒvƒ“/ƒNƒ[ƒY
+        // ã‚³ãƒ³ãƒ†ãƒ³ãƒ„æœ¬æ–‡: é–²è¦§æ³¨æ„ã¨CWã®ã‚ªãƒ¼ãƒ—ãƒ³/ã‚¯ãƒ­ãƒ¼ã‚º
         $(document).on("click", ".expand_header",
             e => $(e.target).next().toggle("slide", { direction: "up" }, 100))
-        // ƒJƒ‰ƒ€–{‘Ì: ‚»‚ÌƒJƒ‰ƒ€‚ÉƒJ[ƒ\ƒ‹‚ğ‡‚í‚¹‚é
+        // ã‚«ãƒ©ãƒ æœ¬ä½“: ãã®ã‚«ãƒ©ãƒ ã«ã‚«ãƒ¼ã‚½ãƒ«ã‚’åˆã‚ã›ã‚‹
         $(document).on("click", ".column_td", e => {
             Column.disposeCursor()
             Column.get($(e.target).closest("td")).setCursor()
         })
-        // ƒJƒ‰ƒ€ƒ{ƒ^ƒ“: ƒgƒbƒv‚ÖˆÚ“®
+        // ã‚«ãƒ©ãƒ ãƒœã‚¿ãƒ³: ãƒˆãƒƒãƒ—ã¸ç§»å‹•
         $(document).on("click", ".__on_column_top",
             e => Column.get($(e.target).closest("td")).scroll(0))
-        // ƒJƒ‰ƒ€ƒ{ƒ^ƒ“: ƒJƒ‰ƒ€‚ğŠJ‚­
+        // ã‚«ãƒ©ãƒ ãƒœã‚¿ãƒ³: ã‚«ãƒ©ãƒ ã‚’é–‹ã
         $(document).on("click", ".__on_column_open",
             e => Column.get($(e.target).closest("td").index(".closed_col")).toggle())
-        // ƒJƒ‰ƒ€ƒ{ƒ^ƒ“: ƒJƒ‰ƒ€‚ğ•Â‚¶‚é
+        // ã‚«ãƒ©ãƒ ãƒœã‚¿ãƒ³: ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹
         $(document).on("click", ".__on_column_close",
             e => Column.get($(e.target).closest("td").index(".column_td")).toggle())
-        // ƒJƒ‰ƒ€ƒ{ƒ^ƒ“: ‰Â•Ï•ON/OFF
+        // ã‚«ãƒ©ãƒ ãƒœã‚¿ãƒ³: å¯å¤‰å¹…ON/OFF
         $(document).on("click", ".__on_column_flex",
             e => Column.get($(e.target).closest("td")).toggleFlex())
-        // ƒJƒ‰ƒ€ƒ{ƒ^ƒ“: ƒŠƒ[ƒh
+        // ã‚«ãƒ©ãƒ ãƒœã‚¿ãƒ³: ãƒªãƒ­ãƒ¼ãƒ‰
         $(document).on("click", ".__on_column_reload",
             e => Column.get($(e.target).closest("td")).reload())
-        // ƒRƒ“ƒeƒ“ƒc–{•¶: ‰æ‘œ‚ğŠg‘å•\¦
+        // ã‚³ãƒ³ãƒ†ãƒ³ãƒ„æœ¬æ–‡: ç”»åƒã‚’æ‹¡å¤§è¡¨ç¤º
         $(document).on("click", ".__on_media_expand", e => {
-            // ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒAƒX”ä‚ğŒvZ
+            // ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¢ã‚¹æ¯”ã‚’è¨ˆç®—
             const link = $(e.target).closest(".__on_media_expand")
             const window_aspect = window.innerWidth / window.innerHeight
             const image_aspect = link.attr("name")
@@ -329,13 +329,13 @@ class Column {
             $("#header>#pop_extend_column")
                 .html(`<div class="expand_image_col"><img src="${link.attr("href")}"/></div>`)
                 .show("slide", { direction: "right" }, 100)
-            if (image_aspect > window_aspect) // ƒEƒBƒ“ƒhƒE‚æ‚è‚à‰æ‘œ‚Ì‚Ù‚¤‚ª‰¡•‚È‚ª‚ß
+            if (image_aspect > window_aspect) // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚ˆã‚Šã‚‚ç”»åƒã®ã»ã†ãŒæ¨ªå¹…ãªãŒã‚
                 $("#header>#pop_extend_column>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
-            else // ƒEƒBƒ“ƒhƒE‚æ‚è‚à‰æ‘œ‚Ì‚Ù‚¤‚ªc•‚È‚ª‚ß
+            else // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚ˆã‚Šã‚‚ç”»åƒã®ã»ã†ãŒç¸¦å¹…ãªãŒã‚
                 $("#header>#pop_extend_column>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
             return false
         })
-        // ‰æ‘œˆÈŠO‚ğƒNƒŠƒbƒN‚·‚é‚Æ‰æ‘œƒEƒBƒ“ƒhƒE‚ğ•Â‚¶‚é
+        // ç”»åƒä»¥å¤–ã‚’ã‚¯ãƒªãƒƒã‚¯ã™ã‚‹ã¨ç”»åƒã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’é–‰ã˜ã‚‹
         $("body *:not(#header>#pop_extend_column>.expand_image_col)")
             .on("click", e => $("#header>#pop_extend_column>.expand_image_col")
                 .closest("#pop_extend_column").hide("slide", { direction: "right" }, 100))
@@ -343,10 +343,10 @@ class Column {
 
     /**
      * #StaticMethod
-     * ƒJƒ‰ƒ€‚Ìƒ{ƒ^ƒ“‚Éƒc[ƒ‹ƒ`ƒbƒv‚ğİ’è‚·‚é
+     * ã‚«ãƒ©ãƒ ã®ãƒœã‚¿ãƒ³ã«ãƒ„ãƒ¼ãƒ«ãƒãƒƒãƒ—ã‚’è¨­å®šã™ã‚‹
      */
     static tooltip() {
-        // ƒJƒ‰ƒ€ƒIƒvƒVƒ‡ƒ“‚Éƒc[ƒ‹ƒ`ƒbƒv•\¦
+        // ã‚«ãƒ©ãƒ ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã«ãƒ„ãƒ¼ãƒ«ãƒãƒƒãƒ—è¡¨ç¤º
         $("td .col_action").tooltip({
             position: {
                 my: "center top",
@@ -365,32 +365,32 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğƒJƒ‰ƒ€‚ÌDOM‚ÉƒoƒCƒ“ƒh‚·‚é
-     * (ƒ^ƒCƒ€ƒ‰ƒCƒ“æ“¾‚ÌƒŠƒNƒGƒXƒg‚ğ‚·‚×‚Ä‘—‚Á‚½ƒ^ƒCƒ~ƒ“ƒO(ƒŒƒXƒ|ƒ“ƒX‚ª•Ô‚Á‚Ä‚«‚½‚©‚Í–â‚í‚È‚¢)‚ÅÀs)
+     * ã“ã®ã‚«ãƒ©ãƒ ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’ã‚«ãƒ©ãƒ ã®DOMã«ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹
+     * (ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³å–å¾—ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’ã™ã¹ã¦é€ã£ãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°(ãƒ¬ã‚¹ãƒãƒ³ã‚¹ãŒè¿”ã£ã¦ããŸã‹ã¯å•ã‚ãªã„)ã§å®Ÿè¡Œ)
      */
     async onLoadTimeline(rest_promises) {
-        // ƒJƒ‰ƒ€‚Ì‚·‚×‚Ä‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌREST API‚ªŒÄ‚Ño‚µI‚í‚Á‚½‚©”»’è‚·‚é‚½‚ß‚ÉPromise.all‚ğg—p
+        // ã‚«ãƒ©ãƒ ã®ã™ã¹ã¦ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®REST APIãŒå‘¼ã³å‡ºã—çµ‚ã‚ã£ãŸã‹åˆ¤å®šã™ã‚‹ãŸã‚ã«Promise.allã‚’ä½¿ç”¨
         Promise.all(rest_promises).then(datas => {
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ÌPromise”z—ñ‚ğ‘–¸
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®Promiseé…åˆ—ã‚’èµ°æŸ»
             const postlist = [];
             datas.forEach(posts => posts.forEach(p => this.addStatus(p, () => postlist.push(p))))
-            // ‚·‚×‚Ä‚Ìƒf[ƒ^‚ğ”z—ñ‚É“ü‚ê‚½ƒ^ƒCƒ~ƒ“ƒO‚Å”z—ñ‚ğ“ú•t‡‚Éƒ\[ƒg‚·‚é(’PˆêTL‚Ì‚Æ‚«‚Í‚µ‚È‚¢)
+            // ã™ã¹ã¦ã®ãƒ‡ãƒ¼ã‚¿ã‚’é…åˆ—ã«å…¥ã‚ŒãŸã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§é…åˆ—ã‚’æ—¥ä»˜é †ã«ã‚½ãƒ¼ãƒˆã™ã‚‹(å˜ä¸€TLã®ã¨ãã¯ã—ãªã„)
             if (datas.length > 1) postlist.sort((a, b) => b.sort_date - a.sort_date)
-            // ƒ\[ƒg‚ªI‚í‚Á‚½‚çƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğDOM‚É”½‰f
+            // ã‚½ãƒ¼ãƒˆãŒçµ‚ã‚ã£ãŸã‚‰ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’DOMã«åæ˜ 
             postlist.forEach(post => this.append(post))
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s
+            // å–å¾—å¤±æ•—æ™‚
             console.log(jqXHR)
-            toast("ƒ^ƒCƒ€ƒ‰ƒCƒ“‚Ìæ“¾‚É¸”s‚µ‚½ƒJƒ‰ƒ€‚ª‚ ‚è‚Ü‚·B", "error")
+            toast("ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã®å–å¾—ã«å¤±æ•—ã—ãŸã‚«ãƒ©ãƒ ãŒã‚ã‚Šã¾ã™ã€‚", "error")
         })
     }
 
     /**
      * #Method
-     * ˆø”‚ÌƒXƒe[ƒ^ƒXƒf[ƒ^‚ğ‚±‚ÌƒJƒ‰ƒ€‚Ì––”ö‚É’Ç‰Á‚·‚é
-     * (Å‰‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“æ“¾ˆ—‚Åg—p)
+     * å¼•æ•°ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’ã“ã®ã‚«ãƒ©ãƒ ã®æœ«å°¾ã«è¿½åŠ ã™ã‚‹
+     * (æœ€åˆã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³å–å¾—å‡¦ç†ã§ä½¿ç”¨)
      * 
-     * @param post ƒJƒ‰ƒ€‚É’Ç‰Á‚·‚éƒXƒe[ƒ^ƒXƒf[ƒ^
+     * @param post ã‚«ãƒ©ãƒ ã«è¿½åŠ ã™ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿
      */
     append(post) {
         $(`#${this.id}>ul`).append(post.element)
@@ -398,24 +398,24 @@ class Column {
 
     /**
      * #Method
-     * ˆø”‚ÌƒXƒe[ƒ^ƒXƒf[ƒ^‚ğ‚±‚ÌƒJƒ‰ƒ€‚Ìæ“ª‚É’Ç‰Á‚·‚é
-     * (WebSocket‚É‚æ‚éStreaming API‚©‚ç‚Ìƒf[ƒ^ƒoƒCƒ“ƒh‚Åg—p)
+     * å¼•æ•°ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’ã“ã®ã‚«ãƒ©ãƒ ã®å…ˆé ­ã«è¿½åŠ ã™ã‚‹
+     * (WebSocketã«ã‚ˆã‚‹Streaming APIã‹ã‚‰ã®ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ãƒ‰ã§ä½¿ç”¨)
      * 
-     * @param post ƒJƒ‰ƒ€‚É’Ç‰Á‚·‚éƒXƒe[ƒ^ƒXƒf[ƒ^
+     * @param post ã‚«ãƒ©ãƒ ã«è¿½åŠ ã™ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿
      */
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
-        // d•¡‚µ‚Ä‚¢‚é“Še‚ğœŠO‚·‚é
+        // é‡è¤‡ã—ã¦ã„ã‚‹æŠ•ç¨¿ã‚’é™¤å¤–ã™ã‚‹
         this.addStatus(post, () => {
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“ƒLƒƒƒbƒVƒ…‚ªŒÀŠE‚É“’B‚µ‚Ä‚¢‚½‚çŒã‚ë‚©‚ç‡‚ÉƒLƒƒƒbƒVƒ…ƒNƒŠƒA‚·‚é
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒé™ç•Œã«åˆ°é”ã—ã¦ã„ãŸã‚‰å¾Œã‚ã‹ã‚‰é †ã«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚¯ãƒªã‚¢ã™ã‚‹
             if (ul.find("li").length >= Column.TIMELINE_LIMIT) this.removeStatus(ul.find("li:last-child"))
             ul.prepend(post.element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
-            // –¢“ÇƒJƒEƒ“ƒ^[‚ğã‚°‚é
+            // æœªèª­ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã‚’ä¸Šã’ã‚‹
             $(`#${this.id}_closed>h2>span`).text(++this.unread)
         })
 
-        // ’Ê’m‚ª—ˆ‚½ê‡‚Í’Ê’mƒEƒBƒ“ƒhƒE‚É’Ç‰Á
+        // é€šçŸ¥ãŒæ¥ãŸå ´åˆã¯é€šçŸ¥ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã«è¿½åŠ 
         if (post.type == 'notification') window.accessApi.notification(post.notification)
     }
 
@@ -425,16 +425,16 @@ class Column {
 
     /**
      * #Method
-     * ˆø”‚ÌƒXƒe[ƒ^ƒXƒf[ƒ^‚ªŠù‚É‚±‚ÌƒJƒ‰ƒ€‚É‘¶İ‚·‚é‚©‚Ç‚¤‚©ŒŸ¸‚·‚é
-     * ‘¶İ‚µ‚È‚¢ê‡‚ÍƒZƒbƒg‚ÉƒL[‚ğ’Ç‰Á‚µ‚Ä’Ç‰Á—p‚ÌƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀs
+     * å¼•æ•°ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿ãŒæ—¢ã«ã“ã®ã‚«ãƒ©ãƒ ã«å­˜åœ¨ã™ã‚‹ã‹ã©ã†ã‹æ¤œæŸ»ã™ã‚‹
+     * å­˜åœ¨ã—ãªã„å ´åˆã¯ã‚»ãƒƒãƒˆã«ã‚­ãƒ¼ã‚’è¿½åŠ ã—ã¦è¿½åŠ ç”¨ã®ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å®Ÿè¡Œ
      * 
-     * @param post ƒJƒ‰ƒ€‚É’Ç‰Á‚·‚éƒXƒe[ƒ^ƒXƒf[ƒ^
-     * @param callback d•¡‚µ‚Ä‚¢‚È‚©‚Á‚½‚ÉÀs‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
+     * @param post ã‚«ãƒ©ãƒ ã«è¿½åŠ ã™ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿
+     * @param callback é‡è¤‡ã—ã¦ã„ãªã‹ã£ãŸæ™‚ã«å®Ÿè¡Œã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
      */
     addStatus(post, callback) {
-        // d•¡‚µ‚Ä‚¢‚éA‚à‚µ‚­‚Íƒ~ƒ…[ƒg‘ÎÛ‚Ìê‡‚ÍƒR[ƒ‹ƒoƒbƒNŠÖ”‚ÌÀs‚ğ–³‹‚·‚é
+        // é‡è¤‡ã—ã¦ã„ã‚‹ã€ã‚‚ã—ãã¯ãƒŸãƒ¥ãƒ¼ãƒˆå¯¾è±¡ã®å ´åˆã¯ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã®å®Ÿè¡Œã‚’ç„¡è¦–ã™ã‚‹
         if (!this.status_map.has(post.status_key) && !post.muted) {
-            // ƒ†ƒj[ƒNƒL[‚ğƒL[‚ÉAƒXƒe[ƒ^ƒXƒCƒ“ƒXƒ^ƒ“ƒX‚ğ‚Â(Timeline‚Æ‘ŠŒİQÆ‚·‚é‚½‚ß)
+            // ãƒ¦ãƒ‹ãƒ¼ã‚¯ã‚­ãƒ¼ã‚’ã‚­ãƒ¼ã«ã€ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’æŒã¤(Timelineã¨ç›¸äº’å‚ç…§ã™ã‚‹ãŸã‚)
             this.status_map.set(post.status_key, post)
             post.from_timeline.id_list = post
             callback()
@@ -450,19 +450,19 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ÉƒJ[ƒ\ƒ‹‚ğİ’è
+     * ã“ã®ã‚«ãƒ©ãƒ ã«ã‚«ãƒ¼ã‚½ãƒ«ã‚’è¨­å®š
      */
     setCursor() {
         const elm = $(`#${this.id}`)
         elm.addClass("__target_col")
             .find(".ic_column_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
-        // ƒJ[ƒ\ƒ‹‚ğƒZƒbƒg‚µ‚½‚Æ‚±‚ë‚Ü‚ÅƒXƒNƒ[ƒ‹
+        // ã‚«ãƒ¼ã‚½ãƒ«ã‚’ã‚»ãƒƒãƒˆã—ãŸã¨ã“ã‚ã¾ã§ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«
         elm.get()[0].scrollIntoView({ inline: 'nearest' })
     }
 
     /**
      * #StaticMethod
-     * Œ»İƒJ[ƒ\ƒ‹‚Ì‚Â‚¢‚Ä‚¢‚éƒJƒ‰ƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğæ“¾
+     * ç¾åœ¨ã‚«ãƒ¼ã‚½ãƒ«ã®ã¤ã„ã¦ã„ã‚‹ã‚«ãƒ©ãƒ ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å–å¾—
      */
     static getCursor() {
         return Column.get($(".__target_col"))
@@ -470,7 +470,7 @@ class Column {
 
     /**
      * #StaticMethod
-     * Œ»İƒJ[ƒ\ƒ‹‚Ì‚Â‚¢‚Ä‚¢‚éƒJƒ‰ƒ€‚©‚çƒJ[ƒ\ƒ‹‚ğÁ‹‚µ‚ÄƒJƒ‰ƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğæ“¾
+     * ç¾åœ¨ã‚«ãƒ¼ã‚½ãƒ«ã®ã¤ã„ã¦ã„ã‚‹ã‚«ãƒ©ãƒ ã‹ã‚‰ã‚«ãƒ¼ã‚½ãƒ«ã‚’æ¶ˆå»ã—ã¦ã‚«ãƒ©ãƒ ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å–å¾—
      */
     static disposeCursor() {
         const target = Column.getCursor()
@@ -480,26 +480,26 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚Ì•\¦/”ñ•\¦‚ğØ‚è‘Ö‚¦‚é
+     * ã“ã®ã‚«ãƒ©ãƒ ã®è¡¨ç¤º/éè¡¨ç¤ºã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
      */
     toggle() {
         const target = $(`#${this.id}`)
         if (this.open_flg) {
-            // OpenËClose
+            // Openâ‡’Close
             if ($(".column_td:visible").length <= 1) {
-                // ‘S•”‚ÌƒJƒ‰ƒ€‚ğ•Â‚¶‚æ‚¤‚Æ‚µ‚½‚ç~‚ß‚é
-                toast("‚·‚×‚Ä‚ÌƒJƒ‰ƒ€‚ğ•Â‚¶‚é‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB", "error")
+                // å…¨éƒ¨ã®ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚ˆã†ã¨ã—ãŸã‚‰æ­¢ã‚ã‚‹
+                toast("ã™ã¹ã¦ã®ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚", "error")
                 return
             }
-            // ©g‚ğ•Â‚¶‚Ä¶—×‚Ì’ZkƒJƒ‰ƒ€‚ğ•\¦
+            // è‡ªèº«ã‚’é–‰ã˜ã¦å·¦éš£ã®çŸ­ç¸®ã‚«ãƒ©ãƒ ã‚’è¡¨ç¤º
             const closed_col = target.prev()
             target.hide()
-            this.unread = 0 // –¢“Ç”‚ğƒŠƒZƒbƒg
+            this.unread = 0 // æœªèª­æ•°ã‚’ãƒªã‚»ãƒƒãƒˆ
             closed_col.find("h2>span").empty()
             closed_col.show()
             this.open_flg = false
         } else {
-            // CloseËOpen
+            // Closeâ‡’Open
             target.prev().hide()
             target.show()
             this.open_flg = true
@@ -509,7 +509,7 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ğŠJ‚­(‚·‚Å‚É•\¦‚µ‚Ä‚¢‚éê‡‚Í‚È‚É‚à‚µ‚È‚¢)
+     * ã“ã®ã‚«ãƒ©ãƒ ã‚’é–‹ã(ã™ã§ã«è¡¨ç¤ºã—ã¦ã„ã‚‹å ´åˆã¯ãªã«ã‚‚ã—ãªã„)
      */
     open() {
         if (!this.open_flg) this.toggle()
@@ -517,7 +517,7 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ğ•Â‚¶‚é(‚·‚Å‚É”ñ•\¦‚Ìê‡‚Í‚È‚É‚à‚µ‚È‚¢)
+     * ã“ã®ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹(ã™ã§ã«éè¡¨ç¤ºã®å ´åˆã¯ãªã«ã‚‚ã—ãªã„)
      */
     close() {
         if (this.open_flg) this.toggle()
@@ -525,18 +525,18 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚Ì‰Â•Ï•İ’è‚ÌON/OFF‚ğØ‚è‘Ö‚¦‚é
+     * ã“ã®ã‚«ãƒ©ãƒ ã®å¯å¤‰å¹…è¨­å®šã®ON/OFFã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
      */
     toggleFlex() {
         const target = $(`#${this.id}`)
         const img = target.find(".ic_column_flex")
         if (!this.flex) {
-            // OFFËON
+            // OFFâ‡’ON
             target.css('width', 'auto')
             img.attr('src', 'resources/ic_flex_on.png')
             this.flex = true
         } else {
-            // ONËOFF
+            // ONâ‡’OFF
             target.css('width', `${this.pref.col_width}px`)
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
@@ -545,14 +545,14 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ÌƒXƒNƒ[ƒ‹ˆÊ’u‚ğˆø”‚Ì’l‚¾‚¯ã‰º‚·‚é
-     * 0‚ğİ’è‚µ‚½ê‡‚Í–³ğŒ‚Åæ“ª‚Ü‚ÅƒXƒNƒ[ƒ‹‚·‚é
+     * ã“ã®ã‚«ãƒ©ãƒ ã®ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ä½ç½®ã‚’å¼•æ•°ã®å€¤ã ã‘ä¸Šä¸‹ã™ã‚‹
+     * 0ã‚’è¨­å®šã—ãŸå ´åˆã¯ç„¡æ¡ä»¶ã§å…ˆé ­ã¾ã§ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹
      *
-     * @param to ƒXƒNƒ[ƒ‹‚·‚é—Ê(0‚ğƒZƒbƒg‚Åæ“ª‚Ü‚ÅˆÚ“®)
+     * @param to ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹é‡(0ã‚’ã‚»ãƒƒãƒˆã§å…ˆé ­ã¾ã§ç§»å‹•)
      */
     scroll(to) {
         const target = $(`#${this.id}>ul`)
-        // ˆø”‚ª0‚Ìê‡‚Íæ“ª‚Ü‚ÅƒXƒNƒ[ƒ‹
+        // å¼•æ•°ãŒ0ã®å ´åˆã¯å…ˆé ­ã¾ã§ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«
         if (to == 0) {
             target.scrollTop(0)
             return
@@ -563,48 +563,48 @@ class Column {
 
     /**
      * #Method
-     * ‚±‚ÌƒJƒ‰ƒ€‚ğƒŠƒ[ƒh‚·‚é
+     * ã“ã®ã‚«ãƒ©ãƒ ã‚’ãƒªãƒ­ãƒ¼ãƒ‰ã™ã‚‹
      */
     reload() {
-        // ˆê’U’†g‚ğ‘SÁ‹‚·‚é
+        // ä¸€æ—¦ä¸­èº«ã‚’å…¨æ¶ˆå»ã™ã‚‹
         $(`#${this.id}`).find("ul").empty()
 
         const rest_promises = []
         this.status_map = new Map()
-        // ƒJƒ‰ƒ€‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğ‘–¸‚µ‚Ä”z—ñ‚ÌAPIŒÄ‚Ño‚µƒpƒ‰ƒ[ƒ^‚ğg‚Á‚Äƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğ¶¬
+        // ã‚«ãƒ©ãƒ ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’èµ°æŸ»ã—ã¦é…åˆ—ã®APIå‘¼ã³å‡ºã—ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ä½¿ã£ã¦ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’ç”Ÿæˆ
         this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
-        // ƒJƒ‰ƒ€‚Ì‚·‚×‚Ä‚Ìƒ^ƒCƒ€ƒ‰ƒCƒ“‚ªæ“¾‚µI‚¦‚½‚çƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğƒoƒCƒ“ƒh
+        // ã‚«ãƒ©ãƒ ã®ã™ã¹ã¦ã®ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãŒå–å¾—ã—çµ‚ãˆãŸã‚‰ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’ãƒã‚¤ãƒ³ãƒ‰
         this.onLoadTimeline(rest_promises)
     }
 
-    // Getter: ‚±‚ÌƒJƒ‰ƒ€‚Ì‰E‰¡‚ÌƒJƒ‰ƒ€‚ğæ“¾(ƒ[ƒe[ƒVƒ‡ƒ“)
+    // Getter: ã“ã®ã‚«ãƒ©ãƒ ã®å³æ¨ªã®ã‚«ãƒ©ãƒ ã‚’å–å¾—(ãƒ­ãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³)
     get next() {
         let index = $(`#${this.id}`).index(".column_td") + 1
-        // ‰E’[‚Ìê‡‚ÍÅ‰‚Ì—v‘f‚ğ‘I‘ğ
+        // å³ç«¯ã®å ´åˆã¯æœ€åˆã®è¦ç´ ã‚’é¸æŠ
         if ($(".column_td").length <= index) index = 0
         return Column.get(index)
     }
 
-    // Getter: ‚±‚ÌƒJƒ‰ƒ€‚Ì‰E‰¡‚ÌŠJ‚¢‚Ä‚¢‚éƒJƒ‰ƒ€‚ğæ“¾(ƒ[ƒe[ƒVƒ‡ƒ“)
+    // Getter: ã“ã®ã‚«ãƒ©ãƒ ã®å³æ¨ªã®é–‹ã„ã¦ã„ã‚‹ã‚«ãƒ©ãƒ ã‚’å–å¾—(ãƒ­ãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³)
     get opened_next() {
         let index = $(`#${this.id}`).index(".column_td:visible") + 1
-        // ‰E’[‚Ìê‡‚ÍÅ‰‚Ì—v‘f‚ğ‘I‘ğ
+        // å³ç«¯ã®å ´åˆã¯æœ€åˆã®è¦ç´ ã‚’é¸æŠ
         if ($(".column_td:visible").length <= index) index = 0
         return Column.get($(".column_td:visible").eq(index))
     }
 
-    // Getter: ‚±‚ÌƒJƒ‰ƒ€‚Ì¶‰¡‚ÌƒJƒ‰ƒ€‚ğæ“¾(ƒ[ƒe[ƒVƒ‡ƒ“)
+    // Getter: ã“ã®ã‚«ãƒ©ãƒ ã®å·¦æ¨ªã®ã‚«ãƒ©ãƒ ã‚’å–å¾—(ãƒ­ãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³)
     get prev() {
         let index = $(`#${this.id}`).index(".column_td") - 1
-        // ¶’[‚Ìê‡‚ÍÅŒã‚Ì—v‘f‚ğ‘I‘ğ
+        // å·¦ç«¯ã®å ´åˆã¯æœ€å¾Œã®è¦ç´ ã‚’é¸æŠ
         if (index < 0) index = $(".column_td").length - 1
         return Column.get(index)
     }
 
-    // Getter: ‚±‚ÌƒJƒ‰ƒ€‚Ì¶‰¡‚ÌŠJ‚¢‚Ä‚¢‚éƒJƒ‰ƒ€‚ğæ“¾(ƒ[ƒe[ƒVƒ‡ƒ“)
+    // Getter: ã“ã®ã‚«ãƒ©ãƒ ã®å·¦æ¨ªã®é–‹ã„ã¦ã„ã‚‹ã‚«ãƒ©ãƒ ã‚’å–å¾—(ãƒ­ãƒ¼ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³)
     get opened_prev() {
         let index = $(`#${this.id}`).index(".column_td:visible") - 1
-        // ‰E’[‚Ìê‡‚ÍÅ‰‚Ì—v‘f‚ğ‘I‘ğ
+        // å³ç«¯ã®å ´åˆã¯æœ€åˆã®è¦ç´ ã‚’é¸æŠ
         if (index < 0) index = $(".column_td:visible").length - 1
         return Column.get($(".column_td:visible").eq(index))
     }

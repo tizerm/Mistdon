@@ -1,14 +1,14 @@
-/**
+ï»¿/**
  * #Renderer #jQuery
- * ƒJƒ‰ƒ€‚Ìƒeƒ“ƒvƒŒ[ƒg‚ğ¶¬‚·‚é
- * ’†g‚ÍŒã“ü‚ê
+ * ã‚«ãƒ©ãƒ ã®ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã‚’ç”Ÿæˆã™ã‚‹
+ * ä¸­èº«ã¯å¾Œå…¥ã‚Œ
  * 
- * @param column ƒJƒ‰ƒ€î•ñ‚ÌJSON
+ * @param column ã‚«ãƒ©ãƒ æƒ…å ±ã®JSON
  */
 function createColumn(column) {
-    // ƒJƒ‰ƒ€¯•ÊID(V‹Kì¬‚Ìê‡‚Í¯•ÊID‚ğ¶¬)
+    // ã‚«ãƒ©ãƒ è­˜åˆ¥ID(æ–°è¦ä½œæˆã®å ´åˆã¯è­˜åˆ¥IDã‚’ç”Ÿæˆ)
     const column_uuid = column?.column_id ?? `col_${crypto.randomUUID()}`;
-    // ƒJƒ‰ƒ€–{‘Ì‚ğ‹ó‚Ìó‘Ô‚Å¶¬
+    // ã‚«ãƒ©ãƒ æœ¬ä½“ã‚’ç©ºã®çŠ¶æ…‹ã§ç”Ÿæˆ
     $("#columns>table>tbody>tr").append(`
         <td id="${column_uuid}" class="timeline ui-sortable">
             <div class="col_head">
@@ -18,36 +18,36 @@ function createColumn(column) {
                 </div>
             </div>
             <div class="col_option">
-                <button type="button" class="__btn_add_tl">TL’Ç‰Á</button>
-                <button type="button" class="__btn_del_col">—ñíœ</button><br/>
+                <button type="button" class="__btn_add_tl">TLè¿½åŠ </button>
+                <button type="button" class="__btn_del_col">åˆ—å‰Šé™¤</button><br/>
                 <input type="checkbox" id="dh_${column_uuid}" class="__chk_default_hide"${column?.d_hide ? ' checked' : ''}/>
-                <label for="dh_${column_uuid}">ƒfƒtƒHƒ‹ƒg‚Å•Â‚¶‚é</label><br/>
+                <label for="dh_${column_uuid}">ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§é–‰ã˜ã‚‹</label><br/>
                 <input type="checkbox" id="df_${column_uuid}" class="__chk_default_flex"${column?.d_flex ? ' checked' : ''}/>
-                <label for="df_${column_uuid}">ƒfƒtƒHƒ‹ƒg‚Å‰Â•Ï•‚É‚·‚é</label><br/>
-                ƒJƒ‰ƒ€ƒJƒ‰[:
+                <label for="df_${column_uuid}">ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§å¯å¤‰å¹…ã«ã™ã‚‹</label><br/>
+                ã‚«ãƒ©ãƒ ã‚«ãƒ©ãƒ¼:
                 #<input type="text" class="__txt_col_color __pull_color_palette" value="${column?.col_color ?? ''}" size="6"/>
             </div>
             <ul></ul>
         </td>
     `);
-    // ƒJƒ‰ƒ€ƒŒƒCƒAƒEƒg‚ğ•ÏX
+    // ã‚«ãƒ©ãƒ ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã‚’å¤‰æ›´
     if (column?.col_color) {
         $(`#columns>table #${column_uuid}>.col_head`).css("background-color", `#${column.col_color}`);
     }
     if (column?.col_width) {
         $(`#columns>table #${column_uuid}`).css("width", `${column.col_width}px`);
     }
-    // ƒJƒ‰ƒ€‚ÌUUID‚ğ•Ô‹p
+    // ã‚«ãƒ©ãƒ ã®UUIDã‚’è¿”å´
     return column_uuid;
 }
 
 /**
  * #Renderer #jQuery
- * ƒ^ƒCƒ€ƒ‰ƒCƒ“İ’èJSON‚ğHTML‚Æ‚µ‚Ä¶¬
+ * ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³è¨­å®šJSONã‚’HTMLã¨ã—ã¦ç”Ÿæˆ
  * 
- * @param array_json İ’èJSON
- * @param j ƒJƒ‰ƒ€”Ô†
- * @param accounts ƒAƒJƒEƒ“ƒgƒ}ƒbƒv
+ * @param array_json è¨­å®šJSON
+ * @param j ã‚«ãƒ©ãƒ ç•ªå·
+ * @param accounts ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒãƒƒãƒ—
  */
 function createTimelineOptions(col, accounts) {
     let html = '';
@@ -63,11 +63,11 @@ function createTimelineOptions(col, accounts) {
 
 /**
  * #Renderer #jQuery
- * ƒ^ƒCƒ€ƒ‰ƒCƒ“İ’è‚ğHTML‚Æ‚µ‚Ä¶¬(1s‚¾‚¯)
+ * ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³è¨­å®šã‚’HTMLã¨ã—ã¦ç”Ÿæˆ(1è¡Œã ã‘)
  * 
- * @param value ŒÂ•Êstatus JSON
- * @param index ƒ^ƒCƒ€ƒ‰ƒCƒ“”Ô†
- * @param accounts ƒAƒJƒEƒ“ƒgƒ}ƒbƒv
+ * @param value å€‹åˆ¥status JSON
+ * @param index ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ç•ªå·
+ * @param accounts ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒãƒƒãƒ—
  */
 function createTimelineOptionLine(arg) {
     const uuid = crypto.randomUUID();
@@ -76,10 +76,10 @@ function createTimelineOptionLine(arg) {
             <h4><span class="tl_header_label">Timeline ${arg.index}</span></h4>
             <div class="tl_option">
                 <div class="lbl_disp_account">
-                    •\¦ƒAƒJƒEƒ“ƒg:<br/>
+                    è¡¨ç¤ºã‚¢ã‚«ã‚¦ãƒ³ãƒˆ:<br/>
                     <select class="__cmb_tl_account">
     `;
-    // ƒAƒJƒEƒ“ƒg‚ğƒRƒ“ƒ{ƒ{ƒbƒNƒX‚ÉƒZƒbƒg
+    // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’ã‚³ãƒ³ãƒœãƒœãƒƒã‚¯ã‚¹ã«ã‚»ãƒƒãƒˆ
     arg.accounts?.forEach((v, k) => html += `
         <option value="${k}"${arg.value?.key_address == k ? ' selected' : ''}>${v.username} - ${k}</option>
     `);
@@ -87,20 +87,20 @@ function createTimelineOptionLine(arg) {
                     </select>
                 </div>
                 <div class="lbl_tl_type">
-                    ’Ç‰Á‚·‚éƒJƒ‰ƒ€‚Ìí—Ş:<br/>
+                    è¿½åŠ ã™ã‚‹ã‚«ãƒ©ãƒ ã®ç¨®é¡:<br/>
                     <select class="__cmb_tl_type">
-                        <option value="home"${arg.value?.timeline_type == 'home' ? ' selected' : ''}>ƒz[ƒ€</option>
-                        <option value="local"${arg.value?.timeline_type == 'local' ? ' selected' : ''}>ƒ[ƒJƒ‹</option>
-                        <option value="federation"${arg.value?.timeline_type == 'federation' ? ' selected' : ''}>˜A‡</option>
-                        <option value="notification"${arg.value?.timeline_type == 'notification' ? ' selected' : ''}>’Ê’m</option>
+                        <option value="home"${arg.value?.timeline_type == 'home' ? ' selected' : ''}>ãƒ›ãƒ¼ãƒ </option>
+                        <option value="local"${arg.value?.timeline_type == 'local' ? ' selected' : ''}>ãƒ­ãƒ¼ã‚«ãƒ«</option>
+                        <option value="federation"${arg.value?.timeline_type == 'federation' ? ' selected' : ''}>é€£åˆ</option>
+                        <option value="notification"${arg.value?.timeline_type == 'notification' ? ' selected' : ''}>é€šçŸ¥</option>
                     </select>
                 </div>
                 <div class="lbl_checkbox">
                     <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"${arg.value?.exclude_reblog ? ' checked' : ''}/>
-                    <label for="xr_${uuid}">ƒu[ƒXƒg/ƒŠƒm[ƒg‚ğ”ñ•\¦</label>
+                    <label for="xr_${uuid}">ãƒ–ãƒ¼ã‚¹ãƒˆ/ãƒªãƒãƒ¼ãƒˆã‚’éè¡¨ç¤º</label>
                 </div>
                 <div class="foot_button">
-                    <button type="button" class="__btn_del_tl">ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğíœ</button>
+                    <button type="button" class="__btn_del_tl">ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’å‰Šé™¤</button>
                 </div>
             </div>
         </li>
@@ -110,10 +110,10 @@ function createTimelineOptionLine(arg) {
 
 /**
  * #Renderer #jQuery
- * g‚¦‚éƒ{ƒ^ƒ“‚Æg‚¦‚È‚¢ƒ{ƒ^ƒ“‚ğÄİ’è
+ * ä½¿ãˆã‚‹ãƒœã‚¿ãƒ³ã¨ä½¿ãˆãªã„ãƒœã‚¿ãƒ³ã‚’å†è¨­å®š
  */
 function setButtonPermission() {
-    // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ª1‚Â‚Ìê‡‚Íƒ^ƒCƒ€ƒ‰ƒCƒ“íœ‚ğ‹Ö~
+    // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ãŒ1ã¤ã®å ´åˆã¯ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³å‰Šé™¤ã‚’ç¦æ­¢
     $("#columns>table>tbody>tr>td").each(
         (index, elm) => $(elm).find(".__btn_del_tl").prop("disabled", $(elm).find("li").length == 1));
 }

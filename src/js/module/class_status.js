@@ -1,36 +1,36 @@
-/**
+ï»¿/**
  * #Class
- * “ŠeA’Ê’mƒf[ƒ^‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * æŠ•ç¨¿ã€é€šçŸ¥ãƒ‡ãƒ¼ã‚¿ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
  *
  * @autor tizerm@mofu.kemo.no
  */
 class Status {
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^: API‚©‚ç—ˆ‚½ƒXƒe[ƒ^ƒXƒf[ƒ^‚ğó‚¯æ‚Á‚Ä¶¬
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿: APIã‹ã‚‰æ¥ãŸã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’å—ã‘å–ã£ã¦ç”Ÿæˆ
     constructor(json, timeline, account) {
-        // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚©‚çŒÄ‚Ño‚·ê‡‚Ítimeline‚Æaccount‚ª“n‚Á‚Ä‚­‚é
-        // ŒÂ•Ê‚Ì“Še‚ğAPI‚©‚çŒÄ‚Ño‚µ‚½ê‡‚Ítimeline‚ªnull‚Å“n‚Á‚Ä‚­‚é(account‚ÍŒÄ‚Ño‚µŒ³ƒAƒJƒEƒ“ƒg)
+        // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‹ã‚‰å‘¼ã³å‡ºã™å ´åˆã¯timelineã¨accountãŒæ¸¡ã£ã¦ãã‚‹
+        // å€‹åˆ¥ã®æŠ•ç¨¿ã‚’APIã‹ã‚‰å‘¼ã³å‡ºã—ãŸå ´åˆã¯timelineãŒnullã§æ¸¡ã£ã¦ãã‚‹(accountã¯å‘¼ã³å‡ºã—å…ƒã‚¢ã‚«ã‚¦ãƒ³ãƒˆ)
         this.from_timeline = timeline
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
-        this.status_id = json.id // “Še‚Å‚Í‚È‚­Œ³‚ÌƒXƒe[ƒ^ƒXƒf[ƒ^‚É‘Î‰‚·‚éID
+        this.status_id = json.id // æŠ•ç¨¿ã§ã¯ãªãå…ƒã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿ã«å¯¾å¿œã™ã‚‹ID
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
 
-        // ƒvƒ‰ƒbƒgƒtƒH[ƒ€”»’è
-        let original_date = null // ¶¬ƒL[‚Ég—p‚·‚é‚Ì‚ÅJSON“ú•t‚Ì‚Ù‚¤‚àˆê•Û‘¶
+        // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ åˆ¤å®š
+        let original_date = null // ç”Ÿæˆã‚­ãƒ¼ã«ä½¿ç”¨ã™ã‚‹ã®ã§JSONæ—¥ä»˜ã®ã»ã†ã‚‚ä¸€æ™‚ä¿å­˜
         let data = null
         switch (this.from_account.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
                 original_date = json.created_at
-                this.reblog = json.reblog ? true : false // ƒu[ƒXƒgƒtƒ‰ƒO
-                this.reblog_by = this.reblog ? json.account.acct : null // ƒu[ƒXƒgŒ³ƒ†[ƒU[
+                this.reblog = json.reblog ? true : false // ãƒ–ãƒ¼ã‚¹ãƒˆãƒ•ãƒ©ã‚°
+                this.reblog_by = this.reblog ? json.account.acct : null // ãƒ–ãƒ¼ã‚¹ãƒˆå…ƒãƒ¦ãƒ¼ã‚¶ãƒ¼
 
-                // ƒu[ƒXƒg‚Ìê‡‚Íƒu[ƒXƒgæ‚ğQÆƒf[ƒ^‚Éİ’è
+                // ãƒ–ãƒ¼ã‚¹ãƒˆã®å ´åˆã¯ãƒ–ãƒ¼ã‚¹ãƒˆå…ˆã‚’å‚ç…§ãƒ‡ãƒ¼ã‚¿ã«è¨­å®š
                 data = this.reblog ? json.reblog : json
-                this.uri = json.status?.url ?? data.url // “ŠeURL(‘O‚ÍƒŠƒvƒ‰ƒC‚ÌURL)
-                this.id = data.id // “ŠeID
+                this.uri = json.status?.url ?? data.url // æŠ•ç¨¿URL(å‰ã¯ãƒªãƒ—ãƒ©ã‚¤æ™‚ã®URL)
+                this.id = data.id // æŠ•ç¨¿ID
 
-                // ƒ†[ƒU[‚ÉŠÖ‚·‚éƒf[ƒ^
+                // ãƒ¦ãƒ¼ã‚¶ãƒ¼ã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
                 this.user = {
                     username: data.account.display_name ?? data.account.username,
                     id: data.account.acct,
@@ -47,18 +47,18 @@ class Status {
                     follow_count: data.account.following_count,
                     follower_count: data.account.followers_count
                 }
-                // “ŠeƒRƒ“ƒeƒ“ƒc‚ÉŠÖ‚·‚éƒf[ƒ^
+                // æŠ•ç¨¿ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
                 this.visibility = data.visibility
-                this.cw_text = data.spoiler_text // CWƒeƒLƒXƒg
-                this.content = data.status?.content ?? data.content // –{•¶(’Ê’m‚Ìê‡‚Ístatus‚©‚ç)
+                this.cw_text = data.spoiler_text // CWãƒ†ã‚­ã‚¹ãƒˆ
+                this.content = data.status?.content ?? data.content // æœ¬æ–‡(é€šçŸ¥ã®å ´åˆã¯statusã‹ã‚‰)
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Mastodon',
                     emojis: data.status?.emojis ?? data.emojis
                 })
 
-                // “Y•tƒƒfƒBƒA
-                this.sensitive = data.sensitive // ‰{——’ˆÓİ’è
+                // æ·»ä»˜ãƒ¡ãƒ‡ã‚£ã‚¢
+                this.sensitive = data.sensitive // é–²è¦§æ³¨æ„è¨­å®š
                 this.medias = []
                 data.media_attachments?.forEach(media => this.medias.push({
                     url: media.url,
@@ -68,26 +68,26 @@ class Status {
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
-                if (this.notif_type == 'achievementEarned') return // TODO: ÀÑ‚Íˆê’UœŠO
+                if (this.notif_type == 'achievementEarned') return // TODO: å®Ÿç¸¾ã¯ä¸€æ—¦é™¤å¤–
 
                 original_date = json.createdAt
-                this.reblog = json.renote && !json.text // ƒŠƒm[ƒgƒtƒ‰ƒO
+                this.reblog = json.renote && !json.text // ãƒªãƒãƒ¼ãƒˆãƒ•ãƒ©ã‚°
                 this.reblog_by = this.reblog ? json.user.username
-                    + (json.user.host ? ('@' + json.user.host) : '') : null // ƒŠƒm[ƒgŒ³ƒ†[ƒU[
+                    + (json.user.host ? ('@' + json.user.host) : '') : null // ãƒªãƒãƒ¼ãƒˆå…ƒãƒ¦ãƒ¼ã‚¶ãƒ¼
                 this.quote_flg = json.renote && json.text
 
-                // ƒŠƒm[ƒg‚Ìê‡‚ÍƒŠƒm[ƒgæ‚ğQÆƒf[ƒ^‚Éİ’è
+                // ãƒªãƒãƒ¼ãƒˆã®å ´åˆã¯ãƒªãƒãƒ¼ãƒˆå…ˆã‚’å‚ç…§ãƒ‡ãƒ¼ã‚¿ã«è¨­å®š
                 data = this.reblog ? json.renote : json
-                // ƒm[ƒgURL¶¬
-                // uri‚ª“ü‚Á‚Ä‚¢‚È‚¢ê‡‚Í©I‚Ì“Še‚È‚Ì‚ÅƒzƒXƒg‚©‚çURI‚ğ¶¬
+                // ãƒãƒ¼ãƒˆURLç”Ÿæˆ
+                // uriãŒå…¥ã£ã¦ã„ãªã„å ´åˆã¯è‡ªé¯–ã®æŠ•ç¨¿ãªã®ã§ãƒ›ã‚¹ãƒˆã‹ã‚‰URIã‚’ç”Ÿæˆ
                 if (!data.uri) this.uri = `https://${host}/notes/${data.id}`
-                // URI‚ª“ü‚Á‚Ä‚¢‚Äƒvƒ‰ƒbƒgƒtƒH[ƒ€‚ªMisskey‚Ìê‡‚Íuri‚ğQÆ
+                // URIãŒå…¥ã£ã¦ã„ã¦ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ãŒMisskeyã®å ´åˆã¯uriã‚’å‚ç…§
                 else if (data.user?.instance?.softwareName == "misskey") this.uri = data.uri
-                // TODO: ‚»‚êˆÈŠO‚Íˆê’UMastodon‚Æ‚µ‚Ä‰ğß‚·‚é
+                // TODO: ãã‚Œä»¥å¤–ã¯ä¸€æ—¦Mastodonã¨ã—ã¦è§£é‡ˆã™ã‚‹
                 else this.uri = data.url
-                this.id = data.id // “ŠeID
+                this.id = data.id // æŠ•ç¨¿ID
 
-                // ƒ†[ƒU[‚ÉŠÖ‚·‚éƒf[ƒ^
+                // ãƒ¦ãƒ¼ã‚¶ãƒ¼ã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
                 this.user = {
                     username: data.user.name ?? data.user.username,
                     id: data.user.username + (data.user.host ? ('@' + data.user.host) : ''),
@@ -99,16 +99,16 @@ class Status {
                         emojis: data.user.emojis
                     })
                 }
-                // “ŠeƒRƒ“ƒeƒ“ƒc‚ÉŠÖ‚·‚éƒf[ƒ^
+                // æŠ•ç¨¿ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã«é–¢ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
                 this.visibility = data.visibility
-                this.cw_text = data.cw // CWƒeƒLƒXƒg
-                this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // –{•¶(’Ê’m‚Ìê‡‚Ístatus‚©‚ç)
+                this.cw_text = data.cw // CWãƒ†ã‚­ã‚¹ãƒˆ
+                this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // æœ¬æ–‡(é€šçŸ¥ã®å ´åˆã¯statusã‹ã‚‰)
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Misskey',
                     emojis: data.note?.renote?.emojis ?? data.note?.emojis ?? data.emojis
                 })
-                // ˆø—pƒm[ƒg‚ª‚ ‚éê‡‚Íˆø—pæ‚ğİ’è
+                // å¼•ç”¨ãƒãƒ¼ãƒˆãŒã‚ã‚‹å ´åˆã¯å¼•ç”¨å…ˆã‚’è¨­å®š
                 if (this.quote_flg) this.quote = {
                     username: data.renote.user.name,
                     user_id: data.renote.user.username,
@@ -120,8 +120,8 @@ class Status {
                     })
                 }
 
-                // “Y•tƒƒfƒBƒA
-                this.sensitive = (data.files?.filter(f => f.isSensitive)?.length ?? 0) > 0 // ‰{——’ˆÓİ’è
+                // æ·»ä»˜ãƒ¡ãƒ‡ã‚£ã‚¢
+                this.sensitive = (data.files?.filter(f => f.isSensitive)?.length ?? 0) > 0 // é–²è¦§æ³¨æ„è¨­å®š
                 this.medias = []
                 data.files?.forEach(media => this.medias.push({
                     url: media.url,
@@ -132,26 +132,26 @@ class Status {
             default:
                 break
         }
-        // ‚±‚ÌƒXƒe[ƒ^ƒX‚ğˆêˆÓ‚ÉŒˆ’è‚·‚é‚½‚ß‚ÌƒL[‚ğİ’è
+        // ã“ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’ä¸€æ„ã«æ±ºå®šã™ã‚‹ãŸã‚ã®ã‚­ãƒ¼ã‚’è¨­å®š
         this.sort_date = new Date(original_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user.full_address}`
     }
 
-    // Getter: ‘}“üæƒJƒ‰ƒ€
+    // Getter: æŒ¿å…¥å…ˆã‚«ãƒ©ãƒ 
     get from_column() { return this.from_timeline?.parent_column }
-    // Getter: æ“¾Œ³ƒAƒJƒEƒ“ƒg‚Ìƒvƒ‰ƒbƒgƒtƒH[ƒ€(“Še‚µ‚½ƒ†[ƒU[‚Ìƒvƒ‰ƒbƒgƒtƒH[ƒ€‚Å‚Í‚ ‚è‚Ü‚¹‚ñ)
+    // Getter: å–å¾—å…ƒã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ (æŠ•ç¨¿ã—ãŸãƒ¦ãƒ¼ã‚¶ãƒ¼ã®ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã§ã¯ã‚ã‚Šã¾ã›ã‚“)
     get platform() { return this.from_account.platform }
-    // Getter: æ“¾Œ³ƒAƒJƒEƒ“ƒg‚ÌƒAƒJƒEƒ“ƒgƒJƒ‰[
+    // Getter: å–å¾—å…ƒã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼
     get account_color() { return this.from_account.pref.acc_color }
-    // Getter: ƒ~ƒ…[ƒg”»’è(Œ»ó‚ÍBTRNœŠO‚Ì‚İ)
+    // Getter: ãƒŸãƒ¥ãƒ¼ãƒˆåˆ¤å®š(ç¾çŠ¶ã¯BTRNé™¤å¤–ã®ã¿)
     get muted() { return this.from_timeline?.pref?.exclude_reblog && this.reblog }
-    // Getter: –{•¶‚ğHTML‰ğÍ‚µ‚Ä•¶Í‚Ì•”•ª‚¾‚¯‚ğ”²‚«o‚·
+    // Getter: æœ¬æ–‡ã‚’HTMLè§£æã—ã¦æ–‡ç« ã®éƒ¨åˆ†ã ã‘ã‚’æŠœãå‡ºã™
     get content_text() { return $($.parseHTML(this.content)).text() }
 
-    // ÅŒã‚É“Še‚µ‚½“Šeƒf[ƒ^‚ğ•Û‚·‚é—Ìˆæ
+    // æœ€å¾Œã«æŠ•ç¨¿ã—ãŸæŠ•ç¨¿ãƒ‡ãƒ¼ã‚¿ã‚’ä¿æŒã™ã‚‹é ˜åŸŸ
     static post_stack = []
 
-    // “ú•tƒtƒH[ƒ}ƒbƒ^[‚ÍstaticƒvƒƒpƒeƒB‚É‚·‚é
+    // æ—¥ä»˜ãƒ•ã‚©ãƒ¼ãƒãƒƒã‚¿ãƒ¼ã¯staticãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã«ã™ã‚‹
     static {
         Status.DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
             year:   'numeric',
@@ -173,69 +173,69 @@ class Status {
         else absentCallback()
     }
 
-    // Getter: “Šeƒf[ƒ^‚©‚çHTML‚ğ¶¬‚µ‚Ä•Ô‹p
+    // Getter: æŠ•ç¨¿ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰HTMLã‚’ç”Ÿæˆã—ã¦è¿”å´
     get element() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: ’Ê’m‚Íˆê’UœŠO
+        if (this.notif_type == 'achievementEarned') return '' // TODO: é€šçŸ¥ã¯ä¸€æ—¦é™¤å¤–
 
-        let html /* name‘®«‚ÉURL‚ğİ’è */ = `<li id="${this.status_key}" name="${this.uri}">`
-        if (this.type == 'notification') { // ’Ê’mƒ^ƒCƒv‚É‚æ‚Á‚Ä•\¦‚ğ•ÏX
+        let html /* nameå±æ€§ã«URLã‚’è¨­å®š */ = `<li id="${this.status_key}" name="${this.uri}">`
+        if (this.type == 'notification') { // é€šçŸ¥ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’å¤‰æ›´
             switch (this.notif_type) {
-                case 'favourite': // ‚¨‹C‚É“ü‚è
+                case 'favourite': // ãŠæ°—ã«å…¥ã‚Š
                     html += `
                         <div class="label_head label_favorite">
                             <span>Favorited by @${this.user.id}</span>
                         </div>
                     `
                     break
-                case 'reblog': // ƒu[ƒXƒg
+                case 'reblog': // ãƒ–ãƒ¼ã‚¹ãƒˆ
                     html += `
                         <div class="label_head label_reblog">
                             <span>Boosted by @${this.user.id}</span>
                         </div>
                     `
                     break
-                case 'reaction': // ŠG•¶šƒŠƒAƒNƒVƒ‡ƒ“
+                case 'reaction': // çµµæ–‡å­—ãƒªã‚¢ã‚¯ã‚·ãƒ§ãƒ³
                     html += `
                         <div class="label_head label_favorite">
                             <span>ReAction from @${this.user.id}</span>
                         </div>
                     `
                     break
-                case 'renote': // ƒŠƒm[ƒg
+                case 'renote': // ãƒªãƒãƒ¼ãƒˆ
                     html += `
                         <div class="label_head label_reblog">
                             <span>Renoted by @${this.user.id}</span>
                         </div>
                     `
                     break
-                case 'follow': // ƒtƒHƒ[’Ê’m
+                case 'follow': // ãƒ•ã‚©ãƒ­ãƒ¼é€šçŸ¥
                     html += `
                         <div class="label_head label_follow">
                             <span>Followed by @${this.user.id}</span>
                         </div>
                     `
                     break
-                default: // ƒŠƒvƒ‰ƒC‚Ìê‡‚Íƒwƒbƒ_‘‚©‚È‚¢
+                default: // ãƒªãƒ—ãƒ©ã‚¤ã®å ´åˆã¯ãƒ˜ãƒƒãƒ€æ›¸ã‹ãªã„
                     break
             }
-        } else if (this.reblog) html /* ƒu[ƒXƒg/ƒŠƒm[ƒg‚Ìƒwƒbƒ_ */ += `
+        } else if (this.reblog) html /* ãƒ–ãƒ¼ã‚¹ãƒˆ/ãƒªãƒãƒ¼ãƒˆã®ãƒ˜ãƒƒãƒ€ */ += `
             <div class="label_head label_reblog">
                 <span>Boosted by @${this.reblog_by}</span>
             </div>
         `
-        html /* ƒ†[ƒU[ƒAƒJƒEƒ“ƒgî•ñ */ += `
+        html /* ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ± */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.user.emojis.replace(this.user.username)}</h4>
                 <a class="userid">@${this.user.id}</a>
-        ` // ŒöŠJ”ÍˆÍ‚ªƒpƒuƒŠƒbƒNˆÈŠO‚Ìê‡‚Í¯•ÊƒAƒCƒRƒ“‚ğ”z’u
+        ` // å…¬é–‹ç¯„å›²ãŒãƒ‘ãƒ–ãƒªãƒƒã‚¯ä»¥å¤–ã®å ´åˆã¯è­˜åˆ¥ã‚¢ã‚¤ã‚³ãƒ³ã‚’é…ç½®
         switch (this.visibility) {
             case 'unlisted':
-            case 'home': // ƒz[ƒ€
+            case 'home': // ãƒ›ãƒ¼ãƒ 
                 html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
                 break
             case 'private':
-            case 'followers': // ƒtƒHƒŒÀ
+            case 'followers': // ãƒ•ã‚©ãƒ­é™
                 html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
                 break
             default:
@@ -245,32 +245,32 @@ class Status {
             </div>
             <div class="content">
         `
-        if (this.cw_text) html /* CWƒeƒLƒXƒg */ += `
+        if (this.cw_text) html /* CWãƒ†ã‚­ã‚¹ãƒˆ */ += `
             <a class="expand_header label_cw">${this.cw_text}</a>
             <div class="main_content cw_content">
         `; else html += '<div class="main_content">'
-        html /* –{•¶(ŠG•¶š‚ğ’uŠ·) */ += `   
+        html /* æœ¬æ–‡(çµµæ–‡å­—ã‚’ç½®æ›) */ += `   
                     ${this.emojis.replace(this.content)}
                 </div>
             </div>
         `
-        if (this.platform == 'Misskey' && this.quote_flg) html /* ˆø—pƒm[ƒg(Misskey‚Ì‚İ) */ += `
+        if (this.platform == 'Misskey' && this.quote_flg) html /* å¼•ç”¨ãƒãƒ¼ãƒˆ(Misskeyã®ã¿) */ += `
             <div class="post_quote">
                 <div>${this.quote.username}</div>
                 <div>@${this.quote.user_id}</div>
                 <div>${this.quote.emojis.replace(this.quote.content)}</div>
             </div>
         `
-        if (this.medias.length > 0) { // “Y•tƒƒfƒBƒA(Œ»ó‚Í‰æ‘œ‚Ì‚İ)
+        if (this.medias.length > 0) { // æ·»ä»˜ãƒ¡ãƒ‡ã‚£ã‚¢(ç¾çŠ¶ã¯ç”»åƒã®ã¿)
             html += '<div class="media">'
-            if (this.sensitive) html /* ‰{——’ˆÓ */ += `
-                <a class="expand_header label_sensitive">‰{——’ˆÓ‚Ì‰æ‘œ‚ª‚ ‚è‚Ü‚·</a>
+            if (this.sensitive) html /* é–²è¦§æ³¨æ„ */ += `
+                <a class="expand_header label_sensitive">é–²è¦§æ³¨æ„ã®ç”»åƒãŒã‚ã‚Šã¾ã™</a>
                 <div class="media_content cw_content">
-            `; else if (this.medias.length > 4) /* “Y•t‰æ‘œ5–‡ˆÈã */ html += `
-                <a class="expand_header label_cw">“Y•t‰æ‘œ‚ª5–‡ˆÈã‚ ‚è‚Ü‚·</a>
+            `; else if (this.medias.length > 4) /* æ·»ä»˜ç”»åƒ5æšä»¥ä¸Š */ html += `
+                <a class="expand_header label_cw">æ·»ä»˜ç”»åƒãŒ5æšä»¥ä¸Šã‚ã‚Šã¾ã™</a>
                 <div class="media_content cw_content">
             `; else html += '<div class="media_content">'
-            // ƒAƒXƒyƒNƒg”ä‚ğƒŠƒ“ƒNƒIƒvƒVƒ‡ƒ“‚Æ‚µ‚Äİ’è
+            // ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’ãƒªãƒ³ã‚¯ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã¨ã—ã¦è¨­å®š
             this.medias.forEach(media => html += `
                 <a href="${media.url}" name="${media.aspect}" class="__on_media_expand">
                     <img src="${media.thumbnail}" class="media_preview"/>
@@ -281,12 +281,12 @@ class Status {
                 </div>
             `
         }
-        html /* “Še(ƒXƒe[ƒ^ƒX)“ú•t */ += `
+        html /* æŠ•ç¨¿(ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹)æ—¥ä»˜ */ += `
             <div class="post_footer">
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
         /*
-            case 'follow': // ƒtƒHƒ[’Ê’m
+            case 'follow': // ãƒ•ã‚©ãƒ­ãƒ¼é€šçŸ¥
         html += `
             <div class="created_at">
                 Post: ${value.account.statuses_count} /
@@ -295,28 +295,28 @@ class Status {
             </div>
         `;//*/
 
-        if (this.from_column?.pref?.multi_user) // ƒ}ƒ‹ƒ`ƒAƒJƒEƒ“ƒgƒJƒ‰ƒ€‚Ìê‡‚Í•\¦Œ³ƒ†[ƒU[‚ğ•\¦
+        if (this.from_column?.pref?.multi_user) // ãƒãƒ«ãƒã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ ã®å ´åˆã¯è¡¨ç¤ºå…ƒãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚’è¡¨ç¤º
             html += `<div class="from_address" name="${this.from_account.full_address}">From ${this.from_account.full_address}</div>`
         html += `
                 </div>
             </li>
         `
 
-        // ¶¬‚µ‚½HTML‚ğjQueryƒIƒuƒWƒFƒNƒg‚Æ‚µ‚Ä•Ô‹p
+        // ç”Ÿæˆã—ãŸHTMLã‚’jQueryã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨ã—ã¦è¿”å´
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
         return jqelm
     }
 
     delete(callback) {
-        // æ‚Étoast•\¦
+        // å…ˆã«toastè¡¨ç¤º
         const toast_uuid = crypto.randomUUID()
-        toast("“Še‚ğíœ‚µ‚Ä‚¢‚Ü‚·...", "progress", toast_uuid)
+        toast("æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¦ã„ã¾ã™...", "progress", toast_uuid)
 
         let request_promise = null
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // ‚±‚ÌƒXƒe[ƒ^ƒXID‚ğg‚Á‚ÄíœƒŠƒNƒGƒXƒg‚ğ‘—M
+                request_promise = $.ajax({ // ã“ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹IDã‚’ä½¿ã£ã¦å‰Šé™¤ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’é€ä¿¡
                     type: "DELETE",
                     url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
                     headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
@@ -327,7 +327,7 @@ class Status {
                     "i": this.from_account.pref.access_token,
                     "noteId": this.status_id
                 }
-                request_promise = $.ajax({ // ‚±‚ÌƒXƒe[ƒ^ƒXID‚ğg‚Á‚ÄíœƒŠƒNƒGƒXƒg‚ğ‘—M
+                request_promise = $.ajax({ // ã“ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹IDã‚’ä½¿ã£ã¦å‰Šé™¤ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’é€ä¿¡
                     type: "POST",
                     url: `https://${this.from_account.pref.domain}/api/notes/delete`,
                     dataType: "json",
@@ -339,15 +339,15 @@ class Status {
                 break
         }
         request_promise.then(() => callback(this, toast_uuid)).catch(
-            (jqXHR, textStatus, errorThrown) => toast("“Še‚Ìíœ‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid))
+            (jqXHR, textStatus, errorThrown) => toast("æŠ•ç¨¿ã®å‰Šé™¤ã«å¤±æ•—ã—ã¾ã—ãŸ.", "error", toast_uuid))
     }
 
     /**
      * #Method
-     * ‚±‚Ì“Še‚É‘Î‚·‚é•ÔM‚ğ“Še‚·‚é‚½‚ß‚Ì‰æ–Ê‚ğ•\¦
+     * ã“ã®æŠ•ç¨¿ã«å¯¾ã™ã‚‹è¿”ä¿¡ã‚’æŠ•ç¨¿ã™ã‚‹ãŸã‚ã®ç”»é¢ã‚’è¡¨ç¤º
      */
     createReplyWindow() {
-        // ƒŠƒvƒ‰ƒCƒEƒBƒ“ƒhƒE‚ÌDOM¶¬
+        // ãƒªãƒ—ãƒ©ã‚¤ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®DOMç”Ÿæˆ
         const jqelm = $($.parseHTML(`
             <div class="reply_col">
                 <h2>From ${this.from_account.full_address}</h2>
@@ -355,66 +355,66 @@ class Status {
                     <input type="hidden" id="__hdn_reply_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reply_account" value="${this.from_account.full_address}"/>
                     <textarea id="__txt_replyarea" class="__ignore_keyborad"
-                        placeholder="(Ctrl+Enter‚Å‚à“Še‚Å‚«‚Ü‚·)">@${this.user.id} </textarea>
-                    <button type="button" id="__on_reply_submit">“Še</button>
+                        placeholder="(Ctrl+Enterã§ã‚‚æŠ•ç¨¿ã§ãã¾ã™)">@${this.user.id} </textarea>
+                    <button type="button" id="__on_reply_submit">æŠ•ç¨¿</button>
                 </div>
                 <div class="timeline">
                     <ul></ul>
                 </div>
-                <button type="button" id="__on_reply_close">~</button>
+                <button type="button" id="__on_reply_close">Ã—</button>
             </div>
         `))
-        // F‚ÆƒXƒe[ƒ^ƒXƒoƒCƒ“ƒh‚Ìİ’è‚ğ‚µ‚ÄDOM‚ğŠg’£ƒJƒ‰ƒ€‚ÉƒoƒCƒ“ƒh
+        // è‰²ã¨ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒã‚¤ãƒ³ãƒ‰ã®è¨­å®šã‚’ã—ã¦DOMã‚’æ‹¡å¼µã‚«ãƒ©ãƒ ã«ãƒã‚¤ãƒ³ãƒ‰
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        // •\¦Œã‚ÉƒŠƒvƒ‰ƒCƒJƒ‰ƒ€‚ÌƒeƒLƒXƒgƒ{ƒbƒNƒX‚ÉƒtƒH[ƒJƒX‚·‚é
+        // è¡¨ç¤ºå¾Œã«ãƒªãƒ—ãƒ©ã‚¤ã‚«ãƒ©ãƒ ã®ãƒ†ã‚­ã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã™ã‚‹
         $("#header>#pop_extend_column #__txt_replyarea").focus()
     }
 
-    // Getter: Electron‚Ì’Ê’mƒRƒ“ƒXƒgƒ‰ƒNƒ^‚É‘—‚é’Ê’m•¶‚ğ¶¬‚µ‚Ä•Ô‹p
+    // Getter: Electronã®é€šçŸ¥ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã«é€ã‚‹é€šçŸ¥æ–‡ã‚’ç”Ÿæˆã—ã¦è¿”å´
     get notification() {
         let title = null
         let body = null
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                // ’Ê’mƒ^ƒCƒv‚É‚æ‚Á‚Ä•\¦‚ğ•ÏX
+                // é€šçŸ¥ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’å¤‰æ›´
                 switch (this.notif_type) {
-                    case 'favourite': // ‚¨‹C‚É“ü‚è
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚ç‚¨‹C‚É“ü‚è`
+                    case 'favourite': // ãŠæ°—ã«å…¥ã‚Š
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãŠæ°—ã«å…¥ã‚Š`
                         body = this.content
                         break
-                    case 'reblog': // ƒu[ƒXƒg
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚çƒu[ƒXƒg`
+                    case 'reblog': // ãƒ–ãƒ¼ã‚¹ãƒˆ
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãƒ–ãƒ¼ã‚¹ãƒˆ`
                         body = this.content
                         break
-                    case 'follow': // ƒtƒHƒ[’Ê’m
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚çƒtƒHƒ[`
+                    case 'follow': // ãƒ•ã‚©ãƒ­ãƒ¼é€šçŸ¥
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãƒ•ã‚©ãƒ­ãƒ¼`
                         body = this.user.profile
                         break
-                    default: // ƒŠƒvƒ‰ƒC
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚ç•ÔM`
+                    default: // ãƒªãƒ—ãƒ©ã‚¤
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰è¿”ä¿¡`
                         body = this.content
                         break
                 }
                 break
             case 'Misskey': // Misskey
-                // ’Ê’mƒ^ƒCƒv‚É‚æ‚Á‚Ä•\¦‚ğ•ÏX
+                // é€šçŸ¥ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’å¤‰æ›´
                 switch (this.notif_type) {
-                    case 'reaction': // ŠG•¶šƒŠƒAƒNƒVƒ‡ƒ“
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚çƒŠƒAƒNƒVƒ‡ƒ“`
+                    case 'reaction': // çµµæ–‡å­—ãƒªã‚¢ã‚¯ã‚·ãƒ§ãƒ³
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãƒªã‚¢ã‚¯ã‚·ãƒ§ãƒ³`
                         body = this.content
                         break
-                    case 'renote': // ƒŠƒm[ƒg
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚çƒŠƒm[ƒg`
+                    case 'renote': // ãƒªãƒãƒ¼ãƒˆ
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãƒªãƒãƒ¼ãƒˆ`
                         body = this.content
                         break
-                    case 'follow': // ƒtƒHƒ[’Ê’m
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚çƒtƒHƒ[`
+                    case 'follow': // ãƒ•ã‚©ãƒ­ãƒ¼é€šçŸ¥
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰ãƒ•ã‚©ãƒ­ãƒ¼`
                         body = `@${this.user.id} - ${this.user.username}`
                         break
-                    default: // ƒŠƒvƒ‰ƒC
-                        title = `${this.from_account.full_address}: ${this.user.username}‚©‚ç•ÔM`
+                    default: // ãƒªãƒ—ãƒ©ã‚¤
+                        title = `${this.from_account.full_address}: ${this.user.username}ã‹ã‚‰è¿”ä¿¡`
                         body = this.content
                         break
                 }
@@ -423,10 +423,10 @@ class Status {
                 break;
         }
 
-        // ’Ê’m‚ğ•Ô‹p
+        // é€šçŸ¥ã‚’è¿”å´
         return {
             title: title,
-            // HTML‚Æ‚µ‚Ä‰ğÍ‚µ‚Ä’†g‚Ì•¶Í‚¾‚¯‚ğæ‚èo‚·
+            // HTMLã¨ã—ã¦è§£æã—ã¦ä¸­èº«ã®æ–‡ç« ã ã‘ã‚’å–ã‚Šå‡ºã™
             body: $($.parseHTML(body)).text()
         }
     }

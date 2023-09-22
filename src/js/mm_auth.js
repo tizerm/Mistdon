@@ -1,10 +1,10 @@
-$(() => {
-    // ƒ[ƒh‚³‚ê‚½’iŠK‚ÅƒAƒJƒEƒ“ƒgƒŠƒXƒg‚ğ¶¬(”ñ“¯Šú)
+ï»¿$(() => {
+    // ãƒ­ãƒ¼ãƒ‰ã•ã‚ŒãŸæ®µéšã§ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒªã‚¹ãƒˆã‚’ç”Ÿæˆ(éåŒæœŸ)
     (async () => {
-        // •ÛŒ¯—p‚ÉƒAƒJƒEƒ“ƒgî•ñ‚ÆƒJƒ‰ƒ€î•ñ‚ª“Ç‚ß‚Ä‚È‚©‚Á‚½‚çˆê’â~
+        // ä¿é™ºç”¨ã«ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã¨ã‚«ãƒ©ãƒ æƒ…å ±ãŒèª­ã‚ã¦ãªã‹ã£ãŸã‚‰ä¸€æ™‚åœæ­¢
         if (!await window.accessApi.readPrefAccs()) return;
         
-        // ƒAƒJƒEƒ“ƒgî•ñ‚ğ‚à‚Æ‚ÉƒAƒJƒEƒ“ƒgƒŠƒXƒg‚ğ¶¬
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã‚’ã‚‚ã¨ã«ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒªã‚¹ãƒˆã‚’ç”Ÿæˆ
         $("#content>#account_list>ul").html(Account.createAccountPrefList());
         $(".__ui_sortable").sortable({
             axis: "y",
@@ -16,19 +16,19 @@ $(() => {
         });
         setColorPalette();
 
-        // ƒAƒJƒEƒ“ƒgƒJƒ‰[•ÏXƒCƒxƒ“ƒg‚ğ’Ç‰Á
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼å¤‰æ›´æ™‚ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¿½åŠ 
         $(document).on("blur", ".__txt_acc_color", (e) => {
-            // ƒAƒJƒEƒ“ƒgƒJƒ‰[‚ğ“ü—Í‚µ‚½F‚É‚·‚é
+            // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã‚’å…¥åŠ›ã—ãŸè‰²ã«ã™ã‚‹
             const target = $(e.target);
             target.closest("li").find("h3").css("background-color", `#${target.val()}`);
         });
-        // ƒAƒJƒEƒ“ƒgƒJƒ‰[‰Šúİ’è
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼åˆæœŸè¨­å®š
         $(".__txt_acc_color").each((index, elm) => {
             const target = $(elm);
             target.closest("li").find("h3").css("background-color", `#${target.val()}`);
         });
         
-        // ƒAƒJƒEƒ“ƒgƒJƒ‰[”½‰fƒ{ƒ^ƒ“
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼åæ˜ ãƒœã‚¿ãƒ³
         $("#on_save_color").on("click", (e) => {
             const param_json = [];
             $("#content>#account_list>ul>li").each((index, elm) => {
@@ -37,14 +37,14 @@ $(() => {
                     'acc_color': $(elm).find(".__txt_acc_color").val()
                 });
             });
-            // ƒAƒJƒEƒ“ƒgƒJƒ‰[‚ğƒtƒ@ƒCƒ‹‚É‘‚«‚İ
+            // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã¿
             window.accessApi.writePrefAccColor(param_json);
-            alert("ƒAƒJƒEƒ“ƒgƒJƒ‰[‚ğ•ÏX‚µ‚Ü‚µ‚½B");
+            alert("ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã‚’å¤‰æ›´ã—ã¾ã—ãŸã€‚");
         });
 
-        // ƒAƒJƒEƒ“ƒg”FØ‰ğœƒ{ƒ^ƒ“ƒCƒxƒ“ƒg
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼è§£é™¤ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ
         $(document).on("click", ".__btn_unauth_acc", e => {
-            if (confirm("‚±‚ÌƒAƒJƒEƒ“ƒg‚Ì‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚Æ‚Ì”FØ‚ğ‰ğœ‚µ‚Ü‚·B\n‚æ‚ë‚µ‚¢‚Å‚·‚©H")) {
+            if (confirm("ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã¨ã®èªè¨¼ã‚’è§£é™¤ã—ã¾ã™ã€‚\nã‚ˆã‚ã—ã„ã§ã™ã‹ï¼Ÿ")) {
                 const target_li = $(e.target).closest("li");
                 const target_account = Account.get(target_li.attr("name"));
                 target_account.unauthorize(() => {
@@ -57,23 +57,23 @@ $(() => {
 
     /*================================================================================================================*/
 
-    // ƒvƒ‰ƒbƒgƒtƒH[ƒ€‘I‘ğ‚ÅMastodon‚ğ‘I‘ğ‚µ‚½‚Æ‚«‚ÌƒCƒxƒ“ƒg
+    // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ é¸æŠã§Mastodonã‚’é¸æŠã—ãŸã¨ãã®ã‚¤ãƒ™ãƒ³ãƒˆ
     $("#on_platform_mastodon").on("click",
         (e) => $("#select_platform").hide("slide", { direction: "right" }, 200,
         () => $("#form_mastodon").show("slide", { direction: "right" }, 200)));
-    // ƒvƒ‰ƒbƒgƒtƒH[ƒ€‘I‘ğ‚ÅMisskey‚ğ‘I‘ğ‚µ‚½‚Æ‚«‚ÌƒCƒxƒ“ƒg
+    // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ é¸æŠã§Misskeyã‚’é¸æŠã—ãŸã¨ãã®ã‚¤ãƒ™ãƒ³ãƒˆ
     $("#on_platform_misskey").on("click",
         (e) => $("#select_platform").hide("slide", { direction: "right" }, 200,
         () => $("#form_misskey").show("slide", { direction: "right" }, 200)));
-    // ‘O‚É–ß‚éƒ{ƒ^ƒ“
+    // å‰ã«æˆ»ã‚‹ãƒœã‚¿ãƒ³
     $(".__on_return").on("click",
         (e) => $(e.target).closest(".platform_section").hide("slide", { direction: "right" }, 200,
         () => $("#select_platform").show("slide", { direction: "right" }, 200)));
-    // ‘O‚É–ß‚éƒ{ƒ^ƒ“(”FØƒR[ƒh‰æ–Ê”Å)
+    // å‰ã«æˆ»ã‚‹ãƒœã‚¿ãƒ³(èªè¨¼ã‚³ãƒ¼ãƒ‰ç”»é¢ç‰ˆ)
     $(".__on_instance_return").on("click",
         (e) => $(e.target).closest(".auth_form").hide("slide", { direction: "right" }, 200,
         () => $(".instance_form").show("slide", { direction: "right" }, 200)));
-    // Å‰‚É–ß‚éƒ{ƒ^ƒ“
+    // æœ€åˆã«æˆ»ã‚‹ãƒœã‚¿ãƒ³
     $(".__on_return_top").on("click",
         (e) => $(e.target).closest(".platform_section").hide("slide", { direction: "right" }, 200, () => {
             $("#select_platform").show("slide", { direction: "right" }, 200);
@@ -81,39 +81,39 @@ $(() => {
             $(".auth_form").hide();
         }));
 
-    // ƒhƒƒCƒ““ü—Í‚ÌƒCƒxƒ“ƒg
+    // ãƒ‰ãƒ¡ã‚¤ãƒ³å…¥åŠ›æ™‚ã®ã‚¤ãƒ™ãƒ³ãƒˆ
     $("#txt_mst_instance_domain").on("blur", (e) => {
         const instance_domain = $("#txt_mst_instance_domain").val();
         if (!instance_domain) {
-            // ‹ó‚Ìê‡‚Í•\¦ƒŠƒZƒbƒg
+            // ç©ºã®å ´åˆã¯è¡¨ç¤ºãƒªã‚»ãƒƒãƒˆ
             $("#lbl_mst_instance_name").text("(Instance Name)");
             return;
         }
 
-        // ajax‚ÅƒCƒ“ƒXƒ^ƒ“ƒXî•ñ‚ğæ“¾
+        // ajaxã§ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹æƒ…å ±ã‚’å–å¾—
         $.ajax({
             type: "GET",
             url: `https://${instance_domain}/api/v2/instance`,
             dataType: "json"
         }).then((data) => {
-            // æ“¾‚Å‚«‚½‚çƒCƒ“ƒXƒ^ƒ“ƒXî•ñ‚ğƒZƒbƒg
+            // å–å¾—ã§ããŸã‚‰ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹æƒ…å ±ã‚’ã‚»ãƒƒãƒˆ
             console.log(data);
             $("#lbl_mst_instance_name").text(data.title);
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s‚ÍƒGƒ‰[•¶š‚ğ“ü‚ê‚é(v3.x.x‚Íæ“¾‚Å‚«‚È‚¢)
-            $("#lbl_mst_instance_name").text("(•s³‚ÈƒCƒ“ƒXƒ^ƒ“ƒX‚©v3.x.xˆÈ‰º‚Å‚·)");
+            // å–å¾—å¤±æ•—æ™‚ã¯ã‚¨ãƒ©ãƒ¼æ–‡å­—ã‚’å…¥ã‚Œã‚‹(v3.x.xã¯å–å¾—ã§ããªã„)
+            $("#lbl_mst_instance_name").text("(ä¸æ­£ãªã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‹v3.x.xä»¥ä¸‹ã§ã™)");
         });
     });
 
     /*================================================================================================================*/
-    // «Mastodon‚Ì”FØƒƒWƒbƒN«
+    // â†“Mastodonã®èªè¨¼ãƒ­ã‚¸ãƒƒã‚¯â†“
 
-    // ”FØƒ{ƒ^ƒ“ƒCƒxƒ“ƒg(ƒCƒ“ƒXƒ^ƒ“ƒX‚ğŒŸõ)
+    // èªè¨¼ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ(ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’æ¤œç´¢)
     $("#on_mst_auth_instance").on("click", (e) => {
         const instance_domain = $("#txt_mst_instance_domain").val();
         const permission = ["read", "write", "follow", "push"].join(" ");
 
-        // ajax‚ÅƒAƒvƒŠƒP[ƒVƒ‡ƒ““o˜^
+        // ajaxã§ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ç™»éŒ²
         $.ajax({
             type: "POST",
             url: `https://${instance_domain}/api/v1/apps`,
@@ -126,21 +126,21 @@ $(() => {
                 "website": "https://github.com/tizerm/Mistdon"
             }
         }).then((data) => {
-            // ”FØ‚É¬Œ÷‚µ‚½‚çƒNƒ‰ƒCƒAƒ“ƒgID‚ğ•Û‘¶‚µ‚ÄŠO•”ƒuƒ‰ƒEƒU‚Å”FØ‰æ–Ê‚ğŠJ‚­
+            // èªè¨¼ã«æˆåŠŸã—ãŸã‚‰ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆIDã‚’ä¿å­˜ã—ã¦å¤–éƒ¨ãƒ–ãƒ©ã‚¦ã‚¶ã§èªè¨¼ç”»é¢ã‚’é–‹ã
             $("#hdn_client_id").val(data.client_id);
             $("#hdn_client_secret").val(data.client_secret);
             window.accessApi.openExternalBrowser(
                 `https://${instance_domain}/oauth/authorize?client_id=${data.client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob`
             );
-            // ‰æ–Ê‚ğ”FØƒR[ƒh‰æ–Ê‚É‘JˆÚ
+            // ç”»é¢ã‚’èªè¨¼ã‚³ãƒ¼ãƒ‰ç”»é¢ã«é·ç§»
             $("#form_mastodon>.instance_form").hide("fade", 500, () => $("#form_mastodon>.auth_form").show("fade", 500));
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s
+            // å–å¾—å¤±æ•—æ™‚
             alert( "Request failed: " + textStatus );
         });
     });
 
-    // “o˜^ƒ{ƒ^ƒ“ƒCƒxƒ“ƒg(ƒAƒNƒZƒXƒg[ƒNƒ“æ“¾)
+    // ç™»éŒ²ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ(ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³å–å¾—)
     $("#on_mst_auth_token").on("click", (e) => {
         let access_token = null;
 
@@ -149,7 +149,7 @@ $(() => {
         const client_id = $("#hdn_client_id").val();
         const client_secret = $("#hdn_client_secret").val();
 
-        // ajax‚ÅOAuth”FØ
+        // ajaxã§OAuthèªè¨¼
         $.ajax({
             type: "POST",
             url: `https://${instance_domain}/oauth/token`,
@@ -163,7 +163,7 @@ $(() => {
                 "code": auth_code
             }
         }).then((data) => {
-            // ”FØ‚É¬Œ÷‚µ‚½ê‡‚»‚ÌƒAƒNƒZƒXƒg[ƒNƒ“‚ğg‚Á‚Ä”FØƒAƒJƒEƒ“ƒg‚Ìî•ñ‚ğæ“¾(Promise•Ô‹p)
+            // èªè¨¼ã«æˆåŠŸã—ãŸå ´åˆãã®ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ã‚’ä½¿ã£ã¦èªè¨¼ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®æƒ…å ±ã‚’å–å¾—(Promiseè¿”å´)
             access_token = data.access_token;
             return $.ajax({
                 type: "GET",
@@ -172,7 +172,7 @@ $(() => {
                 headers: { "Authorization": `Bearer ${access_token}` }
             });
         }).then((data) => {
-            // ƒAƒJƒEƒ“ƒgî•ñ‚Ìæ“¾‚É¬Œ÷‚µ‚½ê‡‚Íƒ†[ƒU[î•ñ‚ÆƒAƒNƒZƒXƒg[ƒNƒ“‚ğ•Û‘¶
+            // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã®å–å¾—ã«æˆåŠŸã—ãŸå ´åˆã¯ãƒ¦ãƒ¼ã‚¶ãƒ¼æƒ…å ±ã¨ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ã‚’ä¿å­˜
             window.accessApi.writePrefMstdAccs({
                 'domain': instance_domain,
                 'user_id': data.username,
@@ -182,19 +182,19 @@ $(() => {
                 'access_token': access_token,
                 'avatar_url': data.avatar
             });
-            alert("ƒAƒJƒEƒ“ƒg‚Ì”FØ‚É¬Œ÷‚µ‚Ü‚µ‚½I");
-            // ‰æ–ÊƒŠƒ[ƒh
+            alert("ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®èªè¨¼ã«æˆåŠŸã—ã¾ã—ãŸï¼");
+            // ç”»é¢ãƒªãƒ­ãƒ¼ãƒ‰
             location.reload();
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s
+            // å–å¾—å¤±æ•—æ™‚
             alert( "Request failed: " + textStatus );
         });
     });
 
     /*================================================================================================================*/
-    // «Misskey‚Ì”FØƒƒWƒbƒN«
+    // â†“Misskeyã®èªè¨¼ãƒ­ã‚¸ãƒƒã‚¯â†“
 
-    // ”FØƒ{ƒ^ƒ“ƒCƒxƒ“ƒg(ƒAƒvƒŠ“o˜^‚Æ”FØ)
+    // èªè¨¼ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ(ã‚¢ãƒ—ãƒªç™»éŒ²ã¨èªè¨¼)
     $("#on_msk_auth_instance").on("click", (e) => {
         const instance_domain = $("#txt_msk_instance_domain").val();
         const permission = ["read:account", "read:notes", "write:notes", "write:blocks",
@@ -202,7 +202,7 @@ $(() => {
             "write:mutes", "read:notifications", "read:reactions", "write:reactions",
             "write:votes", "read:channels", "write:channels"];
     
-        // ajax‚ÅƒAƒvƒŠƒP[ƒVƒ‡ƒ““o˜^
+        // ajaxã§ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ç™»éŒ²
         $.ajax({
             type: "POST",
             url: `https://${instance_domain}/api/app/create`,
@@ -214,7 +214,7 @@ $(() => {
                 'permission': permission
             })
         }).then((data) => {
-            // ƒAƒvƒŠ“o˜^‚É¬Œ÷‚µ‚½‚çsecret‚ğ•Û‘¶‚µ‚Ä”FØƒZƒbƒVƒ‡ƒ“‚ğŠJn
+            // ã‚¢ãƒ—ãƒªç™»éŒ²ã«æˆåŠŸã—ãŸã‚‰secretã‚’ä¿å­˜ã—ã¦èªè¨¼ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‚’é–‹å§‹
             $("#hdn_app_secret").val(data.secret);
             return $.ajax({
                 type: "POST",
@@ -226,24 +226,24 @@ $(() => {
                 })
             });
         }).then((data) => {
-            // –³–‚ÉƒŒƒXƒ|ƒ“ƒX‚ª•Ô‚Á‚½‚çtoken‚ğ•Û‘¶‚µ‚Ä”FØ‹–‰ÂƒEƒBƒ“ƒhƒE‚ğ¶¬
+            // ç„¡äº‹ã«ãƒ¬ã‚¹ãƒãƒ³ã‚¹ãŒè¿”ã£ãŸã‚‰tokenã‚’ä¿å­˜ã—ã¦èªè¨¼è¨±å¯ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ç”Ÿæˆ
             $("#hdn_app_token").val(data.token);
             window.accessApi.openExternalBrowser(data.url);
-            // ‰æ–Ê‚ğ”FØƒR[ƒh‰æ–Ê‚É‘JˆÚ
+            // ç”»é¢ã‚’èªè¨¼ã‚³ãƒ¼ãƒ‰ç”»é¢ã«é·ç§»
             $("#form_misskey>.instance_form").hide("fade", 500, () => $("#form_misskey>.auth_form").show("fade", 500));
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s
+            // å–å¾—å¤±æ•—æ™‚
             alert( "Request failed: " + textStatus );
         });
     });
 
-    // “o˜^ƒ{ƒ^ƒ“ƒCƒxƒ“ƒg(ƒAƒNƒZƒXƒg[ƒNƒ“‚Ì¶¬‚Æ•Û‘¶)
+    // ç™»éŒ²ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ(ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ã®ç”Ÿæˆã¨ä¿å­˜)
     $("#on_msk_auth_token").on("click", (e) => {
         const instance_domain = $("#txt_msk_instance_domain").val();
         const app_secret = $("#hdn_app_secret").val();
         const app_token = $("#hdn_app_token").val();
 
-        // ajax‚ÅƒAƒNƒZƒXƒg[ƒNƒ“æ“¾
+        // ajaxã§ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³å–å¾—
         $.ajax({
             type: "POST",
             url: `https://${instance_domain}/api/auth/session/userkey`,
@@ -254,18 +254,18 @@ $(() => {
                 'token': app_token
             })
         }).then((data) => {
-            // –³–‚ÉƒŒƒXƒ|ƒ“ƒX‚ª•Ô‚Á‚½‚çA•Ô‚Á‚Ä‚«‚½ƒAƒNƒZƒXƒg[ƒNƒ“‚ğƒƒCƒ“ƒvƒƒZƒX‚É“n‚·
+            // ç„¡äº‹ã«ãƒ¬ã‚¹ãƒãƒ³ã‚¹ãŒè¿”ã£ãŸã‚‰ã€è¿”ã£ã¦ããŸã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ã‚’ãƒ¡ã‚¤ãƒ³ãƒ—ãƒ­ã‚»ã‚¹ã«æ¸¡ã™
             window.accessApi.writePrefMskyAccs({
                 'domain': instance_domain,
                 'user': data.user,
                 'app_secret': app_secret,
                 'access_token': data.accessToken
             });
-            alert("ƒAƒJƒEƒ“ƒg‚Ì”FØ‚É¬Œ÷‚µ‚Ü‚µ‚½I");
-            // ‰æ–ÊƒŠƒ[ƒh
+            alert("ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®èªè¨¼ã«æˆåŠŸã—ã¾ã—ãŸï¼");
+            // ç”»é¢ãƒªãƒ­ãƒ¼ãƒ‰
             location.reload();
         }).catch((jqXHR, textStatus, errorThrown) => {
-            // æ“¾¸”s
+            // å–å¾—å¤±æ•—æ™‚
             alert( "Request failed: " + textStatus );
         });
     });

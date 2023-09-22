@@ -1,30 +1,30 @@
-$(() => {
-    // ƒVƒ‡[ƒgƒJƒbƒgƒL[ƒoƒCƒ“ƒh(‘S‘Ì)
+ï»¿$(() => {
+    // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰(å…¨ä½“)
     $("body").keydown(e => {
-        // ƒVƒ‡[ƒgƒJƒbƒgƒL[‚ÌƒoƒCƒ“ƒh‚ğ–³‹‚·‚éƒtƒH[ƒ€“à‚Å‚ÍÀs‚µ‚È‚¢
+        // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆã‚­ãƒ¼ã®ãƒã‚¤ãƒ³ãƒ‰ã‚’ç„¡è¦–ã™ã‚‹ãƒ•ã‚©ãƒ¼ãƒ å†…ã§ã¯å®Ÿè¡Œã—ãªã„
         if ($(e.target).is(".__ignore_keyborad")) return;
         let col = null;
         switch (e.keyCode) {
-            case 78: // n: “ŠeƒeƒLƒXƒgƒ{ƒbƒNƒX‚ÉƒtƒH[ƒJƒX
+            case 78: // n: æŠ•ç¨¿ãƒ†ã‚­ã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹
                 $("#__txt_postarea").focus();
                 return false;
-            case 66: // b: CWƒeƒLƒXƒgƒ{ƒbƒNƒX‚ÉƒtƒH[ƒJƒX
+            case 66: // b: CWãƒ†ã‚­ã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã«ãƒ•ã‚©ãƒ¼ã‚«ã‚¹
                 $("#__txt_content_warning").focus();
                 return false;
-            case 46: // Ctrl+Del: ’¼‘O‚Ì“Še‚ğíœ‚·‚é
+            case 46: // Ctrl+Del: ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã™ã‚‹
                 if (event.ctrlKey || event.metaKey) {
                     $("#header #on_last_delete").click();
                     return false;
                 }
                 break;
-            case 90: // Ctrl+Z: ’¼‘O‚Ì“Še‚ğíœ‚µ‚ÄÄ“WŠJ‚·‚é
+            case 90: // Ctrl+Z: ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¦å†å±•é–‹ã™ã‚‹
                 if (event.ctrlKey || event.metaKey) {
                     $("#header #on_last_delete_paste").click();
                     $("#__txt_postarea").focus();
                     return false;
                 }
                 break;
-            case 86: // Ctrl+V: ’¼‘O‚Ì“Še‚ğƒRƒs[‚µ‚ÄÄ“WŠJ‚·‚é
+            case 86: // Ctrl+V: ç›´å‰ã®æŠ•ç¨¿ã‚’ã‚³ãƒ”ãƒ¼ã—ã¦å†å±•é–‹ã™ã‚‹
                 if (event.ctrlKey || event.metaKey) {
                     $("#header #on_last_copy").click();
                     $("#__txt_postarea").focus();
@@ -32,13 +32,13 @@ $(() => {
                 }
                 break;
             case 65:
-            case 37: // a, <-: ƒJ[ƒ\ƒ‹‚ğ¶‚ÉˆÚ“®
+            case 37: // a, <-: ã‚«ãƒ¼ã‚½ãƒ«ã‚’å·¦ã«ç§»å‹•
                 col = Column.disposeCursor();
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
-                    // Ctrl+Shift+A: ƒJ[ƒ\ƒ‹ˆÚ“®æ‚ÌƒJƒ‰ƒ€‚ğŠJ‚­
+                    // Ctrl+Shift+A: ã‚«ãƒ¼ã‚½ãƒ«ç§»å‹•å…ˆã®ã‚«ãƒ©ãƒ ã‚’é–‹ã
                     col.prev.open();
                 } else if (event.shiftKey) {
-                    // Shift+A: ƒJ[ƒ\ƒ‹ˆÚ“®æ‚ÌƒJƒ‰ƒ€‚ğŠJ‚¢‚ÄŒ»İ‚ÌƒJƒ‰ƒ€‚ğ•Â‚¶‚é
+                    // Shift+A: ã‚«ãƒ¼ã‚½ãƒ«ç§»å‹•å…ˆã®ã‚«ãƒ©ãƒ ã‚’é–‹ã„ã¦ç¾åœ¨ã®ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹
                     col.prev.open();
                     col.close();
                     col.prev.setCursor();
@@ -47,13 +47,13 @@ $(() => {
                 col.opened_prev.setCursor();
                 return false;
             case 68:
-            case 39: // d, ->: ƒJ[ƒ\ƒ‹‚ğ‰E‚ÉˆÚ“®
+            case 39: // d, ->: ã‚«ãƒ¼ã‚½ãƒ«ã‚’å³ã«ç§»å‹•
                 col = Column.disposeCursor();
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
-                    // Ctrl+Shift+D: ƒJ[ƒ\ƒ‹ˆÚ“®æ‚ÌƒJƒ‰ƒ€‚ğŠJ‚­
+                    // Ctrl+Shift+D: ã‚«ãƒ¼ã‚½ãƒ«ç§»å‹•å…ˆã®ã‚«ãƒ©ãƒ ã‚’é–‹ã
                     col.next.open();
                 } else if (event.shiftKey) {
-                    // Shift+D: ƒJ[ƒ\ƒ‹ˆÚ“®æ‚ÌƒJƒ‰ƒ€‚ğŠJ‚¢‚ÄŒ»İ‚ÌƒJƒ‰ƒ€‚ğ•Â‚¶‚é
+                    // Shift+D: ã‚«ãƒ¼ã‚½ãƒ«ç§»å‹•å…ˆã®ã‚«ãƒ©ãƒ ã‚’é–‹ã„ã¦ç¾åœ¨ã®ã‚«ãƒ©ãƒ ã‚’é–‰ã˜ã‚‹
                     col.next.open();
                     col.close();
                     col.next.setCursor();
@@ -62,47 +62,47 @@ $(() => {
                 col.opened_next.setCursor();
                 return false;
             case 87:
-            case 38: // w, ª: ƒJ[ƒ\ƒ‹‚ÌƒJƒ‰ƒ€‚ğã‚ÉƒXƒNƒ[ƒ‹
+            case 38: // w, â†‘: ã‚«ãƒ¼ã‚½ãƒ«ã®ã‚«ãƒ©ãƒ ã‚’ä¸Šã«ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«
                 col = Column.getCursor();
-                // Ctrl+W: æ“ª‚Ü‚ÅˆÚ“®
+                // Ctrl+W: å…ˆé ­ã¾ã§ç§»å‹•
                 if (event.ctrlKey || event.metaKey) col.scroll(0);
-                // Shift+W: ’Êí‚æ‚è‘½‚ß‚ÉƒXƒNƒ[ƒ‹‚·‚é
+                // Shift+W: é€šå¸¸ã‚ˆã‚Šå¤šã‚ã«ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹
                 else if (event.shiftKey) col.scroll(-Column.SHIFT_SCROLL);
                 else col.scroll(-Column.SCROLL);
                 return false;
             case 83:
-            case 40: // s, «: ƒJ[ƒ\ƒ‹‚ÌƒJƒ‰ƒ€‚ğ‰º‚ÉƒXƒNƒ[ƒ‹
+            case 40: // s, â†“: ã‚«ãƒ¼ã‚½ãƒ«ã®ã‚«ãƒ©ãƒ ã‚’ä¸‹ã«ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«
                 col = Column.getCursor();
-                // Shift+S: ’Êí‚æ‚è‘½‚ß‚ÉƒXƒNƒ[ƒ‹‚·‚é
+                // Shift+S: é€šå¸¸ã‚ˆã‚Šå¤šã‚ã«ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã™ã‚‹
                 if (event.shiftKey) col.scroll(Column.SHIFT_SCROLL);
                 else col.scroll(Column.SCROLL);
                 return false;
-            case 70: // f: ƒJ[ƒ\ƒ‹ƒJƒ‰ƒ€‚Ì‰Â•Ï••\¦‚ğƒgƒOƒ‹‚·‚é
+            case 70: // f: ã‚«ãƒ¼ã‚½ãƒ«ã‚«ãƒ©ãƒ ã®å¯å¤‰å¹…è¡¨ç¤ºã‚’ãƒˆã‚°ãƒ«ã™ã‚‹
                 Column.getCursor().toggleFlex();
                 return false;
-            case 116: // F5: ƒJ[ƒ\ƒ‹‚ÌƒJƒ‰ƒ€‚ğƒŠƒ[ƒh‚·‚é
+            case 116: // F5: ã‚«ãƒ¼ã‚½ãƒ«ã®ã‚«ãƒ©ãƒ ã‚’ãƒªãƒ­ãƒ¼ãƒ‰ã™ã‚‹
                 if (event.ctrlKey || event.metaKey) {
-                    // Ctrl+F5: ‰æ–Ê‚»‚Ì‚à‚Ì‚ğ“Ç‚İ‚İ‚È‚¨‚·(ƒuƒ‰ƒEƒUƒŠƒ[ƒh)
+                    // Ctrl+F5: ç”»é¢ãã®ã‚‚ã®ã‚’èª­ã¿è¾¼ã¿ãªãŠã™(ãƒ–ãƒ©ã‚¦ã‚¶ãƒªãƒ­ãƒ¼ãƒ‰)
                     location.reload();
                     return false;
                 }
                 Column.getCursor().reload();
                 return false;
             default:
-                // 1`9(+ƒeƒ“ƒL[): ƒJƒ‰ƒ€‚Ì•\¦‚ğƒgƒOƒ‹
+                // 1ï½9(+ãƒ†ãƒ³ã‚­ãƒ¼): ã‚«ãƒ©ãƒ ã®è¡¨ç¤ºã‚’ãƒˆã‚°ãƒ«
                 const key_num = 49 <= e.keyCode && e.keyCode <= 57;
                 const ten_num = 97 <= e.keyCode && e.keyCode <= 105;
                 if (key_num || ten_num) {
                     let number = null;
-                    // ƒL[ƒ{[ƒh‚Ì”šƒL[
+                    // ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã®æ•°å­—ã‚­ãƒ¼
                     if (key_num) number = e.keyCode - 48;
-                    // ƒeƒ“ƒL[
+                    // ãƒ†ãƒ³ã‚­ãƒ¼
                     else if (ten_num) number = e.keyCode - 96;
 
                     Column.disposeCursor();
                     col = Column.get(number - 1);
-                    if (col.toggle()) col.setCursor(); // ŠJ‚¢‚½
-                    else Column.getOpenedFirst().setCursor(); // •Â‚¶‚½
+                    if (col.toggle()) col.setCursor(); // é–‹ã„ãŸ
+                    else Column.getOpenedFirst().setCursor(); // é–‰ã˜ãŸ
                 }
                 break;
         }
@@ -110,36 +110,36 @@ $(() => {
 
     /*================================================================================================================*/
 
-    // ƒVƒ‡[ƒgƒJƒbƒgƒL[ƒoƒCƒ“ƒh(“ŠeƒtƒH[ƒ€“à)
+    // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰(æŠ•ç¨¿ãƒ•ã‚©ãƒ¼ãƒ å†…)
     $("#header>#head_postarea").keydown(e => {
         if (event.shiftKey && e.keyCode === 13) {
-            // Shift+Enter‚Å“Šeˆ—Às
+            // Shift+Enterã§æŠ•ç¨¿å‡¦ç†å®Ÿè¡Œ
             $("#header #on_submit").click();
             return false;
         } else if ((event.ctrlKey || event.metaKey) && e.keyCode === 13) {
-            // Ctrl+Enter‚Ìê‡A“ŠeŒã‚É©“®‚ÅƒtƒH[ƒJƒX‚ğŠO‚·
+            // Ctrl+Enterã®å ´åˆã€æŠ•ç¨¿å¾Œã«è‡ªå‹•ã§ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚’å¤–ã™
             $("#header #on_submit").click();
             $(e.target).blur();
             return false;
         } else if (e.keyCode === 27) {
-            // Esc‚ÅƒtƒH[ƒJƒXƒAƒEƒg
+            // Escã§ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã‚¢ã‚¦ãƒˆ
             $(e.target).blur();
             return false;
         }
-        // Alt+ª«‚ÅƒAƒJƒEƒ“ƒg‚ğØ‚è‘Ö‚¦
+        // Alt+â†‘â†“ã§ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’åˆ‡ã‚Šæ›¿ãˆ
         if (event.altKey) {
-            if (e.keyCode === 38) { // ª
+            if (e.keyCode === 38) { // â†‘
                 Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).prev.setPostAccount();
                 return false;
-            } else if (e.keyCode === 40) { // «
+            } else if (e.keyCode === 40) { // â†“
                 Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).next.setPostAccount();
                 return false;
             }
         }
     });
-    // ƒVƒ‡[ƒgƒJƒbƒgƒL[ƒoƒCƒ“ƒh(ƒŠƒvƒ‰ƒCƒtƒH[ƒ€“à)
+    // ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆã‚­ãƒ¼ãƒã‚¤ãƒ³ãƒ‰(ãƒªãƒ—ãƒ©ã‚¤ãƒ•ã‚©ãƒ¼ãƒ å†…)
     $(document).on("keydown", "#__txt_replyarea", e => {
-        // Ctrl+Enter‚©Shift+Enter‚Å“Šeˆ—Às
+        // Ctrl+Enterã‹Shift+Enterã§æŠ•ç¨¿å‡¦ç†å®Ÿè¡Œ
         if ((event.ctrlKey || event.metaKey || event.shiftKey) && e.keyCode === 13) {
             $("#__on_reply_submit").click();
             return false;

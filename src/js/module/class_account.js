@@ -1,11 +1,11 @@
-/**
+ï»¿/**
  * #Class
- * ƒAƒJƒEƒ“ƒgî•ñ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
  *
  * @autor tizerm@mofu.kemo.no
  */
 class Account {
-    // ƒRƒ“ƒXƒgƒ‰ƒNƒ^: İ’èƒtƒ@ƒCƒ‹‚É‚ ‚éƒAƒJƒEƒ“ƒgİ’è’l‚ğg‚Á‚Ä‰Šú‰»
+    // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿: è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ã‚ã‚‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆè¨­å®šå€¤ã‚’ä½¿ã£ã¦åˆæœŸåŒ–
     constructor(pref) {
         this.pref = pref
         this.index = pref.index
@@ -16,9 +16,9 @@ class Account {
         this.emoji_cache = null
     }
 
-    // Getter: ƒvƒ‰ƒbƒgƒtƒH[ƒ€
+    // Getter: ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ 
     get platform() { return this.pref.platform }
-    // Getter: WebSocketÚ‘±URL
+    // Getter: WebSocketæ¥ç¶šURL
     get socket_url() {
         let url = null
         switch (this.pref.platform) {
@@ -34,7 +34,7 @@ class Account {
         return url
     }
 
-    // ƒXƒ^ƒeƒBƒbƒNƒ}ƒbƒv‚ğ‰Šú‰»(”ñ“¯Šú)
+    // ã‚¹ã‚¿ãƒ†ã‚£ãƒƒã‚¯ãƒãƒƒãƒ—ã‚’åˆæœŸåŒ–(éåŒæœŸ)
     static {
         (async () => {
             const accounts = await window.accessApi.readPrefAccs()
@@ -53,22 +53,22 @@ class Account {
 
     /**
      * #StaticMethod
-     * ƒAƒJƒEƒ“ƒgƒvƒƒpƒeƒB‚ğæ“¾
+     * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’å–å¾—
      * 
-     * @param arg ”’l‚©ƒAƒJƒEƒ“ƒg‚Ìƒtƒ‹ƒAƒhƒŒƒX
+     * @param arg æ•°å€¤ã‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®ãƒ•ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹
      */
     static get(arg) {
-        // ”’lŒ^‚¾‚Á‚½ê‡ƒCƒ“ƒfƒNƒX‚Æ‚µ‚Ä”Ô†‚©‚çƒvƒƒpƒeƒB‚ğæ“¾
+        // æ•°å€¤å‹ã ã£ãŸå ´åˆã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã¨ã—ã¦ç•ªå·ã‹ã‚‰ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’å–å¾—
         if (typeof arg == 'number') return Account.map.get(Account.keys[arg])
-        // ƒIƒuƒWƒFƒNƒg‚¾‚Á‚½ê‡•¶š—ñ‚Æ‚µ‚Äæ“¾
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸå ´åˆæ–‡å­—åˆ—ã¨ã—ã¦å–å¾—
         else return Account.map.get(arg)
     }
 
     /**
      * #StaticMethod
-     * ƒAƒJƒEƒ“ƒgƒvƒƒpƒeƒB‚ğ‘–¸
+     * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã‚’èµ°æŸ»
      * 
-     * @param callback —v‘f‚²‚Æ‚ÉÀs‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”
+     * @param callback è¦ç´ ã”ã¨ã«å®Ÿè¡Œã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
      */
     static each(callback) {
         Account.map.forEach((v, k) => callback(v))
@@ -76,7 +76,7 @@ class Account {
 
     /**
      * #Method
-     * ‚±‚ÌƒAƒJƒEƒ“ƒg‚ğ“ŠeæƒAƒJƒEƒ“ƒg‚Éİ’è
+     * ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’æŠ•ç¨¿å…ˆã‚¢ã‚«ã‚¦ãƒ³ãƒˆã«è¨­å®š
      */
     setPostAccount() {
         $("#header>#head_postarea>.__lnk_postuser>img").attr('src', this.pref.avatar_url)
@@ -87,30 +87,30 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
-     * ‚±‚ÌƒAƒJƒEƒ“ƒg‚©‚ç“Šeˆ—‚ğÀs
+     * ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‹ã‚‰æŠ•ç¨¿å‡¦ç†ã‚’å®Ÿè¡Œ
      * 
-     * @param arg ƒpƒ‰ƒ[ƒ^
+     * @param arg ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
      */
     async post(arg) {
-        // ‰½‚à‘‚¢‚Ä‚È‚©‚Á‚½‚ç‰½‚à‚µ‚È‚¢
+        // ä½•ã‚‚æ›¸ã„ã¦ãªã‹ã£ãŸã‚‰ä½•ã‚‚ã—ãªã„
         if (!arg.content) return
         let visibility = null
         let request_param = null
         let request_promise = null
-        // æ‚Étoast•\¦
+        // å…ˆã«toastè¡¨ç¤º
         const toast_uuid = crypto.randomUUID()
-        toast("“Še’†‚Å‚·...", "progress", toast_uuid)
+        toast("æŠ•ç¨¿ä¸­ã§ã™...", "progress", toast_uuid)
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
-                // ŒöŠJ”ÍˆÍ‚ğæ“¾
+                // å…¬é–‹ç¯„å›²ã‚’å–å¾—
                 switch (arg.visibility_id) {
-                    case 'visibility_public': // ŒöŠJ
+                    case 'visibility_public': // å…¬é–‹
                         visibility = "public"
                         break
-                    case 'visibility_unlisted': // ƒz[ƒ€
+                    case 'visibility_unlisted': // ãƒ›ãƒ¼ãƒ 
                         visibility = "unlisted"
                         break
-                    case 'visibility_followers': // ƒtƒHƒŒÀ
+                    case 'visibility_followers': // ãƒ•ã‚©ãƒ­é™
                         visibility = "private"
                         break
                     default:
@@ -120,11 +120,11 @@ class Account {
                     "status": arg.content,
                     "visibility": visibility
                 }
-                // CW‚ª‚ ‚éê‡‚ÍCWƒeƒLƒXƒg‚à’Ç‰Á
+                // CWãŒã‚ã‚‹å ´åˆã¯CWãƒ†ã‚­ã‚¹ãƒˆã‚‚è¿½åŠ 
                 if (arg.cw_text) request_param.spoiler_text = arg.cw_text
-                // ƒŠƒvƒ‰ƒC‚Ìê‡‚ÍƒŠƒvƒ‰ƒCæƒc[ƒgID‚ğİ’è
+                // ãƒªãƒ—ãƒ©ã‚¤ã®å ´åˆã¯ãƒªãƒ—ãƒ©ã‚¤å…ˆãƒ„ãƒ¼ãƒˆIDã‚’è¨­å®š
                 if (arg.reply_id) request_param.in_reply_to_id = arg.reply_id
-                request_promise = $.ajax({ // API‚É“Še‚ğ“Š‚°‚ÄA³í‚ÉI—¹‚µ‚½‚çÅI“Še‚Éİ’è
+                request_promise = $.ajax({ // APIã«æŠ•ç¨¿ã‚’æŠ•ã’ã¦ã€æ­£å¸¸ã«çµ‚äº†ã—ãŸã‚‰æœ€çµ‚æŠ•ç¨¿ã«è¨­å®š
                     type: "POST",
                     url: `https://${this.pref.domain}/api/v1/statuses`,
                     dataType: "json",
@@ -136,15 +136,15 @@ class Account {
                 }).then(data => new Status(data, null, this).pushStack())
                 break
             case 'Misskey': // Misskey
-                // ŒöŠJ”ÍˆÍ‚ğæ“¾
+                // å…¬é–‹ç¯„å›²ã‚’å–å¾—
                 switch (arg.visibility_id) {
-                    case 'visibility_public': // ŒöŠJ
+                    case 'visibility_public': // å…¬é–‹
                         visibility = "public"
                         break
-                    case 'visibility_unlisted': // ƒz[ƒ€
+                    case 'visibility_unlisted': // ãƒ›ãƒ¼ãƒ 
                         visibility = "home"
                         break
-                    case 'visibility_followers': // ƒtƒHƒŒÀ
+                    case 'visibility_followers': // ãƒ•ã‚©ãƒ­é™
                         visibility = "followers"
                         break
                     default:
@@ -155,11 +155,11 @@ class Account {
                     "text": arg.content,
                     "visibility": visibility
                 }
-                // CW‚ª‚ ‚éê‡‚ÍCWƒeƒLƒXƒg‚à’Ç‰Á
+                // CWãŒã‚ã‚‹å ´åˆã¯CWãƒ†ã‚­ã‚¹ãƒˆã‚‚è¿½åŠ 
                 if (arg.cw_text) request_param.cw = arg.cw_text
-                // ƒŠƒvƒ‰ƒC‚Ìê‡‚ÍƒŠƒvƒ‰ƒCæƒc[ƒgID‚ğİ’è
+                // ãƒªãƒ—ãƒ©ã‚¤ã®å ´åˆã¯ãƒªãƒ—ãƒ©ã‚¤å…ˆãƒ„ãƒ¼ãƒˆIDã‚’è¨­å®š
                 if (arg.reply_id) request_param.replyId = arg.reply_id
-                request_promise = $.ajax({ // API‚É“Še‚ğ“Š‚°‚ÄA³í‚ÉI—¹‚µ‚½‚çÅI“Še‚Éİ’è
+                request_promise = $.ajax({ // APIã«æŠ•ç¨¿ã‚’æŠ•ã’ã¦ã€æ­£å¸¸ã«çµ‚äº†ã—ãŸã‚‰æœ€çµ‚æŠ•ç¨¿ã«è¨­å®š
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
                     dataType: "json",
@@ -171,27 +171,27 @@ class Account {
                 break
         }
         request_promise.then(data => {
-            // “Še¬Œ÷(ƒR[ƒ‹ƒoƒbƒNŠÖ”Às)
+            // æŠ•ç¨¿æˆåŠŸæ™‚(ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°å®Ÿè¡Œ)
             arg.success()
-            toast("“Še‚µ‚Ü‚µ‚½.", "done", toast_uuid)
-        }).catch((jqXHR, textStatus, errorThrown) => toast("“Še‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid))
+            toast("æŠ•ç¨¿ã—ã¾ã—ãŸ.", "done", toast_uuid)
+        }).catch((jqXHR, textStatus, errorThrown) => toast("æŠ•ç¨¿ã«å¤±æ•—ã—ã¾ã—ãŸ.", "error", toast_uuid))
     }
 
     /**
      * #Method #Ajax #jQuery
-     * ‚±‚ÌƒAƒJƒEƒ“ƒg‚©‚çƒu[ƒXƒg/ƒŠƒm[ƒg/‚¨‹C‚É“ü‚èˆ—‚ğÀs
+     * ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‹ã‚‰ãƒ–ãƒ¼ã‚¹ãƒˆ/ãƒªãƒãƒ¼ãƒˆ/ãŠæ°—ã«å…¥ã‚Šå‡¦ç†ã‚’å®Ÿè¡Œ
      * 
-     * @param arg ƒpƒ‰ƒ[ƒ^
+     * @param arg ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
      */
     async reaction(arg) {
         let request_promise = null
         let target_json = null
         const toast_uuid = crypto.randomUUID()
-        toast("‘ÎÛ‚Ì“Še‚ğæ“¾’†‚Å‚·...", "progress", toast_uuid)
-        // ƒ^[ƒQƒbƒg‚Ì“Šeƒf[ƒ^‚ğæ“¾
+        toast("å¯¾è±¡ã®æŠ•ç¨¿ã‚’å–å¾—ä¸­ã§ã™...", "progress", toast_uuid)
+        // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®æŠ•ç¨¿ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // ŒŸõ‚©‚ç“Še‚ğæ“¾
+                request_promise = $.ajax({ // æ¤œç´¢ã‹ã‚‰æŠ•ç¨¿ã‚’å–å¾—
                     type: "GET",
                     url: `https://${this.pref.domain}/api/v2/search`,
                     dataType: "json",
@@ -202,11 +202,11 @@ class Account {
                         "resolve": true
                     }
                 }).then(data => {
-                    // æ“¾ƒf[ƒ^‚ğPromise‚Å•Ô‹p
+                    // å–å¾—ãƒ‡ãƒ¼ã‚¿ã‚’Promiseã§è¿”å´
                     return data.statuses[0]
                 }).catch((jqXHR, textStatus, errorThrown) => {
-                    // æ“¾¸”s
-                    toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error", toast_uuid)
+                    // å–å¾—å¤±æ•—æ™‚
+                    toast("æŠ•ç¨¿ã®å–å¾—ã§ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ.", "error", toast_uuid)
                 })
                 break
             case 'Misskey': // Misskey
@@ -220,53 +220,53 @@ class Account {
                         "uri": arg.target_url
                     })
                 }).then(data => {
-                    // æ“¾ƒf[ƒ^‚ğPromise‚Å•Ô‹p
+                    // å–å¾—ãƒ‡ãƒ¼ã‚¿ã‚’Promiseã§è¿”å´
                     return data.object
                 }).catch((jqXHR, textStatus, errorThrown) => {
-                    // æ“¾¸”s
-                    toast("“Še‚Ìæ“¾‚ÅƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½.", "error", toast_uuid)
+                    // å–å¾—å¤±æ•—æ™‚
+                    toast("æŠ•ç¨¿ã®å–å¾—ã§ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ.", "error", toast_uuid)
                 });
                 break
             default:
                 break
         }
-        // ƒf[ƒ^‚ªæ“¾‚³‚ê‚é‚Ì‚ğ‘Ò‚Á‚Ätarget_json‚É‘ã“ü
+        // ãƒ‡ãƒ¼ã‚¿ãŒå–å¾—ã•ã‚Œã‚‹ã®ã‚’å¾…ã£ã¦target_jsonã«ä»£å…¥
         target_json = await request_promise
-        // “Še‚ğæ“¾‚Å‚«‚È‚©‚Á‚½‚ç‚È‚É‚à‚µ‚È‚¢
+        // æŠ•ç¨¿ã‚’å–å¾—ã§ããªã‹ã£ãŸã‚‰ãªã«ã‚‚ã—ãªã„
         if (!target_json) return
-        // æ“¾‚Å‚«‚½ê‡‚Ítarget_json‚©‚çStatusƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬
+        // å–å¾—ã§ããŸå ´åˆã¯target_jsonã‹ã‚‰Statusã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç”Ÿæˆ
         const target_post = new Status(target_json, null, this)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 switch (arg.target_mode) {
-                    case '__menu_reply': // ƒŠƒvƒ‰ƒC
+                    case '__menu_reply': // ãƒªãƒ—ãƒ©ã‚¤
                         target_post.createReplyWindow()
                         toast(null, "hide", toast_uuid)
                         break;
-                    case '__menu_reblog': // ƒu[ƒXƒg
+                    case '__menu_reblog': // ãƒ–ãƒ¼ã‚¹ãƒˆ
                         $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/reblog`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                         }).then(data => {
-                            toast("“Še‚ğƒu[ƒXƒg‚µ‚Ü‚µ‚½.", "done", toast_uuid)
+                            toast("æŠ•ç¨¿ã‚’ãƒ–ãƒ¼ã‚¹ãƒˆã—ã¾ã—ãŸ.", "done", toast_uuid)
                         }).catch((jqXHR, textStatus, errorThrown) => {
-                            // æ“¾¸”s
-                            toast("ƒu[ƒXƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid)
+                            // å–å¾—å¤±æ•—æ™‚
+                            toast("ãƒ–ãƒ¼ã‚¹ãƒˆã«å¤±æ•—ã—ã¾ã—ãŸ.", "error", toast_uuid)
                         })
                         break
-                    case '__menu_favorite': // ‚¨‹C‚É“ü‚è
+                    case '__menu_favorite': // ãŠæ°—ã«å…¥ã‚Š
                         $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                         }).then(data => {
-                            toast("“Še‚ğ‚¨‹C‚É“ü‚è‚µ‚Ü‚µ‚½.", "done", toast_uuid)
+                            toast("æŠ•ç¨¿ã‚’ãŠæ°—ã«å…¥ã‚Šã—ã¾ã—ãŸ.", "done", toast_uuid)
                         }).catch((jqXHR, textStatus, errorThrown) => {
-                            // æ“¾¸”s
-                            toast("‚¨‹C‚É“ü‚è‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid)
+                            // å–å¾—å¤±æ•—æ™‚
+                            toast("ãŠæ°—ã«å…¥ã‚Šã«å¤±æ•—ã—ã¾ã—ãŸ.", "error", toast_uuid)
                         })
                         break
                     default:
@@ -275,11 +275,11 @@ class Account {
                 break
             case 'Misskey': // Misskey
                 switch (arg.target_mode) {
-                    case '__menu_reply': // ƒŠƒvƒ‰ƒC
+                    case '__menu_reply': // ãƒªãƒ—ãƒ©ã‚¤
                         target_post.createReplyWindow()
                         toast(null, "hide", toast_uuid)
                         break
-                    case '__menu_reblog': // ƒŠƒm[ƒg
+                    case '__menu_reblog': // ãƒªãƒãƒ¼ãƒˆ
                         $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/create`,
@@ -290,14 +290,14 @@ class Account {
                                 "renoteId": target_post.id
                             })
                         }).then(data => {
-                            toast("“Še‚ğƒŠƒm[ƒg‚µ‚Ü‚µ‚½.", "done", toast_uuid)
+                            toast("æŠ•ç¨¿ã‚’ãƒªãƒãƒ¼ãƒˆã—ã¾ã—ãŸ.", "done", toast_uuid)
                         }).catch((jqXHR, textStatus, errorThrown) => {
-                            // æ“¾¸”s
-                            toast("ƒŠƒm[ƒg‚É¸”s‚µ‚Ü‚µ‚½.", "error", toast_uuid)
+                            // å–å¾—å¤±æ•—æ™‚
+                            toast("ãƒªãƒãƒ¼ãƒˆã«å¤±æ•—ã—ã¾ã—ãŸ.", "error", toast_uuid)
                         })
                         break
-                    case '__menu_favorite': // ‚¨‹C‚É“ü‚è
-                        toast("Misskey‚Å‚¨‹C‚É“ü‚è‚ÍŒ»ó”ñ‘Î‰‚Å‚·cc.", "error", toast_uuid)
+                    case '__menu_favorite': // ãŠæ°—ã«å…¥ã‚Š
+                        toast("Misskeyã§ãŠæ°—ã«å…¥ã‚Šã¯ç¾çŠ¶éå¯¾å¿œã§ã™â€¦â€¦.", "error", toast_uuid)
                         break
                     default:
                         break
@@ -310,9 +310,9 @@ class Account {
 
     /**
      * #Method #WebSocket
-     * ‚±‚ÌƒAƒJƒEƒ“ƒg‚ÉWebSocket‚Ìİ’è‚ğ’Ç‰Á‚·‚é
+     * ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã«WebSocketã®è¨­å®šã‚’è¿½åŠ ã™ã‚‹
      * 
-     * @param arg ƒpƒ‰ƒ[ƒ^
+     * @param arg ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
      */
     addSocketPref(arg) {
         this.socket_prefs.push(arg)
@@ -320,45 +320,45 @@ class Account {
 
     /**
      * #Method #WebSocket
-     * ‚±‚ÌƒAƒJƒEƒ“ƒg‚©‚çWebSocketÚ‘±ˆ—‚ğÀs
+     * ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‹ã‚‰WebSocketæ¥ç¶šå‡¦ç†ã‚’å®Ÿè¡Œ
      * 
-     * @param arg ƒpƒ‰ƒ[ƒ^
+     * @param arg ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
      */
     async connect(arg) {
-        // WebSocketÚ‘±‚ğŠJn
+        // WebSocketæ¥ç¶šã‚’é–‹å§‹
         this.socket = new WebSocket(this.socket_url)
         this.reconnect = arg.reconnect
 
-        // WebSocketÚ‘±ŠJnˆ—
+        // WebSocketæ¥ç¶šé–‹å§‹æ™‚å‡¦ç†
         this.socket.addEventListener("open", (event) => {
-            // Ú‘±ŠJn—pƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀs
+            // æ¥ç¶šé–‹å§‹ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å®Ÿè¡Œ
             arg.openFunc()
-            // ƒ\ƒPƒbƒg‚ÉóMİ’è‚ğ‘—M
+            // ã‚½ã‚±ãƒƒãƒˆã«å—ä¿¡è¨­å®šã‚’é€ä¿¡
             this.socket_prefs.forEach(p => this.socket.send(p.send_param))
         })
-        // ƒGƒ‰[ƒnƒ“ƒhƒ‰
+        // ã‚¨ãƒ©ãƒ¼ãƒãƒ³ãƒ‰ãƒ©
         this.socket.addEventListener("error", (event) => {
-            toast(`${this.full_address}‚ÅÚ‘±ƒGƒ‰[‚ª”­¶‚µ‚Ü‚µ‚½AÄÚ‘±‚µ‚Ä‚­‚¾‚³‚¢B`, "error")
-            // ƒGƒ‰[‚ÅØ‚ê‚½ê‡‚ÍÄÚ‘±‚µ‚È‚¢
+            toast(`${this.full_address}ã§æ¥ç¶šã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€å†æ¥ç¶šã—ã¦ãã ã•ã„ã€‚`, "error")
+            // ã‚¨ãƒ©ãƒ¼ã§åˆ‡ã‚ŒãŸå ´åˆã¯å†æ¥ç¶šã—ãªã„
             this.reconnect = false
             console.log(event)
         })
-        // WebSocketÚ‘±’â~ˆ—
+        // WebSocketæ¥ç¶šåœæ­¢æ™‚å‡¦ç†
         this.socket.addEventListener("close", (event) => {
-            // Ú‘±’â~—pƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀs
+            // æ¥ç¶šåœæ­¢ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å®Ÿè¡Œ
             arg.closeFunc()
-            // ©g‚ğŒÄ‚Ño‚µ‚ÄÄÚ‘±
+            // è‡ªèº«ã‚’å‘¼ã³å‡ºã—ã¦å†æ¥ç¶š
             if (this.reconnect) this.connect(arg)
             console.log(event)
         })
-        // óMˆ—‚ğİ’è
+        // å—ä¿¡å‡¦ç†ã‚’è¨­å®š
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
     }
 
     unauthorize(callback) {
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
-                // ”FØ‰ğœƒvƒƒZƒX‚É¬Œ÷‚µ‚½‚çƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğÀs
+                // èªè¨¼è§£é™¤ãƒ—ãƒ­ã‚»ã‚¹ã«æˆåŠŸã—ãŸã‚‰ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å®Ÿè¡Œ
                 $.ajax({
                     type: "POST",
                     url: `https://${this.pref.domain}/oauth/revoke`,
@@ -372,7 +372,7 @@ class Account {
                 }).then(callback)
                 break
             case 'Misskey': // Misskey
-                // ”FØ‰ğœAPI‚ª‚È‚¢‚Ì‚Å‚»‚Ì‚Ü‚ÜƒR[ƒ‹ƒoƒbƒN‚ğÀs
+                // èªè¨¼è§£é™¤APIãŒãªã„ã®ã§ãã®ã¾ã¾ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã‚’å®Ÿè¡Œ
                 callback()
                 break
             default:
@@ -380,25 +380,25 @@ class Account {
         }
     }
 
-    // Getter: ”FØƒAƒJƒEƒ“ƒg‚ğ‡”Ô‚É•À‚×‚½‚Æ‚«‚É‚±‚ÌƒAƒJƒEƒ“ƒg‚ÌŸ‚É‚ ‚½‚éƒAƒJƒEƒ“ƒg‚ğæ“¾
+    // Getter: èªè¨¼ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’é †ç•ªã«ä¸¦ã¹ãŸã¨ãã«ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®æ¬¡ã«ã‚ãŸã‚‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’å–å¾—
     get next() {
         let index = this.index + 1
-        // ‰E’[‚Ìê‡‚ÍÅ‰‚Ì—v‘f‚ğ‘I‘ğ
+        // å³ç«¯ã®å ´åˆã¯æœ€åˆã®è¦ç´ ã‚’é¸æŠ
         if (Account.keys.length <= index) index = 0
         return Account.get(index)
     }
 
-    // Getter: ”FØƒAƒJƒEƒ“ƒg‚ğ‡”Ô‚É•À‚×‚½‚Æ‚«‚É‚±‚ÌƒAƒJƒEƒ“ƒg‚Ì‘O‚É‚ ‚½‚éƒAƒJƒEƒ“ƒg‚ğæ“¾
+    // Getter: èªè¨¼ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’é †ç•ªã«ä¸¦ã¹ãŸã¨ãã«ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®å‰ã«ã‚ãŸã‚‹ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’å–å¾—
     get prev() {
         let index = this.index - 1
-        // ¶’[‚Ìê‡‚ÍÅŒã‚Ì—v‘f‚ğ‘I‘ğ
+        // å·¦ç«¯ã®å ´åˆã¯æœ€å¾Œã®è¦ç´ ã‚’é¸æŠ
         if (index < 0) index = Account.keys.length - 1
         return Account.get(index)
     }
 
     /**
      * #StaticMethod
-     * “ŠeƒAƒJƒEƒ“ƒg‚ğ‘I‘ğ‚·‚éƒŠƒXƒg‚ÌDOM‚ğ•Ô‹p
+     * æŠ•ç¨¿ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’é¸æŠã™ã‚‹ãƒªã‚¹ãƒˆã®DOMã‚’è¿”å´
      */
     static createPostAccountList() {
         let html = '<div class="account_list">'
@@ -415,7 +415,7 @@ class Account {
 
     /**
      * #StaticMethod
-     * “ŠeƒAƒJƒEƒ“ƒg‚ğ‘I‘ğ‚·‚éƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[‚ÌDOM‚ğ•Ô‹p
+     * æŠ•ç¨¿ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’é¸æŠã™ã‚‹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®DOMã‚’è¿”å´
      */
     static createContextMenuAccountList() {
         let html = ''
@@ -434,11 +434,11 @@ class Account {
                     <div class="userid">${v.full_address}</div>
                 </div>
                 <div class="option">
-                    ƒAƒJƒEƒ“ƒgƒJƒ‰[: 
+                    ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚«ãƒ©ãƒ¼: 
                     #<input type="text" class="__txt_acc_color __pull_color_palette" value="${v.pref.acc_color}" size="6"/>
                 </div>
                 <div class="foot_button">
-                    <button type="button" class="__btn_unauth_acc">”FØ‰ğœ</button>
+                    <button type="button" class="__btn_unauth_acc">èªè¨¼è§£é™¤</button>
                 </div>
             </li>
         `)

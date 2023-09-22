@@ -1,84 +1,84 @@
-$(() => {
-    // HTMLƒ[ƒh‚É”ñ“¯Šú‚ÅÀs
+ï»¿$(() => {
+    // HTMLãƒ­ãƒ¼ãƒ‰æ™‚ã«éåŒæœŸã§å®Ÿè¡Œ
     (async () => {
-        // •ÛŒ¯—p‚ÉƒAƒJƒEƒ“ƒgî•ñ‚ÆƒJƒ‰ƒ€î•ñ‚ª“Ç‚ß‚Ä‚È‚©‚Á‚½‚çˆê’â~
+        // ä¿é™ºç”¨ã«ã‚¢ã‚«ã‚¦ãƒ³ãƒˆæƒ…å ±ã¨ã‚«ãƒ©ãƒ æƒ…å ±ãŒèª­ã‚ã¦ãªã‹ã£ãŸã‚‰ä¸€æ™‚åœæ­¢
         if (!await window.accessApi.readPrefAccs()) return;
         if (!await window.accessApi.readPrefCols()) return;
 
         /*============================================================================================================*/
 
-        // “ŠeæƒAƒJƒEƒ“ƒg‚Ì‰Šúİ’è
+        // æŠ•ç¨¿å…ˆã‚¢ã‚«ã‚¦ãƒ³ãƒˆã®åˆæœŸè¨­å®š
         Account.get(0).setPostAccount();
 
-        // “ŠeƒAƒCƒRƒ“ƒNƒŠƒbƒN‚Ìƒƒjƒ…[¶¬‚Æ•\¦(ƒNƒŠƒbƒNƒCƒxƒ“ƒg)
+        // æŠ•ç¨¿ã‚¢ã‚¤ã‚³ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚ã®ãƒ¡ãƒ‹ãƒ¥ãƒ¼ç”Ÿæˆã¨è¡¨ç¤º(ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ)
         $("#header>#pop_postuser").html(Account.createPostAccountList());
         $("#header>#head_postarea>.__lnk_postuser").on("click",
             e => $("#header>#pop_postuser").show("slide", { direction: "up" }, 150));
-        // ƒAƒJƒEƒ“ƒgƒŠƒXƒg‚ÌƒAƒJƒEƒ“ƒg‘I‘ğ‚É“ŠeæƒAƒJƒEƒ“ƒg‚ğ•ÏX
+        // ã‚¢ã‚«ã‚¦ãƒ³ãƒˆãƒªã‚¹ãƒˆã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆé¸æŠæ™‚ã«æŠ•ç¨¿å…ˆã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’å¤‰æ›´
         $(document).on("click", ".__lnk_account_elm", e => {
             Account.get($(e.target).closest(".__lnk_account_elm").attr('name')).setPostAccount();
             $("#header>#pop_postuser").hide("slide", { direction: "up" }, 150);
         });
 
-        // ŒöŠJ”ÍˆÍƒNƒŠƒbƒNƒCƒxƒ“ƒg
+        // å…¬é–‹ç¯„å›²ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ
         $("#header>#head_postarea .__lnk_visibility").on("click", e => {
-            // ‘I‘ğ’†‚ÌƒIƒvƒVƒ‡ƒ“‚ÉselectedƒNƒ‰ƒX‚ğ•t—^
+            // é¸æŠä¸­ã®ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã«selectedã‚¯ãƒ©ã‚¹ã‚’ä»˜ä¸
             $(".__lnk_visibility>img").removeClass("selected");
             $(e.target).closest("img").addClass("selected");
         });
 
-        // “Šeƒ{ƒ^ƒ“ƒNƒŠƒbƒNƒCƒxƒ“ƒg(“Šeˆ—)
+        // æŠ•ç¨¿ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ(æŠ•ç¨¿å‡¦ç†)
         $("#header #on_submit").on("click",
             e => Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).post({
                 content: $("#__txt_postarea").val(),
                 cw_text: $("#__txt_content_warning").val(),
                 visibility_id: $("#header>#head_postarea>.visibility_icon .selected").attr("id"),
-                // “Še¬Œ÷ˆ—(‘‚¢‚½“à—e‚ğÁ‚·)
+                // æŠ•ç¨¿æˆåŠŸæ™‚å‡¦ç†(æ›¸ã„ãŸå†…å®¹ã‚’æ¶ˆã™)
                 success: () => {
                     $("#__txt_postarea").val("");
                     $("#__txt_content_warning").val("");
                 }
             }));
 
-        // ƒŠƒvƒ‰ƒCƒEƒBƒ“ƒhƒE‚Ì“Šeƒ{ƒ^ƒ“ƒNƒŠƒbƒNƒCƒxƒ“ƒg(ƒŠƒvƒ‰ƒC‘—Mˆ—)
+        // ãƒªãƒ—ãƒ©ã‚¤ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®æŠ•ç¨¿ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ(ãƒªãƒ—ãƒ©ã‚¤é€ä¿¡å‡¦ç†)
         $(document).on("click", "#__on_reply_submit", e => Account.get($("#__hdn_reply_account").val()).post({
             content: $("#__txt_replyarea").val(),
-            visibility_id: 'visibility_public', // TODO: ˆê’UŒöŠJ‚É‚·‚é
+            visibility_id: 'visibility_public', // TODO: ä¸€æ—¦å…¬é–‹ã«ã™ã‚‹
             reply_id: $("#__hdn_reply_id").val(),
-            // “Še¬Œ÷ˆ—(ƒŠƒvƒ‰ƒCƒEƒBƒ“ƒhƒE‚ğ•Â‚¶‚é)
+            // æŠ•ç¨¿æˆåŠŸæ™‚å‡¦ç†(ãƒªãƒ—ãƒ©ã‚¤ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’é–‰ã˜ã‚‹)
             success: () => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150)
         }));
-        // •Â‚¶‚éƒ{ƒ^ƒ“ƒNƒŠƒbƒNƒCƒxƒ“ƒg
+        // é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ
         $(document).on("click", "#__on_reply_close", 
             e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
 
-        // ƒIƒvƒVƒ‡ƒ“ƒ{ƒ^ƒ“ƒCƒxƒ“ƒg: ’¼‘O‚Ì“Še‚ğíœ
+        // ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ: ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤
         $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
-            last => last.delete((post, uuid) => toast("’¼‘O‚Ì“Še‚ğíœ‚µ‚Ü‚µ‚½.", "done", uuid)),
-            () => toast("’¼‘O‚Ì“Še‚ª‚ ‚è‚Ü‚¹‚ñ.", "error")));
-        // ƒIƒvƒVƒ‡ƒ“ƒ{ƒ^ƒ“ƒCƒxƒ“ƒg: ’¼‘O‚Ì“Še‚ğíœ‚µ‚Ä•ÒW
+            last => last.delete((post, uuid) => toast("ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¾ã—ãŸ.", "done", uuid)),
+            () => toast("ç›´å‰ã®æŠ•ç¨¿ãŒã‚ã‚Šã¾ã›ã‚“.", "error")));
+        // ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ: ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¦ç·¨é›†
         $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
             last => last.delete((post, uuid) => {
                 post.from_account.setPostAccount();
                 $("#__txt_postarea").val(post.content_text);
                 $("#__txt_content_warning").val(post.cw_text);
-                toast("’¼‘O‚Ì“Še‚ğíœ‚µ‚Ü‚µ‚½. “à—e‚ğÄ“WŠJ‚µ‚Ü‚·.", "done", uuid);
-            }), () => toast("’¼‘O‚Ì“Še‚ª‚ ‚è‚Ü‚¹‚ñ.", "error")));
-        // ƒIƒvƒVƒ‡ƒ“ƒ{ƒ^ƒ“ƒCƒxƒ“ƒg: ’¼‘O‚Ì“Še‚ğƒRƒs[
+                toast("ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¾ã—ãŸ. å†…å®¹ã‚’å†å±•é–‹ã—ã¾ã™.", "done", uuid);
+            }), () => toast("ç›´å‰ã®æŠ•ç¨¿ãŒã‚ã‚Šã¾ã›ã‚“.", "error")));
+        // ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãƒœã‚¿ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆ: ç›´å‰ã®æŠ•ç¨¿ã‚’ã‚³ãƒ”ãƒ¼
         $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
             $("#__txt_postarea").val(last.content_text);
             $("#__txt_content_warning").val(last.cw_text);
-            toast("’¼‘O‚Ì“Še“à—e‚ğÄ“WŠJ‚µ‚Ü‚µ‚½.", "done");
-        }, () => toast("’¼‘O‚Ì“Še‚ª‚ ‚è‚Ü‚¹‚ñ.", "error")));
+            toast("ç›´å‰ã®æŠ•ç¨¿å†…å®¹ã‚’å†å±•é–‹ã—ã¾ã—ãŸ.", "done");
+        }, () => toast("ç›´å‰ã®æŠ•ç¨¿ãŒã‚ã‚Šã¾ã›ã‚“.", "error")));
 
 
         /*============================================================================================================*/
 
-        // ‘S”ÊƒCƒxƒ“ƒgˆ—
-        // ƒJƒ‰ƒ€‚ÉŠÖ‚·‚éƒCƒxƒ“ƒg‚ÍƒJƒ‰ƒ€ƒNƒ‰ƒX‚ÅƒoƒCƒ“ƒh
+        // å…¨èˆ¬ã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†
+        // ã‚«ãƒ©ãƒ ã«é–¢ã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã¯ã‚«ãƒ©ãƒ ã‚¯ãƒ©ã‚¹ã§ãƒã‚¤ãƒ³ãƒ‰
         Column.bindEvent();
 
-        // “Še‰EƒNƒŠƒbƒN‚ÌƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[•\¦ƒCƒxƒ“ƒg
+        // æŠ•ç¨¿å³ã‚¯ãƒªãƒƒã‚¯æ™‚ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼è¡¨ç¤ºã‚¤ãƒ™ãƒ³ãƒˆ
         $("#header>#pop_context_menu>.ui_menu>li ul").html(Account.createContextMenuAccountList());
         $("#header>#pop_context_menu>.ui_menu").menu();
         $(document).on("contextmenu", "#columns>table>tbody>tr>.column_td>ul>li", e => {
@@ -90,7 +90,7 @@ $(() => {
             return false;
         });
         $("body").on("click", e => $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100));
-        // ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[€–ÚƒNƒŠƒbƒNˆ—
+        // ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼é …ç›®ã‚¯ãƒªãƒƒã‚¯æ™‚å‡¦ç†
         $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", e => {
             const target_account = Account.get($(e.target).closest("li").attr("name"));
             $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
@@ -99,7 +99,7 @@ $(() => {
                 target_url: $("#header>#pop_context_menu").attr("name")
             });
         });
-        // ’Ê’mƒ{ƒ^ƒ“ƒNƒŠƒbƒN
+        // é€šçŸ¥ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚
         $(document).on("click", ".__on_show_notifications", e => {
             $(".__on_show_notifications").text("0");
             $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
@@ -107,27 +107,27 @@ $(() => {
 
         /*============================================================================================================*/
 
-        // ƒJƒ‰ƒ€¶¬ˆ—
+        // ã‚«ãƒ©ãƒ ç”Ÿæˆå‡¦ç†
         Column.each(col => {
-            // ƒJƒ‰ƒ€–{‘Ì‚ğ¶¬
+            // ã‚«ãƒ©ãƒ æœ¬ä½“ã‚’ç”Ÿæˆ
             col.create();
             const rest_promises = [];
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“æ“¾ˆ—‚ğƒvƒƒ~ƒX”z—ñ‚ÉŠi”[‚µ‚ÄWebSocket‚Ìİ’è‚ğƒZƒbƒg
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³å–å¾—å‡¦ç†ã‚’ãƒ—ãƒ­ãƒŸã‚¹é…åˆ—ã«æ ¼ç´ã—ã¦WebSocketã®è¨­å®šã‚’ã‚»ãƒƒãƒˆ
             col.eachTimeline(tl => {
                 rest_promises.push(tl.getTimeline());
                 tl.setSocketParam();
             });
-            // ƒ^ƒCƒ€ƒ‰ƒCƒ“‚ğDOM‚ÉƒoƒCƒ“ƒh
+            // ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’DOMã«ãƒã‚¤ãƒ³ãƒ‰
             col.onLoadTimeline(rest_promises);
         });
-        // ‘ÎÛƒAƒJƒEƒ“ƒg‚ğWebSocket‚ÉÚ‘±
+        // å¯¾è±¡ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’WebSocketã«æ¥ç¶š
         Account.each(account => account.connect({
             openFunc: () => {},
-            closeFunc: () => toast(`${account.full_address}‚Æ‚ÌÚ‘±‚ªØ’f‚³‚ê‚Ü‚µ‚½B`, "error"),
+            closeFunc: () => toast(`${account.full_address}ã¨ã®æ¥ç¶šãŒåˆ‡æ–­ã•ã‚Œã¾ã—ãŸã€‚`, "error"),
             reconnect: true
         }));
-        Column.tooltip(); // ƒJƒ‰ƒ€‚Éƒc[ƒ‹ƒ`ƒbƒv‚ğİ’è
-        // Œ©‚¦‚Ä‚¢‚é’†‚ÅÅ‰‚ÌƒJƒ‰ƒ€‚ÉƒJ[ƒ\ƒ‹‚ğƒZƒbƒg
+        Column.tooltip(); // ã‚«ãƒ©ãƒ ã«ãƒ„ãƒ¼ãƒ«ãƒãƒƒãƒ—ã‚’è¨­å®š
+        // è¦‹ãˆã¦ã„ã‚‹ä¸­ã§æœ€åˆã®ã‚«ãƒ©ãƒ ã«ã‚«ãƒ¼ã‚½ãƒ«ã‚’ã‚»ãƒƒãƒˆ
         Column.getOpenedFirst().setCursor();
     })()
 });

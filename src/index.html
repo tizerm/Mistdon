@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta
         http-equiv="Content-Security-Policy"
         content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
@@ -24,71 +24,72 @@
     <script type="text/javascript" src="js/mm_keybind.js"></script>
     <script type="text/javascript" src="js/mm_core.js"></script>
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
-<head>
+</head>
 <body>
 <nav id="navi">
     <ul id="top_navi">
-        <li><a href="index.html" title="ƒz[ƒ€"><img src="resources/ic_home.png" alt="ƒz[ƒ€"/></a></li>
-        <li><a href="auth.html" title="ƒAƒJƒEƒ“ƒg”FØ"><img src="resources/ic_auth.png" alt="ƒAƒJƒEƒ“ƒg”FØ"/></a></li>
-        <li><a href="pref_col.html" title="İ’è"><img src="resources/ic_pref.png" alt="İ’è"/></a></li>
+        <li><a href="index.html" title="ãƒ›ãƒ¼ãƒ "><img src="resources/ic_home.png" alt="ãƒ›ãƒ¼ãƒ "/></a></li>
+        <li><a href="auth.html" title="ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼"><img src="resources/ic_auth.png" alt="ã‚¢ã‚«ã‚¦ãƒ³ãƒˆèªè¨¼"/></a></li>
+        <li><a href="pref_col.html" title="è¨­å®š"><img src="resources/ic_pref.png" alt="è¨­å®š"/></a></li>
     </ul>
     <ul id="bottom_navi">
+        <li><a id="on_help" title="ãƒ˜ãƒ«ãƒ—"><img src="resources/ic_help.png" alt="ãƒ˜ãƒ«ãƒ—"/></a></li>
         <li><button type="button" class="__on_show_notifications">0</button></li>
     </ul>
     <div id="pop_notification_console">
-    <!-- hidden: ’Ê’mƒ{ƒbƒNƒX -->
+    <!-- hidden: é€šçŸ¥ãƒœãƒƒã‚¯ã‚¹ -->
     </div>
 </nav>
 <header id="header">
     <h1>{target_instance} - {target_domain}</h1>
     <div id="head_postarea">
-        <a class="__lnk_postuser" title="“ŠeƒAƒJƒEƒ“ƒg•ÏX"><img src="{usericon}" class="posticon"/></a>
+        <a class="__lnk_postuser" title="æŠ•ç¨¿ã‚¢ã‚«ã‚¦ãƒ³ãƒˆå¤‰æ›´"><img src="{usericon}" class="posticon"/></a>
         <div class="visibility_icon">
-            <a class="__lnk_visibility" title="ŒöŠJ">
-                <img src="resources/ic_public.png" alt="ŒöŠJ" id="visibility_public" class="selected"/></a>
-            <a class="__lnk_visibility" title="–¢ûÚ/ƒz[ƒ€">
-                <img src="resources/ic_unlisted.png" alt="–¢ûÚ/ƒz[ƒ€" id="visibility_unlisted"/></a>
-            <a class="__lnk_visibility" title="ƒtƒHƒƒ[ŒÀ’è">
-                <img src="resources/ic_followers.png" alt="ƒtƒHƒƒ[ŒÀ’è" id="visibility_followers"/></a>
+            <a class="__lnk_visibility" title="å…¬é–‹">
+                <img src="resources/ic_public.png" alt="å…¬é–‹" id="visibility_public" class="selected"/></a>
+            <a class="__lnk_visibility" title="æœªåè¼‰/ãƒ›ãƒ¼ãƒ ">
+                <img src="resources/ic_unlisted.png" alt="æœªåè¼‰/ãƒ›ãƒ¼ãƒ " id="visibility_unlisted"/></a>
+            <a class="__lnk_visibility" title="ãƒ•ã‚©ãƒ­ãƒ¯ãƒ¼é™å®š">
+                <img src="resources/ic_followers.png" alt="ãƒ•ã‚©ãƒ­ãƒ¯ãƒ¼é™å®š" id="visibility_followers"/></a>
         </div>
-        <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CW‚Ìê‡“ü—Í"/>
-        <textarea id="__txt_postarea" class="__ignore_keyborad" placeholder="‚¢‚Ü‚È‚É‚µ‚Ä‚éH(Ctrl+Enter‚Å‚à“Še‚Å‚«‚Ü‚·)"></textarea>
+        <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWã®å ´åˆå…¥åŠ›"/>
+        <textarea id="__txt_postarea" class="__ignore_keyborad" placeholder="ã„ã¾ãªã«ã—ã¦ã‚‹ï¼Ÿ(Ctrl+Enterã§ã‚‚æŠ•ç¨¿ã§ãã¾ã™)"></textarea>
         <div class="submit_buttons">
-            <button type="button" id="on_submit">“Še</button>
-            <button type="button" id="on_last_delete">’¼‘O‚ğíœ</button>
-            <button type="button" id="on_last_delete_paste">’¼‘O‚ğíœ•ÒW</button>
-            <button type="button" id="on_last_copy">’¼‘O‚ğƒRƒs[</button>
-            <button type="button" id="on_last_replychain">(–¢À‘•)</button>
+            <a id="on_submit" title="æŠ•ç¨¿"><img src="resources/ic_post.png" alt="æŠ•ç¨¿"/></a>
+            <a id="on_last_delete" title="ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤"><img src="resources/ic_del.png" alt="ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤"/></a>
+            <a id="on_last_delete_paste" title="ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¦å†ç·¨é›†"><img src="resources/ic_undo.png" alt="ç›´å‰ã®æŠ•ç¨¿ã‚’å‰Šé™¤ã—ã¦å†ç·¨é›†"/></a>
+            <a id="on_last_copy" title="ç›´å‰ã®æŠ•ç¨¿ã‚’ã‚³ãƒ”ãƒ¼"><img src="resources/ic_copy.png" alt="ç›´å‰ã®æŠ•ç¨¿ã‚’ã‚³ãƒ”ãƒ¼"/></a>
+            <a id="on_last_replychain" title="ç›´å‰ã®æŠ•ç¨¿ã«ã¤ãªã’ã‚‹"><img src="resources/ic_tree.png" alt="ç›´å‰ã®æŠ•ç¨¿ã«ã¤ãªã’ã‚‹"/></a>
         </div>
     </div>
     <div id="pop_postuser">
-    <!-- hidden: ƒ†[ƒU[ˆê—— -->
+    <!-- hidden: ãƒ¦ãƒ¼ã‚¶ãƒ¼ä¸€è¦§ -->
     </div>
     <div id="pop_context_menu" name="{post_id}">
-        <!-- hidden: ‰EƒNƒŠƒbƒNƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[ -->
+        <!-- hidden: å³ã‚¯ãƒªãƒƒã‚¯ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ -->
         <ul class="ui_menu">
-            <li><div>ƒŠƒvƒ‰ƒC/ƒcƒŠ[</div>
+            <li><div>ãƒªãƒ—ãƒ©ã‚¤/ãƒ„ãƒªãƒ¼</div>
                 <ul id="__menu_reply"></ul>
             </li>
-            <li><div>ƒu[ƒXƒg/ƒŠƒm[ƒg</div>
+            <li><div>ãƒ–ãƒ¼ã‚¹ãƒˆ/ãƒªãƒãƒ¼ãƒˆ</div>
                 <ul id="__menu_reblog"></ul>
             </li>
-            <li><div>‚¨‹C‚É“ü‚è(Mastodon‚Ì‚İ)</div>
+            <li><div>ãŠæ°—ã«å…¥ã‚Š(Mastodonã®ã¿)</div>
                 <ul id="__menu_favorite"></ul>
             </li>
         </ul>
     </div>
     <div id="pop_toast">
-    <!-- hidden: ƒg[ƒXƒg -->
+    <!-- hidden: ãƒˆãƒ¼ã‚¹ãƒˆ -->
     </div>
     <div id="pop_extend_column">
-    <!-- hidden: Šg’£ƒJƒ‰ƒ€ -->
+    <!-- hidden: æ‹¡å¼µã‚«ãƒ©ãƒ  -->
     </div>
 </header>
 <section id="columns">
 <table><tbody>
-<tr><!-- jQuery‚ÅƒoƒCƒ“ƒfƒBƒ“ƒOˆ—‚ğ‚µ‚Ü‚· --></tr>
+<tr><!-- jQueryã§ãƒã‚¤ãƒ³ãƒ‡ã‚£ãƒ³ã‚°å‡¦ç†ã‚’ã—ã¾ã™ --></tr>
 </tbody></table>
 </section>
 </body>
-<html>
+</html>

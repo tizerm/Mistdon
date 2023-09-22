@@ -1,10 +1,10 @@
-const color_palette = [
-    // ƒfƒtƒHƒ‹ƒg‚Å‘I‘ğ‚Å‚«‚éƒJƒ‰[ƒpƒŒƒbƒg
+ï»¿const color_palette = [
+    // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§é¸æŠã§ãã‚‹ã‚«ãƒ©ãƒ¼ãƒ‘ãƒ¬ãƒƒãƒˆ
     'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667', '666666'
 ]
 
 $(() => {
-    // ƒiƒrƒQ[ƒVƒ‡ƒ“ƒƒjƒ…[ƒzƒo[‚Éƒc[ƒ‹ƒ`ƒbƒv•\¦
+    // ãƒŠãƒ“ã‚²ãƒ¼ã‚·ãƒ§ãƒ³ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒ›ãƒãƒ¼æ™‚ã«ãƒ„ãƒ¼ãƒ«ãƒãƒƒãƒ—è¡¨ç¤º
     $("#navi").tooltip({
         position: {
             my: "left+15 bottom+2",
@@ -12,14 +12,14 @@ $(() => {
         },
         show: {
             effect: "slide",
-            duration: 100
+            duration: 80
         },
         hide: {
             effect: "slide",
-            duration: 100
+            duration: 80
         }
     });
-    // ŒöŠJ”ÍˆÍƒzƒo[‚Éƒc[ƒ‹ƒ`ƒbƒv•\¦
+    // å…¬é–‹ç¯„å›²ãƒ›ãƒãƒ¼æ™‚ã«ãƒ„ãƒ¼ãƒ«ãƒãƒƒãƒ—è¡¨ç¤º
     $("#header>#head_postarea").tooltip({
         position: {
             my: "center top",
@@ -27,19 +27,45 @@ $(() => {
         },
         show: {
             effect: "slideDown",
-            duration: 100
+            duration: 80
         },
         hide: {
             effect: "slideUp",
-            duration: 100
+            duration: 80
         }
     });
+    // ãƒ˜ãƒ«ãƒ—ã‚’è¡¨ç¤º
+    $("#navi #on_help").on("click", e => {
+        // ãƒ˜ãƒ«ãƒ—ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®DOMç”Ÿæˆ
+        const jqelm = $($.parseHTML(`
+            <div class="help_col">
+                <h2>Mistdon Help</h2>
+                <div class="help_content"></div>
+                <button type="button" id="__on_help_close">Ã—</button>
+            </div>
+        `))
+        // è‰²ã¨ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒã‚¤ãƒ³ãƒ‰ã®è¨­å®šã‚’ã—ã¦DOMã‚’æ‹¡å¼µã‚«ãƒ©ãƒ ã«ãƒã‚¤ãƒ³ãƒ‰
+        //jqelm.find('h2').css("background-color", `#${this.account_color}`)
+        //jqelm.find('.timeline>ul').append(this.element)
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $.ajax({
+            url: "help/help_main.html",
+            cache: false
+        }).then(data => {
+            $.each($.parseHTML(data), (index, value) => {
+                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
+            });
+        });
+    });
+    // é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆ
+    $(document).on("click", "#__on_help_close", 
+        e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
 });
 
 /**
  * #Renderer #jQuery
- * ƒJƒ‰[ƒtƒH[ƒ€‚ÉƒJƒ‰[ƒpƒŒƒbƒg•\¦‹@”\‚ğ’Ç‰Á
- * (“®“I‚É¶¬‚·‚éŠÖŒW‚ÅŒã•t‚µ‚È‚¢‚Æ“®‚©‚È‚¢‚Ì‚ÅŠÖ”‰»)
+ * ã‚«ãƒ©ãƒ¼ãƒ•ã‚©ãƒ¼ãƒ ã«ã‚«ãƒ©ãƒ¼ãƒ‘ãƒ¬ãƒƒãƒˆè¡¨ç¤ºæ©Ÿèƒ½ã‚’è¿½åŠ 
+ * (å‹•çš„ã«ç”Ÿæˆã™ã‚‹é–¢ä¿‚ã§å¾Œä»˜ã—ãªã„ã¨å‹•ã‹ãªã„ã®ã§é–¢æ•°åŒ–)
  */
 function setColorPalette() {
     const palette_dom = $("#header>#pop_palette");
@@ -47,9 +73,9 @@ function setColorPalette() {
         palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
         palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
     });
-    // ƒJƒ‰[ƒpƒŒƒbƒg‚Ì’¼Œã‚ÉƒpƒŒƒbƒgŒÄ‚Ño‚µƒ{ƒ^ƒ“‚ğƒZƒbƒg
+    // ã‚«ãƒ©ãƒ¼ãƒ‘ãƒ¬ãƒƒãƒˆã®ç›´å¾Œã«ãƒ‘ãƒ¬ãƒƒãƒˆå‘¼ã³å‡ºã—ãƒœã‚¿ãƒ³ã‚’ã‚»ãƒƒãƒˆ
     $(".__pull_color_palette").each((index, elm) => {
-        $(elm).after('<a class="__on_call_palette" title="ƒhƒ‰ƒbƒO&ƒhƒƒbƒv‚ÅF‚ğ‘I‘ğ‚Å‚«‚Ü‚·">&nbsp;</a>');
+        $(elm).after('<a class="__on_call_palette" title="ãƒ‰ãƒ©ãƒƒã‚°&ãƒ‰ãƒ­ãƒƒãƒ—ã§è‰²ã‚’é¸æŠã§ãã¾ã™">&nbsp;</a>');
         $(elm).next().css("background-color", `#${$(elm).val()}`);
     });
     $(".__on_call_palette").tooltip({
@@ -68,7 +94,7 @@ function setColorPalette() {
     });
 
     $(document).on("mousedown", ".__on_call_palette", e => {
-        // ƒCƒxƒ“ƒgƒ^[ƒQƒbƒg‚É‚·‚é‚½‚ß‚ÌƒNƒ‰ƒX‚ğ•t—^
+        // ã‚¤ãƒ™ãƒ³ãƒˆã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹ã‚’ä»˜ä¸
         $(e.target).addClass("__target_color_button").prev().addClass("__target_color_box");
 
         palette_dom.css('top', (e.pageY + 12) + 'px').css('left', (e.pageX - 132) + 'px')
@@ -89,24 +115,24 @@ function setColorPalette() {
 
 /**
  * #Renderer #jQuery
- * ƒg[ƒXƒg‚ğ•\¦
+ * ãƒˆãƒ¼ã‚¹ãƒˆã‚’è¡¨ç¤º
  * 
- * @param text •\¦‚·‚é•¶Í
- * @param type ƒg[ƒXƒg‚Ìƒ^ƒCƒv
- * @param type ƒg[ƒXƒg‚ğˆêˆÓ‚É”F¯‚·‚é‚½‚ß‚ÌID
+ * @param text è¡¨ç¤ºã™ã‚‹æ–‡ç« 
+ * @param type ãƒˆãƒ¼ã‚¹ãƒˆã®ã‚¿ã‚¤ãƒ—
+ * @param type ãƒˆãƒ¼ã‚¹ãƒˆã‚’ä¸€æ„ã«èªè­˜ã™ã‚‹ãŸã‚ã®ID
  */
 function toast(text, type, progress_id) {
     const toast_block = $("#header>#pop_toast");
     if (type != 'progress' && progress_id) {
-        // progressƒ‚[ƒhˆÈŠO‚ÅID‚ª“n‚Á‚Ä‚«‚½ê‡‚Í‘ÎÛtoast‚ğíœ
+        // progressãƒ¢ãƒ¼ãƒ‰ä»¥å¤–ã§IDãŒæ¸¡ã£ã¦ããŸå ´åˆã¯å¯¾è±¡toastã‚’å‰Šé™¤
         const target_toast = toast_block.find(`#${progress_id}`);
         target_toast.hide("slide", 1000, () => target_toast.remove());
     }
     if (type == 'hide') {
-        // hide‚Ìê‡‚Í‚»‚Ì‚Ü‚ÜI—¹
+        // hideã®å ´åˆã¯ãã®ã¾ã¾çµ‚äº†
         return;
     }
-    // ƒg[ƒXƒg‚ğ‰æ–Ê‚É’Ç‰Á
+    // ãƒˆãƒ¼ã‚¹ãƒˆã‚’ç”»é¢ã«è¿½åŠ 
     if (type == 'progress' && progress_id) {
         toast_block.append(`<span id="${progress_id}">${text}</span>`);
     } else {
@@ -114,19 +140,19 @@ function toast(text, type, progress_id) {
     }
     const added = toast_block.find("span:last-child");
     if (type != 'progress') {
-        // Às’†ƒg[ƒXƒgˆÈŠO‚Í3•bŒã‚ÉÁ‹‚·‚é
+        // å®Ÿè¡Œä¸­ãƒˆãƒ¼ã‚¹ãƒˆä»¥å¤–ã¯3ç§’å¾Œã«æ¶ˆå»ã™ã‚‹
         if (type == 'error') {
             added.css("background-color", "rgba(115,68,68,0.85)");
             prependNotification(text, true);
         } else {
             added.css("background-color", "rgba(68,83,115,0.85)");
         }
-        // 3•bŒã‚É‰B‚µ‚Ä—v‘f©‘Ì‚ğíœ
+        // 3ç§’å¾Œã«éš ã—ã¦è¦ç´ è‡ªä½“ã‚’å‰Šé™¤
         (async () => setTimeout(() => added.hide("slide", 500, () => added.remove()), 3000))()
     } else {
-        // Às’†‚Í‰ŠúƒJƒ‰[‚É‚à‚Ç‚·
+        // å®Ÿè¡Œä¸­ã¯åˆæœŸã‚«ãƒ©ãƒ¼ã«ã‚‚ã©ã™
         added.css("background-color", "rgba(32,32,32,0.85)");
     }
-    // ’Ç‰ÁƒAƒjƒ[ƒVƒ‡ƒ“
+    // è¿½åŠ ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
     added.hide().show("slide", 250);
 }

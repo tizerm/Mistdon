@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta
         http-equiv="Content-Security-Policy"
         content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
@@ -19,18 +19,18 @@
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
     <script type="text/javascript" src="js/mm_auth.js"></script>
-    <title>Mistdon - �A�J�E���g�̒ǉ��ƊǗ�</title>
-<head>
+    <title>Mistdon - アカウントの追加と管理</title>
+</head>
 <body>
 <nav id="navi">
     <ul>
-        <li><a href="index.html" title="�z�[��"><img src="resources/ic_home.png" alt="�z�[��"/></a></li>
-        <li><a href="auth.html" title="�A�J�E���g�F��"><img src="resources/ic_auth.png" alt="�A�J�E���g�F��"/></a></li>
-        <li><a href="pref_col.html" title="�ݒ�"><img src="resources/ic_pref.png" alt="�ݒ�"/></a></li>
+        <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
+        <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
+        <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
     </ul>
 </nav>
 <header id="header">
-    <h1>�A�J�E���g�̒ǉ��ƊǗ� - Mistdon</h1>
+    <h1>アカウントの追加と管理 - Mistdon</h1>
     <div id="pop_toast">
     </div>
     <div id="pop_palette">
@@ -38,68 +38,68 @@
 </header>
 <section id="content">
     <div id="account_list">
-        <h2>�A�J�E���g�ꗗ</h2>
-        <button type="button" id="on_save_color">�F�Ə��Ԃ�ۑ�</button>
-        <ul class="__ui_sortable"><!-- jQuery�Ńo�C���f�B���O���������܂� --></ul>
+        <h2>アカウント一覧</h2>
+        <button type="button" id="on_save_color">色と順番を保存</button>
+        <ul class="__ui_sortable"><!-- jQueryでバインディング処理をします --></ul>
     </div>
     <div id="account_auth">
-        <h2>�A�J�E���g�̒ǉ�</h2>
+        <h2>アカウントの追加</h2>
         <div id="transition_section">
             <div id="select_platform">
-                <span id="top_text">�ǉ�����A�J�E���g�̃v���b�g�t�H�[����I�����Ă��������B</span>
+                <span id="top_text">追加するアカウントのプラットフォームを選択してください。</span>
                 <div class="platform_selector">
                     <button type="button" id="on_platform_mastodon">Mastodon</button>
                     <button type="button" id="on_platform_misskey">Misskey</button>
                 </div>
             </div>
             <div id="form_mastodon" class="platform_section">
-                <h3>Mastodon�A�J�E���g�̒ǉ�</h3>
+                <h3>Mastodonアカウントの追加</h3>
                 <div class="instance_form">
                     <span id="top_text">
-                    �ǉ��������A�J�E���g�̃C���X�^���X(�T�[�o�[)��<br/>
-                    URL����͂��Ă��������B</span>
+                    追加したいアカウントのインスタンス(サーバー)の<br/>
+                    URLを入力してください。</span>
                     <div class="instance_box">https://<input type="text" id="txt_mst_instance_domain" name="txt_mst_instance_domain" size="50"/>/</div>
                     <div id="lbl_mst_instance_name">(Instance Name)</div>
-                    <button type="button" id="on_mst_auth_instance">�F��</button><br/>
-                    <button type="button" class="__on_return">�O�ɖ߂�</button>
+                    <button type="button" id="on_mst_auth_instance">認証</button><br/>
+                    <button type="button" class="__on_return">前に戻る</button>
                 </div>
                 <div class="auth_form">
                     <span id="top_text">
-                    �ʉ�ʂɕ\�����ꂽ�R�[�h�����(�R�s�y)���Ă�������
+                    別画面に表示されたコードを入力(コピペ)してください
                     </span><br/>
                     <input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
                     <input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
                     <input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
-                    <button type="button" id="on_mst_auth_token">�o�^</button><br/>
-                    <button type="button" class="__on_instance_return">�O�ɖ߂�</button>
-                    <button type="button" class="__on_return_top">�ŏ��ɖ߂�</button>
+                    <button type="button" id="on_mst_auth_token">登録</button><br/>
+                    <button type="button" class="__on_instance_return">前に戻る</button>
+                    <button type="button" class="__on_return_top">最初に戻る</button>
                 </div>
             </div>
             <div id="form_misskey" class="platform_section">
-                <h3>Misskey�A�J�E���g�̒ǉ�</h3>
+                <h3>Misskeyアカウントの追加</h3>
                 <div class="instance_form">
                     <span id="top_text">
-                    �ǉ��������A�J�E���g�̃C���X�^���X(�T�[�o�[)��<br/>
-                    URL����͂��Ă��������B</span>
+                    追加したいアカウントのインスタンス(サーバー)の<br/>
+                    URLを入力してください。</span>
                     <div class="instance_box">https://<input type="text" id="txt_msk_instance_domain" name="txt_msk_instance_domain" size="50"/>/</div>
                     <div id="lbl_msk_instance_name">(Instance Name)</div>
-                    <button type="button" id="on_msk_auth_instance">�F��</button><br/>
-                    <button type="button" class="__on_return">�O�ɖ߂�</button>
+                    <button type="button" id="on_msk_auth_instance">認証</button><br/>
+                    <button type="button" class="__on_return">前に戻る</button>
                 </div>
                 <div class="auth_form">
                     <span id="top_text">
-                    �ʉ�ʂŔF�؃{�^���������Ċ������Ă��牺�̃{�^���������Ă��������B
+                    別画面で認証ボタンを押して完了してから下のボタンを押してください。
                     </span><br/>
                     <input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
                     <input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
-                    <button type="button" id="on_msk_auth_token">�o�^</button><br/>
-                    <button type="button" class="__on_instance_return">�O�ɖ߂�</button>
-                    <button type="button" class="__on_return_top">�ŏ��ɖ߂�</button>
+                    <button type="button" id="on_msk_auth_token">登録</button><br/>
+                    <button type="button" class="__on_instance_return">前に戻る</button>
+                    <button type="button" class="__on_return_top">最初に戻る</button>
                 </div>
             </div>
         </div>
-        <a href="index.html" class="close_link">�F�؂���߂Ė߂�</a>
+        <a href="index.html" class="close_link">認証をやめて戻る</a>
     </div>
 </section>
 </body>
-<html>
+</html>

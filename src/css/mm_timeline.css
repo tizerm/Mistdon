@@ -48,18 +48,48 @@
 #header>#head_postarea>#__txt_postarea {
     position: absolute;
     top: 0px;
-    left: 248px;
+    left: 244px;
     padding: 2px;
     font-family: "ƒƒCƒŠƒI", sans-selif;
     text-align: left;
     background-color: #434343;
     color: #ffffff;
-    width: calc(100% - 338px);
+    width: calc(100% - 408px);
     height: 68px;
 }
 #header>#head_postarea>.submit_buttons {
     position: absolute;
-    top: 48px;
+    top: 0px;
+    right: 8px;
+}
+#header>#head_postarea>.submit_buttons>a:hover>img {
+    border-radius: 8px;
+    background-color: #555555;
+    cursor: pointer;
+}
+.submit_buttons>#on_submit {
+    position: absolute;
+    top: 0px;
+    right: 72px;
+}
+.submit_buttons>#on_last_delete {
+    position: absolute;
+    top: 0px;
+    right: 36px;
+}
+.submit_buttons>#on_last_delete_paste {
+    position: absolute;
+    top: 36px;
+    right: 36px;
+}
+.submit_buttons>#on_last_copy {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+.submit_buttons>#on_last_replychain {
+    position: absolute;
+    top: 36px;
     right: 0px;
 }
 
