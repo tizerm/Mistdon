@@ -414,12 +414,14 @@ const createWindow = () => {
         width: 1920,
         height: 1080,
         webPreferences: {
+            devTools: !app.isPackaged,
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     })
 
     // 最初に表示するページを指定
+    win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 }
 

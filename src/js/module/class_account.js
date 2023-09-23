@@ -113,7 +113,11 @@ class Account {
                     case 'visibility_followers': // フォロ限
                         visibility = "private"
                         break
-                    default:
+                    case 'visibility_direct': // DM
+                        visibility = "direct"
+                        break
+                    default: // リプライから来た場合はリプライ先の値が既に入っている
+                        visibility = arg.visibility_id
                         break
                 }
                 request_param = {
@@ -147,7 +151,11 @@ class Account {
                     case 'visibility_followers': // フォロ限
                         visibility = "followers"
                         break
-                    default:
+                    case 'visibility_direct': // DM
+                        visibility = "specified"
+                        break
+                    default: // リプライから来た場合はリプライ先の値が既に入っている
+                        visibility = arg.visibility_id
                         break
                 }
                 request_param = {

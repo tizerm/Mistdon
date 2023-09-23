@@ -44,9 +44,6 @@ $(() => {
                 <button type="button" id="__on_help_close">×</button>
             </div>
         `))
-        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        //jqelm.find('h2').css("background-color", `#${this.account_color}`)
-        //jqelm.find('.timeline>ul').append(this.element)
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
         $.ajax({
             url: "help/help_main.html",
@@ -60,6 +57,13 @@ $(() => {
     // 閉じるボタンクリックイベント
     $(document).on("click", "#__on_help_close", 
         e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
+    // 外部表示リンククリックイベント
+    $(document).on("click", ".__lnk_external", e => {
+        const url = $(e.target).closest("a").attr("href");
+        window.accessApi.openExternalBrowser(url);
+        // リンク先に飛ばないようにする
+        return false;
+    });
 });
 
 /**

@@ -49,6 +49,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
                 this.content = data.status?.content ?? data.content // 本文(通知の場合はstatusから)
                 this.emojis = new Emojis({
@@ -101,6 +102,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // 本文(通知の場合はstatusから)
                 this.emojis = new Emojis({
@@ -167,10 +169,10 @@ class Status {
         Status.post_stack.push(this)
     }
 
-    static lastStatusIf(presentCallback, absentCallback) {
+    static lastStatusIf(presentCallback, del_flg) {
         const last_status = Status.post_stack.pop()
         if (last_status) presentCallback(last_status)
-        else absentCallback()
+        else toast("直前の投稿がありません.", "error")
     }
 
     // Getter: 投稿データからHTMLを生成して返却
@@ -228,18 +230,21 @@ class Status {
                 <img src="${this.user.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.user.emojis.replace(this.user.username)}</h4>
                 <a class="userid">@${this.user.id}</a>
-        ` // 公開範囲がパブリック以外の場合は識別アイコンを配置
-        switch (this.visibility) {
-            case 'unlisted':
-            case 'home': // ホーム
-                html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
-                break
-            case 'private':
-            case 'followers': // フォロ限
-                html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
-                break
-            default:
-                break
+        `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
+            html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
+            switch (this.visibility) {
+                case 'unlisted':
+                case 'home': // ホーム
+                    html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
+                    break
+                case 'private':
+                case 'followers': // フォロ限
+                    html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
+                    break
+                default:
+                    break
+            }
         }
         html += `
             </div>
@@ -347,6 +352,8 @@ class Status {
      * この投稿に対する返信を投稿するための画面を表示
      */
     createReplyWindow() {
+        // 返信先のアカウントが返信元のアカウントと同じ場合は先頭のユーザーIDを表示しない
+        const userid = `@${this.user.full_address}` != this.from_account.full_address ? `@${this.user.id} ` : ''
         // リプライウィンドウのDOM生成
         const jqelm = $($.parseHTML(`
             <div class="reply_col">
@@ -354,8 +361,9 @@ class Status {
                 <div class="reply_form">
                     <input type="hidden" id="__hdn_reply_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reply_account" value="${this.from_account.full_address}"/>
+                    <input type="hidden" id="__hdn_reply_visibility" value="${this.visibility}"/>
                     <textarea id="__txt_replyarea" class="__ignore_keyborad"
-                        placeholder="(Ctrl+Enterでも投稿できます)">@${this.user.id} </textarea>
+                        placeholder="(Ctrl+Enterでも投稿できます)">${userid}</textarea>
                     <button type="button" id="__on_reply_submit">投稿</button>
                 </div>
                 <div class="timeline">

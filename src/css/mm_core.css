@@ -2,7 +2,7 @@ body {
     background-color: #222222;
     background-image: url("../resources/illust/mitlin_back.jpg");
     background-attachment: fixed;
-    background-position: left 64px bottom 64px;
+    background-position: left 64px bottom 32px;
     background-repeat: no-repeat;
     color: #ffffff;
     margin: 0px;
@@ -141,6 +141,68 @@ button[disabled] {
     background-color: rgba(34,34,34,0.85);
     padding: 8px 32px;
 }
+
+#header>#pop_extend_column {
+    display: none;
+    z-index: 6;
+    border-radius: 12px;
+    background-color: rgba(34,34,34,0.8);
+    padding: 4px 0px 4px 4px;
+    position: absolute;
+    top: 72px;
+    right: 0px;
+}
+#header>#pop_extend_column>.help_col {
+    width: 640px;
+}
+#header>#pop_extend_column>.help_col>h2 {
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    background-color: rgba(67,96,132,0.8);
+    font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
+    font-size: 20px;
+    color: #ffffff;
+    margin: 0px;
+    padding: 12px 24px;
+}
+#header>#pop_extend_column>.help_col>.help_content {
+    overflow-y: auto;
+    background-color: rgba(34,34,34,0.5);
+    padding: 0px 18px 12px;
+    font-size: 13px;
+    height: calc(100vh - 200px);
+}
+#header>#pop_extend_column>.help_col>.help_content::-webkit-scrollbar{
+   width: 8px;
+}
+#header>#pop_extend_column>.help_col>.help_content::-webkit-scrollbar-track{
+   background-color: transparent;
+}
+#header>#pop_extend_column>.help_col>.help_content::-webkit-scrollbar-thumb{
+   background-color: #808080;
+}
+
+#header>#pop_extend_column>.help_col>.help_content h3 {
+    padding: 6px 18px;
+    margin: 24px -12px;
+    font-size: 20px;
+    border-bottom: solid 2px #aaaaaa;
+}
+#header>#pop_extend_column>.help_col>.help_content dt {
+    padding: 0px 12px;
+    font-size: 14px;
+    border-left: solid 8px #aaaaaa;
+}
+#header>#pop_extend_column>.help_col>.help_content dd {
+    margin-bottom: 8px;
+}
+#header>#pop_extend_column>.help_col button {
+    display: block;
+    padding: 6px;
+    text-align: center;
+    width: 100%;
+}
+
 #header>#pop_palette {
     position: absolute;
     display: none;

@@ -5,6 +5,10 @@
         if ($(e.target).is(".__ignore_keyborad")) return;
         let col = null;
         switch (e.keyCode) {
+            case 112: // F1: ヘルプを表示
+                if ($("#header>#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
+                else $("#navi #on_help").click();
+                return false;
             case 78: // n: 投稿テキストボックスにフォーカス
                 $("#__txt_postarea").focus();
                 return false;
@@ -28,6 +32,12 @@
                 if (event.ctrlKey || event.metaKey) {
                     $("#header #on_last_copy").click();
                     $("#__txt_postarea").focus();
+                    return false;
+                }
+                break;
+            case 73: // Ctrl+I: 直前の投稿につなげる
+                if (event.ctrlKey || event.metaKey) {
+                    $("#header #on_last_replychain").click();
                     return false;
                 }
                 break;

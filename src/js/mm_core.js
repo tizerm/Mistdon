@@ -43,7 +43,7 @@
         // リプライウィンドウの投稿ボタンクリックイベント(リプライ送信処理)
         $(document).on("click", "#__on_reply_submit", e => Account.get($("#__hdn_reply_account").val()).post({
             content: $("#__txt_replyarea").val(),
-            visibility_id: 'visibility_public', // TODO: 一旦公開にする
+            visibility_id: $("#__hdn_reply_visibility").val(), // 投稿元の公開範囲を継承する
             reply_id: $("#__hdn_reply_id").val(),
             // 投稿成功時処理(リプライウィンドウを閉じる)
             success: () => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150)
@@ -54,8 +54,7 @@
 
         // オプションボタンイベント: 直前の投稿を削除
         $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
-            last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid)),
-            () => toast("直前の投稿がありません.", "error")));
+            last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid))));
         // オプションボタンイベント: 直前の投稿を削除して編集
         $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
             last => last.delete((post, uuid) => {
@@ -63,14 +62,15 @@
                 $("#__txt_postarea").val(post.content_text);
                 $("#__txt_content_warning").val(post.cw_text);
                 toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid);
-            }), () => toast("直前の投稿がありません.", "error")));
+            })));
         // オプションボタンイベント: 直前の投稿をコピー
         $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
             $("#__txt_postarea").val(last.content_text);
             $("#__txt_content_warning").val(last.cw_text);
             toast("直前の投稿内容を再展開しました.", "done");
-        }, () => toast("直前の投稿がありません.", "error")));
-
+        }));
+        // オプションボタンイベント: 直前の投稿につなげる
+        $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow()));
 
         /*============================================================================================================*/
 
