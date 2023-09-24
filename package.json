@@ -9,12 +9,6 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "mac": {
-    "icon": "src/resources/illust/app_icon.png"
-  },
-  "win": {
-    "icon": "src/resources/illust/app_icon.png"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/tizerm/Mistdon.git"
