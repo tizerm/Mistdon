@@ -41,7 +41,7 @@ class Account {
             const acc_map = new Map()
             const keys = []
             let index = 0
-            accounts.forEach((v, k) => {
+            accounts?.forEach((v, k) => {
                 v.index = index++
                 acc_map.set(k, new Account(v))
                 keys.push(k)

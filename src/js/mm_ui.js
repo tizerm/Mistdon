@@ -64,6 +64,13 @@ $(() => {
         // リンク先に飛ばないようにする
         return false;
     });
+    $("body").keydown(e => {
+        if (e.keyCode == 112) { // ヘルプだけは全画面共通
+            if ($("#header>#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
+            else $("#navi #on_help").click();
+            return false;
+        }
+    });
 });
 
 /**
@@ -71,7 +78,26 @@ $(() => {
  * カラーフォームにカラーパレット表示機能を追加
  * (動的に生成する関係で後付しないと動かないので関数化)
  */
-function setColorPalette() {
+function setColorPalette(target) {
+    if (target) {
+        target.find(".__pull_color_palette")
+            .after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
+        target.find(".__pull_color_palette+.__on_call_palette").tooltip({
+            position: {
+                my: "left+6 bottom+18",
+                at: "right center"
+            },
+            show: {
+                effect: "slide",
+                duration: 80
+            },
+            hide: {
+                effect: "slide",
+                duration: 80
+            }
+        });
+        return;
+    }
     const palette_dom = $("#header>#pop_palette");
     color_palette.forEach(color => {
         palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
@@ -130,33 +156,24 @@ function toast(text, type, progress_id) {
     if (type != 'progress' && progress_id) {
         // progressモード以外でIDが渡ってきた場合は対象toastを削除
         const target_toast = toast_block.find(`#${progress_id}`);
-        target_toast.hide("slide", 1000, () => target_toast.remove());
+        target_toast.hide("slide", { direction: "up" }, 120, () => target_toast.remove());
     }
-    if (type == 'hide') {
-        // hideの場合はそのまま終了
-        return;
-    }
+    // hideの場合はそのまま終了
+    if (type == 'hide') return;
     // トーストを画面に追加
-    if (type == 'progress' && progress_id) {
+    if (type == 'progress' && progress_id) 
         toast_block.append(`<span id="${progress_id}">${text}</span>`);
-    } else {
-        toast_block.append(`<span>${text}</span>`);
-    }
+    else toast_block.append(`<span>${text}</span>`);
     const added = toast_block.find("span:last-child");
     if (type != 'progress') {
         // 実行中トースト以外は3秒後に消去する
         if (type == 'error') {
-            added.css("background-color", "rgba(115,68,68,0.85)");
+            added.addClass("toast_error");
             prependNotification(text, true);
-        } else {
-            added.css("background-color", "rgba(68,83,115,0.85)");
-        }
+        } else added.addClass("toast_done");
         // 3秒後に隠して要素自体を削除
-        (async () => setTimeout(() => added.hide("slide", 500, () => added.remove()), 3000))()
-    } else {
-        // 実行中は初期カラーにもどす
-        added.css("background-color", "rgba(32,32,32,0.85)");
-    }
+        (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()
+    } else added.addClass("toast_progress");
     // 追加アニメーション
-    added.hide().show("slide", 250);
+    added.hide().show("slide", 80);
 }

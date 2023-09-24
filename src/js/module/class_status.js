@@ -170,9 +170,174 @@ class Status {
     }
 
     static lastStatusIf(presentCallback, del_flg) {
-        const last_status = Status.post_stack.pop()
+        const last_status = del_flg
+            ? Status.post_stack.pop() : Status.post_stack[Status.post_stack.length - 1]
         if (last_status) presentCallback(last_status)
         else toast("直前の投稿がありません.", "error")
+    }
+
+    static async getStatus(url) {
+        if (url.indexOf('/') < 0) {
+            toast("詳細表示のできない投稿です.", "error")
+            return
+        }
+        // 先にtoast表示
+        const toast_uuid = crypto.randomUUID()
+        toast("投稿の取得中です...", "progress", toast_uuid)
+        // URLパターンからプラットフォームを判定
+        const spl_url = url.split('/')
+        let platform = null
+        let id = null
+        let domain = null
+        if (spl_url[spl_url.length - 2].match(/@/)) {
+            // 後ろから二番目のブロックに@が入ってたらMastodon
+            platform = 'Mastodon'
+            id = spl_url[spl_url.length - 1]
+            domain = spl_url[spl_url.length - 3]
+        } else if (spl_url[spl_url.length - 2] == 'notes') {
+            // 後ろから二番目のブロックが"notes"の場合Misskey
+            platform = 'Misskey'
+            id = spl_url[spl_url.length - 1]
+            domain = spl_url[spl_url.length - 3]
+        }
+        let request_promise = null
+        switch (platform) {
+            case 'Mastodon': // Mastodon
+                request_promise = $.ajax({ // リモートの投稿を直接取得
+                    type: "GET",
+                    url: `https://${domain}/api/v1/statuses/${id}`,
+                    dataType: "json",
+                })
+                break
+            case 'Misskey': // Misskey
+                request_promise = $.ajax({ // リモートの投稿を直接取得
+                    type: "POST",
+                    url: `https://${domain}/api/notes/show`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "noteId": id })
+                })
+                break
+            default:
+                toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                return
+        }
+        return request_promise.then(data => {
+            toast(null, "hide", toast_uuid)
+            return new Status(data, null, { // accountには最低限の情報だけ入れる
+                "platform": platform,
+                "pref": { "domain": domain }
+            })
+        }).catch((jqXHR, textStatus, errorThrown) => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+    }
+
+    static async getTreePost(arg) {
+        let request_promise = null
+        switch (arg.platform) {
+            case 'Mastodon': // Mastodon
+                request_promise = $.ajax({ // リモートの投稿を直接取得
+                    type: "GET",
+                    url: `https://${arg.domain}/api/v1/statuses/${arg.id}`,
+                    dataType: "json",
+                })
+                break
+            case 'Misskey': // Misskey
+                request_promise = $.ajax({ // リモートの投稿を直接取得
+                    type: "POST",
+                    url: `https://${arg.domain}/api/notes/show`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "noteId": arg.id })
+                })
+                break
+            default:
+                toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                return
+        }
+        return request_promise.then(data => {
+            return new Status(data, null, { // accountには最低限の情報だけ入れる
+                "platform": arg.platform,
+                "pref": { "domain": arg.domain }
+            })
+        }).catch((jqXHR, textStatus, errorThrown) => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+    }
+
+    async getThread() {
+        const domain = this.from_account.pref.domain
+        let main_promise = null
+        const parent_promises = []
+        const child_promises = []
+        switch (this.from_account.platform) {
+            case 'Mastodon': // Mastodon
+                main_promise = $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
+                    type: "GET",
+                    url: `https://${domain}/api/v1/statuses/${this.id}/context`,
+                    dataType: "json",
+                }).then(data => {
+                    // ツリー元のツートを取得(逆順)
+                    data.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
+                        id: ids.id,
+                        platform: this.from_account.platform,
+                        domain: domain
+                    })))
+                    // チェインしているツートを取得
+                    data.descendants.forEach(ids => child_promises.push(Status.getTreePost({
+                        id: ids.id,
+                        platform: this.from_account.platform,
+                        domain: domain
+                    })))
+                    return 'resolve'
+                })
+                break
+            case 'Misskey': // Misskey
+                const recurseChain = async (post) => { // 再帰参照できるチェインノート取得関数
+                    const recurse_promise = []
+                    return $.ajax({ // チェインしているノートを取得
+                        type: "POST",
+                        url: `https://${domain}/api/notes/children`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "noteId": post.id })
+                    }).then(data => {
+                        if (data.length == 0) return 'resolve' // 終端まで取得したら終了
+                        data.forEach(post => {
+                            const ins_post = new Status(post, null, { // accountには最低限の情報だけ入れる
+                                "platform": 'Misskey',
+                                "pref": { "domain": domain }
+                            })
+                            child_promises.push((async () => { return ins_post })())
+                            // 取得したノートを起点に再帰的に取得処理を呼ぶ
+                            recurse_promise.push(recurseChain(ins_post))
+                        })
+                        return Promise.all(recurse_promise)
+                    })
+                }
+                main_promise = Promise.all([
+                    $.ajax({ // ツリー元のノートを取得
+                        type: "POST",
+                        url: `https://${domain}/api/notes/conversation`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "noteId": this.id })
+                    }).then(data => {
+                        data.forEach(post => parent_promises.push((async () => {
+                            return new Status(post, null, { // accountには最低限の情報だけ入れる
+                                "platform": this.from_account.platform,
+                                "pref": { "domain": domain }
+                            })
+                        })()))
+                    }), recurseChain(this)]).then(datas => { return 'resolve' })
+                break
+            default:
+                break
+        }
+        // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
+        main_promise.then(() => {
+            Promise.all(parent_promises).then(parents => parents
+                .forEach(post => $("#header>#pop_extend_column .timeline>ul").prepend(post.element)))
+            Promise.all(child_promises).then(children => children
+                .forEach(post => $("#header>#pop_extend_column .timeline>ul").append(post.element)))
+        }).catch((jqXHR, textStatus, errorThrown) => toast("スレッドの取得に失敗しました.", "error"))
     }
 
     // Getter: 投稿データからHTMLを生成して返却
@@ -378,6 +543,26 @@ class Status {
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
         // 表示後にリプライカラムのテキストボックスにフォーカスする
         $("#header>#pop_extend_column #__txt_replyarea").focus()
+    }
+
+    createDetailWindow() {
+        // 詳細表示のDOM生成
+        const jqelm = $($.parseHTML(`
+            <div class="post_detail_col">
+                <h2>From ${this.from_account.pref.domain}</h2>
+                <a href="${this.uri}" class="__lnk_external lnk_post_browser">ブラウザで表示</a>
+                <div class="timeline">
+                    <ul></ul>
+                </div>
+                <button type="button" id="__on_reply_close">×</button>
+            </div>
+        `))
+        // Classを設定してDOMを拡張カラムにバインド
+        jqelm.find('.timeline>ul').append(this.element)
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+
+        // 一度表示してからチェインしている投稿を取得する
+        this.getThread()
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却

@@ -167,7 +167,12 @@
     opacity: 0.95;
     width: 400px;
 }
-#header>#pop_extend_column>.reply_col>h2 {
+#header>#pop_extend_column>.post_detail_col {
+    opacity: 0.95;
+    width: 480px;
+}
+#header>#pop_extend_column>.reply_col>h2,
+#header>#pop_extend_column>.post_detail_col>h2 {
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
     font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
@@ -175,6 +180,21 @@
     color: #ffffff;
     margin: 0px;
     padding: 12px 24px;
+}
+#header>#pop_extend_column>.post_detail_col>h2 {
+    background-color: #5e5e5e;
+}
+#header>#pop_extend_column>.post_detail_col>.lnk_post_browser {
+    display: block;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 2px;
+    margin: 4px 12px;
+    text-align: center;
+    width: 100%;
+}
+#header>#pop_extend_column>.post_detail_col>.lnk_post_browser:hover {
+    background-color: rgba(255,255,255,0.15);
 }
 #header>#pop_extend_column>.reply_col #__txt_replyarea {
     display: block;
@@ -190,7 +210,8 @@
 #header>#pop_extend_column>.reply_col ul {
     height: auto;
 }
-#header>#pop_extend_column>.reply_col button {
+#header>#pop_extend_column>.reply_col button,
+#header>#pop_extend_column>.post_detail_col button {
     display: block;
     padding: 6px;
     text-align: center;
@@ -214,6 +235,17 @@
 }
 #columns::-webkit-scrollbar-thumb{
    background-color: #808080;
+}
+
+#columns>.__initial_message {
+    z-index: 8;
+    padding: 24px;
+    margin: 24px;
+    background-color: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 16px;
 }
 
 #columns>table {
@@ -315,6 +347,19 @@
 }
 
 /*================================================================================================*/
+
+.timeline>.col_loading {
+    position: absolute;
+    top: calc(50vh - 128px);
+    padding: 24px;
+    right: 0px;
+    left: 0px;
+    background-color: rgba(62,62,62,0.92);
+    border-radius: 12px;
+    text-align: center;
+    color: #dddddd;
+    font-size: 13px;
+}
 
 .timeline>ul {
     background-color: rgba(255,255,255,0.08);
@@ -479,8 +524,16 @@
 }
 .timeline>ul>li>.post_footer>.created_at {
     display: block;
-    color: #cccccc;
+    background-color: rgba(255,255,255,0.05);
+    padding: 2px 12px;
+    border-radius: 6px;
+    color: #dddddd;
     font-size: 12px;
+}
+.timeline>ul>li>.post_footer>.created_at:hover {
+    background-color: rgba(255,255,255,0.1);
+    padding-right: 18px;
+    cursor: pointer;
 }
 .timeline>ul>li>.post_footer>.from_address {
     border-bottom-left-radius: 12px;

@@ -12,7 +12,7 @@ function createColumn(column) {
     $("#columns>table>tbody>tr").append(`
         <td id="${column_uuid}" class="timeline ui-sortable">
             <div class="col_head">
-                <h2><input type="text" class="__txt_col_head" value="${column?.label_head ?? ''}"/></h2>
+                <h2><input type="text" class="__txt_col_head" value="${column?.label_head ?? ''}" placeholder="(カラムの名前を設定してください)"/></h2>
                 <div class="col_pref">
                     <input type="text" class="__txt_col_width" value="${column?.col_width ?? ''}" size="5"/>px
                 </div>
@@ -87,7 +87,7 @@ function createTimelineOptionLine(arg) {
                     </select>
                 </div>
                 <div class="lbl_tl_type">
-                    追加するカラムの種類:<br/>
+                    追加するタイムラインの種類:<br/>
                     <select class="__cmb_tl_type">
                         <option value="home"${arg.value?.timeline_type == 'home' ? ' selected' : ''}>ホーム</option>
                         <option value="local"${arg.value?.timeline_type == 'local' ? ' selected' : ''}>ローカル</option>

@@ -414,7 +414,7 @@ const createWindow = () => {
         width: 1920,
         height: 1080,
         webPreferences: {
-            devTools: !app.isPackaged,
+            devTools: false,
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }

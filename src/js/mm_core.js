@@ -2,8 +2,21 @@
     // HTMLロード時に非同期で実行
     (async () => {
         // 保険用にアカウント情報とカラム情報が読めてなかったら一時停止
-        if (!await window.accessApi.readPrefAccs()) return;
-        if (!await window.accessApi.readPrefCols()) return;
+        {
+            let unread_flg = false;
+            if (!await window.accessApi.readPrefAccs()) unread_flg = true;
+            if (!await window.accessApi.readPrefCols()) unread_flg = true;
+            if (unread_flg) {
+                // まだ設定ファイルを作っていない場合は初期メッセージを表示
+                $("#columns").prepend(`
+                    <div class="__initial_message">
+                        アカウントの認証とカラムの設定からはじめよう！<br/>
+                        わからないときは左下の？をクリックするかF1キーでヘルプを表示できます。
+                    </div>
+                `);
+                return;
+            }
+        }
 
         /*============================================================================================================*/
 
@@ -24,7 +37,7 @@
         $("#header>#head_postarea .__lnk_visibility").on("click", e => {
             // 選択中のオプションにselectedクラスを付与
             $(".__lnk_visibility>img").removeClass("selected");
-            $(e.target).closest("img").addClass("selected");
+            $(e.target).closest(".__lnk_visibility").find("img").addClass("selected");
         });
 
         // 投稿ボタンクリックイベント(投稿処理)
@@ -54,7 +67,7 @@
 
         // オプションボタンイベント: 直前の投稿を削除
         $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
-            last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid))));
+            last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid)), true));
         // オプションボタンイベント: 直前の投稿を削除して編集
         $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
             last => last.delete((post, uuid) => {
@@ -62,15 +75,15 @@
                 $("#__txt_postarea").val(post.content_text);
                 $("#__txt_content_warning").val(post.cw_text);
                 toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid);
-            })));
+            }), true));
         // オプションボタンイベント: 直前の投稿をコピー
         $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
             $("#__txt_postarea").val(last.content_text);
             $("#__txt_content_warning").val(last.cw_text);
             toast("直前の投稿内容を再展開しました.", "done");
-        }));
+        }, false));
         // オプションボタンイベント: 直前の投稿につなげる
-        $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow()));
+        $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow(), false));
 
         /*============================================================================================================*/
 

@@ -10,6 +10,7 @@
 
         // データがなかったらDOM生成はしない
         if (!columns) {
+            setColorPalette();
             return;
         }
 
@@ -46,6 +47,7 @@
             accounts: accounts
         }));
         setButtonPermission();
+        setColorPalette($(`#columns>table #${column_uuid}`));
     });
 
     // カラム削除ボタンイベント(動的バインド)
@@ -54,7 +56,6 @@
         $(e.target).closest("td").remove();
         setButtonPermission();
     });
-
     // タイムライン追加ボタンイベント(動的バインド)
     $(document).on("click", ".__btn_add_tl", (e) => {
         // ボタンを押したカラムのulリストを取得してタイムラインDOM生成を実行

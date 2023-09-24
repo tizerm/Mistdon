@@ -1,6 +1,6 @@
 {
-  "name": "mistdon-electron",
-  "version": "0.0.1",
+  "name": "Mistdon",
+  "version": "0.1.1",
   "description": "This is Electron base Mastodon and Misskey client.",
   "main": "main.js",
   "scripts": {
@@ -8,6 +8,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "electron-forge package",
     "make": "electron-forge make"
+  },
+  "mac": {
+    "icon": "src/resources/illust/app_icon.png"
+  },
+  "win": {
+    "icon": "src/resources/illust/app_icon.png"
   },
   "repository": {
     "type": "git",

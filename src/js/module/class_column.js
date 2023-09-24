@@ -5,7 +5,6 @@
  * @autor tizerm@mofu.kemo.no
  */
 class Timeline {
-    #__column_id // このタイムラインが所属するカラムのID
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref, column) {
         this.pref = pref
@@ -151,7 +150,6 @@ class Timeline {
  * @autor tizerm@mofu.kemo.no
  */
 class Column {
-    #open_flg
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref) {
         this.pref = pref
@@ -179,7 +177,7 @@ class Column {
         (async () => {
             const columns = await window.accessApi.readPrefCols()
             const col_map = new Map()
-            columns.forEach((col, index) => {
+            columns?.forEach((col, index) => {
                 col.index = index
                 col_map.set(col.column_id, new Column(col))
             })
@@ -266,6 +264,10 @@ class Column {
                             ><img src="resources/ic_top.png" alt="トップへ移動"/></a>
                     </div>
                 </div>
+                <div class="col_loading">
+                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                    Now Loading...
+                </div>
                 <ul></ul>
             </td>
         `
@@ -339,6 +341,9 @@ class Column {
         $("body *:not(#header>#pop_extend_column>.expand_image_col)")
             .on("click", e => $("#header>#pop_extend_column>.expand_image_col")
                 .closest("#pop_extend_column").hide("slide", { direction: "right" }, 100))
+        // 投稿日付: 投稿の詳細表示
+        $(document).on("click", ".__on_datelink", e => Status
+            .getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
     }
 
     /**
@@ -376,6 +381,8 @@ class Column {
             datas.forEach(posts => posts.forEach(p => this.addStatus(p, () => postlist.push(p))))
             // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)
             if (datas.length > 1) postlist.sort((a, b) => b.sort_date - a.sort_date)
+            // ロード画面削除
+            $(`#${this.id}>.col_loading`).remove()
             // ソートが終わったらタイムラインをDOMに反映
             postlist.forEach(post => this.append(post))
         }).catch((jqXHR, textStatus, errorThrown) => {
@@ -568,6 +575,12 @@ class Column {
     reload() {
         // 一旦中身を全消去する
         $(`#${this.id}`).find("ul").empty()
+        $(`#${this.id}`).find("ul").before(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                Now Loading...
+            </div>
+        `)
 
         const rest_promises = []
         this.status_map = new Map()

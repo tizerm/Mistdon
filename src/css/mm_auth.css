@@ -141,12 +141,11 @@ input[type="text"] {
 #content>#account_auth #select_platform>.platform_selector>button {
     border-radius: 8px;
     border: solid 2px #ffffff;
-    font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
-    font-size: 32px;
     margin: 16px 12px;
-    padding: 12px;
-    width: 240px;
-
+    padding: 0px;
+}
+#content>#account_auth #select_platform>.platform_selector>button>img {
+    margin-bottom: -4px;
 }
 #content>#account_auth .platform_section {
     position: absolute;

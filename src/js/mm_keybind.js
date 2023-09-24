@@ -5,10 +5,6 @@
         if ($(e.target).is(".__ignore_keyborad")) return;
         let col = null;
         switch (e.keyCode) {
-            case 112: // F1: ヘルプを表示
-                if ($("#header>#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
-                else $("#navi #on_help").click();
-                return false;
             case 78: // n: 投稿テキストボックスにフォーカス
                 $("#__txt_postarea").focus();
                 return false;
@@ -143,6 +139,12 @@
                 return false;
             } else if (e.keyCode === 40) { // ↓
                 Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).next.setPostAccount();
+                return false;
+            } else if (e.keyCode === 37) { // ←
+                $("#header>#head_postarea>.visibility_icon .selected").closest(".__lnk_visibility").prev().click();
+                return false;
+            } else if (e.keyCode === 39) { // →
+                $("#header>#head_postarea>.visibility_icon .selected").closest(".__lnk_visibility").next().click();
                 return false;
             }
         }

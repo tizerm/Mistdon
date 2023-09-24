@@ -128,18 +128,34 @@ button[disabled] {
     font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
     font-size: 18px;
     position: absolute;
+    font-weight: bold;
     top: 118px;
-    left: 8px;
+    left: 0px;
 }
 #header>#pop_toast>span {
-    display: inline-block;
-    border-radius: 12px;
-    border: solid 1px #ffffff;
-    margin-left: 6px;
-    margin-right: 50vw;
-    margin-bottom: 8px;
-    background-color: rgba(34,34,34,0.85);
+    display: block;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    margin: 4px 0px;
     padding: 8px 32px;
+    padding-left: 148px;
+    height: 48px;
+    width: 480px;
+    color: #ffffff;
+    background-position: left center;
+    background-repeat: no-repeat;
+}
+#header>#pop_toast>span.toast_progress {
+    background-color: rgba(34,34,34,0.92);
+    background-image: url("../resources/illust/ani_wait.png");
+}
+#header>#pop_toast>span.toast_done {
+    background-color: rgba(34,60,72,0.92);
+    background-image: url("../resources/illust/il_done.png");
+}
+#header>#pop_toast>span.toast_error {
+    background-color: rgba(72,42,34,0.92);
+    background-image: url("../resources/illust/il_error.png");
 }
 
 #header>#pop_extend_column {
