@@ -1,7 +1,7 @@
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: '/path/to/icon'
+    icon: './path/to/icon'
   },
   rebuildConfig: {},
   makers: [
@@ -9,7 +9,7 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         iconUrl: 'https://url/to/icon.ico',
-        setupIcon: '/path/to/icon.ico'
+        setupIcon: './path/to/icon.ico'
       },
     },
     {
