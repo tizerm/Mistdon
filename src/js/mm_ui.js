@@ -175,5 +175,5 @@ function toast(text, type, progress_id) {
         (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()
     } else added.addClass("toast_progress");
     // 追加アニメーション
-    added.hide().show("slide", 80);
+    added.hide().show("slide", { direction: "up" }, 80);
 }
