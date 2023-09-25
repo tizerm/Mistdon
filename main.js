@@ -13,6 +13,9 @@ const fs = require('fs')
 var pref_accounts = null
 var pref_columns = null
 
+const is_windows = process.platform === 'win32'
+const is_mac = process.platform === 'darwin'
+
 /*====================================================================================================================*/
 
 /**
@@ -415,6 +418,7 @@ const createWindow = () => {
         height: 1080,
         webPreferences: {
             devTools: false,
+            icon: '/path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }

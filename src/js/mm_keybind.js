@@ -37,6 +37,9 @@
                     return false;
                 }
                 break;
+            case 115: // F4: 右に表示される拡張カラムを閉じる
+                $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
+                return false;
             case 65:
             case 37: // a, <-: カーソルを左に移動
                 col = Column.disposeCursor();

@@ -196,6 +196,9 @@
 #header>#pop_extend_column>.post_detail_col>.lnk_post_browser:hover {
     background-color: rgba(255,255,255,0.15);
 }
+#header>#pop_extend_column>.post_detail_col ul {
+    height: calc(100vh - 248px);
+}
 #header>#pop_extend_column>.reply_col #__txt_replyarea {
     display: block;
     padding: 2px;

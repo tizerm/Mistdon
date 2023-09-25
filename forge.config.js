@@ -7,7 +7,10 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        iconUrl: 'https://url/to/icon.ico',
+        setupIcon: '/path/to/icon.ico'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -26,6 +29,18 @@ module.exports = {
     {
       name: '@electron-forge/plugin-auto-unpack-natives',
       config: {},
+    },
+  ],
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      platforms: ["win32"],
+      config: {
+        repository: {
+          owner: "tizerm",
+          name: "Mistdon"
+        },
+      },
     },
   ],
 };

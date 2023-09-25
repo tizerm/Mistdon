@@ -541,8 +541,10 @@ class Status {
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        // 表示後にリプライカラムのテキストボックスにフォーカスする
-        $("#header>#pop_extend_column #__txt_replyarea").focus()
+        // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
+        const replyarea = $("#header>#pop_extend_column #__txt_replyarea")
+        replyarea.focus()
+        replyarea.get(0).setSelectionRange(500, 500)
     }
 
     createDetailWindow() {
