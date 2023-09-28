@@ -30,6 +30,7 @@ class Timeline {
      * (返り値は取得データのpromise)
      */
     getTimeline() {
+        if (!this.target_account) return
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
         this.pref.query_param.limit = 30
         let rest_promise = null
@@ -84,6 +85,8 @@ class Timeline {
      * (この段階ではWebSocketへはまだ接続しない)
      */
     setSocketParam() {
+        if (!this.target_account) return
+
         let message_callback = null
         let send_param = null
 

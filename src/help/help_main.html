@@ -253,7 +253,16 @@
         </dl>
     </article>
     <article>
-        <h3><a name="column">v0.1.1で実装されていない基本機能について</a></h3>
+        <h3><a name="preference">設定ファイルの場所について</a></h3>
+        <p>Mistdonでは認証情報やカラムの設定情報をユーザーのアプリケーションデータを保存する階層に保存しています。<br/>
+        Windowsの場合: \Users\{ユーザー名}\AppData\Roaming\Mistdon\app_prefs<br/>
+        Macの場合: /Users/{ユーザー名}/Library/Application Support/Mistdon/app_prefs<br/>
+        複数のパソコンで使用したり、設定をバックアップしたい場合は、これらのフォルダに保存してあるJSONファイルをコピーしておくといいでしょう。<br/>
+        <strong>※注: 認証情報を持っているauth.jsonにはアクセストークンなどの機密情報が入っています。外部に公開するのはおやめください。最悪アカウント乗っ取られるよ！</strong>
+        </p>
+    </article>
+    <article>
+        <h3><a name="uncommit">v0.1.1で実装されていない基本機能について</a></h3>
         <dl>
             <dt>カスタム絵文字</dt>
             <dd>

@@ -22,7 +22,7 @@
         // タイムラインカラーを初期設定
         $(".__cmb_tl_account").each((index, elm) => {
             const key_address = $(elm).find("option[selected]").val();
-            $(elm).closest("li").find("h4").css("background-color", `#${accounts.get(key_address).acc_color}`);
+            $(elm).closest("li").find("h4").css("background-color", `#${accounts.get(key_address)?.acc_color}`);
         });
         // カラムをSortableにする
         $(".__ui_sortable").sortable({
@@ -88,7 +88,7 @@
         // カラムカラーを選択したアカウントの色にする
         const target = $(e.target);
         const key_address = target.find("option:selected").val();
-        target.closest("li").find("h4").css("background-color", `#${accounts.get(key_address).acc_color}`);
+        target.closest("li").find("h4").css("background-color", `#${accounts.get(key_address)?.acc_color}`);
         setButtonPermission();
     });
 

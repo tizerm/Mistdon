@@ -39,7 +39,7 @@
             });
             // アカウントカラーをファイルに書き込み
             window.accessApi.writePrefAccColor(param_json);
-            alert("アカウントカラーを変更しました。");
+            alert("設定を保存しました。");
         });
 
         // アカウント認証解除ボタンイベント

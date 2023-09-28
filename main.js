@@ -28,15 +28,15 @@ const is_mac = process.platform === 'darwin'
 function readPrefAccs() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_accounts) {
-        console.log('@INF: use prefs/auth.json cache.')
+        console.log('@INF: use app_prefs/auth.json cache.')
         return pref_accounts
     }
-    const content = readFile('prefs/auth.json')
+    const content = readFile('app_prefs/auth.json')
     if (!content) { // ファイルが見つからなかったらnullを返却
         return null
     }
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
-    console.log('@INF: read prefs/auth.json.')
+    console.log('@INF: read app_prefs/auth.json.')
     return pref_accounts
 }
 
@@ -45,7 +45,7 @@ function readPrefAccs() {
  * アカウント認証情報を設定ファイルに書き込む(Mastodon用)
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param path 書き込むファイルのパス
+ * @param filepath 書き込むファイルのパス
  * @param json_data 書き込むJSONデータ
  */
 function writePrefMstdAccs(event, json_data) {
@@ -65,7 +65,7 @@ function writePrefMstdAccs(event, json_data) {
     }
 
     // ファイルに書き込み
-    const content = writeFileArrayJson('prefs/auth.json', write_json)
+    const content = writeFileArrayJson('app_prefs/auth.json', write_json)
 
     // キャッシュを更新
     if (!pref_accounts) {
@@ -81,7 +81,7 @@ function writePrefMstdAccs(event, json_data) {
  * アカウント認証情報を設定ファイルに書き込む(Misskey用)
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param path 書き込むファイルのパス
+ * @param filepath 書き込むファイルのパス
  * @param json_data 書き込むJSONデータ
  */
 function writePrefMskyAccs(event, json_data) {
@@ -105,7 +105,7 @@ function writePrefMskyAccs(event, json_data) {
     }
 
     // ファイルに書き込み
-    const content = writeFileArrayJson('prefs/auth.json', write_json)
+    const content = writeFileArrayJson('app_prefs/auth.json', write_json)
 
     // キャッシュを更新
     if (!pref_accounts) {
@@ -125,7 +125,7 @@ function writePrefMskyAccs(event, json_data) {
  * @param json_data 書き込むJSONデータ
  */
 function writePrefAccColor(event, json_data) {
-    console.log('@INF: use prefs/auth.json cache.')
+    console.log('@INF: use app_prefs/auth.json cache.')
     // 返却JSONを走査して色情報をキャッシュに保存
     const write_json = []
     json_data.forEach((color) => {
@@ -135,7 +135,7 @@ function writePrefAccColor(event, json_data) {
     })
 
     // ファイルに書き込み
-    const content = overwriteFile('prefs/auth.json', write_json)
+    const content = overwriteFile('app_prefs/auth.json', write_json)
 
     // キャッシュを更新
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
@@ -151,15 +151,15 @@ function writePrefAccColor(event, json_data) {
 function readPrefCols() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_columns) {
-        console.log('@INF: use prefs/columns.json cache.')
+        console.log('@INF: use app_prefs/columns.json cache.')
         return pref_columns
     }
-    const content = readFile('prefs/columns.json')
+    const content = readFile('app_prefs/columns.json')
     if (!content) { // ファイルが見つからなかったらnullを返却
         return null
     }
     pref_columns = JSON.parse(content)
-    console.log('@INF: read prefs/columns.json.')
+    console.log('@INF: read app_prefs/columns.json.')
     return pref_columns
 }
 
@@ -168,7 +168,7 @@ function readPrefCols() {
  * カラム設定情報を設定ファイルに書き込む
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param path 書き込むファイルのパス
+ * @param filepath 書き込むファイルのパス
  * @param json_data 整形前の書き込むJSONデータ
  */
 function writePrefCols(event, json_data) {
@@ -278,7 +278,7 @@ function writePrefCols(event, json_data) {
         })
     })
     // 最終的な設定ファイルをJSONファイルに書き込み
-    const content = overwriteFile('prefs/columns.json', write_json)
+    const content = overwriteFile('app_prefs/columns.json', write_json)
     
     // キャッシュを更新
     pref_columns = JSON.parse(content)
@@ -291,13 +291,15 @@ function writePrefCols(event, json_data) {
  * 汎用ファイル書き込みメソッド(同期)
  * 読み込みに成功すればファイルのstringが、失敗するとnullが返る
  * 
- * @param path 読み込むファイルのパス
+ * @param filepath 読み込むファイルのパス
  * @return 読み込んだファイル(string形式) 失敗した場合null
  */
-function readFile(path) {
+function readFile(filepath) {
+    // ApplicationDataのパスを取得
+    const pref_path = path.join(app.getPath('userData'), filepath)
     let content = null
     try {
-        content = fs.readFileSync(path, 'utf8')
+        content = fs.readFileSync(pref_path, 'utf8')
     } catch(err) {
         console.log('!ERR: file read failed.')
     }
@@ -309,12 +311,12 @@ function readFile(path) {
  * 汎用配列型JSONファイル書き込みメソッド(非同期)
  * 非配列型JSONを配列型JSONファイルの後ろに追加する
  * 
- * @param path 読み込むファイルのパス
+ * @param filepath 読み込むファイルのパス
  * @param json_data ファイルに追加するJSONデータ(非配列型)
  * @return 最終的に書き込んだファイル内容string
  */
-function writeFileArrayJson(path, json_data) {
-    let content = readFile(path)
+function writeFileArrayJson(filepath, json_data) {
+    let content = readFile(filepath)
     if (content) {
         // ファイルが存在する場合(引数のJSONをpush)
         let pre_json = JSON.parse(content)
@@ -325,7 +327,7 @@ function writeFileArrayJson(path, json_data) {
         content = JSON.stringify([json_data])
     }
 
-    writeDirFile(path, content)
+    writeDirFile(filepath, content)
     return content
 }
 
@@ -334,14 +336,14 @@ function writeFileArrayJson(path, json_data) {
  * 汎用JSONファイル書き込みメソッド(非同期)
  * 引数のJSONファイルをファイルに書き込む(完全上書き処理)
  * 
- * @param path 読み込むファイルのパス
+ * @param filepath 読み込むファイルのパス
  * @param json_data ファイルに書き込むJSONデータ(この内容で上書き)
  * @return 最終的に書き込んだファイル内容string
  */
-function overwriteFile(path, json_data) {
+function overwriteFile(filepath, json_data) {
     const content = JSON.stringify(json_data)
 
-    writeDirFile(path, content)
+    writeDirFile(filepath, content)
     return content
 }
 
@@ -350,18 +352,18 @@ function overwriteFile(path, json_data) {
  * 汎用ファイル書き込みメソッド(非同期)
  * 引数のcontentをファイルに書き込む、ディレクトリがなかったら自動で作成
  * 
- * @param path 読み込むファイルのパス
+ * @param filepath 読み込むファイルのパス
  * @param content ファイルに書き込むstring
  */
-function writeDirFile(path, content) {
-    const dir_name = path.split('/')[0]
-    // パス先頭のディレクトリが未作成なら先に作成
-    if (!fs.existsSync(dir_name)) {
-        fs.mkdirSync(dir_name)
-    }
+async function writeDirFile(filepath, content) {
+    // ApplicationDataのパスを取得
+    const pref_path = path.join(app.getPath('userData'), filepath)
+    const pref_dir = path.dirname(pref_path)
+    // ディレクトリが未作成なら先に作成
+    if (!fs.existsSync(pref_dir)) await fs.promises.mkdir(pref_dir, { recursive: true })
 
     // ファイル書き込み
-    fs.writeFile(path, content, 'utf8', (err) => {
+    fs.writeFile(pref_path, content, 'utf8', (err) => {
         if (err) throw err;
         console.log('@INF: file write successed.')
     })
@@ -418,7 +420,7 @@ const createWindow = () => {
         height: 1080,
         webPreferences: {
             devTools: false,
-            icon: '/path/to/icon.png',
+            icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
