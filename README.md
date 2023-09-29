@@ -3,8 +3,8 @@
 
 <p>
 Electronを使って開発しているMastodonとMisskeyがいっぺんに見られるFediverseクライアントです。<br/>
-ついにアルファリリースできました！(現在v0.0.2)<br/>
-使ってみたい方はGoogle Driveの<a href="https://drive.google.com/drive/folders/16xwNbQCl5kRLfJdK3DT84652JdvTHfFP?usp=drive_link" target="_blank">こちら</a>からダウンロードしてください。
+ついにベータリリースできました！<br/>
+右側のReleaseからダウンロードしてください。
 </p>
 
 <h3>Change Log</h3>
