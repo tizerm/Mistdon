@@ -33,6 +33,8 @@ class Account {
         }
         return url
     }
+    // Getter: 絵文字キャッシュ
+    get emojis() { return Emojis.get(this.pref.domain) }
 
     // スタティックマップを初期化(非同期)
     static {
@@ -363,6 +365,87 @@ class Account {
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
     }
 
+    static async cacheEmojis() {
+        { // キャッシュが取れていないアカウントがある場合は自動的にキャッシュを取得
+            let cache_flg = true
+            for (const elm of Account.map) {
+                if (!elm[1].emojis) {
+                    cache_flg = false
+                    break
+                }
+            }
+            if (cache_flg) return // キャッシュが取れてる場合はなにもしない
+        }
+        const toast_uuid = crypto.randomUUID()
+        toast("カスタム絵文字がキャッシュされていないアカウントがあります。キャッシュを更新します...",
+            "progress", toast_uuid)
+        // サーバーのカスタム絵文字一覧を取得してファイルに書き込む
+        const write_promises = []
+        Account.map.forEach((v, k) => write_promises.push(
+            v.getCustomEmojis().then(data => { return window.accessApi.writeCustomEmojis(data) })))
+        // すべて書き込み終わったら通知toastを出してキャッシュを更新
+        Promise.all(write_promises).then(() => {
+            toast("カスタム絵文字のキャッシュが完了しました.", "done", toast_uuid)
+            Emojis.readCache()
+        })
+    }
+
+    getCustomEmojis() {
+        let rest_promise = null
+        switch (this.pref.platform) {
+            case 'Mastodon': // Mastodon
+                // カスタム絵文字を取得して整形するプロセスをpromiseとして返却
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v1/custom_emojis`,
+                    dataType: "json"
+                }).then(data => {
+                    return (async () => {
+                        // 絵文字一覧データをメインプロセスにわたす形に整形する
+                        const emojis = []
+                        data.forEach(e => emojis.push({
+                            "name": e.shortcode,
+                            "shortcode": `:${e.shortcode}:`,
+                            "url": e.url
+                        }))
+                        return {
+                            "host": this.pref.domain,
+                            "emojis": emojis
+                        }
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                // カスタム絵文字を取得して整形するプロセスをpromiseとして返却
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/emojis`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ })
+                }).then(data => {
+                    return (async () => {
+                        // 絵文字一覧データをメインプロセスにわたす形に整形する
+                        const emojis = []
+                        data.emojis.forEach(e => emojis.push({
+                            "name": e.aliases[0],
+                            "shortcode": `:${e.name}:`,
+                            "url": e.url
+                        }))
+                        return {
+                            "host": this.pref.domain,
+                            "emojis": emojis
+                        }
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise
+    }
+
     unauthorize(callback) {
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
@@ -386,6 +469,24 @@ class Account {
             default:
                 break
         }
+    }
+
+    createEmojiList() {
+        $("#header>#pop_custom_emoji").html(`
+            <div class="emoji_head">
+                <h2>カスタム絵文字一覧</h2>
+                <h3>${this.pref.domain}</h3>
+            </div>
+            <div class="emoji_list">
+            </div>
+            <button type="button" id="__on_emoji_close">×</button>
+        `).show("slide", { direction: "left" }, 150)
+        $("#header>#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
+
+        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
+        ;(async () => this.emojis.each(emoji => $("#header>#pop_custom_emoji>.emoji_list").append(`
+            <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `)))()
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得
@@ -433,23 +534,27 @@ class Account {
 
     static createAccountPrefList() {
         let html = ''
-        Account.map.forEach((v, k) => html += `
-            <li class="ui-sortable" name="${v.full_address}">
-                <h3>${v.pref.domain}</h3>
-                <div class="user">
-                    <img src="${v.pref.avatar_url}" class="usericon"/>
-                    <h4 class="username">${v.pref.username}</h4>
-                    <div class="userid">${v.full_address}</div>
-                </div>
-                <div class="option">
-                    アカウントカラー: 
-                    #<input type="text" class="__txt_acc_color __pull_color_palette" value="${v.pref.acc_color}" size="6"/>
-                </div>
-                <div class="foot_button">
-                    <button type="button" class="__btn_unauth_acc">認証解除</button>
-                </div>
-            </li>
-        `)
+        Account.map.forEach((v, k) => {
+            const cache_flg = v.emojis ? true : false
+            html += `
+                <li class="ui-sortable" name="${v.full_address}">
+                    <h3>${v.pref.domain}</h3>
+                    <div class="user">
+                        <img src="${v.pref.avatar_url}" class="usericon"/>
+                        <h4 class="username">${v.pref.username}</h4>
+                        <div class="userid">${v.full_address}</div>
+                    </div>
+                    <div class="option">
+                        アカウントカラー: 
+                        #<input type="text" class="__txt_acc_color __pull_color_palette" value="${v.pref.acc_color}" size="6"/>
+                        <br/>カスタム絵文字キャッシュ: ${cache_flg ? '◯' : '×'}
+                    </div>
+                    <div class="foot_button">
+                        <button type="button" class="__btn_unauth_acc">認証解除</button>
+                    </div>
+                </li>
+            `
+        })
         return html
     }
 }

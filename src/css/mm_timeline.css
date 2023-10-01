@@ -44,7 +44,12 @@
     border-radius: 4px;
     border: solid 1px #888888;
     color: #ffffff;
-    width: 204px;
+    width: 156px;
+}
+#header>#head_postarea>#on_custom_emoji {
+    position: absolute;
+    top: 48px;
+    left: 200px;
 }
 #header>#head_postarea>#__txt_postarea {
     position: absolute;
@@ -159,6 +164,59 @@
 }
 #header>#pop_context_menu>ul>li>ul {
     width: 360px;
+}
+
+#header>#pop_custom_emoji {
+    display: none;
+    z-index: 5;
+    width: 400px;
+    position: absolute;
+    top: 198px;
+    left: -2px;
+}
+#header>#pop_custom_emoji>.emoji_head {
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    font-family: Arial, "ƒƒCƒŠƒI", sans-selif;
+    color: #ffffff;
+    margin: 0px;
+    margin-bottom: 6px;
+    padding: 8px 24px;
+}
+#header>#pop_custom_emoji>.emoji_head>* {
+    font-size: 18px;
+    padding: 0px;
+    margin: 0px;
+}
+#header>#pop_custom_emoji>.emoji_list {
+    background-color: rgba(34,34,34,0.8);
+    overflow-y: auto;
+    height: calc(100vh - 380px);
+}
+#header>#pop_custom_emoji>.emoji_list::-webkit-scrollbar{
+   width: 8px;
+}
+#header>#pop_custom_emoji>.emoji_list::-webkit-scrollbar-track{
+   background-color: transparent;
+}
+#header>#pop_custom_emoji>.emoji_list::-webkit-scrollbar-thumb{
+   background-color: #808080;
+}
+#header>#pop_custom_emoji>.emoji_list img {
+    display: inline-block;
+    height: 32px;
+    width: auto;
+    vertical-align: text-bottom;
+}
+#header>#pop_custom_emoji>.emoji_list a:hover img {
+    background-color: rgba(255,255,255,0.2);
+    cursor: pointer;
+}
+#header>#pop_custom_emoji button {
+    display: block;
+    padding: 6px;
+    text-align: center;
+    width: 100%;
 }
 
 /*================================================================================================*/
@@ -491,7 +549,6 @@
     height: 24px;
     width: auto;
     vertical-align: text-bottom;
-
 }
 
 .timeline>ul>li>.content>.main_content a:not([class*="mention"]) {

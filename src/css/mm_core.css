@@ -165,7 +165,7 @@ button[disabled] {
     background-color: rgba(34,34,34,0.8);
     padding: 4px 0px 4px 4px;
     position: absolute;
-    top: 72px;
+    top: 24px;
     right: 0px;
 }
 #header>#pop_extend_column>.help_col {
@@ -186,7 +186,7 @@ button[disabled] {
     background-color: rgba(34,34,34,0.5);
     padding: 0px 18px 12px;
     font-size: 13px;
-    height: calc(100vh - 200px);
+    height: calc(100vh - 280px);
 }
 #header>#pop_extend_column>.help_col>.help_content::-webkit-scrollbar{
    width: 8px;

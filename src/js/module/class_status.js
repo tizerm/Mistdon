@@ -30,6 +30,8 @@ class Status {
                 this.uri = json.status?.url ?? data.url // 投稿URL(前はリプライ時のURL)
                 this.id = data.id // 投稿ID
 
+                this.use_emoji_cache = false // Mastodonの場合絵文字キャッシュは使わない
+
                 // ユーザーに関するデータ
                 this.user = {
                     username: data.account.display_name ?? data.account.username,
@@ -88,6 +90,9 @@ class Status {
                 else this.uri = data.url
                 this.id = data.id // 投稿ID
 
+                // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する
+                this.use_emoji_cache = !data.uri
+
                 // ユーザーに関するデータ
                 this.user = {
                     username: data.user.name ?? data.user.username,
@@ -145,6 +150,8 @@ class Status {
     get platform() { return this.from_account.platform }
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() { return this.from_account.pref.acc_color }
+    // Getter: 取得元アカウントのカスタム絵文字
+    get host_emojis() { return this.from_account?.emojis }
     // Getter: ミュート判定(現状はBTRN除外のみ)
     get muted() { return this.from_timeline?.pref?.exclude_reblog && this.reblog }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
@@ -344,6 +351,7 @@ class Status {
     get element() {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
+        let target_emojis = null
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}">`
         if (this.type == 'notification') { // 通知タイプによって表示を変更
             switch (this.notif_type) {
@@ -390,10 +398,12 @@ class Status {
                 <span>Boosted by @${this.reblog_by}</span>
             </div>
         `
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon"/>
-                <h4 class="username">${this.user.emojis.replace(this.user.username)}</h4>
+                <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                 <a class="userid">@${this.user.id}</a>
         `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
             html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
@@ -415,22 +425,28 @@ class Status {
             </div>
             <div class="content">
         `
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
             <a class="expand_header label_cw">${this.cw_text}</a>
             <div class="main_content cw_content">
         `; else html += '<div class="main_content">'
         html /* 本文(絵文字を置換) */ += `   
-                    ${this.emojis.replace(this.content)}
+                    ${target_emojis.replace(this.content)}
                 </div>
             </div>
         `
-        if (this.platform == 'Misskey' && this.quote_flg) html /* 引用ノート(Misskeyのみ) */ += `
-            <div class="post_quote">
-                <div>${this.quote.username}</div>
-                <div>@${this.quote.user_id}</div>
-                <div>${this.quote.emojis.replace(this.quote.content)}</div>
-            </div>
-        `
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        if (this.platform == 'Misskey' && this.quote_flg) {
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
+            html /* 引用ノート(Misskeyのみ) */ += `
+                <div class="post_quote">
+                    <div>${this.quote.username}</div>
+                    <div>@${this.quote.user_id}</div>
+                    <div>${target_emojis.replace(this.quote.content)}</div>
+                </div>
+            `
+        }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             html += '<div class="media">'
             if (this.sensitive) html /* 閲覧注意 */ += `
