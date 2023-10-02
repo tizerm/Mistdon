@@ -83,8 +83,11 @@ class Status {
                 data = this.reblog ? json.renote : json
                 // ノートURL生成
                 // uriが入っていない場合は自鯖の投稿なのでホストからURIを生成
-                if (!data.uri) this.uri = `https://${host}/notes/${data.id}`
-                // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
+                if (!data.uri) { // uriが入っていない場合は自鯖の投稿
+                    // 通知の場合は本体のIDを参照
+                    if (this.notif_type) this.uri = `https://${host}/notes/${data.note?.renote?.id ?? data.note?.id}`
+                    else this.uri = `https://${host}/notes/${data.id}`
+                } // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
                 else if (data.user?.instance?.softwareName == "misskey") this.uri = data.uri
                 // TODO: それ以外は一旦Mastodonとして解釈する
                 else this.uri = data.url
@@ -92,6 +95,7 @@ class Status {
 
                 // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する
                 this.use_emoji_cache = !data.uri
+                if (this.notif_type == 'reaction') this.reaction_emoji = data.reaction // リアクションを保存
 
                 // ユーザーに関するデータ
                 this.user = {
@@ -372,7 +376,7 @@ class Status {
                 case 'reaction': // 絵文字リアクション
                     html += `
                         <div class="label_head label_favorite">
-                            <span>ReAction from @${this.user.id}</span>
+                            <span>Reaction from @${this.user.id}</span>
                         </div>
                     `
                     break
@@ -431,13 +435,23 @@ class Status {
             <a class="expand_header label_cw">${this.cw_text}</a>
             <div class="main_content cw_content">
         `; else html += '<div class="main_content">'
-        html /* 本文(絵文字を置換) */ += `   
-                    ${target_emojis.replace(this.content)}
+
+        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content)
+        if (this.reaction_emoji) { // リアクション絵文字がある場合
+            let alias = null
+            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
+                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
+                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
+                else alias = `${this.reaction_emoji} (キャッシュされていないかリモートのカスタム絵文字です)`
+            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+            html += `<p class="reaction_emoji">${alias}</p>`
+        }
+        html += `
                 </div>
             </div>
         `
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         if (this.platform == 'Misskey' && this.quote_flg) {
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
@@ -561,6 +575,32 @@ class Status {
         const replyarea = $("#header>#pop_extend_column #__txt_replyarea")
         replyarea.focus()
         replyarea.get(0).setSelectionRange(500, 500)
+    }
+
+    createReactionWindow() {
+        // リアクションウィンドウのDOM生成
+        const jqelm = $($.parseHTML(`
+            <div class="reaction_col">
+                <h2>From ${this.from_account.full_address}</h2>
+                <div class="timeline">
+                    <ul></ul>
+                </div>
+                <div class="reaction_list">
+                    <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
+                    <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
+                </div>
+                <button type="button" id="__on_reply_close">×</button>
+            </div>
+        `))
+        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
+        jqelm.find('h2').css("background-color", `#${this.account_color}`)
+        jqelm.find('.timeline>ul').append(this.element)
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+
+        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
+        ;(async () => this.from_account.emojis.each(emoji => $("#header>#pop_extend_column .reaction_list").append(`
+            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `)))()
     }
 
     createDetailWindow() {

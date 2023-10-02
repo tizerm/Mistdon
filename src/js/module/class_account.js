@@ -76,13 +76,24 @@ class Account {
         Account.map.forEach((v, k) => callback(v))
     }
 
+    static eachPlatform(platform, callback) {
+        let nothing = true
+        Account.map.forEach((v, k) => {
+            if (v.platform == platform) {
+                nothing = false
+                callback(v)
+            }
+        })
+        return nothing
+    }
+
     /**
      * #Method
      * このアカウントを投稿先アカウントに設定
      */
     setPostAccount() {
-        $("#header>#head_postarea>.__lnk_postuser>img").attr('src', this.pref.avatar_url)
-        $("#header>#head_postarea>.__lnk_postuser>img").attr('name', this.full_address)
+        $("#header>#head_postarea .__lnk_postuser>img").attr('src', this.pref.avatar_url)
+        $("#header>#head_postarea .__lnk_postuser>img").attr('name', this.full_address)
         $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
         $("#header>h1").css("background-color", `#${this.pref.acc_color}`)
     }
@@ -211,10 +222,7 @@ class Account {
                         "type": "statuses",
                         "resolve": true
                     }
-                }).then(data => {
-                    // 取得データをPromiseで返却
-                    return data.statuses[0]
-                }).catch((jqXHR, textStatus, errorThrown) => {
+                }).then(data => { return data.statuses[0] }).catch((jqXHR, textStatus, errorThrown) => {
                     // 取得失敗時
                     toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
                 })
@@ -229,13 +237,10 @@ class Account {
                         "i": this.pref.access_token,
                         "uri": arg.target_url
                     })
-                }).then(data => {
-                    // 取得データをPromiseで返却
-                    return data.object
-                }).catch((jqXHR, textStatus, errorThrown) => {
+                }).then(data => { return data.object }).catch((jqXHR, textStatus, errorThrown) => {
                     // 取得失敗時
                     toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
-                });
+                })
                 break
             default:
                 break
@@ -252,19 +257,15 @@ class Account {
                     case '__menu_reply': // リプライ
                         target_post.createReplyWindow()
                         toast(null, "hide", toast_uuid)
-                        break;
+                        break
                     case '__menu_reblog': // ブースト
                         $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/reblog`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => {
-                            toast("投稿をブーストしました.", "done", toast_uuid)
-                        }).catch((jqXHR, textStatus, errorThrown) => {
-                            // 取得失敗時
-                            toast("ブーストに失敗しました.", "error", toast_uuid)
-                        })
+                        }).then(data => toast("投稿をブーストしました.", "done", toast_uuid)).catch(
+                            (jqXHR, textStatus, errorThrown) => toast("ブーストに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
@@ -272,12 +273,17 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => {
-                            toast("投稿をお気に入りしました.", "done", toast_uuid)
-                        }).catch((jqXHR, textStatus, errorThrown) => {
-                            // 取得失敗時
-                            toast("お気に入りに失敗しました.", "error", toast_uuid)
-                        })
+                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid)).catch(
+                            (jqXHR, textStatus, errorThrown) => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_bookmark': // ブックマーク
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/bookmark`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                        }).then(data => toast("投稿をブックマークしました.", "done", toast_uuid)).catch(
+                            (jqXHR, textStatus, errorThrown) => toast("ブックマークに失敗しました.", "error", toast_uuid))
                         break
                     default:
                         break
@@ -299,15 +305,25 @@ class Account {
                                 "i": this.pref.access_token,
                                 "renoteId": target_post.id
                             })
-                        }).then(data => {
-                            toast("投稿をリノートしました.", "done", toast_uuid)
-                        }).catch((jqXHR, textStatus, errorThrown) => {
-                            // 取得失敗時
-                            toast("リノートに失敗しました.", "error", toast_uuid)
-                        })
+                        }).then(data => toast("投稿をリノートしました.", "done", toast_uuid)).catch(
+                            (jqXHR, textStatus, errorThrown) => toast("リノートに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
-                        toast("Misskeyでお気に入りは現状非対応です…….", "error", toast_uuid)
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/notes/favorites/create`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.pref.access_token,
+                                "noteId": target_post.id
+                            })
+                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid)).catch(
+                            (jqXHR, textStatus, errorThrown) => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_reaction': // リアクション
+                        target_post.createReactionWindow()
+                        toast(null, "hide", toast_uuid)
                         break
                     default:
                         break
@@ -316,6 +332,26 @@ class Account {
             default:
                 break
         }
+    }
+
+    async sendReaction(arg) {
+        const toast_uuid = crypto.randomUUID()
+        toast("リアクションを送信しています...", "progress", toast_uuid)
+        $.ajax({
+            type: "POST",
+            url: `https://${this.pref.domain}/api/notes/reactions/create`,
+            dataType: "json",
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({
+                "i": this.pref.access_token,
+                "noteId": arg.id,
+                "reaction": arg.shortcode
+            })
+        }).then(data => {
+            // 投稿成功時(コールバック関数実行)
+            arg.success()
+            toast("リアクションを送信しました.", "done", toast_uuid)
+        }).catch((jqXHR, textStatus, errorThrown) => toast("リアクションに失敗しました.", "error", toast_uuid))
     }
 
     /**
@@ -526,9 +562,16 @@ class Account {
      * #StaticMethod
      * 投稿アカウントを選択するコンテキストメニューのDOMを返却
      */
-    static createContextMenuAccountList() {
+    static createContextMenuAccountList(platform) {
         let html = ''
-        Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
+        if (platform) {
+            // プラットフォーム指定がされている場合は対象プラットフォームだけ表示
+            if (Account.eachPlatform(platform, elm => html += `
+                <li name="${elm.full_address}"><div>${elm.pref.username} - ${elm.full_address}</div></li>`))
+                // 対象プラットフォームが認証されていない場合は選択不可の項目を作る
+                html = `<li class="ui-state-disabled"><div>(${platform}のアカウントがありません)</div></li>`
+        } else // プラットフォーム指定がない場合は普通にすべてのアカウントを表示
+            Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
         return html
     }
 

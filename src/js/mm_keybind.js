@@ -138,16 +138,16 @@
         // Alt+↑↓でアカウントを切り替え
         if (event.altKey) {
             if (e.keyCode === 38) { // ↑
-                Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).prev.setPostAccount();
+                Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).prev.setPostAccount();
                 return false;
             } else if (e.keyCode === 40) { // ↓
-                Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).next.setPostAccount();
+                Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).next.setPostAccount();
                 return false;
             } else if (e.keyCode === 37) { // ←
-                $("#header>#head_postarea>.visibility_icon .selected").closest(".__lnk_visibility").prev().click();
+                $("#header>#head_postarea .visibility_icon .selected").closest(".__lnk_visibility").prev().click();
                 return false;
             } else if (e.keyCode === 39) { // →
-                $("#header>#head_postarea>.visibility_icon .selected").closest(".__lnk_visibility").next().click();
+                $("#header>#head_postarea .visibility_icon .selected").closest(".__lnk_visibility").next().click();
                 return false;
             }
         }

@@ -25,7 +25,7 @@ $(() => (async () => {
 
     // 投稿アイコンクリック時のメニュー生成と表示(クリックイベント)
     $("#header>#pop_postuser").html(Account.createPostAccountList());
-    $("#header>#head_postarea>.__lnk_postuser").on("click",
+    $("#header>#head_postarea .__lnk_postuser").on("click",
         e => $("#header>#pop_postuser").show("slide", { direction: "up" }, 150));
     // アカウントリストのアカウント選択時に投稿先アカウントを変更
     $(document).on("click", ".__lnk_account_elm", e => {
@@ -44,7 +44,7 @@ $(() => (async () => {
     $("#header>#head_postarea #on_custom_emoji").on("click", e => {
         // リプライウィンドウを開いている場合はリプライアカウントに合わせる
         if ($(".reply_col").is(":visible")) Account.get($("#__hdn_reply_account").val()).createEmojiList();
-        else Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).createEmojiList();
+        else Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList();
     });
     // カスタム絵文字クリックイベント
     $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
@@ -54,7 +54,7 @@ $(() => (async () => {
         const target_text = target.val();
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name");
         const target_account = is_reply ? Account.get($("#__hdn_reply_account").val())
-            : Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name"));
+            : Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"));
         // Mastodonの場合前後にスペースを入れる
         if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `;
         target.val(target_text.substr(0, cursor_pos) + target_emoji + target_text.substr(cursor_pos, target_text.length));
@@ -63,10 +63,10 @@ $(() => (async () => {
 
     // 投稿ボタンクリックイベント(投稿処理)
     $("#header #on_submit").on("click",
-        e => Account.get($("#header>#head_postarea>.__lnk_postuser>img").attr("name")).post({
+        e => Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
             content: $("#__txt_postarea").val(),
             cw_text: $("#__txt_content_warning").val(),
-            visibility_id: $("#header>#head_postarea>.visibility_icon .selected").attr("id"),
+            visibility_id: $("#header>#head_postarea .visibility_icon .selected").attr("id"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__txt_postarea").val("");
@@ -86,6 +86,15 @@ $(() => (async () => {
             $("#__on_emoji_close").click();
         }
     }));
+
+    // リアクションウィンドウでリアクション選択時イベント(リアクション送信)
+    $(document).on("click", ".__on_emoji_reaction", e => Account.get($("#__hdn_reaction_account").val()).sendReaction({
+        id: $("#__hdn_reaction_id").val(),
+        shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
+        // 投稿成功時処理(リプライウィンドウを閉じる)
+        success: () => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150)
+    }));
+
     // 閉じるボタンクリックイベント
     $(document).on("click", "#__on_reply_close", 
         e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
@@ -112,6 +121,12 @@ $(() => (async () => {
     // オプションボタンイベント: 直前の投稿につなげる
     $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow(), false));
 
+    // ウィンドウサイズが800を下回った場合、投稿フォームを拡張する
+    $("#header #__txt_postarea").on("focus", e => {
+        if (window.innerWidth < 800) $(e.target).css("width", "calc(100vw - 334px)");
+    });
+    $("#header #__txt_postarea").on("blur", e => $(e.target).css("width", "calc(100vw - 514px)"));
+
     /*============================================================================================================*/
 
     // 全般イベント処理
@@ -119,7 +134,11 @@ $(() => (async () => {
     Column.bindEvent();
 
     // 投稿右クリック時のコンテキストメニュー表示イベント
-    $("#header>#pop_context_menu>.ui_menu>li ul").html(Account.createContextMenuAccountList());
+    $("#header>#pop_context_menu>.ui_menu>li ul").each((index, elm) => {
+        // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
+        if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
+        else $(elm).html(Account.createContextMenuAccountList());
+    });
     $("#header>#pop_context_menu>.ui_menu").menu();
     $(document).on("contextmenu", "#columns>table>tbody>tr>.column_td>ul>li", e => {
         $("#header>#pop_context_menu")

@@ -2,7 +2,18 @@
     position: relative;
     margin-top: 4px;
 }
-#header>#head_postarea>.__lnk_postuser {
+#header>#head_postarea>.left_block {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 320px;
+}
+#header>#head_postarea>.right_block {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+#header>#head_postarea .__lnk_postuser {
     display: block;
     position: absolute;
     top: 0px;
@@ -10,51 +21,59 @@
     width: 72px;
     height: 72px;
 }
-#header>#head_postarea>.__lnk_postuser>img {
+#header>#head_postarea .__lnk_postuser>img {
     border-radius: 12px;
     width: 72px;
     height: 72px;
     cursor: pointer;
 }
-#header>#head_postarea>.visibility_icon {
+#header>#head_postarea .visibility_icon {
     position: absolute;
     top: 0px;
     left: 76px;
 }
-#header>#head_postarea>.visibility_icon>.__lnk_visibility>img {
+#header>#head_postarea .visibility_icon>.__lnk_visibility>img {
     display: inline-block;
     border-radius: 8px;
     width: 48px;
     height: 48px;
 }
-#header>#head_postarea>.visibility_icon>.__lnk_visibility:hover>img {
+#header>#head_postarea .visibility_icon>.__lnk_visibility:hover>img {
     background-color: #225588;
     cursor: pointer;
 }
-#header>#head_postarea>.visibility_icon>.__lnk_visibility>img.selected {
+#header>#head_postarea .visibility_icon>.__lnk_visibility>img.selected {
     background-color: #3388cc;
 }
-#header>#head_postarea>#__txt_content_warning {
+#header>#head_postarea .cw_block {
     position: absolute;
     top: 48px;
     left: 76px;
+}
+#header>#head_postarea #on_custom_emoji {
+    display: inline-block;
+    vertical-align: text-bottom;
+}
+#header>#head_postarea #on_custom_emoji:hover>img {
+    background-color: #225588;
+    cursor: pointer;
+}
+
+#header>#head_postarea #__txt_content_warning {
+    position: relative;
+    top: -6px;
     font-family: "メイリオ", sans-selif;
     text-align: left;
     background-color: #434343;
     border-radius: 4px;
     border: solid 1px #888888;
     color: #ffffff;
-    width: 156px;
+    width: 174px;
 }
-#header>#head_postarea>#on_custom_emoji {
+#header>#head_postarea #__txt_postarea {
     position: absolute;
-    top: 48px;
-    left: 200px;
-}
-#header>#head_postarea>#__txt_postarea {
-    position: absolute;
-    top: -1px;
-    left: 288px;
+    top: -2px;
+    right: 154px;
     padding: 2px;
     font-family: "メイリオ", sans-selif;
     text-align: left;
@@ -62,15 +81,15 @@
     background-color: #434343;
     border: solid 1px #888888;
     color: #ffffff;
-    width: calc(100% - 450px);
+    width: calc(100vw - 514px);
     height: 68px;
 }
-#header>#head_postarea>.submit_buttons {
+#header>#head_postarea .submit_buttons {
     position: absolute;
     top: 0px;
     right: 8px;
 }
-#header>#head_postarea>.submit_buttons>a:hover>img {
+#header>#head_postarea .submit_buttons>a:hover>img {
     border-radius: 8px;
     background-color: #555555;
     cursor: pointer;
@@ -168,7 +187,7 @@
 
 #header>#pop_custom_emoji {
     display: none;
-    z-index: 5;
+    z-index: 7;
     width: 400px;
     position: absolute;
     top: 198px;
@@ -202,13 +221,15 @@
 #header>#pop_custom_emoji>.emoji_list::-webkit-scrollbar-thumb{
    background-color: #808080;
 }
-#header>#pop_custom_emoji>.emoji_list img {
+#header>#pop_custom_emoji>.emoji_list img,
+#header>#pop_extend_column>.reaction_col>.reaction_list img {
     display: inline-block;
     height: 32px;
     width: auto;
     vertical-align: text-bottom;
 }
-#header>#pop_custom_emoji>.emoji_list a:hover img {
+#header>#pop_custom_emoji>.emoji_list a:hover img,
+#header>#pop_extend_column>.reaction_col>.reaction_list a:hover img {
     background-color: rgba(255,255,255,0.2);
     cursor: pointer;
 }
@@ -221,7 +242,8 @@
 
 /*================================================================================================*/
 
-#header>#pop_extend_column>.reply_col {
+#header>#pop_extend_column>.reply_col,
+#header>#pop_extend_column>.reaction_col {
     opacity: 0.95;
     width: 400px;
 }
@@ -230,6 +252,7 @@
     width: 480px;
 }
 #header>#pop_extend_column>.reply_col>h2,
+#header>#pop_extend_column>.reaction_col>h2,
 #header>#pop_extend_column>.post_detail_col>h2 {
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
@@ -268,10 +291,25 @@
     width: 100%;
     height: 108px;
 }
-#header>#pop_extend_column>.reply_col ul {
+#header>#pop_extend_column>.reply_col ul,
+#header>#pop_extend_column>.reaction_col ul {
     height: auto;
 }
+#header>#pop_extend_column>.reaction_col>.reaction_list {
+    overflow-y: auto;
+    height: calc(100vh - 320px);
+}
+#header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar{
+   width: 8px;
+}
+#header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar-track{
+   background-color: transparent;
+}
+#header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar-thumb{
+   background-color: #808080;
+}
 #header>#pop_extend_column>.reply_col button,
+#header>#pop_extend_column>.reaction_col button,
 #header>#pop_extend_column>.post_detail_col button {
     display: block;
     padding: 6px;
@@ -494,7 +532,9 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.timeline>ul>li>.user>.username .inline_emoji {
+.timeline>ul>li>.user>.username .inline_emoji,
+.timeline>ul>li>.content>.main_content .inline_emoji,
+.timeline>ul>li>.post_quote .inline_emoji {
     display: inline-block;
     height: 24px;
     width: auto;
@@ -502,6 +542,7 @@
 }
 
 .timeline>ul>li>.user>.userid {
+    display: block;
     color: #cccccc;
     font-size: 14px;
     width: calc(100% - 60px);
@@ -544,13 +585,6 @@
     overflow-wrap: break-word;
 }
 
-.timeline>ul>li>.content>.main_content .inline_emoji {
-    display: inline-block;
-    height: 24px;
-    width: auto;
-    vertical-align: text-bottom;
-}
-
 .timeline>ul>li>.content>.main_content a:not([class*="mention"]) {
     display: inline-block;
     max-width: 240px;
@@ -558,6 +592,16 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     vertical-align: text-bottom;
+}
+.timeline>ul>li>.content>.main_content p {
+    margin-bottom: 1em;
+}
+.timeline>ul>li>.content>.main_content p.reaction_emoji {
+    font-size: 20px;
+    border-radius: 8px;
+    margin: 4px 0px;
+    padding: 2px 12px;
+    background-color: rgba(255,255,255,0.08);
 }
 .timeline>ul>li>.media .media_preview {
     border-radius: 8px;

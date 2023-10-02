@@ -43,26 +43,38 @@
 <header id="header">
     <h1>Mistdon - The Integrated Mastodon and Misskey Client</h1>
     <div id="head_postarea">
-        <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
-        <div class="visibility_icon">
-            <a class="__lnk_visibility" title="公開">
-                <img src="resources/ic_public.png" alt="公開" id="visibility_public" class="selected"/></a>
-            <a class="__lnk_visibility" title="未収載/ホーム">
-                <img src="resources/ic_unlisted.png" alt="未収載/ホーム" id="visibility_unlisted"/></a>
-            <a class="__lnk_visibility" title="フォロワー限定">
-                <img src="resources/ic_followers.png" alt="フォロワー限定" id="visibility_followers"/></a>
-            <a class="__lnk_visibility" title="ダイレクトメッセージ">
-                <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
+        <div class="left_block">
+            <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
+            <div class="visibility_icon">
+                <a class="__lnk_visibility" title="公開">
+                    <img src="resources/ic_public.png" alt="公開" id="visibility_public" class="selected"/></a>
+                <a class="__lnk_visibility" title="未収載/ホーム">
+                    <img src="resources/ic_unlisted.png" alt="未収載/ホーム" id="visibility_unlisted"/></a>
+                <a class="__lnk_visibility" title="フォロワー限定">
+                    <img src="resources/ic_followers.png" alt="フォロワー限定" id="visibility_followers"/></a>
+                <a class="__lnk_visibility" title="ダイレクトメッセージ">
+                    <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
+            </div>
+            <div class="cw_block">
+                <a id="on_custom_emoji" title="カスタム絵文字を使用"
+                    ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
+                <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
+            </div>
         </div>
-        <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
-        <a id="on_custom_emoji" title="カスタム絵文字を使用">えもじ</a>
-        <textarea id="__txt_postarea" class="__ignore_keyborad" placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
-        <div class="submit_buttons">
-            <a id="on_submit" title="投稿"><img src="resources/ic_post.png" alt="投稿"/></a>
-            <a id="on_last_delete" title="直前の投稿を削除"><img src="resources/ic_del.png" alt="直前の投稿を削除"/></a>
-            <a id="on_last_delete_paste" title="直前の投稿を削除して再編集"><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></a>
-            <a id="on_last_copy" title="直前の投稿をコピー"><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></a>
-            <a id="on_last_replychain" title="直前の投稿につなげる"><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
+        <div class="right_block">
+            <textarea id="__txt_postarea" class="__ignore_keyborad"
+                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
+            <div class="submit_buttons">
+                <a id="on_submit" title="投稿"><img src="resources/ic_post.png" alt="投稿"/></a>
+                <a id="on_last_delete" title="直前の投稿を削除"
+                    ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></a>
+                <a id="on_last_delete_paste" title="直前の投稿を削除して再編集"
+                    ><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></a>
+                <a id="on_last_copy" title="直前の投稿をコピー"
+                    ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></a>
+                <a id="on_last_replychain" title="直前の投稿につなげる"
+                    ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
+            </div>
         </div>
     </div>
     <div id="pop_postuser">
@@ -80,8 +92,14 @@
             <li><div>ブースト/リノート</div>
                 <ul id="__menu_reblog"></ul>
             </li>
-            <li><div>お気に入り(Mastodonのみ)</div>
+            <li><div>お気に入り</div>
                 <ul id="__menu_favorite"></ul>
+            </li>
+            <li><div>リアクション(Misskeyのみ)</div>
+                <ul id="__menu_reaction" name="Misskey"></ul>
+            </li>
+            <li><div>ブックマーク(Mastodonのみ)</div>
+                <ul id="__menu_bookmark" name="Mastodon"></ul>
             </li>
         </ul>
     </div>
