@@ -160,5 +160,13 @@
             return false;
         }
     });
+    // ショートカットキーバインド(検索フォーム内)
+    $(document).on("keydown", "#__txt_search_query", e => {
+        // Enterで検索処理実行
+        if (e.keyCode === 13) {
+            $("#__on_search").click();
+            return false;
+        }
+    });
 });
 

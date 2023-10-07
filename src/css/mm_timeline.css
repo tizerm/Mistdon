@@ -47,7 +47,7 @@
 }
 #header>#head_postarea .cw_block {
     position: absolute;
-    top: 48px;
+    top: 49px;
     left: 76px;
 }
 #header>#head_postarea #on_custom_emoji {
@@ -61,7 +61,7 @@
 
 #header>#head_postarea #__txt_content_warning {
     position: relative;
-    top: -6px;
+    top: -7px;
     font-family: "メイリオ", sans-selif;
     text-align: left;
     background-color: #434343;
@@ -239,11 +239,45 @@
     text-align: center;
     width: 100%;
 }
+#header>#pop_expand_image {
+    display: none;
+    z-index: 8;
+    border-radius: 8px;
+    background-color: rgba(34,34,34,0.8);
+    padding: 4px 0px 4px 4px;
+    position: absolute;
+    top: 108px;
+    right: 0px;
+}
 
 /*================================================================================================*/
 
+#header>#pop_search_column {
+    display: none;
+    z-index: 5;
+    border-radius: 8px;
+    background-color: rgba(34,34,34,0.8);
+    padding: 4px 0px 4px 4px;
+    position: absolute;
+    top: 72px;
+    right: 0px;
+}
+#header>#pop_search_column input {
+    font-family: "メイリオ", sans-selif;
+    font-size: 16px;
+    background-color: #434343;
+    border-radius: 4px;
+    border: solid 1px #888888;
+    color: #ffffff;
+    width: 100%;
+}
+#header>#pop_search_column #__on_search {
+    display: none;
+}
+
 #header>#pop_extend_column>.reply_col,
-#header>#pop_extend_column>.reaction_col {
+#header>#pop_extend_column>.reaction_col,
+#header>#pop_search_column {
     opacity: 0.95;
     width: 400px;
 }
@@ -253,7 +287,8 @@
 }
 #header>#pop_extend_column>.reply_col>h2,
 #header>#pop_extend_column>.reaction_col>h2,
-#header>#pop_extend_column>.post_detail_col>h2 {
+#header>#pop_extend_column>.post_detail_col>h2,
+#header>#pop_search_column h2 {
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
     font-family: Arial, "メイリオ", sans-selif;
@@ -262,7 +297,8 @@
     margin: 0px;
     padding: 12px 24px;
 }
-#header>#pop_extend_column>.post_detail_col>h2 {
+#header>#pop_extend_column>.post_detail_col>h2,
+#header>#pop_search_column h2 {
     background-color: #5e5e5e;
 }
 #header>#pop_extend_column>.post_detail_col>.lnk_post_browser {
@@ -277,8 +313,9 @@
 #header>#pop_extend_column>.post_detail_col>.lnk_post_browser:hover {
     background-color: rgba(255,255,255,0.15);
 }
-#header>#pop_extend_column>.post_detail_col ul {
-    height: calc(100vh - 248px);
+#header>#pop_extend_column>.post_detail_col ul,
+#header>#pop_search_column ul {
+    height: calc(100vh - 224px);
 }
 #header>#pop_extend_column>.reply_col #__txt_replyarea {
     display: block;
@@ -308,13 +345,17 @@
 #header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar-thumb{
    background-color: #808080;
 }
-#header>#pop_extend_column>.reply_col button,
-#header>#pop_extend_column>.reaction_col button,
-#header>#pop_extend_column>.post_detail_col button {
+#header>#pop_extend_column button,
+#header>#pop_search_column button {
     display: block;
+    border-radius: 12px;
     padding: 6px;
     text-align: center;
     width: 100%;
+    border: solid 2px #ffffff;
+    padding: 4px 32px;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 /*================================================================================================*/
@@ -426,13 +467,16 @@
     font-size: 20px;
     margin-bottom: 4px;
 }
-#columns>table .col_head>h3 {
-    font-size: 16px;
-}
 #columns>table .timeline>.col_head>.col_action {
     position: absolute;
     bottom: 0px;
     right: 4px;
+}
+#columns>table .timeline>.col_head>.col_action>.ic_column_warn {
+    display: none;
+    position: absolute;
+    bottom: 46px;
+    right: 0px;
 }
 #columns>table .timeline>.col_head>.col_action>a {
     margin: 0px;
@@ -501,14 +545,23 @@
     text-align: right;
 }
 
+.label_reply {
+    background-color: #cc355d;
+}
 .label_reblog {
     background-color: #408a08;
 }
 .label_favorite {
     background-color: #a8880a;
 }
+.label_postcount {
+    background-color: #606060;
+}
 .label_follow {
-    background-color: #0a64a8;
+    background-color: #3562cc;
+}
+.label_follower {
+    background-color: #cc6a35;
 }
 
 .timeline>ul>li>.user {
@@ -532,9 +585,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.timeline>ul>li>.user>.username .inline_emoji,
-.timeline>ul>li>.content>.main_content .inline_emoji,
-.timeline>ul>li>.post_quote .inline_emoji {
+.inline_emoji {
     display: inline-block;
     height: 24px;
     width: auto;
@@ -593,9 +644,6 @@
     text-overflow: ellipsis;
     vertical-align: text-bottom;
 }
-.timeline>ul>li>.content>.main_content p {
-    margin-bottom: 1em;
-}
 .timeline>ul>li>.content>.main_content p.reaction_emoji {
     font-size: 20px;
     border-radius: 8px;
@@ -623,6 +671,59 @@
 .timeline>ul>li>.content p {
     margin: 0px;
 }
+.timeline>ul>li>.content>.main_content p {
+    margin-bottom: 1em;
+}
+
+.timeline>ul>li>.detail_info {
+    margin: 6px 8px;
+    font-family: Arial, "メイリオ", sans-selif;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: right;
+}
+.timeline>ul>li>.detail_info span,
+.timeline>ul>li>.detail_info a {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 2px 18px;
+    margin: 2px;
+    background-position: center right;
+    background-repeat: no-repeat;
+    padding-right: 32px;
+}
+.detail_info .hashtag {
+    background-color: rgba(255,255,255,0.1);
+    background-image: url("../resources/ic_tag.png");
+}
+.detail_info .count_post {
+    background-image: url("../resources/ic_cnt_pst.png");
+}
+.detail_info .count_follow {
+    background-image: url("../resources/ic_cnt_flw.png");
+}
+.detail_info .count_follower {
+    background-image: url("../resources/ic_cnt_flwr.png");
+}
+.detail_info .count_reply {
+    background-image: url("../resources/ic_cnt_rp.png");
+}
+.detail_info .count_reblog {
+    background-image: url("../resources/ic_cnt_rblg.png");
+}
+.detail_info .count_fav {
+    background-image: url("../resources/ic_cnt_fav.png");
+}
+.detail_info .count_reaction_total {
+    background-image: url("../resources/ic_emoji.png");
+}
+.timeline>ul>li>.detail_info .counter {
+    width: 17%;
+}
+.timeline>ul>li>.detail_info .count_reaction {
+    background-color: rgba(0,172,255,0.2);
+    padding-right: 8px;
+}
 
 .timeline>ul>li>.post_footer {
     text-align: right;
@@ -647,3 +748,16 @@
     margin: 6px -12px -8px;
     font-size: 12px;
 }
+
+.timeline>ul>li.short_userinfo {
+    background-color: rgba(62,82,96,0.92);
+}
+.timeline>ul>li.short_userinfo>.user_header {
+    height: 64px;
+}
+.timeline>ul>li.short_userinfo .main_content {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+

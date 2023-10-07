@@ -98,6 +98,8 @@ $(() => (async () => {
     // 閉じるボタンクリックイベント
     $(document).on("click", "#__on_reply_close", 
         e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
+    $(document).on("click", "#__on_search_close", 
+        e => $("#header>#pop_search_column").hide("slide", { direction: "right" }, 150));
     $(document).on("click", "#__on_emoji_close", 
         e => $("#header>#pop_custom_emoji").hide("slide", { direction: "left" }, 150));
 
@@ -148,7 +150,12 @@ $(() => (async () => {
         $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
         return false;
     });
-    $("body").on("click", e => $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100));
+    $("body").on("click", e => {
+        $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
+        if (!$(e.target).is("#header>#head_postarea .posticon")) 
+            // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
+            $("#header>#pop_postuser").hide("slide", { direction: "up" }, 150);
+    });
     // コンテキストメニュー項目クリック時処理
     $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"));
@@ -158,6 +165,15 @@ $(() => (async () => {
             target_url: $("#header>#pop_context_menu").attr("name")
         });
     });
+    // ナビゲーション-検索ボタンクリック時処理
+    $("#navi .navi_search").on("click", e => createSearchWindow());
+    // ナビゲーション-絵文字キャッシュクリアボタンクリック時処理
+    $("#navi .navi_reset_emoji").on("click", e => {
+        Emojis.clearCache();
+        Account.cacheEmojis();
+    });
+    // 検索処理実行
+    $(document).on("click", "#__on_search", e => Column.search());
     // 通知ボタンクリック時
     $(document).on("click", ".__on_show_notifications", e => {
         $(".__on_show_notifications").text("0");

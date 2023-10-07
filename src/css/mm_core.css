@@ -74,13 +74,14 @@ button[disabled] {
 }
 #navi>ul>li {
     list-style-type: none;
-    margin: 32px 0px;
+    margin: 24px 0px;
     padding: 0px;
 }
 #navi>ul>li>a:hover>img {
     border-radius: 12px;
     background-color: rgba(255,255,255,0.15);
-}
+    cursor: pointer;
+n}
 #navi>#bottom_navi {
     position: absolute;
     left: 0px;
@@ -215,11 +216,16 @@ button[disabled] {
 #header>#pop_extend_column>.help_col>.help_content dd {
     margin-bottom: 8px;
 }
-#header>#pop_extend_column>.help_col button {
+#header>#pop_extend_column button {
     display: block;
+    border-radius: 12px;
     padding: 6px;
     text-align: center;
     width: 100%;
+    border: solid 2px #ffffff;
+    padding: 4px 32px;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 #header>#pop_palette {

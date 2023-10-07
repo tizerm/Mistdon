@@ -2,7 +2,7 @@
  * #Class
  * カスタム絵文字を管理するクラス
  *
- * @autor tizerm@mofu.kemo.no
+ * @author tizerm@mofu.kemo.no
  */
 class Emojis {
     // コンストラクタ: パラメータを使って初期化(ファイルとJSON両対応)
@@ -49,6 +49,10 @@ class Emojis {
             cache_flg: true
         })))
         Emojis.map = emoji_map
+    }
+
+    static clearCache() {
+        Emojis.map.clear()
     }
 
     /**

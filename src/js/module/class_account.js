@@ -2,7 +2,7 @@
  * #Class
  * アカウント情報を管理するクラス
  *
- * @autor tizerm@mofu.kemo.no
+ * @author tizerm@mofu.kemo.no
  */
 class Account {
     // コンストラクタ: 設定ファイルにあるアカウント設定値を使って初期化
@@ -195,7 +195,7 @@ class Account {
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
-        }).catch((jqXHR, textStatus, errorThrown) => toast("投稿に失敗しました.", "error", toast_uuid))
+        }).catch(jqXHR => toast("投稿に失敗しました.", "error", toast_uuid))
     }
 
     /**
@@ -222,10 +222,8 @@ class Account {
                         "type": "statuses",
                         "resolve": true
                     }
-                }).then(data => { return data.statuses[0] }).catch((jqXHR, textStatus, errorThrown) => {
-                    // 取得失敗時
-                    toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
-                })
+                }).then(data => { return data.statuses[0] })
+                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             case 'Misskey': // Misskey
                 request_promise = $.ajax({
@@ -237,10 +235,8 @@ class Account {
                         "i": this.pref.access_token,
                         "uri": arg.target_url
                     })
-                }).then(data => { return data.object }).catch((jqXHR, textStatus, errorThrown) => {
-                    // 取得失敗時
-                    toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
-                })
+                }).then(data => { return data.object })
+                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             default:
                 break
@@ -264,8 +260,8 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/reblog`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブーストしました.", "done", toast_uuid)).catch(
-                            (jqXHR, textStatus, errorThrown) => toast("ブーストに失敗しました.", "error", toast_uuid))
+                        }).then(data => toast("投稿をブーストしました.", "done", toast_uuid))
+                            .catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
@@ -273,8 +269,8 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid)).catch(
-                            (jqXHR, textStatus, errorThrown) => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
+                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_bookmark': // ブックマーク
                         $.ajax({
@@ -282,8 +278,8 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/bookmark`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブックマークしました.", "done", toast_uuid)).catch(
-                            (jqXHR, textStatus, errorThrown) => toast("ブックマークに失敗しました.", "error", toast_uuid))
+                        }).then(data => toast("投稿をブックマークしました.", "done", toast_uuid))
+                            .catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
                         break
                     default:
                         break
@@ -305,8 +301,8 @@ class Account {
                                 "i": this.pref.access_token,
                                 "renoteId": target_post.id
                             })
-                        }).then(data => toast("投稿をリノートしました.", "done", toast_uuid)).catch(
-                            (jqXHR, textStatus, errorThrown) => toast("リノートに失敗しました.", "error", toast_uuid))
+                        }).then(data => toast("投稿をリノートしました.", "done", toast_uuid))
+                            .catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
@@ -318,8 +314,8 @@ class Account {
                                 "i": this.pref.access_token,
                                 "noteId": target_post.id
                             })
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid)).catch(
-                            (jqXHR, textStatus, errorThrown) => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
+                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_reaction': // リアクション
                         target_post.createReactionWindow()
@@ -351,7 +347,63 @@ class Account {
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)
-        }).catch((jqXHR, textStatus, errorThrown) => toast("リアクションに失敗しました.", "error", toast_uuid))
+        }).catch(jqXHR => toast("リアクションに失敗しました.", "error", toast_uuid))
+    }
+
+    search(query) {
+        let rest_promise = null
+        // 検索文字列を渡して投稿を検索
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v2/search`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
+                    data: {
+                        "q": query,
+                        "type": "statuses",
+                        "limit": 40
+                    }
+                }).then(data => {
+                    return (async () => {
+                        const posts = []
+                        data.statuses.forEach(p => posts.push(
+                            new Status(p, { "parent_column": Column.SEARCH_COL } , this)))
+                        return posts
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/notes/search`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": this.pref.access_token,
+                        "query": query,
+                        "limit": 40
+                    })
+                }).then(data => {
+                    return (async () => {
+                        const posts = []
+                        data.forEach(p => posts.push(
+                            new Status(p, { "parent_column": Column.SEARCH_COL }, this)))
+                        return posts
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
     }
 
     /**
@@ -413,7 +465,7 @@ class Account {
             if (cache_flg) return // キャッシュが取れてる場合はなにもしない
         }
         const toast_uuid = crypto.randomUUID()
-        toast("カスタム絵文字がキャッシュされていないアカウントがあります。キャッシュを更新します...",
+        toast("カスタム絵文字のキャッシュを更新します...",
             "progress", toast_uuid)
         // サーバーのカスタム絵文字一覧を取得してファイルに書き込む
         const write_promises = []

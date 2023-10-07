@@ -1,8 +1,91 @@
 ﻿/**
  * #Class
+ * (他人の)アカウント情報を管理するクラス
+ *
+ * @author tizerm@mofu.kemo.no
+ */
+class User {
+    // コンストラクタ: APIから来たユーザーデータを受け取って生成
+    constructor(json, host, platform) {
+        switch (platform) { // TODO: 暫定
+            case 'Mastodon': // Mastodon
+                this.user_id = json.username
+                this.full_address = `@${json.username}@${host}`
+                this.username = json.display_name ?? json.username
+                this.avatar_url = json.avatar
+                this.header_url = json.header
+                this.profile = json.note
+                this.url = json.url
+                this.count_post = json.statuses_count
+                this.count_follow = json.following_count
+                this.count_follower = json.followers_count
+                break
+            case 'Misskey': // Misskey
+                this.user_id = json.username
+                this.full_address = `@${json.username}@${host}`
+                this.username = json.name ?? json.username
+                this.avatar_url = json.avatarUrl
+                this.header_url = json.bannerUrl
+                this.profile = json.description
+                this.url = `https://${host}/@${json.username}` // URLは自前で生成
+                this.count_post = json.notesCount
+                this.count_follow = json.followingCount
+                this.count_follower = json.followersCount
+                break
+            default:
+                break
+        }
+    }
+
+    get short_elm() {
+        let target_emojis = null
+        let html /* name属性にURLを設定 */ = `
+            <li class="short_userinfo">
+                <div class="label_head user_header">
+                    <span>&nbsp;</span>
+                </div>
+        `
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        //target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
+        html /* ユーザーアカウント情報 */ += `
+            <div class="user">
+                <img src="${this.avatar_url}" class="usericon"/>
+                <h4 class="username">${this.username}</h4>
+                <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+            </div>
+        `
+        html += `
+            <div class="content"><div class="main_content">
+                ${$($.parseHTML(this.profile)).text()}
+            </div></div>
+        `
+        html += `
+            <div class="detail_info">
+                <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
+                <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
+                <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+            </div>
+        `
+        html += '</li>'
+
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(html))
+        jqelm.find('.user_header') // ヘッダ画像を縮小表示して表示
+            .css('background-image', `url("${this.header_url}")`)
+            .css('background-size', '480px auto')
+            .css('background-position', 'center center')
+        jqelm.find('.detail_info').tooltip()
+        return jqelm
+    }
+}
+
+/*================================================================================================================*/
+
+/**
+ * #Class
  * 投稿、通知データを管理するクラス
  *
- * @autor tizerm@mofu.kemo.no
+ * @author tizerm@mofu.kemo.no
  */
 class Status {
     // コンストラクタ: APIから来たステータスデータを受け取って生成
@@ -10,10 +93,14 @@ class Status {
         // タイムラインから呼び出す場合はtimelineとaccountが渡ってくる
         // 個別の投稿をAPIから呼び出した場合はtimelineがnullで渡ってくる(accountは呼び出し元アカウント)
         this.from_timeline = timeline
+        this.detail_flg = !timeline
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
         this.status_id = json.id // 投稿ではなく元のステータスデータに対応するID
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
+
+        // TODO: debug
+        if (this.detail_flg) console.log(json)
 
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
@@ -34,7 +121,7 @@ class Status {
 
                 // ユーザーに関するデータ
                 this.user = {
-                    username: data.account.display_name ?? data.account.username,
+                    username: data.account.display_name || data.account.username,
                     id: data.account.acct,
                     full_address: data.account.acct.match(/@/)
                         ? data.account.acct : `${data.account.acct}@${host}`,
@@ -64,10 +151,22 @@ class Status {
                 this.sensitive = data.sensitive // 閲覧注意設定
                 this.medias = []
                 data.media_attachments?.forEach(media => this.medias.push({
+                    type: media.type,
                     url: media.url,
                     thumbnail: media.preview_url,
                     aspect: media.meta?.original?.aspect ?? 1
                 }))
+
+                // 詳細表示に関するデータ
+                this.author_id = data.account.id
+                if (data.tags) { // ハッシュタグ
+                    const hashtags = []
+                    data.tags.forEach(t => hashtags.push(t.name))
+                    this.hashtags = hashtags
+                }
+                this.count_reply = data.replies_count
+                this.count_reblog = data.reblogs_count
+                this.count_fav = data.favourites_count
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -99,7 +198,7 @@ class Status {
 
                 // ユーザーに関するデータ
                 this.user = {
-                    username: data.user.name ?? data.user.username,
+                    username: data.user.name || data.user.username,
                     id: data.user.username + (data.user.host ? ('@' + data.user.host) : ''),
                     full_address: `${json.user?.username}@${json.user?.host ? json.user?.host : host}`,
                     avatar_url: data.user.avatarUrl,
@@ -114,6 +213,8 @@ class Status {
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // 本文(通知の場合はstatusから)
+                if (this.content) this.content = this.content.replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
+
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Misskey',
@@ -135,10 +236,26 @@ class Status {
                 this.sensitive = (data.files?.filter(f => f.isSensitive)?.length ?? 0) > 0 // 閲覧注意設定
                 this.medias = []
                 data.files?.forEach(media => this.medias.push({
+                    type: media.type.substring(0, media.type.indexOf("/")),
                     url: media.url,
                     thumbnail: media.thumbnailUrl,
                     aspect: media.properties.width / media.properties.height
                 }))
+
+                // 詳細表示に関するデータ
+                this.author_id = data.user.id
+                this.hashtags = data.tags
+                this.count_reply = data.repliesCount
+                this.count_reblog = data.renoteCount
+                if (this.detail_flg && data.reactions) { // リアクションがある場合はリアクション一覧をリスト化する
+                    const reactions = []
+                    Object.keys(data.reactions).forEach(key => reactions.push({
+                        shortcode: key,
+                        count: data.reactions[key],
+                        url: data.reactionEmojis[key.substring(1, key.length - 1)]
+                    }))
+                    this.reactions = reactions
+                }
                 break
             default:
                 break
@@ -159,7 +276,7 @@ class Status {
     // Getter: ミュート判定(現状はBTRN除外のみ)
     get muted() { return this.from_timeline?.pref?.exclude_reblog && this.reblog }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
-    get content_text() { return $($.parseHTML(this.content)).text() }
+    get content_text() { return $.parseHTML(`<div>${this.content}</div>`)[0].innerText }
 
     // 最後に投稿した投稿データを保持する領域
     static post_stack = []
@@ -239,7 +356,7 @@ class Status {
                 "platform": platform,
                 "pref": { "domain": domain }
             })
-        }).catch((jqXHR, textStatus, errorThrown) => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
     }
 
     static async getTreePost(arg) {
@@ -270,7 +387,7 @@ class Status {
                 "platform": arg.platform,
                 "pref": { "domain": arg.domain }
             })
-        }).catch((jqXHR, textStatus, errorThrown) => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
     }
 
     async getThread() {
@@ -283,7 +400,7 @@ class Status {
                 main_promise = $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
                     type: "GET",
                     url: `https://${domain}/api/v1/statuses/${this.id}/context`,
-                    dataType: "json",
+                    dataType: "json"
                 }).then(data => {
                     // ツリー元のツートを取得(逆順)
                     data.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
@@ -348,7 +465,33 @@ class Status {
                 .forEach(post => $("#header>#pop_extend_column .timeline>ul").prepend(post.element)))
             Promise.all(child_promises).then(children => children
                 .forEach(post => $("#header>#pop_extend_column .timeline>ul").append(post.element)))
-        }).catch((jqXHR, textStatus, errorThrown) => toast("スレッドの取得に失敗しました.", "error"))
+        }).catch(jqXHR => toast("スレッドの取得に失敗しました.", "error"))
+    }
+
+    getAuthorInfo() {
+        const domain = this.from_account.pref.domain
+        let rest_promise = null
+        switch (this.from_account.platform) {
+            case 'Mastodon': // Mastodon
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${domain}/api/v1/accounts/${this.author_id}`,
+                    dataType: "json"
+                })
+                break
+            case 'Misskey': // Misskey
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${domain}/api/users/show`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "userId": this.author_id })
+                })
+                break
+            default:
+                break
+        }
+        return rest_promise.then(data => { return new User(data, domain, this.from_account.platform) })
     }
 
     // Getter: 投稿データからHTMLを生成して返却
@@ -471,29 +614,62 @@ class Status {
                 <div class="media_content cw_content">
             `; else html += '<div class="media_content">'
             // アスペクト比をリンクオプションとして設定
-            this.medias.forEach(media => html += `
-                <a href="${media.url}" name="${media.aspect}" class="__on_media_expand">
-                    <img src="${media.thumbnail}" class="media_preview"/>
-                </a>
-            `)
+            this.medias.forEach(media => {
+                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
+                    <audio controls src="${media.url}" preload="none"></audio>
+                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                        <img src="${media.thumbnail}" class="media_preview"/>
+                    </a>
+                `
+            })
             html += `
                     </div>
                 </div>
             `
         }
+        if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
+            html += '<div class="detail_info">'
+            if (this.hashtags) { // ハッシュタグ
+                html += '<div>'
+                this.hashtags.forEach(tag => html += `<a class="hashtag">${tag}</a>`)
+                html += '</div>'
+            }
+            // リプライ数とブースト/リノート数
+            html += `
+                <span class="count_reply counter label_reply" title="リプライ数">${this.count_reply}</span>
+                <span class="count_reblog counter label_reblog" title="ブースト/リノート数">${this.count_reblog}</span>
+            `; switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // ふぁぼの表示だけする
+                    html += `<span class="count_fav counter label_favorite" title="お気に入り数">${this.count_fav}</span>`
+                    break
+                case 'Misskey': // Misskey
+                    let reaction_html = '' // リアクションHTMLは後ろにつける
+                    let reaction_count = 0 // リアクション合計値を保持
+                    this.reactions?.forEach(reaction => {
+                        if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
+                            <span class="count_reaction">${reaction.count}
+                            <img src="${reaction.url}" class="inline_emoji"/></span>
+                        `; else reaction_html /* それ以外は一旦そのまま表示 */ += `
+                            <span class="count_reaction">${reaction.count} ${reaction.shortcode}</span>
+                        `
+                        reaction_count += Number(reaction.count)
+                    })
+                    // 先にリアクションの合計値を表示
+                    html += `<span class="count_reaction_total counter label_favorite"
+                        title="リアクション合計">${reaction_count}</span>`
+                    html += `<div>${reaction_html}</div>`
+                    break
+                default:
+                    break
+            }
+            html += '</div>'
+        }
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
-        /*
-            case 'follow': // フォロー通知
-        html += `
-            <div class="created_at">
-                Post: ${value.account.statuses_count} /
-                Follow: ${value.account.following_count} /
-                Follower: ${value.account.followers_count}
-            </div>
-        `;//*/
 
         if (this.from_column?.pref?.multi_user) // マルチアカウントカラムの場合は表示元ユーザーを表示
             html += `<div class="from_address" name="${this.from_account.full_address}">From ${this.from_account.full_address}</div>`
@@ -505,6 +681,7 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        if (this.detail_flg) jqelm.find('.detail_info').tooltip()
         return jqelm
     }
 
@@ -538,8 +715,8 @@ class Status {
             default:
                 break
         }
-        request_promise.then(() => callback(this, toast_uuid)).catch(
-            (jqXHR, textStatus, errorThrown) => toast("投稿の削除に失敗しました.", "error", toast_uuid))
+        request_promise.then(() => callback(this, toast_uuid))
+            .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
     /**
@@ -618,9 +795,12 @@ class Status {
         // Classを設定してDOMを拡張カラムにバインド
         jqelm.find('.timeline>ul').append(this.element)
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        const parent_post = $(`#header>#pop_extend_column .timeline>ul>li[id="${this.status_key}"]`)
 
         // 一度表示してからチェインしている投稿を取得する
         this.getThread()
+        // 詳細表示のターゲットになっている投稿の直上に簡易プロフィールを設置
+        this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却

@@ -240,7 +240,7 @@ async function writePrefCols(event, json_data) {
                             break
                         case 'notification': // 通知
                             rest_url = `https://${tl.account.domain}/api/i/notifications`
-                            query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app'] }
+                            query_param = { 'excludeTypes': ['pollVote', 'pollEnded', 'groupInvited', 'app', 'achievementEarned'] }
                             socket_param = { 'channel': 'main' }
                             break
                         default:

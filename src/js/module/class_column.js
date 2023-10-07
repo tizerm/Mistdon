@@ -2,7 +2,7 @@
  * #Class
  * タイムラインを管理するクラス(カラムに内包)
  *
- * @autor tizerm@mofu.kemo.no
+ * @author tizerm@mofu.kemo.no
  */
 class Timeline {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -76,7 +76,12 @@ class Timeline {
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise
+        return rest_promise.catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
     }
 
     /**
@@ -150,22 +155,32 @@ class Timeline {
  * #Class
  * カラムを管理するクラス
  *
- * @autor tizerm@mofu.kemo.no
+ * @author tizerm@mofu.kemo.no
  */
 class Column {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref) {
-        this.pref = pref
-        this.index = pref.index
-        this.status_map = new Map()
-        this.unread = 0
-        this.flex = pref.d_flex
-        this.open_flg = !pref.d_hide
+        if (pref) { // prefがある(通常のカラム)
+            this.pref = pref
+            this.index = pref.index
+            this.status_map = new Map()
+            this.unread = 0
+            this.flex = pref.d_flex
+            this.open_flg = !pref.d_hide
+            this.search_flg = false
 
-        // タイムラインはインスタンスを作って管理
-        const tls = []
-        pref.timelines.forEach(tl => tls.push(new Timeline(tl, this)))
-        this.timelines = tls
+            // タイムラインはインスタンスを作って管理
+            const tls = []
+            pref.timelines.forEach(tl => tls.push(new Timeline(tl, this)))
+            this.timelines = tls
+        } else { // prefがない(検索用カラム)
+            this.pref = {
+                "column_id": "__search_timeline",
+                "multi_user": true
+            }
+            this.status_map = new Map()
+            this.search_flg = true
+        }
     }
 
     // Getter: カラムの一意識別IDを取得
@@ -186,6 +201,8 @@ class Column {
             })
             Column.map = col_map
         })()
+        // 検索用の静的カラムを設定
+        Column.SEARCH_COL = new Column(null)
     }
 
     /**
@@ -256,6 +273,7 @@ class Column {
                         ${num_img}
                     </div>
                     <div class="col_action">
+                        <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_column_warn"/>
                         <a class="__on_column_reload" title="カラムをリロード"
                             ><img src="resources/ic_reload.png" alt="カラムをリロード"/></a>
                         <a class="__on_column_flex" title="可変幅ON/OFF"
@@ -269,7 +287,7 @@ class Column {
                 </div>
                 <div class="col_loading">
                     <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                    Now Loading...
+                    <span class="loading_text">Now Loading...</span>
                 </div>
                 <ul></ul>
             </td>
@@ -328,22 +346,32 @@ class Column {
         $(document).on("click", ".__on_media_expand", e => {
             // アプリケーションのアス比を計算
             const link = $(e.target).closest(".__on_media_expand")
-            const window_aspect = window.innerWidth / window.innerHeight
-            const image_aspect = link.attr("name")
 
-            $("#header>#pop_extend_column")
-                .html(`<div class="expand_image_col"><img src="${link.attr("href")}"/></div>`)
-                .show("slide", { direction: "right" }, 100)
-            if (image_aspect > window_aspect) // ウィンドウよりも画像のほうが横幅ながめ
-                $("#header>#pop_extend_column>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
-            else // ウィンドウよりも画像のほうが縦幅ながめ
-                $("#header>#pop_extend_column>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
+            // 動画ファイル
+            if (link.attr("type") == 'video') $("#header>#pop_expand_image").html(`
+                <div class="expand_image_col">
+                    <video src="${link.attr("href")}" autoplay controls loop></video>
+                </div>`).show("slide", { direction: "right" }, 80)
+            else { // それ以外は画像ファイル
+                const window_aspect = window.innerWidth / window.innerHeight
+                const image_aspect = link.attr("name")
+                $("#header>#pop_expand_image")
+                    .html(`<div class="expand_image_col"><img src="${link.attr("href")}"/></div>`)
+                    .show("slide", { direction: "right" }, 80)
+                if (image_aspect > window_aspect) // ウィンドウよりも画像のほうが横幅ながめ
+                    $("#header>#pop_expand_image>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
+                else // ウィンドウよりも画像のほうが縦幅ながめ
+                    $("#header>#pop_expand_image>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
+            }
+
             return false
         })
         // 画像以外をクリックすると画像ウィンドウを閉じる
-        $("body *:not(#header>#pop_extend_column>.expand_image_col)")
-            .on("click", e => $("#header>#pop_extend_column>.expand_image_col")
-                .closest("#pop_extend_column").hide("slide", { direction: "right" }, 100))
+        $("body").on("click", e => {
+            if (!$(e.target).is(".expand_image_col>*")) $("#header>#pop_expand_image")
+                // 閉じたときに動画が裏で再生されないように閉じた後中身を消す
+                .hide("slide", { direction: "right" }, 80, () => $("#header>#pop_expand_image").empty())
+        })
         // 投稿日付: 投稿の詳細表示
         $(document).on("click", ".__on_datelink", e => Status
             .getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
@@ -377,21 +405,30 @@ class Column {
      * (タイムライン取得のリクエストをすべて送ったタイミング(レスポンスが返ってきたかは問わない)で実行)
      */
     async onLoadTimeline(rest_promises) {
-        // カラムのすべてのタイムラインのREST APIが呼び出し終わったか判定するためにPromise.allを使用
-        Promise.all(rest_promises).then(datas => {
-            // タイムラインのPromise配列を走査
-            const postlist = [];
-            datas.forEach(posts => posts.forEach(p => this.addStatus(p, () => postlist.push(p))))
-            // すべてのデータを配列に入れたタイミングで配列を日付順にソートする(単一TLのときはしない)
-            if (datas.length > 1) postlist.sort((a, b) => b.sort_date - a.sort_date)
-            // ロード画面削除
-            $(`#${this.id}>.col_loading`).remove()
-            // ソートが終わったらタイムラインをDOMに反映
-            postlist.forEach(post => this.append(post))
-        }).catch((jqXHR, textStatus, errorThrown) => {
-            // 取得失敗時
-            console.log(jqXHR)
-            toast("タイムラインの取得に失敗したカラムがあります。", "error")
+        // カラムのすべてのタイムラインを(成功失敗に関わらず)すべて終わったらバインド処理
+        Promise.allSettled(rest_promises).then(results => {
+            let all_rejected_flg = true
+            const postlist = []
+            // 取得に成功したPromiseだけで処理を実行
+            results.filter(res => res.status == 'fulfilled').map(res => res.value).forEach(posts => {
+                posts.forEach(p => this.addStatus(p, () => postlist.push(p)))
+                all_rejected_flg = false
+            })
+            if (results.some(res => res.status == 'rejected')) // 取得に失敗したTLがひとつでもある場合
+                $(`#${this.id} .col_action>.ic_column_warn`).css('display', 'inline-block') // 警告アイコンを表示
+
+            if (!all_rejected_flg) { // ひとつでも取得に成功したタイムラインがある場合
+                // すべてのデータを配列に入れたタイミングで配列を日付順にソートする
+                postlist.sort((a, b) => b.sort_date - a.sort_date)
+                // ロード画面削除
+                $(`#${this.id}>.col_loading`).remove()
+                // ソートが終わったらタイムラインをDOMに反映
+                postlist.forEach(post => this.append(post))
+            } else { // すべてのカラムの取得に失敗した場合
+                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
+                $(`#${this.id}>.col_loading>.loading_text`)
+                    .text(`${this.pref.label_head}のタイムラインの取得に失敗しました……。`)
+            }
         })
     }
 
@@ -456,6 +493,27 @@ class Column {
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
         jqelm.remove()
+    }
+
+    static async search() {
+        // 一旦中身を全消去する
+        $('#pop_search_column').find(".col_loading").remove()
+        $('#pop_search_column').find("ul").empty()
+        $('#pop_search_column').find("ul").before(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
+
+        const query = $("#header>#pop_search_column #__txt_search_query").val()
+        const search_col = Column.SEARCH_COL
+        const rest_promises = []
+        search_col.status_map = new Map()
+        // すべてのアカウントから検索処理を実行(検索結果をPromise配列に)
+        Account.each(account => rest_promises.push(account.search(query)))
+        // すべての検索結果を取得したらカラムにバインド
+        search_col.onLoadTimeline(rest_promises)
     }
 
     /**
@@ -577,11 +635,12 @@ class Column {
      */
     reload() {
         // 一旦中身を全消去する
+        $(`#${this.id}`).find(".col_loading").remove()
         $(`#${this.id}`).find("ul").empty()
         $(`#${this.id}`).find("ul").before(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                Now Loading...
+                <span class="loading_text">Now Loading...</span>
             </div>
         `)
 
