@@ -1,4 +1,8 @@
-﻿function createSearchWindow() {
+﻿/**
+ * #Renderer #jQuery 
+ * 検索ウィンドウを生成
+ */
+function createSearchWindow() {
     // 検索カラムのDOM生成
     $("#header>#pop_search_column").html(`
         <h2>Toot/Note検索</h2>

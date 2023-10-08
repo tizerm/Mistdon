@@ -1,5 +1,5 @@
 ﻿const color_palette = [
-    // デフォルトで選択できるカラーパレット
+    // デフォルトで選択できるカラーパレット(15色)
     'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667',
     '666666', '997460', '87995f', '738c83', '676a82', '996a88'
 ]
@@ -177,4 +177,55 @@ function toast(text, type, progress_id) {
     } else added.addClass("toast_progress");
     // 追加アニメーション
     added.hide().show("slide", { direction: "up" }, 80);
+}
+
+/**
+ * #Renderer #jQuery
+ * ダイアログを表示
+ * 
+ * @param arg 設定オブジェクト
+ */
+function dialog(arg) {
+    const dialog_elm = $("#header>#pop_dialog");
+    dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
+    if (arg.type == 'alert') dialog_elm.dialog({ // アラート
+        resizable: false,
+        draggable: false,
+        width: 400,
+        modal: true,
+        show: {
+            effect: "bounce",
+            duration: 120
+        },
+        hide: {
+            effect: "puff",
+            duration: 120
+        },
+        close: (event, ui) => { // ダイアログを閉じた後になにか処理がある場合はコールバック実行
+            dialog_elm.dialog("destroy");
+            if (arg.accept) arg.accept();
+        },
+        buttons: { "OK": () => dialog_elm.dialog("close") }
+    }); else if (arg.type == 'confirm') dialog_elm.dialog({ // 確認ダイアログ
+        resizable: false,
+        draggable: false,
+        width: 400,
+        modal: true,
+        show: {
+            effect: "bounce",
+            duration: 120
+        },
+        hide: {
+            effect: "puff",
+            duration: 120
+        },
+        close: (event, ui) => dialog_elm.dialog("destroy"),
+        buttons: {
+            "OK": () => { // ダイアログを閉じてコールバック関数を実行
+                dialog_elm.dialog("close");
+                arg.accept();
+            },
+            "キャンセル": () => dialog_elm.dialog("close"),
+        }
+    });
 }

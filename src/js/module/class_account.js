@@ -76,6 +76,14 @@ class Account {
         Account.map.forEach((v, k) => callback(v))
     }
 
+    /**
+     * #StaticMethod
+     * アカウントプロパティを走査
+     * 引数で指定したプラットフォームのアカウントだけでループさせる
+     * 
+     * @param platform 走査対象のプラットフォーム
+     * @param callback 要素ごとに実行するコールバック関数
+     */
     static eachPlatform(platform, callback) {
         let nothing = true
         Account.map.forEach((v, k) => {
@@ -102,7 +110,7 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントから投稿処理を実行
      * 
-     * @param arg パラメータ
+     * @param arg パラメータオブジェクト
      */
     async post(arg) {
         // 何も書いてなかったら何もしない
@@ -202,7 +210,7 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントからブースト/リノート/お気に入り処理を実行
      * 
-     * @param arg パラメータ
+     * @param arg パラメータオブジェクト
      */
     async reaction(arg) {
         let request_promise = null
@@ -330,6 +338,12 @@ class Account {
         }
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントからリアクションを送信する(Misskey専用機能)
+     * 
+     * @param arg パラメータオブジェクト
+     */
     async sendReaction(arg) {
         const toast_uuid = crypto.randomUUID()
         toast("リアクションを送信しています...", "progress", toast_uuid)
@@ -350,6 +364,13 @@ class Account {
         }).catch(jqXHR => toast("リアクションに失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントから検索処理を実行する
+     * 現状投稿の検索のみ対応
+     * 
+     * @param query 検索文字列
+     */
     search(query) {
         let rest_promise = null
         // 検索文字列を渡して投稿を検索
@@ -453,6 +474,11 @@ class Account {
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字キャッシュデータが欠損している場合に、
+     * すべてのアカウントからカスタム絵文字のキャッシュを取得してファイルに保存する
+     */
     static async cacheEmojis() {
         { // キャッシュが取れていないアカウントがある場合は自動的にキャッシュを取得
             let cache_flg = true
@@ -469,8 +495,18 @@ class Account {
             "progress", toast_uuid)
         // サーバーのカスタム絵文字一覧を取得してファイルに書き込む
         const write_promises = []
-        Account.map.forEach((v, k) => write_promises.push(
-            v.getCustomEmojis().then(data => { return window.accessApi.writeCustomEmojis(data) })))
+        Account.map.forEach((v, k) => write_promises.push(v.getCustomEmojis()
+            .then(data => { return window.accessApi.writeCustomEmojis(data) })
+            .catch(jqXHR => { // カスタム絵文字の取得に失敗した場合は空のキャッシュデータを作成
+                console.log(jqXHR)
+                toast(`${v.pref.domain}のカスタム絵文字の取得に失敗しました。
+                    空のキャッシュデータを作成します。`, "error")
+                return window.accessApi.writeCustomEmojis({
+                    "host": v.pref.domain,
+                    "emojis": []
+                })
+            })
+        ))
         // すべて書き込み終わったら通知toastを出してキャッシュを更新
         Promise.all(write_promises).then(() => {
             toast("カスタム絵文字のキャッシュが完了しました.", "done", toast_uuid)
@@ -478,6 +514,10 @@ class Account {
         })
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントのサーバーの持っているカスタム絵文字を取得する
+     */
     getCustomEmojis() {
         let rest_promise = null
         switch (this.pref.platform) {
@@ -534,6 +574,61 @@ class Account {
         return rest_promise
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントの最新情報を取得する
+     */
+    async getInfo() {
+        let rest_promise = null
+        switch (this.pref.platform) {
+            case 'Mastodon': // Mastodon
+                // 認証アカウントの情報を取得
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v1/accounts/verify_credentials`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                }).then(data => {
+                    return {
+                        'user_id': data.username,
+                        'username': data.display_name,
+                        'avatar_url': data.avatar
+                    }
+                })
+                break
+            case 'Misskey': // Misskey
+                // 認証アカウントの情報を取得
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/i`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                }).then(data => {
+                    return {
+                        'user_id': data.username,
+                        'username': data.name,
+                        'avatar_url': data.avatarUrl
+                    }
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.catch(jqXHR => { // 失敗したらnullを返す
+            toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
+            return null
+        })
+    }
+
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントとMistdonとの認証を解除する
+     * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
+     * 
+     * @param callback 削除後に実行するコールバック関数
+     */
     unauthorize(callback) {
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
@@ -559,6 +654,10 @@ class Account {
         }
     }
 
+    /**
+     * #Method
+     * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
+     */
     createEmojiList() {
         $("#header>#pop_custom_emoji").html(`
             <div class="emoji_head">
@@ -627,6 +726,10 @@ class Account {
         return html
     }
 
+    /**
+     * #StaticMethod
+     * アカウント認証画面のアカウントリストのDOMを返却
+     */
     static createAccountPrefList() {
         let html = ''
         Account.map.forEach((v, k) => {

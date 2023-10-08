@@ -14,7 +14,7 @@ input[type="text"] {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 380px;
+    width: 340px;
     text-align: center;
 }
 #content>#account_list>button {
@@ -22,19 +22,23 @@ input[type="text"] {
     border-radius: 6px;
     border: solid 1px #ffffff;
 }
+#content>#account_list>span {
+    display: block;
+    font-size: 13px;
+}
 #content>#account_list>h2 {
     border-radius: 18px;
     background-color: #638042;
     text-align: center;
     color: #ffffff;
     margin: 0px;
-    padding: 12px 24px;
+    padding: 6px 24px;
 }
 
 #content>#account_list>ul {
     margin: 0px;
     padding: 0px;
-    height: calc(100vh - 124px);
+    height: calc(100vh - 152px);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -51,7 +55,7 @@ input[type="text"] {
 
 #content>#account_list>ul>li {
     background-color: rgba(67,67,67,0.95);
-    border-radius: 12px;
+    border-radius: 18px;
     list-style-type: none;
     margin: 6px;
     padding: 8px 12px;
@@ -111,14 +115,14 @@ input[type="text"] {
     top: 0px;
     right: 16px;
     text-align: center;
-    width: calc(100vw - 480px);
+    width: calc(100vw - 440px);
 }
 #content>#account_auth>h2 {
     border-radius: 18px;
     background-color: #42718a;
     color: #ffffff;
     margin: 0px;
-    padding: 12px 24px;
+    padding: 6px 24px;
 }
 #content>#account_auth>#transition_section {
     position: relative;

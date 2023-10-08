@@ -328,13 +328,17 @@
     width: 100%;
     height: 108px;
 }
-#header>#pop_extend_column>.reply_col ul,
+#header>#pop_extend_column>.reply_col ul {
+    overflow-y: auto;
+    height: calc(100vh - 320px);
+}
 #header>#pop_extend_column>.reaction_col ul {
-    height: auto;
+    overflow-y: auto;
+    height: 320px;
 }
 #header>#pop_extend_column>.reaction_col>.reaction_list {
     overflow-y: auto;
-    height: calc(100vh - 320px);
+    height: calc(100vh - 480px);
 }
 #header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar{
    width: 8px;
@@ -346,9 +350,10 @@
    background-color: #808080;
 }
 #header>#pop_extend_column button,
-#header>#pop_search_column button {
+#header>#pop_search_column button,
+#header>#pop_custom_emoji button {
     display: block;
-    border-radius: 12px;
+    border-radius: 6px;
     padding: 6px;
     text-align: center;
     width: 100%;

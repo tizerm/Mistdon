@@ -168,16 +168,43 @@ $(() => (async () => {
     // ナビゲーション-検索ボタンクリック時処理
     $("#navi .navi_search").on("click", e => createSearchWindow());
     // ナビゲーション-絵文字キャッシュクリアボタンクリック時処理
-    $("#navi .navi_reset_emoji").on("click", e => {
-        Emojis.clearCache();
-        Account.cacheEmojis();
-    });
+    $("#navi .navi_reset_emoji").on("click", e => dialog({
+        type: 'confirm',
+        title: "絵文字キャッシュ取得",
+        text: `登録アカウントすべてのカスタム絵文字のキャッシュを更新します。<br/>
+            よろしいですか？<br/>
+            (Misskeyのサーバーに新しいカスタム絵文字が追加されたときに実行するのをおすすめします。)`,
+        accept: () => { // OKボタン押下時の処理
+            Emojis.clearCache();
+            Account.cacheEmojis();
+        }
+    }));
     // 検索処理実行
     $(document).on("click", "#__on_search", e => Column.search());
     // 通知ボタンクリック時
     $(document).on("click", ".__on_show_notifications", e => {
         $(".__on_show_notifications").text("0");
         $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
+    });
+    // キーボードショートカット早見表を表示
+    $("#navi #on_help_keybind").on("click", e => {
+        // ヘルプウィンドウのDOM生成
+        const jqelm = $($.parseHTML(`
+            <div class="help_col">
+                <h2>キーボードショートカット早見表</h2>
+                <div class="help_content"></div>
+                <button type="button" id="__on_help_close">×</button>
+            </div>
+        `))
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $.ajax({
+            url: "help/help_keybind.html",
+            cache: false
+        }).then(data => {
+            $.each($.parseHTML(data), (index, value) => {
+                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
+            });
+        });
     });
 
     /*============================================================================================================*/

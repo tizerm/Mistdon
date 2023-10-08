@@ -36,6 +36,7 @@
                 ><img src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
     <ul id="bottom_navi">
+        <li><a id="on_help_keybind" title="キーボードショートカット早見表"><img src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
         <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
         <li><button type="button" class="__on_show_notifications">0</button></li>
     </ul>
@@ -86,6 +87,9 @@
     <div id="pop_toast">
     <!-- hidden: トースト -->
     </div>
+    <div id="pop_dialog">
+    <!-- hidden: ダイアログ -->
+    </div>
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
@@ -101,10 +105,10 @@
             <li><div>お気に入り</div>
                 <ul id="__menu_favorite"></ul>
             </li>
-            <li><div>リアクション(Misskeyのみ)</div>
+            <li><div>リアクション(Misskey)</div>
                 <ul id="__menu_reaction" name="Misskey"></ul>
             </li>
-            <li><div>ブックマーク(Mastodonのみ)</div>
+            <li><div>ブックマーク(Mastodon)</div>
                 <ul id="__menu_bookmark" name="Mastodon"></ul>
             </li>
         </ul>

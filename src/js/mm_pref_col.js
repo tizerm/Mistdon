@@ -48,6 +48,10 @@
         }));
         setButtonPermission();
         setColorPalette($(`#columns>table #${column_uuid}`));
+        for (const elm of accounts) {
+            $(`#columns>table #${column_uuid}>ul>li:last-child>h4`).css("background-color", `#${elm[1].acc_color}`);
+            break;
+        }
     });
 
     // カラム削除ボタンイベント(動的バインド)
@@ -65,6 +69,10 @@
             index: ul.children().length + 1,
             accounts: accounts
         }));
+        for (const elm of accounts) {
+            ul.find("li:last-child>h4").css("background-color", `#${elm[1].acc_color}`);
+            break;
+        }
         setButtonPermission();
     });
 
@@ -97,7 +105,7 @@
         (e) => $(e.target).closest("td").css("width", `${$(e.target).val()}px`));
 
     // 設定を保存ボタンイベント
-    $("#on_save_pref").on("click", (e) => {
+    $("#on_save_pref").on("click", e => (async () => {
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = [];
         $("#columns>table td").each((col_index, col_elm) => {
@@ -128,14 +136,14 @@
             });
         });
         // ファイルに追加する処理を書く(整形はメインプロセスで)
-        window.accessApi.writePrefCols(col_list);
-
-        alert("カラム設定を保存しました。");
-    });
+        await window.accessApi.writePrefCols(col_list);
+        dialog({
+            type: 'alert',
+            title: "カラム設定",
+            text: "カラム設定を保存しました。"
+        });
+    })());
 
     // 戻るボタンイベント
-    $("#on_close").on("click", (e) => {
-        window.open("index.html", "_self");
-    });
-
+    $("#on_close").on("click", e => window.open("index.html", "_self"));
 });

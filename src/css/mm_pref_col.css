@@ -2,6 +2,10 @@
     margin: 12px;
     text-align: center;
 }
+#header>.head_buttons>span {
+    display: block;
+    font-size: 13px;
+}
 #header>.head_buttons>button {
     border-radius: 8px;
     border: solid 2px #ffffff;
@@ -44,6 +48,7 @@
 .timeline select {
     border-radius: 4px;
     padding: 2px 8px;
+    width: 100%;
 }
 .timeline>.col_option {
     background-color: rgba(67,67,67,0.8);
@@ -56,7 +61,7 @@
 .timeline>ul {
     margin: 0px;
     padding: 0px;
-    height: calc(100vh - 288px);
+    height: calc(100vh - 316px);
     overflow-y: auto;
 }
 

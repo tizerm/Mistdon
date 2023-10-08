@@ -142,6 +142,12 @@ class Timeline {
         })
     }
 
+    /**
+     * #Method
+     * このタイムラインに保存してあるステータス情報を削除する
+     * 
+     * @param arg 投稿ID
+     */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
         // タイムラインに存在する投稿だけ削除対象とする
@@ -466,6 +472,12 @@ class Column {
         if (post.type == 'notification') window.accessApi.notification(post.notification)
     }
 
+    /**
+     * #Method
+     * このカラムに存在する投稿のDOMのjQueryオブジェクトをユニークキーを使って返却する
+     * 
+     * @param status_key 対象の投稿のユニークキー
+     */
     getStatusElement(status_key) {
         return $(`#${this.id}>ul>li[id="${status_key}"]`)
     }
@@ -488,6 +500,12 @@ class Column {
         }
     }
 
+    /**
+     * #Method
+     * 引数のjQueryオブジェクトに該当する投稿データを画面から消去する
+     * 
+     * @param jqelm 消去対象の投稿のjQueryオブジェクト
+     */
     removeStatus(jqelm) {
         const post = this.status_map.get(jqelm.attr("id"))
         post.from_timeline.status_key_map.delete(post.status_id)
@@ -495,6 +513,10 @@ class Column {
         jqelm.remove()
     }
 
+    /**
+     * #StaticMethod
+     * 検索カラムに入力された情報をもとに検索処理を実効する
+     */
     static async search() {
         // 一旦中身を全消去する
         $('#pop_search_column').find(".col_loading").remove()

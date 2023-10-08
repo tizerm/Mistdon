@@ -37,6 +37,7 @@ class User {
         }
     }
 
+    // Getter: 簡易プロフィールエレメントを返却
     get short_elm() {
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `
@@ -252,7 +253,7 @@ class Status {
                     Object.keys(data.reactions).forEach(key => reactions.push({
                         shortcode: key,
                         count: data.reactions[key],
-                        url: data.reactionEmojis[key.substring(1, key.length - 1)]
+                        url: data.reactionEmojis ? data.reactionEmojis[key.substring(1, key.length - 1)] : null
                     }))
                     this.reactions = reactions
                 }
@@ -293,10 +294,22 @@ class Status {
         })
     }
 
+    /**
+     * #StaticMethod
+     * 「直前の投稿」のスタックにこの投稿をプッシュする
+     */
     pushStack() {
         Status.post_stack.push(this)
     }
 
+    /**
+     * #StaticMethod
+     * 直前の投稿が存在する場合、その投稿に対してコールバック関数を実行する
+     * フラグが経っている場合は投稿をスタックからポップする
+     * 
+     * @param presentCallback 直前の投稿が存在した場合に実行するコールバック関数
+     * @param del_flg trueの場合スタックから投稿をポップ(削除)する
+     */
     static lastStatusIf(presentCallback, del_flg) {
         const last_status = del_flg
             ? Status.post_stack.pop() : Status.post_stack[Status.post_stack.length - 1]
@@ -304,6 +317,12 @@ class Status {
         else toast("直前の投稿がありません.", "error")
     }
 
+    /**
+     * #StaticMethod
+     * URLから投稿データをリモートから直接取得する
+     * 
+     * @param url ステータスURL
+     */
     static async getStatus(url) {
         if (url.indexOf('/') < 0) {
             toast("詳細表示のできない投稿です.", "error")
@@ -359,6 +378,12 @@ class Status {
         }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #StaticMethod
+     * IDから投稿データを対象サーバーを使って取得する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     static async getTreePost(arg) {
         let request_promise = null
         switch (arg.platform) {
@@ -390,6 +415,11 @@ class Status {
         }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #Method
+     * この投稿を軸としてその後に続くリプライ/ツリーと、その前に続くリプライ/ツリーを取得
+     * そのあと、詳細表示ウィンドウに表示
+     */
     async getThread() {
         const domain = this.from_account.pref.domain
         let main_promise = null
@@ -468,6 +498,10 @@ class Status {
         }).catch(jqXHR => toast("スレッドの取得に失敗しました.", "error"))
     }
 
+    /**
+     * #Method
+     * この投稿を書いたアカウントの情報を取得する
+     */
     getAuthorInfo() {
         const domain = this.from_account.pref.domain
         let rest_promise = null
@@ -685,6 +719,13 @@ class Status {
         return jqelm
     }
 
+    /**
+     * #Method
+     * この投稿をサーバーから削除する
+     * 削除後にこの投稿をパラメータとしてコールバック関数を実行
+     * 
+     * @param callback 削除処理実行後に実行するコールバック関数
+     */
     delete(callback) {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
@@ -754,6 +795,10 @@ class Status {
         replyarea.get(0).setSelectionRange(500, 500)
     }
 
+    /**
+     * #Method
+     * この投稿にリアクションを贈るための画面を表示
+     */
     createReactionWindow() {
         // リアクションウィンドウのDOM生成
         const jqelm = $($.parseHTML(`
@@ -780,6 +825,10 @@ class Status {
             `)))()
     }
 
+    /**
+     * #Method
+     * この投稿の詳細情報を表示する画面を表示
+     */
     createDetailWindow() {
         // 詳細表示のDOM生成
         const jqelm = $($.parseHTML(`

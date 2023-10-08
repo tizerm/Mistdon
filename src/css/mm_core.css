@@ -127,6 +127,30 @@ n}
    background-color: #808080;
 }
 
+#header>#pop_dialog {
+    display: none;
+}
+.ui-dialog {
+    background-color: rgba(34,34,34,0.8);
+    border-style: none;
+}
+.ui-dialog-titlebar,
+.ui-dialog-buttonpane {
+    background-color: rgba(62,62,62,0.92);
+    border-style: none;
+}
+.ui-dialog-content,
+.ui-dialog-title {
+    color: #ffffff;
+}
+.ui-button {
+    background-color: #606060;
+    font-family: "メイリオ", sans-selif;
+    color: #ffffff;
+    font-size: 13px;
+    width: 128px;
+    height: 42px;
+}
 #header>#pop_toast {
     z-index: 9;
     font-family: Arial, "メイリオ", sans-selif;

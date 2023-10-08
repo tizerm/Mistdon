@@ -87,6 +87,10 @@
                 else col.scroll(Column.SCROLL);
                 return false;
             case 70: // f: カーソルカラムの可変幅表示をトグルする
+                if (event.ctrlKey || event.metaKey) { // Ctrl+F: 検索
+                    $("#navi .navi_search").click();
+                    return false;
+                }
                 Column.getCursor().toggleFlex();
                 return false;
             case 116: // F5: カーソルのカラムをリロードする

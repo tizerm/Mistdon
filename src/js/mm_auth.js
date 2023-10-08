@@ -29,22 +29,40 @@
         });
         
         // アカウントカラー反映ボタン
-        $("#on_save_color").on("click", (e) => {
+        $("#on_save_color").on("click", e => (async () => {
+            const toast_uuid = crypto.randomUUID();
+            toast("アカウント設定を保存中です...", "progress", toast_uuid);
+
             const param_json = [];
-            $("#content>#account_list>ul>li").each((index, elm) => {
+            // awaitを使えるようにforでループする
+            for (const elm of $("#content>#account_list>ul>li").get()) {
+                const userinfo = await Account.get($(elm).find(".userid").text()).getInfo();
                 param_json.push({
+                    'user_id': userinfo?.user_id ?? null,
+                    'username': userinfo?.username ?? null,
+                    'avatar_url': userinfo?.avatar_url ?? null,
                     'key_address': $(elm).find(".userid").text(),
                     'acc_color': $(elm).find(".__txt_acc_color").val()
                 });
-            });
+            }
             // アカウントカラーをファイルに書き込み
-            window.accessApi.writePrefAccColor(param_json);
-            alert("設定を保存しました。");
-        });
+            await window.accessApi.writePrefAccColor(param_json);
+            toast("アカウント設定を保存しました.", "done", toast_uuid);
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "設定を保存しました。",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            });
+        })());
 
         // アカウント認証解除ボタンイベント
-        $(document).on("click", ".__btn_unauth_acc", e => {
-            if (confirm("このアカウントのこのアプリケーションとの認証を解除します。\nよろしいですか？")) {
+        $(document).on("click", ".__btn_unauth_acc", e => dialog({
+            type: 'confirm',
+            title: "アカウント認証解除",
+            text: "このアカウントのこのアプリケーションとの認証を解除します。<br/>よろしいですか？",
+            accept: () => { // OKボタン押下時の処理
                 const target_li = $(e.target).closest("li");
                 const target_account = Account.get(target_li.attr("name"));
                 target_account.unauthorize(() => {
@@ -52,7 +70,7 @@
                     $("#on_save_color").click();
                 });
             }
-        });
+        }));
     })()
 
     /*================================================================================================================*/
@@ -95,11 +113,11 @@
             type: "GET",
             url: `https://${instance_domain}/api/v2/instance`,
             dataType: "json"
-        }).then((data) => {
+        }).then(data => {
             // 取得できたらインスタンス情報をセット
             console.log(data);
             $("#lbl_mst_instance_name").text(data.title);
-        }).catch((jqXHR, textStatus, errorThrown) => {
+        }).catch(jqXHR => {
             // 取得失敗時はエラー文字を入れる(v3.x.xは取得できない)
             $("#lbl_mst_instance_name").text("(不正なインスタンスかv3.x.x以下です)");
         });
@@ -125,7 +143,7 @@
                 "scopes": permission,
                 "website": "https://github.com/tizerm/Mistdon"
             }
-        }).then((data) => {
+        }).then(data => {
             // 認証に成功したらクライアントIDを保存して外部ブラウザで認証画面を開く
             $("#hdn_client_id").val(data.client_id);
             $("#hdn_client_secret").val(data.client_secret);
@@ -134,10 +152,11 @@
             );
             // 画面を認証コード画面に遷移
             $("#form_mastodon>.instance_form").hide("fade", 500, () => $("#form_mastodon>.auth_form").show("fade", 500));
-        }).catch((jqXHR, textStatus, errorThrown) => {
-            // 取得失敗時
-            alert( "Request failed: " + textStatus );
-        });
+        }).catch(jqXHR => dialog({
+            type: 'alert',
+            title: "アカウント設定",
+            text: "認証リクエスト実行中に問題が発生しました。"
+        }));
     });
 
     // 登録ボタンイベント(アクセストークン取得)
@@ -162,7 +181,7 @@
                 "grant_type": "authorization_code",
                 "code": auth_code
             }
-        }).then((data) => {
+        }).then(data => {
             // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
             access_token = data.access_token;
             return $.ajax({
@@ -171,9 +190,9 @@
                 dataType: "json",
                 headers: { "Authorization": `Bearer ${access_token}` }
             });
-        }).then((data) => {
+        }).then(data => (async () => {
             // アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
-            window.accessApi.writePrefMstdAccs({
+            await window.accessApi.writePrefMstdAccs({
                 'domain': instance_domain,
                 'user_id': data.username,
                 'username': data.display_name,
@@ -182,13 +201,18 @@
                 'access_token': access_token,
                 'avatar_url': data.avatar
             });
-            alert("アカウントの認証に成功しました！");
-            // 画面リロード
-            location.reload();
-        }).catch((jqXHR, textStatus, errorThrown) => {
-            // 取得失敗時
-            alert( "Request failed: " + textStatus );
-        });
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "アカウントの認証に成功しました！",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            });
+        })()).catch(jqXHR => dialog({
+            type: 'alert',
+            title: "アカウント設定",
+            text: "認証リクエスト実行中に問題が発生しました。"
+        }));
     });
 
     /*================================================================================================================*/
@@ -213,7 +237,7 @@
                 'description': 'This is Electron base Mastodon and Misskey client.',
                 'permission': permission
             })
-        }).then((data) => {
+        }).then(data => {
             // アプリ登録に成功したらsecretを保存して認証セッションを開始
             $("#hdn_app_secret").val(data.secret);
             return $.ajax({
@@ -225,16 +249,17 @@
                     'appSecret': data.secret
                 })
             });
-        }).then((data) => {
+        }).then(data => {
             // 無事にレスポンスが返ったらtokenを保存して認証許可ウィンドウを生成
             $("#hdn_app_token").val(data.token);
             window.accessApi.openExternalBrowser(data.url);
             // 画面を認証コード画面に遷移
             $("#form_misskey>.instance_form").hide("fade", 500, () => $("#form_misskey>.auth_form").show("fade", 500));
-        }).catch((jqXHR, textStatus, errorThrown) => {
-            // 取得失敗時
-            alert( "Request failed: " + textStatus );
-        });
+        }).catch(jqXHR => dialog({
+            type: 'alert',
+            title: "アカウント設定",
+            text: "認証リクエスト実行中に問題が発生しました。"
+        }));
     });
 
     // 登録ボタンイベント(アクセストークンの生成と保存)
@@ -253,20 +278,21 @@
                 'appSecret': app_secret,
                 'token': app_token
             })
-        }).then((data) => {
+        }).then(data => (async () => {
             // 無事にレスポンスが返ったら、返ってきたアクセストークンをメインプロセスに渡す
-            window.accessApi.writePrefMskyAccs({
+            await window.accessApi.writePrefMskyAccs({
                 'domain': instance_domain,
                 'user': data.user,
                 'app_secret': app_secret,
                 'access_token': data.accessToken
             });
-            alert("アカウントの認証に成功しました！");
-            // 画面リロード
-            location.reload();
-        }).catch((jqXHR, textStatus, errorThrown) => {
-            // 取得失敗時
-            alert( "Request failed: " + textStatus );
-        });
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "アカウントの認証に成功しました！",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            });
+        })());
     });
 });

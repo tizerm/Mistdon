@@ -46,7 +46,7 @@ function readPrefAccs() {
  * アカウント認証情報を設定ファイルに書き込む(Mastodon用)
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param filepath 書き込むファイルのパス
+ * @param event イベント
  * @param json_data 書き込むJSONデータ
  */
 async function writePrefMstdAccs(event, json_data) {
@@ -82,7 +82,7 @@ async function writePrefMstdAccs(event, json_data) {
  * アカウント認証情報を設定ファイルに書き込む(Misskey用)
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param filepath 書き込むファイルのパス
+ * @param event イベント
  * @param json_data 書き込むJSONデータ
  */
 async function writePrefMskyAccs(event, json_data) {
@@ -129,10 +129,14 @@ async function writePrefAccColor(event, json_data) {
     console.log('@INF: use app_prefs/auth.json cache.')
     // 返却JSONを走査して色情報をキャッシュに保存
     const write_json = []
-    json_data.forEach((color) => {
-        let acc = pref_accounts.get(color.key_address)
-        acc.acc_color = color.acc_color
-        write_json.push(acc)
+    json_data.forEach(pref => {
+        let account = pref_accounts.get(pref.key_address)
+        account.acc_color = pref.acc_color
+        // ユーザー情報を更新できる場合は更新
+        if (pref.user_id) account.user_id = pref.user_id
+        if (pref.username) account.username = pref.username
+        if (pref.avatar_url) account.avatar_url = pref.avatar_url
+        write_json.push(account)
     })
 
     // ファイルに書き込み
@@ -169,8 +173,8 @@ function readPrefCols() {
  * カラム設定情報を設定ファイルに書き込む
  * 書き込んだ後アプリケーションキャッシュを更新
  * 
- * @param filepath 書き込むファイルのパス
- * @param json_data 整形前の書き込むJSONデータ
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
  */
 async function writePrefCols(event, json_data) {
     // ファイル書き込み用にJSONファイルを再生成
@@ -285,6 +289,13 @@ async function writePrefCols(event, json_data) {
     pref_columns = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * 保存してあるカスタム絵文字のキャッシュを読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return カスタム絵文字キャッシュ情報(マップで返却)
+ */
 function readCustomEmojis() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_emojis.size > 0) {
@@ -303,6 +314,13 @@ function readCustomEmojis() {
     return pref_emojis
 }
 
+/**
+ * #IPC
+ * カスタム絵文字のキャッシュを書き込む
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function writeCustomEmojis(event, data) {
     // 絵文字キャッシュデータを書き込み
     const content = await overwriteFile(`app_prefs/emojis/${data.host}.json`, data.emojis)
@@ -315,7 +333,7 @@ async function writeCustomEmojis(event, data) {
 
 /**
  * #Utils #Node.js
- * 汎用ファイル書き込みメソッド(同期)
+ * 汎用ファイル読み込みメソッド(同期)
  * 読み込みに成功すればファイルのstringが、失敗するとnullが返る
  * 
  * @param filepath 読み込むファイルのパス
@@ -333,6 +351,14 @@ function readFile(filepath) {
     return content
 }
 
+/**
+ * #Utils #Node.js
+ * 汎用ディレクトリ読み込みメソッド(同期)
+ * 読み込みに成功すればファイル名をキーにしたMapが返る
+ * 
+ * @param dirpath 読み込むディレクトリのパス
+ * @return 読み込んだファイルのMap
+ */
 function readDirFile(dirpath) {
     // ApplicationDataのパスを取得
     const pref_path = path.join(app.getPath('userData'), dirpath)
