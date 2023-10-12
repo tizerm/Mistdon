@@ -99,7 +99,7 @@ $(() => (async () => {
     $(document).on("click", "#__on_reply_close", 
         e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
     $(document).on("click", "#__on_search_close", 
-        e => $("#header>#pop_search_column").hide("slide", { direction: "right" }, 150));
+        e => $("#header>#pop_ex_timeline").hide("slide", { direction: "right" }, 150));
     $(document).on("click", "#__on_emoji_close", 
         e => $("#header>#pop_custom_emoji").hide("slide", { direction: "left" }, 150));
 
@@ -110,13 +110,13 @@ $(() => (async () => {
     $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
         last => last.delete((post, uuid) => {
             post.from_account.setPostAccount();
-            $("#__txt_postarea").val(post.content_text);
+            $("#__txt_postarea").val(post.original_text);
             $("#__txt_content_warning").val(post.cw_text);
             toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid);
         }), true));
     // オプションボタンイベント: 直前の投稿をコピー
     $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
-        $("#__txt_postarea").val(last.content_text);
+        $("#__txt_postarea").val(last.original_text);
         $("#__txt_content_warning").val(last.cw_text);
         toast("直前の投稿内容を再展開しました.", "done");
     }, false));
@@ -135,28 +135,43 @@ $(() => (async () => {
     // カラムに関するイベントはカラムクラスでバインド
     Column.bindEvent();
 
-    // 投稿右クリック時のコンテキストメニュー表示イベント
-    $("#header>#pop_context_menu>.ui_menu>li ul").each((index, elm) => {
+    // 右クリック時のコンテキストメニュー表示イベント
+    $("#header>.pop_context>.ui_menu>li ul").each((index, elm) => {
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
         if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
         else $(elm).html(Account.createContextMenuAccountList());
     });
-    $("#header>#pop_context_menu>.ui_menu").menu();
-    $(document).on("contextmenu", "#columns>table>tbody>tr>.column_td>ul>li", e => {
+    // 投稿を右クリックしたときのコンテキストメニュー
+    $("#header>.pop_context>.ui_menu").menu();
+    $(document).on("contextmenu", "ul.__context_posts>li", e => {
+        if ($(e.target).closest("li").is(".short_userinfo")) return; // 簡易プロフィールは無視
+        if ($(e.target).closest("table").is("#auth_account_table")) // 認証アカウント一覧のときは削除可能にする
+            $("#header>#pop_context_menu .__menu_post_del").removeClass("ui-state-disabled");
+        else $("#header>#pop_context_menu .__menu_post_del").addClass("ui-state-disabled");
         $("#header>#pop_context_menu")
-            .css('top', e.pageY + 'px')
-            .css('left', (e.pageX - 48) + 'px')
+            .css('top', (e.pageY - 8) + 'px')
+            .css('left', (e.pageX - 64) + 'px')
             .show("slide", { direction: "up" }, 100);
         $("#header>#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"));
         return false;
     });
+    // ユーザー詳細を右クリックしたときのコンテキストメニュー
+    $(document).on("contextmenu", "ul.__context_user>li, li.short_userinfo", e => {
+        $("#header>#pop_context_user")
+            .css('top', (e.pageY - 8) + 'px')
+            .css('left', (e.pageX - 64) + 'px')
+            .show("slide", { direction: "up" }, 100);
+        $("#header>#pop_context_user").attr("name", $(e.target).closest("td").attr("id"));
+        return false;
+    });
     $("body").on("click", e => {
         $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
+        $("#header>#pop_context_user").hide("slide", { direction: "up" }, 100);
         if (!$(e.target).is("#header>#head_postarea .posticon")) 
             // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
             $("#header>#pop_postuser").hide("slide", { direction: "up" }, 150);
     });
-    // コンテキストメニュー項目クリック時処理
+    // コンテキストメニュー(投稿系)項目クリック時処理
     $(document).on("click", "#header>#pop_context_menu>.ui_menu>li ul>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"));
         $("#header>#pop_context_menu").hide("slide", { direction: "up" }, 100);
@@ -165,8 +180,26 @@ $(() => (async () => {
             target_url: $("#header>#pop_context_menu").attr("name")
         });
     });
+    // コンテキストメニュー「詳細表示」クリック時処理
+    $(document).on("click", "#header>#pop_context_menu>.ui_menu .__menu_post_detail", e => Status
+            .getStatus($("#header>#pop_context_menu").attr("name")).then(post => post.createDetailWindow()));
+    // コンテキストメニュー「URLをコピー」クリック時処理
+    $(document).on("click", "#header>#pop_context_menu>.ui_menu .__menu_post_url",
+        e => navigator.clipboard.writeText($("#header>#pop_context_menu").attr("name"))
+            .then(() => toast(`投稿のURLをコピーしました.`, "done")));
+    // コンテキストメニュー(ユーザー系)項目クリック時処理
+    $(document).on("click", "#header>#pop_context_user>.ui_menu>li ul>li", e => {
+        const target_account = Account.get($(e.target).closest("li").attr("name"));
+        $("#header>#pop_context_user").hide("slide", { direction: "up" }, 100);
+        target_account.userAction({
+            target_mode: $(e.target).closest("ul").attr("id"),
+            target_user: $("#header>#pop_context_user").attr("name")
+        });
+    });
     // ナビゲーション-検索ボタンクリック時処理
     $("#navi .navi_search").on("click", e => createSearchWindow());
+    // ナビゲーション-全体プロフィールボタンクリック時処理
+    $("#navi .navi_show_profile").on("click", e => Account.createProfileTimeline());
     // ナビゲーション-絵文字キャッシュクリアボタンクリック時処理
     $("#navi .navi_reset_emoji").on("click", e => dialog({
         type: 'confirm',
@@ -181,6 +214,19 @@ $(() => (async () => {
     }));
     // 検索処理実行
     $(document).on("click", "#__on_search", e => Column.search());
+    // プロフィールウィンドウ-ピンどめを閉じる
+    $(document).on("click", "#pop_ex_timeline .pinned_block>h4", e => {
+        const btn = $(e.target)
+        if (btn.is(".closed")) { // 既に閉じていた場合は開く
+            btn.removeClass("closed")
+            btn.next().css('height', 'calc((100vh - 310px) * 0.2)')
+            btn.closest("td").find(".posts").css('height', 'calc((100vh - 310px) * 0.6)')
+        } else { // 開いている場合は閉じる
+            btn.addClass("closed")
+            btn.next().css('height', '32px')
+            btn.closest("td").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
+        }
+    });
     // 通知ボタンクリック時
     $(document).on("click", ".__on_show_notifications", e => {
         $(".__on_show_notifications").text("0");

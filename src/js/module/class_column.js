@@ -295,7 +295,7 @@ class Column {
                     <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                     <span class="loading_text">Now Loading...</span>
                 </div>
-                <ul></ul>
+                <ul class="__context_posts"></ul>
             </td>
         `
         // テーブルにバインド(対象が複数に渡るので一度バインドしてから表示制御)
@@ -319,7 +319,7 @@ class Column {
      */
     static bindEvent() {
         // コンテンツ本文: リンクを外部ブラウザで開く
-        $(document).on("click", ".content>.main_content a", e => {
+        $(document).on("click", ".content>.main_content a, .prof_field a", e => {
             const url = $(e.target).closest("a").attr("href")
             window.accessApi.openExternalBrowser(url)
             // リンク先に飛ばないようにする
@@ -348,13 +348,19 @@ class Column {
         // カラムボタン: リロード
         $(document).on("click", ".__on_column_reload",
             e => Column.get($(e.target).closest("td")).reload())
+        // ユーザーアドレス: リモートのユーザー情報を表示
+        $(document).on("click", ".__lnk_userdetail", e => (async () => {
+            const post = await Status.getStatus($(e.target).closest("li").attr("name"))
+            const user = await post.getAuthorInfo()
+            user.createDetailWindow()
+        })())
         // コンテンツ本文: 画像を拡大表示
         $(document).on("click", ".__on_media_expand", e => {
             // アプリケーションのアス比を計算
             const link = $(e.target).closest(".__on_media_expand")
 
-            // 動画ファイル
-            if (link.attr("type") == 'video') $("#header>#pop_expand_image").html(`
+            // 動画ファイル(GIFアニメも含む)
+            if (link.attr("type") == 'video' || link.attr("type") == 'gifv') $("#header>#pop_expand_image").html(`
                 <div class="expand_image_col">
                     <video src="${link.attr("href")}" autoplay controls loop></video>
                 </div>`).show("slide", { direction: "right" }, 80)
@@ -519,16 +525,16 @@ class Column {
      */
     static async search() {
         // 一旦中身を全消去する
-        $('#pop_search_column').find(".col_loading").remove()
-        $('#pop_search_column').find("ul").empty()
-        $('#pop_search_column').find("ul").before(`
+        $('#pop_ex_timeline').find(".col_loading").remove()
+        $('#pop_ex_timeline').find("ul").empty()
+        $('#pop_ex_timeline').find("ul").before(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
         `)
 
-        const query = $("#header>#pop_search_column #__txt_search_query").val()
+        const query = $("#header>#pop_ex_timeline #__txt_search_query").val()
         const search_col = Column.SEARCH_COL
         const rest_promises = []
         search_col.status_map = new Map()

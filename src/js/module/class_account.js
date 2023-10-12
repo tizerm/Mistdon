@@ -158,7 +158,7 @@ class Account {
                         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                     },
                     data: request_param
-                }).then(data => new Status(data, null, this).pushStack())
+                }).then(data => new Status(data, null, this).pushStack(arg.content))
                 break
             case 'Misskey': // Misskey
                 // 公開範囲を取得
@@ -194,7 +194,7 @@ class Account {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(request_param)
-                }).then(data => new Status(data.createdNote, null, this).pushStack())
+                }).then(data => new Status(data.createdNote, null, this).pushStack(arg.content))
                 break
             default:
                 break
@@ -362,6 +362,133 @@ class Account {
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)
         }).catch(jqXHR => toast("リアクションに失敗しました.", "error", toast_uuid))
+    }
+
+    async userAction(arg) {
+        let request_promise = null
+        let target_json = null
+        const toast_uuid = crypto.randomUUID()
+        toast("対象ユーザーを取得中です...", "progress", toast_uuid)
+        // ターゲットのユーザーデータを取得
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                request_promise = $.ajax({ // 検索から投稿を取得
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v2/search`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
+                    data: {
+                        "q": arg.target_user,
+                        "type": "accounts",
+                        "resolve": true
+                    }
+                }).then(data => { return data.accounts[0] })
+                    .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid))
+                break
+            case 'Misskey': // Misskey
+                request_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/users/show`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": this.pref.access_token,
+                        "username": arg.target_user.substring(1, arg.target_user.lastIndexOf('@')),
+                        "host": arg.target_user.substring(arg.target_user.lastIndexOf('@') + 1)
+                    })
+                }).then(data => { return data })
+                    .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid))
+                break
+            default:
+                break
+        }
+        // データが取得されるのを待ってtarget_jsonに代入
+        target_json = await request_promise
+        // ユーザーを取得できなかったらなにもしない
+        if (!target_json) return
+        const target_id = target_json.id
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                switch (arg.target_mode) {
+                    case '__menu_follow': // フォロー
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/follow`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をフォローしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_mute': // ミュート
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/mute`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をミュートしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_block': // ブロック
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/block`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をブロックしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                        break
+                    default:
+                        break
+                }
+                break
+            case 'Misskey': // Misskey
+                switch (arg.target_mode) {
+                    case '__menu_follow': // フォロー
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/following/create`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.pref.access_token,
+                                "userId": target_id
+                            })
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をフォローしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_mute': // ミュート
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/mute/create`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.pref.access_token,
+                                "userId": target_id
+                            })
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をミュートしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                        break
+                    case '__menu_block': // ブロック
+                        $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/blocking/create`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.pref.access_token,
+                                "userId": target_id
+                            })
+                        }).then(data => toast(`${this.full_address}から${arg.target_user}をブロックしました.`, "done", toast_uuid))
+                            .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                        break
+                    default:
+                        break
+                }
+                break
+            default:
+                break
+        }
     }
 
     /**
@@ -588,12 +715,6 @@ class Account {
                     url: `https://${this.pref.domain}/api/v1/accounts/verify_credentials`,
                     dataType: "json",
                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                }).then(data => {
-                    return {
-                        'user_id': data.username,
-                        'username': data.display_name,
-                        'avatar_url': data.avatar
-                    }
                 })
                 break
             case 'Misskey': // Misskey
@@ -604,22 +725,17 @@ class Account {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify({ "i": this.pref.access_token })
-                }).then(data => {
-                    return {
-                        'user_id': data.username,
-                        'username': data.name,
-                        'avatar_url': data.avatarUrl
-                    }
                 })
                 break
             default:
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => { // 失敗したらnullを返す
-            toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
-            return null
-        })
+        return rest_promise.then(data => { return new User(data, this.pref.domain, this.pref.platform) })
+            .catch(jqXHR => { // 失敗したらnullを返す
+                toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
+                return null
+            })
     }
 
     /**
@@ -754,5 +870,55 @@ class Account {
             `
         })
         return html
+    }
+
+    static createProfileTimeline() {
+        let html = ''
+        Account.map.forEach((v, k) => html /* アカウント分のカラムを生成 */ += `
+            <td id="${k}" class="timeline column_profile">
+                <div class="col_loading">
+                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                    <span class="loading_text">Now Loading...</span>
+                </div>
+                <ul class="profile_header"></ul>
+                <ul class="profile_detail"></ul>
+                <div class="pinned_block post_div">
+                    <h4>ピンどめ</h4>
+                    <ul class="pinned_post __context_posts"></ul>
+                </div>
+                <div class="posts_block post_div">
+                    <h4>投稿一覧</h4>
+                    <ul class="posts __context_posts"></ul>
+                </div>
+            </td>
+        `)
+        // 先に表示フレームだけ生成
+        $("#header>#pop_ex_timeline").html(`
+            <div class="account_timeline">
+                <table id="auth_account_table"><tbody>
+                    <tr>${html}</tr>
+                </tbody></table>
+            </div>
+            <button type="button" id="__on_search_close">×</button>
+        `).show("slide", { direction: "right" }, 150)
+
+        Account.map.forEach((v, k) => v.getInfo().then(detail => {
+            const column = $(`#header>#pop_ex_timeline>.account_timeline td[id="${k}"]`)
+
+            // ロード待ち画面を消してユーザー情報のプロフィール部分を生成
+            column.find(".col_loading").remove()
+            column.find(".profile_header").html(detail.header_element)
+            column.find(".profile_detail").html(detail.profile_element)
+
+            // ユーザーの投稿を取得
+            detail.getPost(v).then(posts => posts.forEach(p => column.find(".posts").append(p.element)))
+            detail.getPinnedPost(v).then(posts => {
+                if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
+                else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
+                    column.find(".pinned_block").remove()
+                    column.find(".posts").css('height', 'calc((100vh - 310px) * 0.8)')
+                }
+            })
+        }))
     }
 }

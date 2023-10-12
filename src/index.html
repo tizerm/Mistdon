@@ -32,6 +32,8 @@
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
         <li><a class="navi_search" title="検索(β)"><img src="resources/ic_search.png" alt="検索"/></a></li>
+        <li><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"
+                ><img src="resources/ic_emorel.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
         <li><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"
                 ><img src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
@@ -93,7 +95,7 @@
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
-    <div id="pop_context_menu" name="{post_id}">
+    <div id="pop_context_menu" class="pop_context" name="{post_id}">
         <!-- hidden: 右クリックコンテキストメニュー -->
         <ul class="ui_menu">
             <li><div>リプライ/ツリー</div>
@@ -111,12 +113,29 @@
             <li><div>ブックマーク(Mastodon)</div>
                 <ul id="__menu_bookmark" name="Mastodon"></ul>
             </li>
+            <li class="__menu_post_detail"><div>詳細表示</div></li>
+            <li class="__menu_post_url"><div>URLをコピー</div></li>
+            <li class="__menu_post_del ui-state-disabled"><div>削除</div></li>
+        </ul>
+    </div>
+    <div id="pop_context_user" class="pop_context" name="{post_id}">
+        <!-- hidden: 右クリックコンテキストメニュー(ユーザー) -->
+        <ul class="ui_menu">
+            <li><div>フォロー</div>
+                <ul id="__menu_follow"></ul>
+            </li>
+            <li><div>ミュート</div>
+                <ul id="__menu_mute"></ul>
+            </li>
+            <li><div>ブロック</div>
+                <ul id="__menu_block"></ul>
+            </li>
         </ul>
     </div>
     <div id="pop_expand_image">
     <!-- hidden: 画像拡大表示 -->
     </div>
-    <div id="pop_search_column">
+    <div id="pop_ex_timeline">
     <!-- hidden: 拡張カラム -->
     </div>
     <div id="pop_extend_column">

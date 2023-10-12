@@ -4,18 +4,20 @@
  */
 function createSearchWindow() {
     // 検索カラムのDOM生成
-    $("#header>#pop_search_column").html(`
+    $("#header>#pop_ex_timeline").html(`
         <h2>Toot/Note検索</h2>
-        <div class="search_options">
-            <input type="text" id="__txt_search_query" class="__ignore_keyborad" placeholder="(検索語句を入力してEnterで検索)"/>
-            <button type="button" id="__on_search">search</button>
-        </div>
-        <div id="__search_timeline" class="timeline">
-            <div class="col_loading">
-                <img src="resources/illust/il_done.png" alt="done"/><br/>
-                <span class="loading_text">検索結果がここに表示されます。</span>
+        <div class="search_timeline">
+            <div class="search_options">
+                <input type="text" id="__txt_search_query" class="__ignore_keyborad" placeholder="(検索語句を入力してEnterで検索)"/>
+                <button type="button" id="__on_search">search</button>
             </div>
-            <ul></ul>
+            <div id="__search_timeline" class="timeline">
+                <div class="col_loading">
+                    <img src="resources/illust/il_done.png" alt="done"/><br/>
+                    <span class="loading_text">検索結果がここに表示されます。</span>
+                </div>
+                <ul class="search_ul __context_posts"></ul>
+            </div>
         </div>
         <button type="button" id="__on_search_close">×</button>
     `).show("slide", { direction: "right" }, 150, () => $("#__txt_search_query").focus())
