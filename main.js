@@ -8,6 +8,7 @@ const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
+const stateKeeper = require('electron-window-state')
 
 // アプリ保持用設定データの管理
 var pref_accounts = null
@@ -265,7 +266,9 @@ async function writePrefCols(event, json_data) {
                 'socket_url': socket_url,
                 'query_param': query_param,
                 'socket_param': socket_param,
-                'exclude_reblog': tl.exclude_reblog
+                'exclude_reblog': tl.exclude_reblog,
+                'expand_cw': tl.expand_cw,
+                'expand_media': tl.expand_media
             })
         })
         // カラムリストに追加
@@ -479,11 +482,17 @@ function notification(event, arg) {
  * メインウィンドウ生成処理
  */
 const createWindow = () => {
+    let windowState = stateKeeper({
+        defaultWidth: 1920,
+        defaultHeight: 1080
+    })
     const win = new BrowserWindow({
-        width: 1920,
-        height: 1080,
+        x: windowState.x,
+        y: windowState.y,
+        width: windowState.width,
+        height: windowState.height,
         webPreferences: {
-            //devTools: false,
+            devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -491,8 +500,10 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    //win.setMenuBarVisibility(false)
+    win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
+
+     windowState.manage(win)
 }
 
 /**

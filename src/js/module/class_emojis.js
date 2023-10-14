@@ -94,7 +94,7 @@ class Emojis {
     replace(text) {
         if (this.cache_flg) { // アプリケーションキャッシュの絵文字データの場合
             if (!text) return ""
-            return text.replace(new RegExp(':[a-zA-z0-9_]+:', 'g'), match => {
+            return text.replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), match => {
                 const target = this.emoji_map.get(match)
                 if (target) return `<img src="${target.url}" class="inline_emoji"/>`
                 else return match
@@ -102,10 +102,58 @@ class Emojis {
         } else { // 投稿データに付随してきた絵文字データの場合
              // 文字の入力がない場合は空文字を返却
             if (!text) return ""
-            this.list.forEach(emoji => text = text.replace(
-                new RegExp(`:${emoji.shortcode}:`, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`))
-            return text
+            return this.list.reduce((str, emoji) => str.replace(
+                new RegExp(`:${emoji.shortcode}:`, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
         }
+    }
+
+    /**
+     * #StaticMethod
+     * 引数の文字列に含まれる絵文字ショートコードをサーバーから取得して絵文字に置換する
+     * (※Misskey専用機能)
+     * 
+     * @param arg パラメータオブジェクト
+     */
+    static async replaceAsync(arg) {
+        const host = arg.host
+        let text = arg.text
+        if (!text) return ""
+
+        // 文章中に存在するショートコードを抽出
+        const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+:', 'g'))
+        if (!shortcodes) return text // 絵文字がない場合はそのまま返却
+        const emoji_promises = []
+        shortcodes.map(code => code.substring(1, code.length -1))
+            .forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
+                    type: "POST",
+                    url: `https://${host}/api/emoji`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "name": code })
+                }).then(data => { return {
+                    shortcode: `:${data.name}:`,
+                    url: data.url
+                }})))
+        // 取得に成功したショートコードを抜き出して置換処理を実行
+        return await Promise.allSettled(emoji_promises).then(results => {
+            return results.filter(res => res.status == 'fulfilled').map(res => res.value)
+                .reduce((str, emoji) => str.replace(
+                    new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
+        })
+    }
+
+    /**
+     * #StaticMethod
+     * 指定したDOMのカスタム絵文字ショートコードを非同期で絵文字に置換する
+     * 
+     * @param jqelm 置換対象のテキストのあるjQueryオブジェクト
+     * @param host ホストアドレス
+     */
+    static async replaceDomAsync(jqelm, host) {
+        jqelm.each((index, elm) => Emojis.replaceAsync({
+            text: $(elm).html(),
+            host: host
+        }).then(text => $(elm).html(text)))
     }
 }
 

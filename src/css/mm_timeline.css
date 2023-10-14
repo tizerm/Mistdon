@@ -32,17 +32,17 @@
     top: 0px;
     left: 76px;
 }
-#header>#head_postarea .visibility_icon>.__lnk_visibility>img {
+.visibility_icon>.__lnk_visibility>img {
     display: inline-block;
     border-radius: 8px;
     width: 48px;
     height: 48px;
 }
-#header>#head_postarea .visibility_icon>.__lnk_visibility:hover>img {
+.visibility_icon>.__lnk_visibility:hover>img {
     background-color: #225588;
     cursor: pointer;
 }
-#header>#head_postarea .visibility_icon>.__lnk_visibility>img.selected {
+.visibility_icon>.__lnk_visibility>img.selected {
     background-color: #3388cc;
 }
 #header>#head_postarea .cw_block {
@@ -276,6 +276,7 @@
 }
 
 #header>#pop_extend_column>.reply_col,
+#header>#pop_extend_column>.quote_col,
 #header>#pop_extend_column>.reaction_col,
 #header>#pop_ex_timeline>.search_timeline {
     opacity: 0.95;
@@ -286,6 +287,7 @@
     width: 480px;
 }
 #header>#pop_extend_column>.reply_col>h2,
+#header>#pop_extend_column>.quote_col>h2,
 #header>#pop_extend_column>.reaction_col>h2,
 #header>#pop_extend_column>.post_detail_col>h2,
 #header>#pop_ex_timeline h2 {
@@ -317,7 +319,21 @@
 #header>#pop_ex_timeline .search_ul {
     height: calc(100vh - 224px);
 }
-#header>#pop_extend_column>.reply_col #__txt_replyarea {
+#header>#pop_extend_column>.quote_col .visibility_icon {
+    text-align: center;
+}
+#header>#pop_extend_column>.quote_col #__txt_quote_cw {
+    position: relative;
+    font-family: "メイリオ", sans-selif;
+    text-align: left;
+    background-color: #434343;
+    border-radius: 4px;
+    border: solid 1px #888888;
+    color: #ffffff;
+    width: 100%;
+}
+#header>#pop_extend_column>.reply_col #__txt_replyarea,
+#header>#pop_extend_column>.quote_col #__txt_quotearea {
     display: block;
     padding: 2px;
     font-family: "メイリオ", sans-selif;
@@ -331,6 +347,10 @@
 #header>#pop_extend_column>.reply_col ul {
     overflow-y: auto;
     height: calc(100vh - 320px);
+}
+#header>#pop_extend_column>.quote_col ul {
+    overflow-y: auto;
+    height: calc(100vh - 480px);
 }
 #header>#pop_extend_column>.reaction_col ul {
     overflow-y: auto;
@@ -684,7 +704,7 @@
 
 .timeline ul>li>.user>.userid {
     display: block;
-    color: #cccccc;
+    color: #bbbbbb;
     font-size: 14px;
     width: calc(100% - 60px);
     overflow: hidden;
@@ -694,6 +714,10 @@
 .timeline ul>li>.user>.userid a {
     text-decoration: underline;
     cursor: pointer;
+}
+.timeline ul>li>.user>.userid a:hover {
+    text-decoration: none;
+    color: #eeeeee;
 }
 .timeline ul>li>.user>.visibilityicon {
     position: absolute;

@@ -119,7 +119,9 @@
                     'key_address': acc_address,
                     'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
                     'account': accounts.get(acc_address),
-                    'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked")
+                    'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
+                    'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
+                    'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
                 });
             });
             // 各フォームの情報をJSONでリストに追加

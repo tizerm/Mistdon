@@ -349,11 +349,9 @@ class Column {
         $(document).on("click", ".__on_column_reload",
             e => Column.get($(e.target).closest("td")).reload())
         // ユーザーアドレス: リモートのユーザー情報を表示
-        $(document).on("click", ".__lnk_userdetail", e => (async () => {
-            const post = await Status.getStatus($(e.target).closest("li").attr("name"))
-            const user = await post.getAuthorInfo()
-            user.createDetailWindow()
-        })())
+        $(document).on("click", ".__lnk_userdetail", e => User.getByAddress($(e.target).attr("name"))
+            .then(user => user.createDetailWindow())
+            .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error")))
         // コンテンツ本文: 画像を拡大表示
         $(document).on("click", ".__on_media_expand", e => {
             // アプリケーションのアス比を計算

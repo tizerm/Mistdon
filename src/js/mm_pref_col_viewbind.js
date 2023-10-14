@@ -97,7 +97,11 @@ function createTimelineOptionLine(arg) {
                 </div>
                 <div class="lbl_checkbox">
                     <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"${arg.value?.exclude_reblog ? ' checked' : ''}/>
-                    <label for="xr_${uuid}">ブースト/リノートを非表示</label>
+                    <label for="xr_${uuid}">ブースト/リノートを非表示</label><br/>
+                    <input type="checkbox" id="xcw_${uuid}" class="__chk_expand_cw"${arg.value?.expand_cw ? ' checked' : ''}/>
+                    <label for="xcw_${uuid}">デフォルトでCWを展開</label><br/>
+                    <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"${arg.value?.expand_media ? ' checked' : ''}/>
+                    <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
                 </div>
                 <div class="foot_button">
                     <button type="button" class="__btn_del_tl">タイムラインを削除</button>

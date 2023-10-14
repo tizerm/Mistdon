@@ -74,7 +74,7 @@ button[disabled] {
 }
 #navi>ul>li {
     list-style-type: none;
-    margin: 24px 0px;
+    margin: 18px 0px;
     padding: 0px;
 }
 #navi>ul>li>a:hover>img {

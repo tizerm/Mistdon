@@ -186,8 +186,10 @@ class Account {
                 }
                 // CWがある場合はCWテキストも追加
                 if (arg.cw_text) request_param.cw = arg.cw_text
-                // リプライの場合はリプライ先ツートIDを設定
+                // リプライの場合はリプライ先ノートIDを設定
                 if (arg.reply_id) request_param.replyId = arg.reply_id
+                // 引用の場合は引用ノートIDを設定
+                if (arg.quote_id) request_param.renoteId = arg.quote_id
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
@@ -312,6 +314,10 @@ class Account {
                         }).then(data => toast("投稿をリノートしました.", "done", toast_uuid))
                             .catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
                         break
+                    case '__menu_quote': // 引用
+                        target_post.createQuoteWindow()
+                        toast(null, "hide", toast_uuid)
+                        break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
                             type: "POST",
@@ -364,6 +370,12 @@ class Account {
         }).catch(jqXHR => toast("リアクションに失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントからユーザーに対するフォロー/ミュート/ブロックを実行する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     async userAction(arg) {
         let request_promise = null
         let target_json = null
@@ -407,88 +419,140 @@ class Account {
         // ユーザーを取得できなかったらなにもしない
         if (!target_json) return
         const target_id = target_json.id
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                switch (arg.target_mode) {
-                    case '__menu_follow': // フォロー
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/follow`,
-                            dataType: "json",
-                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をフォローしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
-                        break
-                    case '__menu_mute': // ミュート
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/mute`,
-                            dataType: "json",
-                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をミュートしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
-                        break
-                    case '__menu_block': // ブロック
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/block`,
-                            dataType: "json",
-                            headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をブロックしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
-                        break
-                    default:
-                        break
-                }
+        // 一旦toastを消去
+        toast(null, "hide", toast_uuid)
+
+        // ダイアログを出すためモードから先に判定
+        switch (arg.target_mode) {
+            case '__menu_follow': // フォロー
+                dialog({
+                    type: 'confirm',
+                    title: "ユーザーフォロー",
+                    text: `${arg.target_user}を${this.full_address}からフォローします。<br/>よろしいですか？<br/>`,
+                    accept: () => { // OKボタン押下時の処理
+                        switch (this.platform) {
+                            case 'Mastodon': // Mastodon
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/follow`,
+                                    dataType: "json",
+                                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                                }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                                break
+                            case 'Misskey': // Misskey
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/following/create`,
+                                    dataType: "json",
+                                    headers: { "Content-Type": "application/json" },
+                                    data: JSON.stringify({
+                                        "i": this.pref.access_token,
+                                        "userId": target_id
+                                    })
+                                }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                                break
+                            default:
+                                break
+                        }
+                    }
+                })
                 break
-            case 'Misskey': // Misskey
-                switch (arg.target_mode) {
-                    case '__menu_follow': // フォロー
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/following/create`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": this.pref.access_token,
-                                "userId": target_id
-                            })
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をフォローしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
-                        break
-                    case '__menu_mute': // ミュート
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/mute/create`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": this.pref.access_token,
-                                "userId": target_id
-                            })
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をミュートしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
-                        break
-                    case '__menu_block': // ブロック
-                        $.ajax({
-                            type: "POST",
-                            url: `https://${this.pref.domain}/api/blocking/create`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": this.pref.access_token,
-                                "userId": target_id
-                            })
-                        }).then(data => toast(`${this.full_address}から${arg.target_user}をブロックしました.`, "done", toast_uuid))
-                            .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
-                        break
-                    default:
-                        break
-                }
+            case '__menu_mute': // ミュート
+                dialog({
+                    type: 'confirm',
+                    title: "ユーザーミュート",
+                    text: `${arg.target_user}を${this.full_address}からミュートします。<br/>よろしいですか？<br/>`,
+                    accept: () => { // OKボタン押下時の処理
+                        switch (this.platform) {
+                            case 'Mastodon': // Mastodon
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/mute`,
+                                    dataType: "json",
+                                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                                }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                                break
+                            case 'Misskey': // Misskey
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/mute/create`,
+                                    dataType: "json",
+                                    headers: { "Content-Type": "application/json" },
+                                    data: JSON.stringify({
+                                        "i": this.pref.access_token,
+                                        "userId": target_id
+                                    })
+                                }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                                break
+                            default:
+                                break
+                        }
+                    }
+                })
+                break
+            case '__menu_block': // ブロック
+                dialog({
+                    type: 'confirm',
+                    title: "ユーザーブロック",
+                    text: `${arg.target_user}を${this.full_address}からブロックします。<br/>
+                    よろしいですか？<br/><br/>……本当に？`,
+                    accept: () => { // OKボタン押下時の処理
+                        switch (this.platform) {
+                            case 'Mastodon': // Mastodon
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/block`,
+                                    dataType: "json",
+                                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                                }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                                break
+                            case 'Misskey': // Misskey
+                                $.ajax({
+                                    type: "POST",
+                                    url: `https://${this.pref.domain}/api/blocking/create`,
+                                    dataType: "json",
+                                    headers: { "Content-Type": "application/json" },
+                                    data: JSON.stringify({
+                                        "i": this.pref.access_token,
+                                        "userId": target_id
+                                    })
+                                }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
+                                    .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                                break
+                            default:
+                                break
+                        }
+                    }
+                })
                 break
             default:
                 break
         }
+    }
+
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントからURLの投稿を削除する
+     * 
+     * @param url 削除対象の投稿のURL
+     */
+    async deletePost(url) {
+        // URLから投稿を取得
+        let post = await Status.getStatus(url)
+        // アカウント情報をこのアカウントに書き換える
+        post.from_account = this
+        dialog({ // 削除確認ダイアログを表示
+            type: 'confirm',
+            title: "投稿削除",
+            text: `投稿を削除しますか？<br/><br/>${post.content_text}`,
+            // OKボタンで投稿を削除
+            accept: () => post.delete((post, uuid) => toast("投稿を削除しました.", "done", uuid))
+        })
     }
 
     /**
@@ -872,6 +936,10 @@ class Account {
         return html
     }
 
+    /**
+     * #StaticMethod
+     * アカウントのプロフィール一覧を生成するDOMを返却
+     */
     static createProfileTimeline() {
         let html = ''
         Account.map.forEach((v, k) => html /* アカウント分のカラムを生成 */ += `

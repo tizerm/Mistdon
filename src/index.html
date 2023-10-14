@@ -17,6 +17,7 @@
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_ui.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
+    <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
     <script type="text/javascript" src="js/module/class_column.js"></script>
@@ -33,7 +34,7 @@
         <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
         <li><a class="navi_search" title="検索(β)"><img src="resources/ic_search.png" alt="検索"/></a></li>
         <li><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"
-                ><img src="resources/ic_emorel.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
+                ><img src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
         <li><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"
                 ><img src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
@@ -104,6 +105,9 @@
             <li><div>ブースト/リノート</div>
                 <ul id="__menu_reblog"></ul>
             </li>
+            <li><div>引用(Misskey)</div>
+                <ul id="__menu_quote" name="Misskey"></ul>
+            </li>
             <li><div>お気に入り</div>
                 <ul id="__menu_favorite"></ul>
             </li>
@@ -115,10 +119,10 @@
             </li>
             <li class="__menu_post_detail"><div>詳細表示</div></li>
             <li class="__menu_post_url"><div>URLをコピー</div></li>
-            <li class="__menu_post_del ui-state-disabled"><div>削除</div></li>
+            <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
     </div>
-    <div id="pop_context_user" class="pop_context" name="{post_id}">
+    <div id="pop_context_user" class="pop_context" name="{user_id}">
         <!-- hidden: 右クリックコンテキストメニュー(ユーザー) -->
         <ul class="ui_menu">
             <li><div>フォロー</div>

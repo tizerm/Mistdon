@@ -34,9 +34,9 @@ $(() => (async () => {
     });
 
     // 公開範囲クリックイベント
-    $("#header>#head_postarea .__lnk_visibility").on("click", e => {
+    $(document).on("click", ".__lnk_visibility", e => {
         // 選択中のオプションにselectedクラスを付与
-        $(".__lnk_visibility>img").removeClass("selected");
+        $(e.target).closest(".visibility_icon").find("img").removeClass("selected");
         $(e.target).closest(".__lnk_visibility").find("img").addClass("selected");
     });
 
@@ -44,17 +44,26 @@ $(() => (async () => {
     $("#header>#head_postarea #on_custom_emoji").on("click", e => {
         // リプライウィンドウを開いている場合はリプライアカウントに合わせる
         if ($(".reply_col").is(":visible")) Account.get($("#__hdn_reply_account").val()).createEmojiList();
+        else if ($(".quote_col").is(":visible")) Account.get($("#__hdn_quote_account").val()).createEmojiList();
         else Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList();
     });
     // カスタム絵文字クリックイベント
     $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
-        const is_reply = $(".reply_col").is(":visible");
-        const target = is_reply ? $(".reply_col #__txt_replyarea") : $("#header #__txt_postarea");
+        let target = null;
+        let target_account = null;
+        if ($(".reply_col").is(":visible")) { // リプライウィンドウ
+            target = $(".reply_col #__txt_replyarea");
+            target_account = Account.get($("#__hdn_reply_account").val());
+        } else if ($(".quote_col").is(":visible")) { // 引用ウィンドウ
+            target = $(".quote_col #__txt_quotearea");
+            target_account = Account.get($("#__hdn_quote_account").val());
+        } else {
+            target = $("#header #__txt_postarea");
+            target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"));
+        }
         const cursor_pos = target.get(0).selectionStart;
         const target_text = target.val();
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name");
-        const target_account = is_reply ? Account.get($("#__hdn_reply_account").val())
-            : Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"));
         // Mastodonの場合前後にスペースを入れる
         if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `;
         target.val(target_text.substr(0, cursor_pos) + target_emoji + target_text.substr(cursor_pos, target_text.length));
@@ -81,6 +90,19 @@ $(() => (async () => {
         visibility_id: $("#__hdn_reply_visibility").val(), // 投稿元の公開範囲を継承する
         reply_id: $("#__hdn_reply_id").val(),
         // 投稿成功時処理(リプライウィンドウを閉じる)
+        success: () => {
+            $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
+            $("#__on_emoji_close").click();
+        }
+    }));
+
+    // 引用ウィンドウの投稿ボタンクリックイベント(引用投稿送信処理)
+    $(document).on("click", "#__on_quote_submit", e => Account.get($("#__hdn_quote_account").val()).post({
+        content: $("#__txt_quotearea").val(),
+        cw_text: $("#__txt_quote_cw").val(),
+        visibility_id: $("#header>#pop_extend_column .visibility_icon .selected").attr("id"),
+        quote_id: $("#__hdn_quote_id").val(),
+        // 投稿成功時処理(引用ウィンドウを閉じる)
         success: () => {
             $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
             $("#__on_emoji_close").click();
@@ -146,7 +168,8 @@ $(() => (async () => {
     $(document).on("contextmenu", "ul.__context_posts>li", e => {
         if ($(e.target).closest("li").is(".short_userinfo")) return; // 簡易プロフィールは無視
         if ($(e.target).closest("table").is("#auth_account_table")) // 認証アカウント一覧のときは削除可能にする
-            $("#header>#pop_context_menu .__menu_post_del").removeClass("ui-state-disabled");
+            $("#header>#pop_context_menu .__menu_post_del") // 削除クラスを消してnameにアカウントアドレスを付与
+                .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"));
         else $("#header>#pop_context_menu .__menu_post_del").addClass("ui-state-disabled");
         $("#header>#pop_context_menu")
             .css('top', (e.pageY - 8) + 'px')
@@ -187,6 +210,9 @@ $(() => (async () => {
     $(document).on("click", "#header>#pop_context_menu>.ui_menu .__menu_post_url",
         e => navigator.clipboard.writeText($("#header>#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")));
+    // コンテキストメニュー「削除」クリック時処理
+    $(document).on("click", "#header>#pop_context_menu>.ui_menu .__menu_post_del", e => Account
+        .get($(e.target).closest("li").attr("name")).deletePost($("#header>#pop_context_menu").attr("name")));
     // コンテキストメニュー(ユーザー系)項目クリック時処理
     $(document).on("click", "#header>#pop_context_user>.ui_menu>li ul>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"));
