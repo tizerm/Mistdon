@@ -10,6 +10,10 @@ Electronを使って開発しているMastodonとMisskeyがいっぺんに見ら
 <h3>Change Log</h3>
 
 <p>
+2023/10/15 v0.3.1 (beta)<br/>
+・主な機能はユーザー詳細表示、CW自動展開など<br/>
+・詳細はReleaseを見てね……<br/>
+<br/>
 2023/10/08 v0.2.1 (beta)<br/>
 ・主な機能はカスタム絵文字、動画再生、詳細表示など<br/>
 ・詳細はReleaseを見てね……<br/>
