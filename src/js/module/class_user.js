@@ -410,9 +410,11 @@ class User {
             if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
                 const host = this.host
                 Emojis.replaceDomAsync(column.find(".pinned_post .username"), host) // ユーザー名
-                Emojis.replaceDomAsync(column.find(".pinned_post .main_content"), host) // プロフィール文
+                Emojis.replaceDomAsync(column.find(".pinned_post .label_cw"), host) // CWテキスト
+                Emojis.replaceDomAsync(column.find(".pinned_post .main_content"), host) // 本文
                 Emojis.replaceDomAsync(column.find(".posts .username"), host) // ユーザー名
-                Emojis.replaceDomAsync(column.find(".posts .main_content"), host) // プロフィール文
+                Emojis.replaceDomAsync(column.find(".posts .label_cw"), host) // CWテキスト
+                Emojis.replaceDomAsync(column.find(".posts .main_content"), host) // 本文
             }
         }))()
     }

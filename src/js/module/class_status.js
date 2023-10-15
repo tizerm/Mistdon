@@ -517,7 +517,7 @@ class Status {
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${this.cw_text}</a>
+            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
         `; html += '<div class="main_content">'
 
         html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content)
@@ -810,6 +810,7 @@ class Status {
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.from_account.pref.domain
             Emojis.replaceDomAsync(parent_post.find(".username"), host) // ユーザー名
+            Emojis.replaceDomAsync(parent_post.find(".label_cw"), host) // CWテキスト
             Emojis.replaceDomAsync(parent_post.find(".main_content"), host) // 本文
             Emojis.replaceDomAsync(parent_post.find(".__yet_replace_reaction"), host) // 未置換のリアクション
         }

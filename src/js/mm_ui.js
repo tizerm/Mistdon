@@ -5,6 +5,9 @@
 ]
 
 $(() => {
+    // 背景をランダムに変更
+    if (Math.random() < 0.55) $("body").css("background-image", 'url("resources/illust/mitlin_back2.jpg")');
+    else $("body").css("background-image", 'url("resources/illust/mitlin_back1.jpg")');
     // ナビゲーションメニューホバー時にツールチップ表示
     $("#navi").tooltip({
         position: {
