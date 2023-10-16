@@ -83,7 +83,8 @@ function createTimelineOptionLine(arg) {
     arg.accounts?.forEach((v, k) => html += `
         <option value="${k}"${arg.value?.key_address == k ? ' selected' : ''}>${v.username} - ${k}</option>
     `);
-    html += `
+    html /* コンボの末尾にその他のインスタンスを追加 */ += `
+                        <option value="__external">その他のインスタンス</option>
                     </select>
                 </div>
                 <div class="lbl_tl_type">
