@@ -544,13 +544,20 @@
 }
 #columns>table .closed_col>h2>span {
     display: inline-block;
+    vertical-align: middle;
+}
+#columns>table .closed_col>h2>.unread {
     border-radius: 12px;
     background-color: rgba(255,255,255,0.2);
     margin-left: 32px;
     margin-bottom: 8px;
     padding: 2px 12px;
     font-size: 18px;
-    vertical-align: middle;
+}
+#columns>table .closed_col>h2>.speed {
+    margin-left: 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
 }
 #columns>table .timeline {
     position: relative;
@@ -566,12 +573,21 @@
     height: 58px;
 }
 
-#columns>table .timeline>.col_head>h2,
-#columns>table .timeline>.col_head>h3 {
+#columns>table .timeline>.col_head>h2 {
     margin: 0px;
     padding: 0px;
     text-align: left;
     font-family: Arial, "メイリオ", sans-selif;
+}
+#columns>table .timeline>.col_head>h6 {
+    position: absolute;
+    top: 20px;
+    right: 48px;
+    margin: 0px;
+    padding: 0px;
+    text-align: right;
+    font-family: Arial, "メイリオ", sans-selif;
+    font-size: 14px;
 }
 #columns>table .col_head>h2 {
     font-size: 20px;

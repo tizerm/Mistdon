@@ -171,6 +171,9 @@ class Column {
             this.index = pref.index
             this.status_map = new Map()
             this.unread = 0
+            this.counter = 0
+            this.ppm_que = []
+            this.timer_id = null
             this.flex = pref.d_flex
             this.open_flg = !pref.d_hide
             this.search_flg = false
@@ -269,7 +272,10 @@ class Column {
                         <img src="resources/ic_right.png" alt="カラムを開く"/>
                     </a>
                 </div>
-                <h2>${this.pref.label_head}<span></span></h2>
+                <h2>${this.pref.label_head}
+                    <span class="unread"></span>
+                    <span class="speed">0.0p/h</span>
+                </h2>
             </td>
         `; html /* 開いた状態のカラム */ += `
             <td id="${this.id}" class="timeline column_td">
@@ -278,6 +284,7 @@ class Column {
                     <div class="ic_column_cursor">
                         ${num_img}
                     </div>
+                    <h6>0.0p/h</h6>
                     <div class="col_action">
                         <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_column_warn"/>
                         <a class="__on_column_reload" title="カラムをリロード"
@@ -434,6 +441,8 @@ class Column {
                 $(`#${this.id}>.col_loading`).remove()
                 // ソートが終わったらタイムラインをDOMに反映
                 postlist.forEach(post => this.append(post))
+                // 流速タイマーをセット
+                this.initSpeedAnalyzer()
             } else { // すべてのカラムの取得に失敗した場合
                 $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
                 $(`#${this.id}>.col_loading>.loading_text`)
@@ -469,7 +478,8 @@ class Column {
             ul.prepend(post.element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
-            $(`#${this.id}_closed>h2>span`).text(++this.unread)
+            $(`#${this.id}_closed>h2>.unread`).text(++this.unread)
+            this.counter++
         })
 
         // 通知が来た場合は通知ウィンドウに追加
@@ -502,6 +512,27 @@ class Column {
             post.from_timeline.id_list = post
             callback()
         }
+    }
+
+    /**
+     * #Method
+     * タイムライン流速計測タイマーをセットする
+     */
+    async initSpeedAnalyzer() {
+        if (!this.timer_id) clearInterval(this.timer_id) // 実行中の場合は一旦削除
+        this.timer_id = setInterval(() => (async () => {
+            const ppm = this.counter
+            this.counter = 0 // 先にカウンターを0にリセット
+            this.ppm_que.push(ppm)
+            if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
+            // pph(post per hour)を計算
+            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
+            const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
+
+            const target = $(`#${this.id}`)
+            target.find(".col_head h6").html(insert_text)
+            target.prev().find("h2 .speed").html(insert_text)
+        })(), 60000) // 1分おきに実行
     }
 
     /**
@@ -589,7 +620,7 @@ class Column {
             const closed_col = target.prev()
             target.hide()
             this.unread = 0 // 未読数をリセット
-            closed_col.find("h2>span").empty()
+            closed_col.find("h2>.unread").empty()
             closed_col.show()
             this.open_flg = false
         } else {
