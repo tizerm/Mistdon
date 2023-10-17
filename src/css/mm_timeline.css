@@ -581,8 +581,8 @@
 }
 #columns>table .timeline>.col_head>h6 {
     position: absolute;
-    top: 20px;
-    right: 48px;
+    top: 24px;
+    right: 40px;
     margin: 0px;
     padding: 0px;
     text-align: right;
