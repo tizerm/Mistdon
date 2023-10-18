@@ -172,7 +172,6 @@ class User {
             .css('background-image', `url("${this.header_url}")`)
             .css('background-size', '420px auto')
             .css('background-position', 'center center')
-        jqelm.find('.detail_info').tooltip()
         return jqelm
     }
 
@@ -237,7 +236,21 @@ class User {
             .css('background-image', `url("${this.header_url}")`)
             .css('background-size', '480px auto')
             .css('background-position', 'center center')
-        jqelm.find('.detail_info').tooltip()
+        return jqelm
+    }
+
+    // Getter: インラインで名前だけ表示するネームタグ表示用DOM
+    get inline_nametag() {
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(`
+            <li class="user_nametag" name="${this.full_address}">
+                <div class="user">
+                    <img src="${this.avatar_url}" class="usericon"/>
+                    <h4 class="username">${this.username}</h4>
+                    <span class="userid">${this.full_address}</a>
+                </div>
+            </li>
+        `))
         return jqelm
     }
 
@@ -346,6 +359,60 @@ class User {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${this.full_address}の投稿の取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
+    }
+
+    getFFUsers(account, type) {
+        let api_url = null
+        let rest_promise = null
+        switch (account.platform) {
+            case 'Mastodon': // Mastodon
+                if (type == 'follows') api_url = `https://${this.host}/api/v1/accounts/${this.id}/following`
+                else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: api_url,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: { "limit": 80 }
+                }).then(data => {
+                    return (async () => {
+                        const users = []
+                        data.forEach(u => users.push(new User(data, this.host, account.platform)))
+                        return users
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                if (type == 'follows') api_url = `https://${this.host}/api/users/following`
+                else if (type == 'followers') api_url = `https://${this.host}/api/users/followers`
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: api_url,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": account.pref.access_token,
+                        "userId": this.id,
+                        "limit": 80
+                    })
+                }).then(data => {
+                    return (async () => {
+                        const users = []
+                        data.forEach(u => users.push(new User(data, this.host, account.platform)))
+                        return users
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
             return Promise.reject(jqXHR)
         })
     }
