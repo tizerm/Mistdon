@@ -96,6 +96,14 @@ class Account {
     }
 
     /**
+     * #StaticMethod
+     * アカウントデータが存在しない場合trueを返す
+     */
+    static isEmpty() {
+        return Account.map.size == 0
+    }
+
+    /**
      * #Method
      * このアカウントを投稿先アカウントに設定
      */
@@ -735,18 +743,30 @@ class Account {
                 })
                 break
             case 'Misskey': // Misskey
-                // カスタム絵文字を取得して整形するプロセスをpromiseとして返却
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/emojis`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ })
-                }).then(data => {
+                // v11以下と最新で絵文字を取得するエンドポイントが違うので動いたやつで取得
+                rest_promise = Promise.any([
+                    $.ajax({ // 最新バージョン(v2023.9.3)
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/emojis`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ })
+                    }).then(data => { return data.emojis }),
+                    $.ajax({ // v11以下(Misskey.devなど)
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/meta`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ detail: false })
+                    }).then(data => { // emojis entityがあればそのまま返却、なければ新版なのでreject
+                        if (data.emojis) return data.emojis
+                        else return Promise.reject('not exist emojis in /api/meta.')
+                    })
+                ]).then(data => {
                     return (async () => {
                         // 絵文字一覧データをメインプロセスにわたす形に整形する
                         const emojis = []
-                        data.emojis.forEach(e => emojis.push({
+                        data.forEach(e => emojis.push({
                             "name": e.aliases[0],
                             "shortcode": `:${e.name}:`,
                             "url": e.url

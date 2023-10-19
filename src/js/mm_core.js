@@ -1,27 +1,30 @@
 ﻿// HTMLロード時に非同期で実行
 $(() => (async () => {
-    { // 保険用にアカウント情報とカラム情報が読めてなかったら一時停止
-        let unread_flg = false;
-        if (!await window.accessApi.readPrefAccs()) unread_flg = true;
-        if (!await window.accessApi.readPrefCols()) unread_flg = true;
-        if (unread_flg) {
-            // まだ設定ファイルを作っていない場合は初期メッセージを表示
-            $("#columns").prepend(`
-                <div class="__initial_message">
-                    アカウントの認証とカラムの設定からはじめよう！<br/>
-                    わからないときは左下の？をクリックするかF1キーでヘルプを表示できます。
-                </div>
-            `);
-            return;
-        }
-        await window.accessApi.readCustomEmojis()
+    // 設定ファイル不在での起動制御
+    await window.accessApi.readPrefAccs();
+    await window.accessApi.readPrefCols();
+    await window.accessApi.readCustomEmojis();
+
+    if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
+        $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
+        $("#header>h1").text('認証されているアカウントがありません。 - Mistdon')
+    } else Account.get(0).setPostAccount();
+    if (Column.isEmpty()) { // カラムが未登録(この場合はストップする)
+        $("#columns").prepend(`
+            <div class="__initial_message">
+                アカウントの認証 <img src="resources/ic_auth.png" class="ic_inline"/>
+                とカラムの設定 <img src="resources/ic_pref.png" class="ic_inline"/>
+                からはじめよう！<br/>
+                わからないときは左下の？をクリックするかF1キーでヘルプを表示できます。
+            </div>
+        `);
+        return;
     }
 
     /*============================================================================================================*/
 
-    // 投稿先アカウントの初期設定とカスタム絵文字のキャッシュ確認
+    // カスタム絵文字のキャッシュ確認
     Account.cacheEmojis();
-    Account.get(0).setPostAccount();
 
     // 投稿アイコンクリック時のメニュー生成と表示(クリックイベント)
     $("#header>#pop_postuser").html(Account.createPostAccountList());

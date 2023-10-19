@@ -30,7 +30,8 @@ class Timeline {
      * (返り値は取得データのpromise)
      */
     getTimeline() {
-        if (!this.target_account) return
+        // ターゲットのアカウントが存在しない場合はreject
+        if (!this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
         this.pref.query_param.limit = 30
         let rest_promise = null
@@ -245,6 +246,14 @@ class Column {
      */
     static each(callback) {
         Column.map.forEach((v, k) => callback(v))
+    }
+
+    /**
+     * #StaticMethod
+     * カラムデータが存在しない場合trueを返す
+     */
+    static isEmpty() {
+        return Column.map.size == 0
     }
 
     /**
