@@ -950,13 +950,17 @@ class Account {
                 </div>
                 <ul class="profile_header"></ul>
                 <ul class="profile_detail"></ul>
-                <div class="pinned_block post_div">
-                    <h4>ピンどめ</h4>
-                    <ul class="pinned_post __context_posts"></ul>
+                <div class="user_post_elm">
+                    <div class="pinned_block post_div">
+                        <h4>ピンどめ</h4>
+                        <ul class="pinned_post __context_posts"></ul>
+                    </div>
+                    <div class="posts_block post_div">
+                        <h4>投稿一覧</h4>
+                        <ul class="posts __context_posts"></ul>
+                    </div>
                 </div>
-                <div class="posts_block post_div">
-                    <h4>投稿一覧</h4>
-                    <ul class="posts __context_posts"></ul>
+                <div class="user_ff_elm">
                 </div>
             </td>
         `)
@@ -969,6 +973,7 @@ class Account {
             </div>
             <button type="button" id="__on_search_close">×</button>
         `).show("slide", { direction: "right" }, 150)
+        $("#header>#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 
         Account.map.forEach((v, k) => v.getInfo().then(detail => {
             const column = $(`#header>#pop_ex_timeline>.account_timeline td[id="${k}"]`)

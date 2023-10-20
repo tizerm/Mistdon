@@ -485,5 +485,19 @@ class User {
             }
         }))()
     }
+
+    createFFTaglist(type) {
+        const target = $(`#header>#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.find(".user_post_elm").hide()
+        target.find(".user_ff_elm").html(`
+            <ul class="ff_short_profile">
+                <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>
+            </ul>
+            <ul class="ff_nametags"></ul>
+        `).show()
+
+        this.getFFUsers(Account.get(this.full_address), type).then(data => (async () => data.forEach(
+            u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag)))())
+    }
 }
 

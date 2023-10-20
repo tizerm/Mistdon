@@ -253,6 +253,9 @@ $(() => (async () => {
             btn.closest("td").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
         }
     });
+    // プロフィールウィンドウ-フォロー数表示
+    $(document).on("click", "#pop_ex_timeline .profile_header>.header_userinfo .count_follow", e => {
+    });
     // 通知ボタンクリック時
     $(document).on("click", ".__on_show_notifications", e => {
         $(".__on_show_notifications").text("0");
