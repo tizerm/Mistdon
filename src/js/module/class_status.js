@@ -713,7 +713,6 @@ class Status {
         replyarea.get(0).setSelectionRange(500, 500)
     }
 
-    
     /**
      * #Method
      * この投稿を引用した投稿するための画面を表示

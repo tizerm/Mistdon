@@ -83,7 +83,7 @@ $(() => {
  * (動的に生成する関係で後付しないと動かないので関数化)
  */
 function setColorPalette(target) {
-    if (target) {
+    if (target) { // 付与先のターゲットが指定されている場合は指定先にあるカラーパレットにだけセット
         target.find(".__pull_color_palette")
             .after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
         target.find(".__pull_color_palette+.__on_call_palette").tooltip({
@@ -173,7 +173,7 @@ function toast(text, type, progress_id) {
         // 実行中トースト以外は3秒後に消去する
         if (type == 'error') {
             added.addClass("toast_error");
-            prependNotification(text, true);
+            //prependNotification(text, true);
         } else added.addClass("toast_done");
         // 3秒後に隠して要素自体を削除
         (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()

@@ -164,6 +164,14 @@
             return false;
         }
     });
+    // ショートカットキーバインド(引用フォーム内)
+    $(document).on("keydown", "#__txt_quotearea", e => {
+        // Ctrl+EnterかShift+Enterで投稿処理実行
+        if ((event.ctrlKey || event.metaKey || event.shiftKey) && e.keyCode === 13) {
+            $("#__on_quote_submit").click();
+            return false;
+        }
+    });
     // ショートカットキーバインド(検索フォーム内)
     $(document).on("keydown", "#__txt_search_query", e => {
         // Enterで検索処理実行

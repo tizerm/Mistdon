@@ -15,6 +15,7 @@
 }
 
 #columns input, #columns select {
+    border-radius: 4px;
     background-color: #4f4f4f;
     color: #ffffff;
     border: solid 1px #ffffff;
@@ -46,7 +47,6 @@
     font-weight: bold;
 }
 .timeline select {
-    border-radius: 4px;
     padding: 2px 8px;
     width: 100%;
 }
@@ -76,18 +76,33 @@
     padding: 8px 24px;
     background-color: #808080;
 }
-.timeline>ul>li>h4>.tl_color {
-    position: absolute;
-    right: 24px;
-    top: 8px;
-}
-
 .timeline>ul>li>.tl_option {
     font-size: 14px;
     margin: 6px 12px;
 }
+.timeline>ul>li>.tl_option label {
+    font-size: 13px;
+}
 .timeline>ul>li>.tl_option>div {
     margin: 12px 0px;
+}
+.timeline>ul>li>.tl_option .__txt_external_instance {
+    width: calc(100% - 72px);
+}
+.timeline>ul>li>.tl_option .lbl_external_instance>.instance_info {
+    background-color: rgba(255,255,255,0.08);
+    background-size: auto 64px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 12px;
+    margin: 6px 0px;
+    padding: 4px;
+    font-size: 13px;
+    text-align: center;
+}
+.timeline>ul>li>.tl_option .lbl_external_instance>.color_info {
+    font-size: 13px;
+    text-align: right;
 }
 .timeline>ul>li>.tl_option>.foot_button {
     text-align: right;

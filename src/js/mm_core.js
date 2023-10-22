@@ -5,6 +5,33 @@ $(() => (async () => {
     await window.accessApi.readPrefCols();
     await window.accessApi.readCustomEmojis();
 
+    // 通知ボタンクリック時
+    /*
+    $(document).on("click", ".__on_show_notifications", e => {
+        $(".__on_show_notifications").text("0");
+        $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
+    });//*/
+    // キーボードショートカット早見表を表示(これはユーザー有無に関わらず常にイベント登録)
+    $("#navi #on_help_keybind").on("click", e => {
+        // ヘルプウィンドウのDOM生成
+        const jqelm = $($.parseHTML(`
+            <div class="help_col">
+                <h2>キーボードショートカット早見表</h2>
+                <div class="help_content"></div>
+                <button type="button" id="__on_help_close">×</button>
+            </div>
+        `))
+        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $.ajax({
+            url: "help/help_keybind.html",
+            cache: false
+        }).then(data => {
+            $.each($.parseHTML(data), (index, value) => {
+                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
+            });
+        });
+    });
+
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
         $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
         $("#header>h1").text('認証されているアカウントがありません。 - Mistdon')
@@ -258,31 +285,6 @@ $(() => (async () => {
     });
     // プロフィールウィンドウ-フォロー数表示
     $(document).on("click", "#pop_ex_timeline .profile_header>.header_userinfo .count_follow", e => {
-    });
-    // 通知ボタンクリック時
-    $(document).on("click", ".__on_show_notifications", e => {
-        $(".__on_show_notifications").text("0");
-        $("#pop_notification_console").toggle("slide", { direction: "down" }, 250);
-    });
-    // キーボードショートカット早見表を表示
-    $("#navi #on_help_keybind").on("click", e => {
-        // ヘルプウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="help_col">
-                <h2>キーボードショートカット早見表</h2>
-                <div class="help_content"></div>
-                <button type="button" id="__on_help_close">×</button>
-            </div>
-        `))
-        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        $.ajax({
-            url: "help/help_keybind.html",
-            cache: false
-        }).then(data => {
-            $.each($.parseHTML(data), (index, value) => {
-                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
-            });
-        });
     });
 
     /*============================================================================================================*/

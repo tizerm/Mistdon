@@ -262,6 +262,8 @@ n}
     padding: 6px;
 }
 #header>#pop_palette .__on_select_color, .__on_call_palette {
+    position: relative;
+    top: -2px;
     display: inline-block;
     border-radius: 4px;
     width: 24px;

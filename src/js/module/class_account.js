@@ -824,6 +824,61 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
+     * このアカウントが作成したリストの一覧を取得する
+     */
+    getLists() {
+        let rest_promise = null
+        switch (this.pref.platform) {
+            case 'Mastodon': // Mastodon
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v1/lists`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                }).then(data => {
+                    // リストを持っていない場合はreject
+                    if (data.length == 0) return Promise.reject('empty')
+                    return (async () => {
+                        // リスト一覧を整形
+                        const lists = []
+                        data.forEach(l => lists.push({
+                            "listname": l.title,
+                            "id": l.id
+                        }))
+                        return lists
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/users/lists/list`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                }).then(data => {
+                    // リストを持っていない場合はreject
+                    if (data.length == 0) return Promise.reject('empty')
+                    return (async () => {
+                        // リスト一覧を整形
+                        const lists = []
+                        data.forEach(l => lists.push({
+                            "listname": l.name,
+                            "id": l.id
+                        }))
+                        return lists
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise
+    }
+
+    /**
+     * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
      * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
      * 
