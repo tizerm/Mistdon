@@ -322,7 +322,9 @@
 #header>#pop_extend_column>.quote_col .visibility_icon {
     text-align: center;
 }
-#header>#pop_extend_column>.quote_col #__txt_quote_cw {
+#header>#pop_extend_column>.quote_col #__txt_quote_cw,
+#header>#pop_extend_column>.reaction_col #__txt_reaction_search,
+#header>#pop_custom_emoji #__txt_emoji_search {
     position: relative;
     font-family: "ƒƒCƒŠƒI", sans-selif;
     text-align: left;
@@ -358,7 +360,7 @@
 }
 #header>#pop_extend_column>.reaction_col>.reaction_list {
     overflow-y: auto;
-    height: calc(100vh - 480px);
+    height: calc(100vh - 500px);
 }
 #header>#pop_extend_column>.reaction_col>.reaction_list::-webkit-scrollbar{
    width: 8px;

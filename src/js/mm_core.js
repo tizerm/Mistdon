@@ -76,6 +76,30 @@ $(() => (async () => {
         if ($(".reply_col").is(":visible")) Account.get($("#__hdn_reply_account").val()).createEmojiList();
         else if ($(".quote_col").is(":visible")) Account.get($("#__hdn_quote_account").val()).createEmojiList();
         else Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList();
+        // サジェストテキストボックスにフォーカス
+        $("#__txt_emoji_search").focus();
+    });
+    // カスタム絵文字サジェストイベント
+    $(document).on("keyup", "#__txt_emoji_search", e => {
+        const suggest = $(e.target).val()
+        if (!suggest) { // 空欄の場合すべて表示
+            $(".emoji_list>*").show();
+            return;
+        }
+        // 一旦全部消してから一致するやつを抽出
+        $(".emoji_list>*").hide();
+        $(`.emoji_list>a.__on_emoji_append[name*="${suggest}"]`).show();
+    });
+    // リアクションサジェストイベント
+    $(document).on("keyup", "#__txt_reaction_search", e => {
+        const suggest = $(e.target).val()
+        if (!suggest) { // 空欄の場合すべて表示
+            $(".reaction_list>*").show();
+            return;
+        }
+        // 一旦全部消してから一致するやつを抽出
+        $(".reaction_list>*").hide();
+        $(`.reaction_list>a.__on_emoji_reaction[name*="${suggest}"]`).show();
     });
     // カスタム絵文字クリックイベント
     $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {

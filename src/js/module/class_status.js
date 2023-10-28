@@ -777,6 +777,8 @@ class Status {
                 <div class="timeline">
                     <ul></ul>
                 </div>
+                <input type="text" id="__txt_reaction_search" class="__ignore_keyborad"
+                    placeholder="ショートコードを入力するとサジェストされます"/>
                 <div class="reaction_list">
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
@@ -788,6 +790,8 @@ class Status {
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
         $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        // サジェストテキストボックスにフォーカス
+        $("#__txt_reaction_search").focus()
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
         ;(async () => this.from_account.emojis.each(emoji => $("#header>#pop_extend_column .reaction_list").append(`

@@ -919,6 +919,8 @@ class Account {
                 <h2>カスタム絵文字一覧</h2>
                 <h3>${this.pref.domain}</h3>
             </div>
+            <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
+                placeholder="ショートコードを入力するとサジェストされます"/>
             <div class="emoji_list">
             </div>
             <button type="button" id="__on_emoji_close">×</button>
