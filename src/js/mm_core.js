@@ -293,14 +293,16 @@ $(() => (async () => {
     Column.each(col => {
         // カラム本体を生成
         col.create();
-        const rest_promises = [];
         // タイムライン取得処理をプロミス配列に格納してWebSocketの設定をセット
-        col.eachTimeline(tl => {
-            rest_promises.push(tl.getTimeline());
-            tl.setSocketParam();
+        col.eachGroup(gp => {
+            const rest_promises = [];
+            gp.eachTimeline(tl => {
+                rest_promises.push(tl.getTimeline());
+                tl.setSocketParam();
+            })
+            // タイムラインをDOMにバインド
+            gp.onLoadTimeline(rest_promises);
         });
-        // タイムラインをDOMにバインド
-        col.onLoadTimeline(rest_promises);
     });
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({

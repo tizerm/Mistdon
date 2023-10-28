@@ -31,7 +31,11 @@ class TimelinePref {
         // タイムラインの設定ブロックをjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
             <li>
-                <h4><span class="tl_header_label">Timeline ${index}</span></h4>
+                <h4>
+                    <span class="tl_header_label">Timeline ${index}</span>
+                    <a class="__on_remove_timeline ic_button" title="このタイムラインを削除"
+                        ><img src="resources/ic_rem24.png" alt="このタイムラインを削除"/></a>
+                </h4>
                 <div class="tl_option">
                     <div class="lbl_disp_account">
                         表示アカウント:<br/><select class="__cmb_tl_account">
@@ -45,8 +49,7 @@ class TimelinePref {
                         <input type="hidden" class="__hdn_external_platform" value="null"/>
                         <div class="instance_info">(URLを入力してください)</div>
                         <div class="color_info">
-                            TLカラー:
-                            #<input type="text" class="__txt_external_color __pull_color_palette" size="6"/>
+                            色: #<input type="text" class="__txt_external_color __pull_color_palette" size="6"/>
                         </div>
                     </div>
                     <div class="lbl_tl_type">
@@ -71,9 +74,6 @@ class TimelinePref {
                         <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"/>
                         <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
                     </div>
-                    <div class="foot_button">
-                        <button type="button" class="__btn_del_tl">タイムラインを削除</button>
-                    </div>
                 </div>
             </li>
         `))
@@ -82,10 +82,12 @@ class TimelinePref {
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
             jqelm.find("h4").css("background-color", `#${Account.get(this.pref.key_address)?.pref.acc_color}`)
             jqelm.find(".lbl_external_instance").hide()
-        } else if (this.pref?.external_instance) { // 外部インスタンスが表示対象の場合は「その他」を初期設定
+        } else if (this.pref?.external) { // 外部インスタンスが表示対象の場合は「その他」を初期設定
             jqelm.find(`.__cmb_tl_account>option[value="__external"]`).prop("selected", true)
             jqelm.find(".__txt_external_instance").val(this.pref.host)
             jqelm.find(".__hdn_external_platform").val(this.pref.platform)
+            jqelm.find(".__txt_external_color").val(this.pref.color)
+            jqelm.find("h4").css("background-color", `#${this.pref.color}`)
             jqelm.find(".lbl_external_instance").show()
             jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
@@ -222,6 +224,114 @@ class TimelinePref {
 
 /**
  * #Class
+ * タイムライングループの設定値を管理するクラス(カラムに内包)
+ *
+ * @author tizerm@mofu.kemo.no
+ */
+class GroupPref {
+    // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
+    constructor(pref, column) {
+        if (pref) { // 設定ファイルがある場合
+            this.pref = pref
+            this.__column_id = column.id
+
+            // タイムライン設定も追加
+            const timelines = []
+            this.pref?.timelines?.forEach(tl => timelines.push(new TimelinePref(tl, column)))
+            this.timelines = timelines
+        } else { // 設定ファイルがない場合は新規UUIDを生成してカラムを新規作成
+            this.pref = { "group_id": crypto.randomUUID() }
+            this.timelines = []
+        }
+    }
+
+    // Getter: カラムの一意識別IDを取得
+    get id() { return this.pref?.group_id }
+    // Getter: このタイムライングループが所属するカラム
+    get parent_column() { return ColumnPref.get(this.__column_id) }
+
+    get height() {
+        // 高さがnullでなければそのまま返却
+        if (this.pref.gp_height) return this.pref.gp_height
+
+        let others = 0
+        this.parent_column.eachGroup(gp => others += Number(gp.pref.gp_height))
+        return 100 - others
+    }
+
+    /**
+     * #Method
+     * このカラムの設定DOMを生成してテーブルにアペンドする
+     */
+    create() {
+        // カラム本体を空の状態でjQueryオブジェクトとして生成
+        const jqelm = $($.parseHTML(`
+            <div id="${this.id}" class="tl_group timeline ui-sortable">
+                <div class="group_head">
+                    <h3><input type="text" class="__txt_group_head" placeholder="(グループの名前を設定してください)"/></h3>
+                    <div class="group_button">
+                        <a class="__on_add_tl ic_button" title="タイムラインを追加"
+                            ><img src="resources/ic_add24.png" alt="タイムラインを追加"/></a>
+                        <a class="__on_remove_group ic_button" title="このグループを削除"
+                            ><img src="resources/ic_rem24.png" alt="このグループを削除"/></a>
+                    </div>
+                    <div class="group_pref">
+                        <input type="text" class="__txt_group_height" size="4"/>%
+                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
+                    </div>
+                </div>
+                <ul></ul>
+            </div>
+        `))
+        // 初期値が存在する場合は初期値を設定
+        if (this.pref?.label_head) // グループ名称
+            jqelm.find(".__txt_group_head").val(this.pref.label_head)
+        if (this.pref?.gp_height) { // グループ高
+            jqelm.find(".__txt_group_height").val(this.pref.gp_height)
+        }
+        if (this.pref?.gp_color) { // グループカラー
+            jqelm.find(".__txt_group_color").val(this.pref.gp_color)
+            jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
+        }
+        // タイムラインの設定値をDOMと共に生成
+        this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create(index + 1)))
+
+        // jQueryオブジェクトを返却
+        return jqelm
+    }
+
+    /**
+     * #Method
+     * このグループにタイムラインを追加する
+     */
+    addTimeline() {
+        const tl = new TimelinePref(null, this)
+        this.timelines.push(tl)
+        const jqelm = tl.create(this.timelines.length)
+        $(`#${this.id}>ul`).append(jqelm)
+        ColumnPref.setButtonPermission()
+        setColorPalette($(`#${this.id}>ul>li:last-child`))
+    }
+
+    /**
+     * #Method
+     * このカラムのタイムラインを削除する
+     * 
+     * @param index 削除対象のタイムラインのインデクス
+     */
+    removeTimeline(index) {
+        this.timelines.splice(index, 1)
+        $(`#${this.id}>ul>li`).eq(index).remove()
+        // タイムラインの連番を再生成
+        $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
+        ColumnPref.setButtonPermission()
+    }
+}
+
+/*====================================================================================================================*/
+
+/**
+ * #Class
  * カラムの設定値を管理するクラス
  *
  * @author tizerm@mofu.kemo.no
@@ -233,12 +343,19 @@ class ColumnPref {
             this.pref = pref
 
             // タイムライン設定も追加
-            const timelines = []
-            this.pref?.timelines?.forEach(tl => timelines.push(new TimelinePref(tl, this)))
-            this.timelines = timelines
+            //const timelines = []
+            //this.pref?.timelines?.forEach(tl => timelines.push(new TimelinePref(tl, this)))
+            //this.timelines = timelines
+            const groups = new Map()
+            this.pref?.groups?.forEach(group => {
+                const group_obj = new GroupPref(group, this)
+                groups.set(group_obj.id, group_obj)
+            })
+            this.tl_groups = groups
         } else { // 設定ファイルがない場合は新規UUIDを生成してカラムを新規作成
             this.pref = { "column_id": crypto.randomUUID() }
-            this.timelines = []
+            //this.timelines = []
+            this.tl_groups = new Map()
         }
     }
 
@@ -273,6 +390,10 @@ class ColumnPref {
         else return ColumnPref.map.get(arg.attr("id"))
     }
 
+    static getGroup(target) {
+        return ColumnPref.map.get(target.closest("td").attr("id")).tl_groups.get(target.closest(".tl_group").attr("id"))
+    }
+
     /**
      * #StaticMethod
      * カラムプロパティを走査
@@ -298,24 +419,28 @@ class ColumnPref {
     create() {
         // カラム本体を空の状態でjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
-            <td id="${this.id}" class="timeline ui-sortable">
+            <td id="${this.id}" class="column_td ui-sortable">
                 <div class="col_head">
                     <h2><input type="text" class="__txt_col_head" placeholder="(カラムの名前を設定してください)"/></h2>
+                    <div class="group_button">
+                        <a class="__on_add_group ic_button" title="タイムライングループを追加"
+                            ><img src="resources/ic_add32.png" alt="タイムライングループを追加"/></a>
+                        <a class="__on_remove_column ic_button" title="このカラムを削除"
+                            ><img src="resources/ic_rem32.png" alt="このカラムを削除"/></a>
+                    </div>
                     <div class="col_pref">
                         <input type="text" class="__txt_col_width" size="5"/>px
                     </div>
                 </div>
                 <div class="col_option">
-                    <button type="button" class="__btn_add_tl">TL追加</button>
-                    <button type="button" class="__btn_del_col">列削除</button><br/>
                     <input type="checkbox" id="dh_${this.id}" class="__chk_default_hide"/>
                     <label for="dh_${this.id}">デフォルトで閉じる</label><br/>
                     <input type="checkbox" id="df_${this.id}" class="__chk_default_flex"/>
                     <label for="df_${this.id}">デフォルトで可変幅にする</label><br/>
-                    カラムカラー:
-                    #<input type="text" class="__txt_col_color __pull_color_palette" size="6"/>
+                    色: #<input type="text" class="__txt_col_color __pull_color_palette" size="6"/>
                 </div>
-                <ul></ul>
+                <div class="col_tl_groups">
+                </div>
             </td>
         `))
         // 初期値が存在する場合は初期値を設定
@@ -334,7 +459,7 @@ class ColumnPref {
             jqelm.find(".col_head").css("background-color", `#${this.pref.col_color}`)
         }
         // タイムラインの設定値をDOMと共に生成
-        this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create(index + 1)))
+        this.tl_groups.forEach((v, k) => jqelm.find(".col_tl_groups").append(v.create()))
 
         // 最後にカラムのDOMを追加
         $("#columns>table>tbody>tr").append(jqelm)
@@ -348,7 +473,7 @@ class ColumnPref {
         const column = new ColumnPref(null)
         ColumnPref.map.set(column.id, column)
         column.create()
-        column.addTimeline()
+        column.addGroup()
         ColumnPref.setButtonPermission()
         setColorPalette($(`#columns>table #${column.id}>.col_option`))
     }
@@ -365,15 +490,22 @@ class ColumnPref {
 
     /**
      * #Method
-     * このカラムにタイムラインを追加する
+     * このグループにタイムラインを追加する
      */
-    addTimeline() {
-        const tl = new TimelinePref(null, this)
-        this.timelines.push(tl)
-        const jqelm = tl.create(this.timelines.length)
-        $(`#${this.id}>ul`).append(jqelm)
+    addGroup() {
+        const group = new GroupPref(null, this)
+        this.tl_groups.set(group.id, group)
+        const jqelm = group.create()
+        $(`#${this.id}>.col_tl_groups`).append(jqelm)
+        group.addTimeline()
+        // グループの高さを再設定
+        const reset_rate = Math.round(100 / this.tl_groups.size)
+        $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
+        /*
+        $(`#${this.id}>.col_tl_groups>.tl_group>ul`)
+            .css("height", `calc((100vh - 316px) * ${reset_rate / 100} - 46px)`)//*/
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>ul>li:last-child`))
+        setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_head`))
     }
 
     /**
@@ -382,11 +514,16 @@ class ColumnPref {
      * 
      * @param index 削除対象のタイムラインのインデクス
      */
-    removeTimeline(index) {
-        this.timelines.splice(index, 1)
-        $(`#${this.id}>ul>li`).eq(index).remove()
-        // タイムラインの連番を再生成
-        $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
+    removeGroup(id) {
+        const group = this.tl_groups.get(id)
+        $(`#${group.id}`).remove()
+        this.tl_groups.delete(id)
+        /*
+        // グループの高さを再設定
+        const reset_rate = Math.round(100 / this.tl_groups.size)
+        $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
+        $(`#${this.id}>.col_tl_groups>.tl_group>ul`)
+            .css("height", `calc((100vh - 316px) * ${reset_rate / 100} - 46px)`)//*/
         ColumnPref.setButtonPermission()
     }
 
@@ -395,9 +532,40 @@ class ColumnPref {
      * 設定を変えたときに制御しないといけないボタンを一括制御する
      */
     static setButtonPermission() {
-        // タイムラインが1つの場合はタイムライン削除を禁止
-        $("#columns>table>tbody>tr>td").each(
-            (index, elm) => $(elm).find(".__btn_del_tl").prop("disabled", $(elm).find("li").length == 1));
+        // 最後のタイムライングループの縦幅を編集禁止にする
+        $(".__txt_group_height").prop("disabled", false)
+        $("#columns>table>tbody>tr>td>.col_tl_groups>.tl_group:last-child .__txt_group_height").prop("disabled", true).val("")
+        // すべてのタイムライングループの高さを再設定
+        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+            let total = 0
+            $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
+                let height = $(gp_elm).find('.__txt_group_height').val()
+                if (!height) height = 100 - total
+                else total += Number(height)
+                $(gp_elm).css("height", `${height}%`)
+                $(gp_elm).find("ul").css("height", 'calc(100% - 48px)')
+
+                // タイムラインタイトルを再設定
+                $(gp_elm).find("ul>li").each((tl_index, tl_elm) => $(tl_elm)
+                    .find(".tl_header_label").text(`Timeline ${gp_index + 1}-${tl_index + 1}`))
+            })
+        })
+
+        // ツールチップを設定し直す
+        $(".ic_button").tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
     }
 
     /**
@@ -407,27 +575,39 @@ class ColumnPref {
     static async save() {
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
-        $("#columns>table td").each((col_index, col_elm) => {
-            // タイムライン一覧を走査
-            const tl_list = []
-            $(col_elm).find("ul>li").each((tl_index, tl_elm) => {
-                // アカウントコンボボックスの値を取得
-                const acc_address = $(tl_elm).find(".__cmb_tl_account").val()
-                // 各フォームの情報をJSONでリストに追加
-                tl_list.push({
-                    'key_address': acc_address,
-                    'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
-                    'account': Account.get(acc_address).pref,
-                    'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
-                    'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
-                    'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
+        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+            const group_list = []
+            $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
+                const tl_list = []
+                $(gp_elm).find("ul>li").each((tl_index, tl_elm) => { // タイムラインイテレータ
+                    // アカウントコンボボックスの値を取得
+                    const account_address = $(tl_elm).find(".__cmb_tl_account").val()
+                    tl_list.push({ // タイムラインプリファレンス
+                        'key_address': account_address,
+                        'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
+                        'account': Account.get(account_address)?.pref,
+                        'ex_host': $(tl_elm).find(".__txt_external_instance").val(),
+                        'ex_platform': $(tl_elm).find(".__hdn_external_platform").val(),
+                        'ex_color': $(tl_elm).find(".__txt_external_color").val(),
+                        'list_id': $(tl_elm).find(".__cmb_tl_list").val(),
+                        'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
+                        'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
+                        'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
+                    })
+                })
+                group_list.push({ // タイムライングループプリファレンス
+                    // デフォルトグループ名は「Group XX」
+                    'label_head': $(gp_elm).find(".__txt_group_head").val() || `Group ${gp_index + 1}`,
+                    'timelines': tl_list,
+                    // デフォルトグループカラーは#777777(グレー)
+                    'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
+                    'gp_height': $(gp_elm).find(".__txt_group_height").val()
                 })
             })
-            // 各フォームの情報をJSONでリストに追加
-            col_list.push({
+            col_list.push({ // カラムプリファレンス
                 // デフォルトカラム名は「Column XX」
                 'label_head': $(col_elm).find(".__txt_col_head").val() || `Column ${col_index + 1}`,
-                'timelines': tl_list,
+                'groups': group_list,
                 // デフォルトカラムカラーは#808080(グレー)
                 'col_color': $(col_elm).find(".__txt_col_color").val() || '808080',
                 // デフォルトカラム長は330px

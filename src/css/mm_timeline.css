@@ -422,7 +422,7 @@
 .column_profile>.profile_header .user_header {
     height: 96px;
 }
-.column_profile>.post_div {
+.column_profile .post_div {
     position: relative;
 }
 .column_profile>.profile_detail .prof_field{
@@ -441,7 +441,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.column_profile>.post_div>h4 {
+.column_profile .post_div>h4 {
     border-radius: 12px;
     z-index: 1;
     display: inline-block;
@@ -453,18 +453,18 @@
     opacity: 0.8;
     font-size: 12px;
 }
-.column_profile>.pinned_block>h4:hover {
+.column_profile .pinned_block>h4:hover {
     cursor: pointer;
     opacity: 1.0;
 }
-.column_profile>.pinned_block>h4 {
+.column_profile .pinned_block>h4 {
     background-color: #3b783b;
 }
-.column_profile>.posts_block>h4 {
+.column_profile .posts_block>h4 {
     background-color: #3b5778;
 }
-.column_profile>.pinned_block>ul>li {
-    background-color: rgba(62,82,96,0.92);
+.column_profile .pinned_block>ul>li {
+    background-color: rgba(82,66,62,0.92);
 }
 
 /*================================================================================================*/
@@ -503,7 +503,8 @@
     table-layout: fixed;
 }
 
-.col_action>a:hover>img {
+.col_action>a:hover>img,
+.gp_action>a:hover>img {
     border-radius: 8px;
     background-color: rgba(255,255,255,0.15);
     cursor: pointer;
@@ -529,41 +530,63 @@
     top: 48px;
     left: 8px;
 }
-#columns>table .closed_col>h2 {
+#columns>table .closed_col>.rotate_head {
     position: absolute;
     top: 108px;
     left: 44px;
     transform: rotate(90deg);
     transform-origin: left top;
     white-space: nowrap;
-    margin: 0px;
-    padding: 0px;
     font-family: Arial, "メイリオ", sans-selif;
-    font-size: 32px;
     text-align: left;
 }
-#columns>table .closed_col>h2>span {
+#columns>table .closed_col>.rotate_head>* {
     display: inline-block;
-    vertical-align: middle;
 }
-#columns>table .closed_col>h2>.unread {
-    border-radius: 12px;
-    background-color: rgba(255,255,255,0.2);
-    margin-left: 32px;
-    margin-bottom: 8px;
-    padding: 2px 12px;
-    font-size: 18px;
+#columns>table .closed_col>.rotate_head>h2 {
+    margin: 0px;
+    padding: 0px;
+    margin-right: 24px;
+    font-size: 32px;
 }
-#columns>table .closed_col>h2>.speed {
-    margin-left: 12px;
-    margin-bottom: 8px;
+#columns>table .closed_col>.rotate_head>.group_label {
+    position: relative;
+    border-radius: 16px;
+    margin: 0px 6px;
+    padding: 0px;
+    padding-right: 18px;
     font-size: 14px;
+    height: 24px;
 }
-#columns>table .timeline {
+#columns>table .closed_col>.rotate_head>.group_label>.ic_group_num {
+    width: 24px;
+    height: 24px;
+}
+#columns>table .closed_col>.rotate_head>.group_label>span {
+    position: relative;
+    display: inline-block;
+}
+#columns>table .closed_col>.rotate_head>.group_label>.speed_meter {
+    top: -8px;
+    margin-left: 8px;
+}
+#columns>table .closed_col>.rotate_head>.group_label>.unread_count {
+    top: -7px;
+    border-radius: 12px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background-color: rgba(255,255,255,0.15);
+    font-weight: bold;
+    font-size: 15px;
+}
+#columns>table .closed_col>.rotate_head>.group_label>.unread_count:empty {
+    display: none;
+}
+#columns>table .column_td {
     position: relative;
     padding: 0px;
 }
-#columns>table .timeline>.col_head {
+#columns>table .column_td>.col_head {
     position: relative;
     border-top-left-radius: 18px;
     border-top-right-radius: 18px;
@@ -573,13 +596,15 @@
     height: 58px;
 }
 
-#columns>table .timeline>.col_head>h2 {
+#columns>table .column_td>.col_head>h2 {
     margin: 0px;
     padding: 0px;
+    font-size: 20px;
+    margin-bottom: 4px;
     text-align: left;
     font-family: Arial, "メイリオ", sans-selif;
 }
-#columns>table .timeline>.col_head>h6 {
+#columns>table .column_td>.col_head>h6 {
     position: absolute;
     top: 24px;
     right: 40px;
@@ -589,25 +614,21 @@
     font-family: Arial, "メイリオ", sans-selif;
     font-size: 14px;
 }
-#columns>table .col_head>h2 {
-    font-size: 20px;
-    margin-bottom: 4px;
-}
-#columns>table .timeline>.col_head>.col_action {
+#columns>table .column_td>.col_head>.col_action {
     position: absolute;
     bottom: 0px;
     right: 4px;
 }
-#columns>table .timeline>.col_head>.col_action>.ic_column_warn {
+#columns>table .column_td>.col_head>.col_action>.ic_column_warn {
     display: none;
     position: absolute;
     bottom: 46px;
     right: 0px;
 }
-#columns>table .timeline>.col_head>.col_action>a {
+#columns>table .column_td>.col_head>.col_action>a {
     margin: 0px;
 }
-#columns>table .timeline>.col_head>.ic_column_cursor {
+#columns>table .column_td>.col_head>.ic_column_cursor {
     position: absolute;
     bottom: 0px;
     left: 24px;
@@ -617,9 +638,61 @@
 
 /*================================================================================================*/
 
+#columns>table .column_td>.col_tl_groups {
+    height: calc(100vh - 204px);
+}
+
+#columns>table .tl_group_box {
+    position: relative;
+}
+#columns>table .tl_group_box>.group_head {
+    position: relative;
+    font-family: Arial, "メイリオ", sans-selif;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    height: 20px;
+}
+#columns>table .tl_group_box>.group_head img {
+    width: 18px;
+    height: 18px;
+}
+#columns>table .tl_group_box>.group_head>.gp_action>.ic_group_warn {
+    display: none;
+}
+#columns>table .tl_group_box>.group_head>h4,
+#columns>table .tl_group_box>.group_head>h6 {
+    margin: 0px;
+    padding: 0px;
+}
+#columns>table .tl_group_box>.group_head>.ic_group_cursor {
+    position: absolute;
+    top: 1px;
+    left: 8px;
+}
+#columns>table .tl_group_box>.group_head>h4 {
+    position: absolute;
+    top: 2px;
+    left: 48px;
+    font-size: 13px;
+}
+#columns>table .tl_group_box>.group_head>h6 {
+    position: absolute;
+    top: 3px;
+    right: 68px;
+    font-weight: normal;
+    font-size: 12px;
+}
+#columns>table .tl_group_box>.group_head>.gp_action {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+}
+
+/*================================================================================================*/
+
 .timeline>.col_loading {
     position: absolute;
-    top: calc(50vh - 128px);
+    top: calc(50% - 128px);
     padding: 24px;
     right: 0px;
     left: 0px;
@@ -656,6 +729,12 @@
     list-style-type: none;
     margin: 6px;
     padding: 8px 12px;
+}
+.timeline ul>li.self_post {
+    background-color: rgba(62,68,82,0.92);
+}
+.timeline ul>li.rebloged_post {
+    background-color: rgba(62,76,66,0.92);
 }
 .timeline ul>li.inserted_info {
     font-size: 12px;
@@ -721,6 +800,7 @@
 
 .timeline ul>li>.user>.userid {
     display: block;
+    font-family: Arial, "メイリオ", sans-selif;
     color: #bbbbbb;
     font-size: 14px;
     width: calc(100% - 60px);
@@ -767,7 +847,7 @@
 
 .timeline ul>li>.content>.main_content {
     font-size: 13px;
-    margin: 6px 18px;
+    margin: 12px 18px 6px;
     overflow-wrap: break-word;
 }
 

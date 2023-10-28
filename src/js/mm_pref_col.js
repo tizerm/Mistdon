@@ -29,19 +29,27 @@
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", e => ColumnPref.addColumn());
     // カラム削除ボタンイベント(動的バインド)
-    $(document).on("click", ".__btn_del_col", e => ColumnPref.get($(e.target).closest("td")).removeColumn());
+    $(document).on("click", ".__on_remove_column", e => ColumnPref.get($(e.target).closest("td")).removeColumn());
+    // グループ追加ボタンイベント(動的バインド)
+    $(document).on("click", ".__on_add_group", e => ColumnPref.get($(e.target).closest("td")).addGroup());
+    // グループ削除ボタンイベント(動的バインド)
+    $(document).on("click", ".__on_remove_group", 
+        e => ColumnPref.get($(e.target).closest("td")).removeGroup($(e.target).closest(".tl_group").attr("id")));
     // タイムライン追加ボタンイベント(動的バインド)
-    $(document).on("click", ".__btn_add_tl", e => ColumnPref.get($(e.target).closest("td")).addTimeline());
+    $(document).on("click", ".__on_add_tl", e => ColumnPref.getGroup($(e.target)).addTimeline());
     // タイムライン削除ボタンイベント(動的バインド)
-    $(document).on("click", ".__btn_del_tl", 
-        e => ColumnPref.get($(e.target).closest("td")).removeTimeline($(e.target).closest("li").index()));
+    $(document).on("click", ".__on_remove_timeline", 
+        e => ColumnPref.getGroup($(e.target)).removeTimeline($(e.target).closest("li").index()));
     // カラムカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_color",
         e => $(e.target).closest("td").find(".col_head").css("background-color", `#${$(e.target).val()}`));
+    // グループカラー変更イベント(動的バインド)
+    $(document).on("blur", ".__txt_group_color",
+        e => $(e.target).closest(".group_head").css("background-color", `#${$(e.target).val()}`));
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`));
-    // カラム幅変更イベント(動的バインド)
+    // カラム幅変更イベント(動的バインド)-+
     $(document).on("blur", ".__txt_col_width",
         e => $(e.target).closest("td").css("width", `${$(e.target).val()}px`));
     // 表示アカウント変更イベント(動的バインド)

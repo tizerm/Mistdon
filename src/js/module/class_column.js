@@ -1,165 +1,5 @@
 ﻿/**
  * #Class
- * タイムラインを管理するクラス(カラムに内包)
- *
- * @author tizerm@mofu.kemo.no
- */
-class Timeline {
-    // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
-    constructor(pref, column) {
-        this.pref = pref
-        this.__column_id = column.id
-        this.status_key_map = new Map()
-    }
-
-    // Getter: このタイムラインのホスト(サーバードメイン)
-    get host() { return this.pref.host }
-    // Getter: このタイムラインのアカウントのフルアドレス
-    get account_key() { return this.pref.key_address }
-    // Getter: このタイムラインのアカウント
-    get target_account() { return Account.get(this.pref.key_address) }
-    // Getter: このタイムラインが所属するカラム
-    get parent_column() { return Column.get(this.__column_id) }
-
-    // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
-    set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
-
-    /**
-     * #Method
-     * このタイムラインの最新の投稿を30件取得する
-     * (返り値は取得データのpromise)
-     */
-    getTimeline() {
-        // ターゲットのアカウントが存在しない場合はreject
-        if (!this.target_account) return Promise.reject('account not found.')
-        // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
-        this.pref.query_param.limit = 30
-        let rest_promise = null
-        // プラットフォーム判定
-        switch (this.target_account.platform) {
-            case 'Mastodon': // Mastodon
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.target_account.pref.access_token}` },
-                    data: this.pref.query_param
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                // クエリパラメータにアクセストークンをセット
-                this.pref.query_param.i = this.target_account.pref.access_token
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(this.pref.query_param)
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
-            toast(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
-    }
-
-    /**
-     * #Method
-     * このタイムラインのWebSocket設定パラメータをアカウント情報にわたす
-     * (この段階ではWebSocketへはまだ接続しない)
-     */
-    setSocketParam() {
-        if (!this.target_account) return
-
-        let message_callback = null
-        let send_param = null
-
-        // プラットフォーム判定
-        switch (this.target_account.platform) {
-            case 'Mastodon': // Mastodon
-                // メッセージ受信時のコールバック関数
-                message_callback = (event) => {
-                    const data = JSON.parse(event.data)
-                    // TLと違うStreamは無視
-                    if (data.stream[0] != this.pref.socket_param.stream) return
-                    // タイムラインの更新通知
-                    if (data.event == "update"
-                        || (this.pref.timeline_type == "notification" && data.event == "notification"))
-                        this.parent_column.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
-                    // 削除された投稿を検知
-                    else if (data.event == "delete") this.removeStatus(data.payload)
-                }
-                // 購読パラメータの設定
-                this.pref.socket_param.type = "subscribe"
-                send_param = JSON.stringify(this.pref.socket_param)
-                break
-            case 'Misskey': // Misskey
-                const uuid = crypto.randomUUID()
-                message_callback = (event) => {
-                    const data = JSON.parse(event.data)
-                    // TLと違うStreamは無視
-                    if (data.body.id != uuid) return
-                    if (data.body.type == "note"
-                        || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
-                        this.parent_column.prepend(new Status(data.body.body, this, this.target_account))
-                }
-                // 購読パラメータの設定
-                this.pref.socket_param.id = uuid
-                send_param = JSON.stringify({
-                    'type': 'connect',
-                    'body': this.pref.socket_param
-                })
-                break
-            default:
-                break
-        }
-        // アカウント情報にソケット設定を追加
-        this.target_account.addSocketPref({
-            target_col: this.parent_column,
-            send_param: send_param,
-            messageFunc: message_callback
-        })
-    }
-
-    /**
-     * #Method
-     * このタイムラインに保存してあるステータス情報を削除する
-     * 
-     * @param arg 投稿ID
-     */
-    removeStatus(id) {
-        const status_key = this.status_key_map.get(id)
-        // タイムラインに存在する投稿だけ削除対象とする
-        if (status_key) this.parent_column.removeStatus(this.parent_column.getStatusElement(status_key))
-    }
-}
-
-/*====================================================================================================================*/
-
-/**
- * #Class
  * カラムを管理するクラス
  *
  * @author tizerm@mofu.kemo.no
@@ -170,7 +10,6 @@ class Column {
         if (pref) { // prefがある(通常のカラム)
             this.pref = pref
             this.index = pref.index
-            this.status_map = new Map()
             this.unread = 0
             this.counter = 0
             this.ppm_que = []
@@ -179,10 +18,13 @@ class Column {
             this.open_flg = !pref.d_hide
             this.search_flg = false
 
-            // タイムラインはインスタンスを作って管理
-            const tls = []
-            pref.timelines.forEach(tl => tls.push(new Timeline(tl, this)))
-            this.timelines = tls
+            // グループはインスタンスを作って管理
+            const gps = new Map()
+            pref.groups.forEach((gp, index) => {
+                gp.index = index
+                gps.set(gp.group_id, new Group(gp, this))
+            })
+            this.group_map = gps
         } else { // prefがない(検索用カラム)
             this.pref = {
                 "column_id": "__search_timeline",
@@ -195,10 +37,6 @@ class Column {
 
     // Getter: カラムの一意識別IDを取得
     get id() { return this.pref.column_id }
-
-    static TIMELINE_LIMIT = 200 // カラムのタイムラインに表示できる限界量
-    static SCROLL = 200         // wsスクロールでスクロールするピクセル量
-    static SHIFT_SCROLL = 800   // シフトwsスクロールでスクロールするピクセル量
 
     // スタティックマップを初期化(非同期)
     static {
@@ -256,14 +94,18 @@ class Column {
         return Column.map.size == 0
     }
 
+    getGroup(id) {
+        return this.group_map.get(id)
+    }
+
     /**
      * #Method
      * このカラムのタイムラインプロパティを走査
      * 
      * @param callback 要素ごとに実行するコールバック関数
      */
-    eachTimeline(callback) {
-        this.timelines.forEach(callback)
+    eachGroup(callback) {
+        this.group_map.forEach((v, k) => callback(v))
     }
 
     /**
@@ -281,19 +123,16 @@ class Column {
                         <img src="resources/ic_right.png" alt="カラムを開く"/>
                     </a>
                 </div>
-                <h2>${this.pref.label_head}
-                    <span class="unread"></span>
-                    <span class="speed">0.0p/h</span>
-                </h2>
+                <div class="rotate_head">
+                    <h2>${this.pref.label_head}</h2>
+                </div>
             </td>
         `; html /* 開いた状態のカラム */ += `
-            <td id="${this.id}" class="timeline column_td">
+            <td id="${this.id}" class="column_td">
                 <div class="col_head">
                     <h2>${this.pref.label_head}</h2>
-                    <div class="ic_column_cursor">
-                        ${num_img}
-                    </div>
-                    <h6>0.0p/h</h6>
+                    <div class="ic_column_cursor">${num_img}</div>
+                    <h6></h6>
                     <div class="col_action">
                         <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_column_warn"/>
                         <a class="__on_column_reload" title="カラムをリロード"
@@ -307,11 +146,8 @@ class Column {
                             ><img src="resources/ic_top.png" alt="トップへ移動"/></a>
                     </div>
                 </div>
-                <div class="col_loading">
-                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                    <span class="loading_text">Now Loading...</span>
+                <div class="col_tl_groups">
                 </div>
-                <ul class="__context_posts"></ul>
             </td>
         `
         // テーブルにバインド(対象が複数に渡るので一度バインドしてから表示制御)
@@ -327,6 +163,12 @@ class Column {
             $(`#columns>table #${this.id}`).hide()
             $(`#columns>table #${this.id}_closed`).show()
         }
+
+        // タイムライングループをセット
+        this.eachGroup(gp => {
+            $(`#${this.id}>.col_tl_groups`).append(gp.create())
+            $(`#${this.id}_closed>.rotate_head`).append(gp.createClosedLabel())
+        })
     }
 
     /**
@@ -345,13 +187,17 @@ class Column {
         $(document).on("click", ".expand_header",
             e => $(e.target).next().toggle("slide", { direction: "up" }, 100))
         // カラム本体: そのカラムにカーソルを合わせる
-        $(document).on("click", ".column_td", e => {
+        $(document).on("click", ".tl_group_box", e => {
+            const target_col = Column.get($(e.target).closest("td"))
             Column.disposeCursor()
-            Column.get($(e.target).closest("td")).setCursor()
+            target_col.setCursor()
+            const target_gp = target_col.getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            Group.disposeCursor()
+            target_gp.setCursor()
         })
         // カラムボタン: トップへ移動
-        $(document).on("click", ".__on_column_top",
-            e => Column.get($(e.target).closest("td")).scroll(0))
+        $(document).on("click", ".__on_column_top", // カラム内のグループすべてトップに移動
+            e => Column.get($(e.target).closest("td")).eachGroup(gp => gp.scroll(0)))
         // カラムボタン: カラムを開く
         $(document).on("click", ".__on_column_open",
             e => Column.get($(e.target).closest("td").index(".closed_col")).toggle())
@@ -362,8 +208,14 @@ class Column {
         $(document).on("click", ".__on_column_flex",
             e => Column.get($(e.target).closest("td")).toggleFlex())
         // カラムボタン: リロード
-        $(document).on("click", ".__on_column_reload",
-            e => Column.get($(e.target).closest("td")).reload())
+        $(document).on("click", ".__on_column_reload", // カラム内のグループすべてリロード
+            e => Column.get($(e.target).closest("td")).eachGroup(gp => gp.reload()))
+        // グループボタン: トップへ移動
+        $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).scroll(0))
+        // グループボタン: リロード
+        $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
         // ユーザーアドレス: リモートのユーザー情報を表示
         $(document).on("click", ".__lnk_userdetail", e => User.getByAddress($(e.target).attr("name"))
             .then(user => user.createDetailWindow())
@@ -409,7 +261,7 @@ class Column {
      */
     static tooltip() {
         // カラムオプションにツールチップ表示
-        $("td .col_action").tooltip({
+        $("td .col_action, .tl_group_box .gp_action").tooltip({
             position: {
                 my: "center top",
                 at: "center bottom"
@@ -423,104 +275,6 @@ class Column {
                 duration: 100
             }
         });
-    }
-
-    /**
-     * #Method
-     * このカラムのタイムラインをカラムのDOMにバインドする
-     * (タイムライン取得のリクエストをすべて送ったタイミング(レスポンスが返ってきたかは問わない)で実行)
-     */
-    async onLoadTimeline(rest_promises) {
-        // カラムのすべてのタイムラインを(成功失敗に関わらず)すべて終わったらバインド処理
-        Promise.allSettled(rest_promises).then(results => {
-            let all_rejected_flg = true
-            const postlist = []
-            // 取得に成功したPromiseだけで処理を実行
-            results.filter(res => res.status == 'fulfilled').map(res => res.value).forEach(posts => {
-                posts.forEach(p => this.addStatus(p, () => postlist.push(p)))
-                all_rejected_flg = false
-            })
-            if (results.some(res => res.status == 'rejected')) // 取得に失敗したTLがひとつでもある場合
-                $(`#${this.id} .col_action>.ic_column_warn`).css('display', 'inline-block') // 警告アイコンを表示
-
-            if (!all_rejected_flg) { // ひとつでも取得に成功したタイムラインがある場合
-                // すべてのデータを配列に入れたタイミングで配列を日付順にソートする
-                postlist.sort((a, b) => b.sort_date - a.sort_date)
-                // ロード画面削除
-                $(`#${this.id}>.col_loading`).remove()
-                // ソートが終わったらタイムラインをDOMに反映
-                postlist.forEach(post => this.append(post))
-                // 流速タイマーをセット
-                this.initSpeedAnalyzer()
-            } else { // すべてのカラムの取得に失敗した場合
-                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
-                $(`#${this.id}>.col_loading>.loading_text`)
-                    .text(`${this.pref.label_head}のタイムラインの取得に失敗しました……。`)
-            }
-        })
-    }
-
-    /**
-     * #Method
-     * 引数のステータスデータをこのカラムの末尾に追加する
-     * (最初のタイムライン取得処理で使用)
-     * 
-     * @param post カラムに追加するステータスデータ
-     */
-    append(post) {
-        $(`#${this.id}>ul`).append(post.element)
-    }
-
-    /**
-     * #Method
-     * 引数のステータスデータをこのカラムの先頭に追加する
-     * (WebSocketによるStreaming APIからのデータバインドで使用)
-     * 
-     * @param post カラムに追加するステータスデータ
-     */
-    prepend(post) {
-        const ul = $(`#${this.id}>ul`)
-        // 重複している投稿を除外する
-        this.addStatus(post, () => {
-            // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            if (ul.find("li").length >= Column.TIMELINE_LIMIT) this.removeStatus(ul.find("li:last-child"))
-            ul.prepend(post.element)
-            ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
-            // 未読カウンターを上げる
-            $(`#${this.id}_closed>h2>.unread`).text(++this.unread)
-            this.counter++
-        })
-
-        // 通知が来た場合は通知ウィンドウに追加
-        if (post.type == 'notification') window.accessApi.notification(post.notification)
-    }
-
-    /**
-     * #Method
-     * このカラムに存在する投稿のDOMのjQueryオブジェクトをユニークキーを使って返却する
-     * 
-     * @param status_key 対象の投稿のユニークキー
-     */
-    getStatusElement(status_key) {
-        return $(`#${this.id}>ul>li[id="${status_key}"]`)
-    }
-
-    /**
-     * #Method
-     * 引数のステータスデータが既にこのカラムに存在するかどうか検査する
-     * 存在しない場合はセットにキーを追加して追加用のコールバック関数を実行
-     * 
-     * @param post カラムに追加するステータスデータ
-     * @param callback 重複していなかった時に実行するコールバック関数
-     */
-    addStatus(post, callback) {
-        // 重複している、もしくはミュート対象の場合はコールバック関数の実行を無視する
-        if (!this.status_map.has(post.status_key) && !post.muted) {
-            // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
-            this.status_map.set(post.status_key, post)
-            post.from_timeline.id_list = post
-            callback()
-        }
     }
 
     /**
@@ -542,19 +296,6 @@ class Column {
             target.find(".col_head h6").html(insert_text)
             target.prev().find("h2 .speed").html(insert_text)
         })(), 60000) // 1分おきに実行
-    }
-
-    /**
-     * #Method
-     * 引数のjQueryオブジェクトに該当する投稿データを画面から消去する
-     * 
-     * @param jqelm 消去対象の投稿のjQueryオブジェクト
-     */
-    removeStatus(jqelm) {
-        const post = this.status_map.get(jqelm.attr("id"))
-        post.from_timeline.status_key_map.delete(post.status_id)
-        this.status_map.delete(post.status_key)
-        jqelm.remove()
     }
 
     /**
@@ -590,8 +331,10 @@ class Column {
         const elm = $(`#${this.id}`)
         elm.addClass("__target_col")
             .find(".ic_column_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
+        elm.find(".tl_group_box:first-child").addClass("__target_group")
+            .find(".ic_group_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
         // カーソルをセットしたところまでスクロール
-        elm.get()[0].scrollIntoView({ inline: 'nearest' })
+        elm.get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**
@@ -609,6 +352,7 @@ class Column {
     static disposeCursor() {
         const target = Column.getCursor()
         $(".__target_col").removeClass("__target_col").find(".ic_cursor").remove()
+        $(".__target_group").removeClass("__target_group").find(".ic_cursor").remove()
         return target
     }
 
@@ -628,8 +372,8 @@ class Column {
             // 自身を閉じて左隣の短縮カラムを表示
             const closed_col = target.prev()
             target.hide()
-            this.unread = 0 // 未読数をリセット
-            closed_col.find("h2>.unread").empty()
+            this.eachGroup(gp => gp.unread = 0)
+            closed_col.find(".group_label>.unread_count").empty()
             closed_col.show()
             this.open_flg = false
         } else {
@@ -675,24 +419,6 @@ class Column {
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
         }
-    }
-
-    /**
-     * #Method
-     * このカラムのスクロール位置を引数の値だけ上下する
-     * 0を設定した場合は無条件で先頭までスクロールする
-     *
-     * @param to スクロールする量(0をセットで先頭まで移動)
-     */
-    scroll(to) {
-        const target = $(`#${this.id}>ul`)
-        // 引数が0の場合は先頭までスクロール
-        if (to == 0) {
-            target.scrollTop(0)
-            return
-        }
-        let pos = target.scrollTop() + to
-        target.scrollTop(pos > 0 ? pos : 0)
     }
 
     /**

@@ -11,15 +11,17 @@ class Status {
         // 個別の投稿をAPIから呼び出した場合はtimelineがnullで渡ってくる(accountは呼び出し元アカウント)
         this.from_timeline = timeline
         this.detail_flg = !timeline
+        this.user_profile_flg = timeline?.parent_column == null
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
         this.status_id = json.id // 投稿ではなく元のステータスデータに対応するID
+        this.platform = this.from_account?.platform ?? this.from_timeline?.platform
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
 
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
-        switch (this.from_account.platform) {
+        switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
                 original_date = json.created_at
@@ -184,10 +186,10 @@ class Status {
 
     // Getter: 挿入先カラム
     get from_column() { return this.from_timeline?.parent_column }
-    // Getter: 取得元アカウントのプラットフォーム(投稿したユーザーのプラットフォームではありません)
-    get platform() { return this.from_account.platform }
+    // Getter: 挿入先タイムライングループ
+    get from_group() { return this.from_timeline?.parent_group }
     // Getter: 取得元アカウントのアカウントカラー
-    get account_color() { return this.from_account.pref.acc_color }
+    get account_color() { return this.from_account?.pref.acc_color ?? this.from_timeline?.pref?.color }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
     // Getter: ミュート判定(現状はBTRN除外のみ)
@@ -619,8 +621,11 @@ class Status {
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
 
-        if (this.from_column?.pref?.multi_user) // マルチアカウントカラムの場合は表示元ユーザーを表示
-            html += `<div class="from_address" name="${this.from_account.full_address}">From ${this.from_account.full_address}</div>`
+        if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
+            // 外部インスタンスの場合はタイムラインのホスト名にする
+            const address = this.from_timeline?.pref.external ? this.from_timeline?.pref.host : this.from_account.full_address
+            html += `<div class="from_address" name="${address}">From ${address}</div>`
+        }
         html += `
                 </div>
             </li>
@@ -629,6 +634,11 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        // 自分の投稿にはクラスをつける
+        if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
+            jqelm.closest('li').addClass('self_post')
+        // BTRNにはクラスをつける
+        if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
             jqelm.find('.content>.main_content').hide()  // CWを非表示にする
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)

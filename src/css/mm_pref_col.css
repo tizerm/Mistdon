@@ -20,10 +20,13 @@
     color: #ffffff;
     border: solid 1px #ffffff;
 }
-#columns>table .timeline {
+#columns {
+    overflow-y: hidden;
+}
+#columns>table .column_td {
     width: 330px;
 }
-#columns>table .timeline>.col_head {
+#columns>table .column_td>.col_head {
     background-color: #808080;
     background-image: url("../resources/ic_sort_x.png");
     background-position: right 12px bottom 5px;
@@ -31,65 +34,98 @@
     position: relative;
     cursor: move;
 }
-#columns>table .timeline>.col_head>h2,
-#columns>table .timeline>.col_head>h3 {
+#columns>table .column_td>.col_head>h2 {
     margin: 0px;
+}
+#columns>table .column_td>.col_head>.group_button {
+    position: absolute;
+    bottom: 0px;
+    right: 48px;
 }
 .__txt_col_head {
     width: calc(100% - 12px);
 }
 
-.timeline button {
-    border-radius: 6px;
-    border: solid 1px #ffffff;
-    padding: 2px 8px;
-    font-size: 13px;
-    font-weight: bold;
-}
-.timeline select {
+#columns>table .column_td select {
     padding: 2px 8px;
     width: 100%;
 }
-.timeline>.col_option {
+#columns>table .column_td>.col_option {
     background-color: rgba(67,67,67,0.8);
     border-radius: 12px;
     margin: 2px 0px;
-    padding: 4px 0px;
+    padding: 2px 0px;
     font-size: 13px;
     text-align: center;
 }
-.timeline>ul {
+#columns>table .column_td>.col_tl_groups {
+    height: calc(100vh - 284px);
+}
+#columns>table .column_td>.col_tl_groups input:disabled {
+    color: #808080;
+}
+.column_td>.col_tl_groups>.tl_group>.group_head {
+    background-color: #505050;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    height: 44px;
+    margin: 2px 0px;
+    padding: 4px 8px;
+    font-size: 12px;
+    text-align: left;
+    position: relative;
+    cursor: move;
+}
+.column_td>.col_tl_groups>.tl_group>.group_head>h3 {
+    margin: 0px;
+}
+.column_td>.col_tl_groups>.tl_group>.group_head>.group_button {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+}
+.__txt_group_head {
+    width: calc(100% - 64px);
+}
+.column_td>.col_tl_groups>.tl_group>ul {
     margin: 0px;
     padding: 0px;
     height: calc(100vh - 316px);
     overflow-y: auto;
 }
 
-.timeline>ul>li>h4 {
+.column_td>.col_tl_groups>.tl_group>ul>li>h4 {
     position: relative;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
     color: #ffffff;
+    font-family: Arial, "メイリオ", sans-selif;
     font-size: 18px;
     font-weight: bold;
     margin: -12px -12px 12px;
-    padding: 8px 24px;
+    padding: 6px 24px;
     background-color: #808080;
 }
-.timeline>ul>li>.tl_option {
+.column_td>.col_tl_groups>.tl_group>ul>li>h4>a {
+    display: inline-block;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+}
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option {
     font-size: 14px;
     margin: 6px 12px;
 }
-.timeline>ul>li>.tl_option label {
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option label {
     font-size: 13px;
 }
-.timeline>ul>li>.tl_option>div {
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option>div {
     margin: 12px 0px;
 }
-.timeline>ul>li>.tl_option .__txt_external_instance {
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .__txt_external_instance {
     width: calc(100% - 72px);
 }
-.timeline>ul>li>.tl_option .lbl_external_instance>.instance_info {
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .lbl_external_instance>.instance_info {
     background-color: rgba(255,255,255,0.08);
     background-size: auto 64px;
     background-position: center center;
@@ -100,11 +136,8 @@
     font-size: 13px;
     text-align: center;
 }
-.timeline>ul>li>.tl_option .lbl_external_instance>.color_info {
+.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .lbl_external_instance>.color_info {
     font-size: 13px;
     text-align: right;
 }
-.timeline>ul>li>.tl_option>.foot_button {
-    text-align: right;
-    margin: 12px 0px;
-}
+

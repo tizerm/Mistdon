@@ -180,105 +180,143 @@ function readPrefCols() {
 async function writePrefCols(event, json_data) {
     // ファイル書き込み用にJSONファイルを再生成
     const write_json = []
-    json_data.forEach((col, index) => {
-        const tl_list = []
-        const unique_address = col.timelines[0].key_address
-        let multi_account_flg = false
-        col.timelines.forEach((tl) => {
-            // タイムラインのJSONを再生成
-            let rest_url = null
-            let socket_url = null
-            let query_param = null
-            let socket_param = null
+    json_data.forEach(col => { // カラムイテレータ
+        const gp_list = []
+        col.groups.forEach((gp, index) => { // グループイテレータ
+            const tl_list = []
+            const unique_address = gp.timelines[0].key_address
+            let multi_account_flg = false
+            gp.timelines.forEach(tl => { // タイムラインイテレータ
+                // 外部インスタンスと認証済みで値を変える
+                const host = tl.account?.domain ?? tl.ex_host
+                const platform = tl.account?.platform ?? tl.ex_platform
+                const external = !tl.account
+                const color = external ? tl.ex_color : null
 
-            if (tl.key_address != unique_address) {
+                let rest_url = null
+                let socket_url = null
+                let query_param = null
+                let socket_param = null
+
                 // ひとつのタイムラインに2アカウント以上混在する場合はマルチフラグを立てる
-                multi_account_flg = true
-            }
-            // プラットフォームの種類によってAPIの形式が違うので個別に設定
-            switch (tl.account.platform) {
-                case 'Mastodon': // Mastodon
-                    // タイムラインタイプによって設定値を変える
-                    switch (tl.timeline_type) {
-                        case 'home': // ホームタイムライン
-                            rest_url = `https://${tl.account.domain}/api/v1/timelines/home`
-                            query_param = {}
-                            socket_param = { 'stream': 'user' }
-                            break
-                        case 'local': // ローカルタイムライン
-                            rest_url = `https://${tl.account.domain}/api/v1/timelines/public`
-                            query_param = { 'local': true }
-                            socket_param = { 'stream': 'public:local' }
-                            break
-                        case 'federation': // 連合タイムライン
-                            rest_url = `https://${tl.account.domain}/api/v1/timelines/public`
-                            query_param = { 'remote': true }
-                            socket_param = { 'stream': 'public:remote' }
-                            break
-                        case 'notification': // 通知
-                            rest_url = `https://${tl.account.domain}/api/v1/notifications`
-                            query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
-                            socket_param = { 'stream': 'user:notification' }
-                            break
-                        default:
-                            break
-                    }
-                    socket_url = `wss://${tl.account.domain}/api/v1/streaming`
-                    break;
-                case 'Misskey': // Misskey
-                    // タイムラインタイプによって設定値を変える
-                    switch (tl.timeline_type) {
-                        case 'home': // ホームタイムライン
-                            rest_url = `https://${tl.account.domain}/api/notes/timeline`
-                            query_param = {}
-                            socket_param = { 'channel': 'homeTimeline' }
-                            break
-                        case 'local': // ローカルタイムライン
-                            rest_url = `https://${tl.account.domain}/api/notes/local-timeline`
-                            query_param = {}
-                            socket_param = { 'channel': 'localTimeline' }
-                            break
-                        case 'federation': // 連合タイムライン
-                            rest_url = `https://${tl.account.domain}/api/notes/global-timeline`
-                            query_param = {}
-                            socket_param = { 'channel': 'globalTimeline' }
-                            break
-                        case 'notification': // 通知
-                            rest_url = `https://${tl.account.domain}/api/i/notifications`
-                            query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
-                            socket_param = { 'channel': 'main' }
-                            break
-                        default:
-                            break
-                    }
-                    // WebSocket URLは共通なので外に出す
-                    socket_url = `wss://${tl.account.domain}/streaming`
-                    break
-                default:
-                    break
-            }
-            // タイムラインリストに追加
-            tl_list.push({
-                'key_address': tl.key_address,
-                'host': tl.account.domain,
-                'timeline_type': tl.timeline_type,
-                'rest_url': rest_url,
-                'socket_url': socket_url,
-                'query_param': query_param,
-                'socket_param': socket_param,
-                'exclude_reblog': tl.exclude_reblog,
-                'expand_cw': tl.expand_cw,
-                'expand_media': tl.expand_media
+                if (tl.key_address != unique_address) multi_account_flg = true
+
+                // プラットフォームの種類によってAPIの形式が違うので個別に設定
+                switch (platform) {
+                    case 'Mastodon': // Mastodon
+                        // タイムラインタイプによって設定値を変える
+                        switch (tl.timeline_type) {
+                            case 'home': // ホームタイムライン
+                                rest_url = `https://${host}/api/v1/timelines/home`
+                                query_param = {}
+                                socket_param = { 'stream': 'user' }
+                                break
+                            case 'local': // ローカルタイムライン
+                                rest_url = `https://${host}/api/v1/timelines/public`
+                                query_param = { 'local': true }
+                                socket_param = { 'stream': 'public:local' }
+                                break
+                            case 'federation': // 連合タイムライン
+                                rest_url = `https://${host}/api/v1/timelines/public`
+                                query_param = { 'remote': true }
+                                socket_param = { 'stream': 'public:remote' }
+                                break
+                            case 'list': // リスト
+                                rest_url = `https://${host}/api/v1/timelines/list/${tl.list_id}`
+                                query_param = {}
+                                socket_param = { 'stream': 'list', 'list': tl.list_id }
+                                break
+                            case 'notification': // 通知
+                                rest_url = `https://${host}/api/v1/notifications`
+                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+                                socket_param = { 'stream': 'user:notification' }
+                                break
+                            case 'mention': // メンション
+                                rest_url = `https://${host}/api/v1/notifications`
+                                query_param = { 'types': ['mention'] }
+                                socket_param = { 'stream': 'user:notification' }
+                                break
+                            default:
+                                break
+                        }
+                        socket_url = `wss://${host}/api/v1/streaming`
+                        break;
+                    case 'Misskey': // Misskey
+                        // タイムラインタイプによって設定値を変える
+                        switch (tl.timeline_type) {
+                            case 'home': // ホームタイムライン
+                                rest_url = `https://${host}/api/notes/timeline`
+                                query_param = {}
+                                socket_param = { 'channel': 'homeTimeline' }
+                                break
+                            case 'local': // ローカルタイムライン
+                                rest_url = `https://${host}/api/notes/local-timeline`
+                                query_param = {}
+                                socket_param = { 'channel': 'localTimeline' }
+                                break
+                            case 'federation': // 連合タイムライン
+                                rest_url = `https://${host}/api/notes/global-timeline`
+                                query_param = {}
+                                socket_param = { 'channel': 'globalTimeline' }
+                                break
+                            case 'list': // リスト
+                                rest_url = `https://${host}/api/notes/user-list-timeline`
+                                query_param = { 'listId': tl.list_id }
+                                socket_param = { 'channel': 'userList', 'listId': tl.list_id }
+                                break
+                            case 'notification': // 通知
+                                rest_url = `https://${host}/api/i/notifications`
+                                query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
+                                socket_param = { 'channel': 'main' }
+                                break
+                            case 'mention': // メンション
+                                rest_url = `https://${host}/api/i/notifications`
+                                query_param = { 'includeTypes': ['mention', 'reply', 'quote'] }
+                                socket_param = { 'channel': 'main' }
+                                break
+                            default:
+                                break
+                        }
+                        socket_url = `wss://${host}/streaming`
+                        break
+                    default:
+                        break
+                }
+                tl_list.push({ // タイムラインプリファレンス
+                    'key_address': !external ? tl.key_address : null,
+                    'external': external,
+                    'host': host,
+                    'platform': platform,
+                    'color': color,
+                    'timeline_type': tl.timeline_type,
+                    'list_id': tl.timeline_type == 'list' ? tl.list_id : null,
+                    'rest_url': rest_url,
+                    'socket_url': socket_url,
+                    'query_param': query_param,
+                    'socket_param': socket_param,
+                    'exclude_reblog': tl.exclude_reblog,
+                    'expand_cw': tl.expand_cw,
+                    'expand_media': tl.expand_media
+                })
+            })
+            gp_list.push({ // グループプリファレンス
+                // グループIDはUUIDを使って一意に決定(書き込み直前に再生成)
+                'group_id': `gp_${crypto.randomUUID()}`,
+                'label_head': gp.label_head,
+                'timelines': tl_list,
+                'multi_user': multi_account_flg,
+                'multi_timeline': tl_list.length > 1,
+                'gp_color': gp.gp_color,
+                // 最後のグループだけは高さを自動決定するためnullにする
+                'gp_height': index < col.groups.length - 1 ? gp.gp_height : null,
             })
         })
-        // カラムリストに追加
-        write_json.push({
+        write_json.push({ // カラムプリファレンス
             // カラムIDはUUIDを使って一意に決定(書き込み直前に再生成)
             'column_id': `col_${crypto.randomUUID()}`,
             'label_head': col.label_head,
-            'timelines': tl_list,
-            'multi_user': multi_account_flg,
-            'multi_timeline': tl_list.length > 1,
+            'groups': gp_list,
+            'multi_group': gp_list.length > 1,
             'col_color': col.col_color,
             'col_width': col.col_width,
             'd_hide': col.d_hide,
