@@ -448,12 +448,12 @@ class User {
         jqelm.find(".profile_detail").html(this.profile_element)
         // 若干横幅が長いのでヘッダサイズを大きくする
         jqelm.find('.profile_header .user_header').css('background-size', '480px auto')
-        $("#header>#pop_ex_timeline").html(jqelm)
+        $("#pop_ex_timeline").html(jqelm)
             .append('<button type="button" id="__on_search_close">×</button>')
             .show("slide", { direction: "right" }, 150)
 
         // ユーザーの投稿を非同期で取得
-        const column = $(`#header>#pop_ex_timeline>.account_timeline td`)
+        const column = $(`#pop_ex_timeline>.account_timeline td`)
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.host
             Emojis.replaceDomAsync(column.find(".profile_header .username"), host) // ユーザー名
@@ -487,7 +487,7 @@ class User {
     }
 
     createFFTaglist(type) {
-        const target = $(`#header>#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
         target.find(".user_post_elm").hide()
         target.find(".user_ff_elm").html(`
             <ul class="ff_short_profile">

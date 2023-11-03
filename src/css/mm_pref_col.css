@@ -1,17 +1,20 @@
+﻿/*=== General Stylesheet =========================================================================*/
+
 #header>.head_buttons {
     margin: 12px;
     text-align: center;
-}
-#header>.head_buttons>span {
-    display: block;
-    font-size: 13px;
-}
-#header>.head_buttons>button {
-    border-radius: 8px;
-    border: solid 2px #ffffff;
-    padding: 6px 32px;
-    font-size: 16px;
-    font-weight: bold;
+
+    > span {
+        display: block;
+        font-size: 13px;
+    }
+    > button {
+        border-radius: 8px;
+        border: solid 2px #ffffff;
+        padding: 6px 32px;
+        font-size: 16px;
+        font-weight: bold;
+    }
 }
 
 #columns input, #columns select {
@@ -20,124 +23,132 @@
     color: #ffffff;
     border: solid 1px #ffffff;
 }
+
+/*=== Column Layout ==============================================================================*/
+
 #columns {
     overflow-y: hidden;
-}
-#columns>table .column_td {
-    width: 330px;
-}
-#columns>table .column_td>.col_head {
-    background-color: #808080;
-    background-image: url("../resources/ic_sort_x.png");
-    background-position: right 12px bottom 5px;
-    background-repeat: no-repeat;
-    position: relative;
-    cursor: move;
-}
-#columns>table .column_td>.col_head>h2 {
-    margin: 0px;
-}
-#columns>table .column_td>.col_head>.group_button {
-    position: absolute;
-    bottom: 0px;
-    right: 48px;
+
+    >table {
+        .column_td {
+            width: 330px;
+
+            > .col_head {
+                background-color: #808080;
+                background-image: url("../resources/ic_sort_x.png");
+                background-position: right 12px bottom 5px;
+                background-repeat: no-repeat;
+                position: relative;
+                cursor: move;
+                > h2 { margin: 0px; }
+                > .group_button {
+                    position: absolute;
+                    bottom: 0px;
+                    right: 48px;
+                }
+            }
+            & select {
+                padding: 2px 8px;
+                width: 100%;
+            }
+            > .col_option {
+                background-color: rgba(67,67,67,0.8);
+                border-radius: 12px;
+                margin: 2px 0px;
+                padding: 2px 0px;
+                font-size: 13px;
+                text-align: center;
+            }
+
+            /*=== Group Layout ===================================================================*/
+            > .col_tl_groups {
+                height: calc(100vh - 284px);
+                & input:disabled { color: #808080; }
+                > .tl_group {
+                    > .group_head {
+                        background-color: #505050;
+                        border-top-right-radius: 12px;
+                        border-bottom-right-radius: 12px;
+                        height: 76px;
+                        margin: 2px 0px;
+                        padding: 4px 8px;
+                        font-size: 12px;
+                        text-align: left;
+                        position: relative;
+                        cursor: move;
+                        > h3 { margin: 0px; }
+                        > .group_button {
+                            position: absolute;
+                            top: 2px;
+                            right: 4px;
+                        }
+                    }
+                    > ul {
+                        margin: 0px;
+                        padding: 0px;
+                        height: calc(100vh - 316px);
+                        overflow-y: auto;
+
+                        /*=== Timeline Layout ====================================================*/
+                        > li {
+                            > h4 {
+                                position: relative;
+                                border-top-left-radius: 12px;
+                                border-top-right-radius: 12px;
+                                color: #ffffff;
+                                font-family: Arial, "メイリオ", sans-selif;
+                                font-size: 18px;
+                                font-weight: bold;
+                                margin: -12px -12px 12px;
+                                padding: 6px 24px;
+                                background-color: #808080;
+                                > a {
+                                    display: inline-block;
+                                    position: absolute;
+                                    top: 4px;
+                                    right: 4px;
+                                }
+                            }
+                            > .tl_option {
+                                font-size: 14px;
+                                margin: 6px 12px;
+                                & label { font-size: 13px; }
+                                > div { margin: 12px 0px; }
+                                .lbl_external_instance {
+                                    >.instance_info {
+                                        background-color: rgba(255,255,255,0.08);
+                                        background-size: auto 64px;
+                                        background-position: center center;
+                                        background-repeat: no-repeat;
+                                        border-radius: 12px;
+                                        margin: 6px 0px;
+                                        padding: 4px;
+                                        font-size: 13px;
+                                        text-align: center;
+                                    }
+                                    > .color_info {
+                                        font-size: 13px;
+                                        text-align: right;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 .__txt_col_head {
     width: calc(100% - 12px);
 }
-
-#columns>table .column_td select {
-    padding: 2px 8px;
-    width: 100%;
-}
-#columns>table .column_td>.col_option {
-    background-color: rgba(67,67,67,0.8);
-    border-radius: 12px;
-    margin: 2px 0px;
-    padding: 2px 0px;
-    font-size: 13px;
-    text-align: center;
-}
-#columns>table .column_td>.col_tl_groups {
-    height: calc(100vh - 284px);
-}
-#columns>table .column_td>.col_tl_groups input:disabled {
-    color: #808080;
-}
-.column_td>.col_tl_groups>.tl_group>.group_head {
-    background-color: #505050;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    height: 44px;
-    margin: 2px 0px;
-    padding: 4px 8px;
-    font-size: 12px;
-    text-align: left;
-    position: relative;
-    cursor: move;
-}
-.column_td>.col_tl_groups>.tl_group>.group_head>h3 {
-    margin: 0px;
-}
-.column_td>.col_tl_groups>.tl_group>.group_head>.group_button {
-    position: absolute;
-    top: 2px;
-    right: 4px;
-}
 .__txt_group_head {
     width: calc(100% - 64px);
 }
-.column_td>.col_tl_groups>.tl_group>ul {
-    margin: 0px;
-    padding: 0px;
-    height: calc(100vh - 316px);
-    overflow-y: auto;
+.__cmb_tl_layout {
+    font-size: 12px;
 }
-
-.column_td>.col_tl_groups>.tl_group>ul>li>h4 {
-    position: relative;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    color: #ffffff;
-    font-family: Arial, "メイリオ", sans-selif;
-    font-size: 18px;
-    font-weight: bold;
-    margin: -12px -12px 12px;
-    padding: 6px 24px;
-    background-color: #808080;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>h4>a {
-    display: inline-block;
-    position: absolute;
-    top: 4px;
-    right: 4px;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option {
-    font-size: 14px;
-    margin: 6px 12px;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option label {
-    font-size: 13px;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option>div {
-    margin: 12px 0px;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .__txt_external_instance {
+.__txt_external_instance {
     width: calc(100% - 72px);
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .lbl_external_instance>.instance_info {
-    background-color: rgba(255,255,255,0.08);
-    background-size: auto 64px;
-    background-position: center center;
-    background-repeat: no-repeat;
-    border-radius: 12px;
-    margin: 6px 0px;
-    padding: 4px;
-    font-size: 13px;
-    text-align: center;
-}
-.column_td>.col_tl_groups>.tl_group>ul>li>.tl_option .lbl_external_instance>.color_info {
-    font-size: 13px;
-    text-align: right;
 }
 

@@ -12,6 +12,7 @@
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mm_main.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
@@ -25,7 +26,7 @@
     <script type="text/javascript" src="js/module/class_column.js"></script>
     <script type="text/javascript" src="js/mm_viewbind.js"></script>
     <script type="text/javascript" src="js/mm_keybind.js"></script>
-    <script type="text/javascript" src="js/mm_core.js"></script>
+    <script type="text/javascript" src="js/mm_main.js"></script>
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 </head>
 <body>
@@ -86,6 +87,8 @@
             </div>
         </div>
     </div>
+</header>
+<div id="pop">
     <div id="pop_postuser">
     <!-- hidden: ユーザー一覧 -->
     </div>
@@ -141,13 +144,17 @@
     <div id="pop_expand_image">
     <!-- hidden: 画像拡大表示 -->
     </div>
+    <div id="pop_expand_post" class="timeline">
+        <ul class="__context_posts"></ul>
+    <!-- hidden: 投稿拡大ウィンドウ -->
+    </div>
     <div id="pop_ex_timeline">
     <!-- hidden: 拡張カラム -->
     </div>
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->
     </div>
-</header>
+</div>
 <section id="columns">
 <table><tbody>
 <tr><!-- jQueryでバインディング処理をします --></tr>

@@ -48,19 +48,19 @@ $(() => {
                 <button type="button" id="__on_help_close">×</button>
             </div>
         `))
-        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
         $.ajax({
             url: "help/help_main.html",
             cache: false
         }).then(data => {
             $.each($.parseHTML(data), (index, value) => {
-                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
+                if ($(value).is("#main")) $("#pop_extend_column .help_content").html($(value));
             });
         });
     });
     // 閉じるボタンクリックイベント
     $(document).on("click", "#__on_help_close", 
-        e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
+        e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
     // 外部表示リンククリックイベント
     $(document).on("click", ".__lnk_external", e => {
         const url = $(e.target).closest("a").attr("href");
@@ -70,7 +70,7 @@ $(() => {
     });
     $("body").keydown(e => {
         if (e.keyCode == 112) { // ヘルプだけは全画面共通
-            if ($("#header>#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
+            if ($("#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
             else $("#navi #on_help").click();
             return false;
         }
@@ -102,7 +102,7 @@ function setColorPalette(target) {
         });
         return;
     }
-    const palette_dom = $("#header>#pop_palette");
+    const palette_dom = $("#pop_palette");
     color_palette.forEach(color => {
         palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
         palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
@@ -156,7 +156,7 @@ function setColorPalette(target) {
  * @param type トーストを一意に認識するためのID
  */
 function toast(text, type, progress_id) {
-    const toast_block = $("#header>#pop_toast");
+    const toast_block = $("#pop_toast");
     if (type != 'progress' && progress_id) {
         // progressモード以外でIDが渡ってきた場合は対象toastを削除
         const target_toast = toast_block.find(`#${progress_id}`);
@@ -189,7 +189,7 @@ function toast(text, type, progress_id) {
  * @param arg 設定オブジェクト
  */
 function dialog(arg) {
-    const dialog_elm = $("#header>#pop_dialog");
+    const dialog_elm = $("#pop_dialog");
     dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
     if (arg.type == 'alert') dialog_elm.dialog({ // アラート
         resizable: false,

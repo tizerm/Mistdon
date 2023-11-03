@@ -146,7 +146,7 @@ class Group {
      * @param post カラムに追加するステータスデータ
      */
     append(post) {
-        $(`#${this.id}>ul`).append(post.element)
+        $(`#${this.id}>ul`).append(post.timeline_element)
     }
 
     /**
@@ -162,7 +162,7 @@ class Group {
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
             if (ul.find("li").length >= Column.TIMELINE_LIMIT) this.removeStatus(ul.find("li:last-child"))
-            ul.prepend(post.element)
+            ul.prepend(post.timeline_element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
@@ -172,6 +172,10 @@ class Group {
 
         // 通知が来た場合は通知ウィンドウに追加
         if (post.type == 'notification') window.accessApi.notification(post.notification)
+    }
+
+    getStatus(target_li) {
+        return this.status_map.get(target_li.attr("id"))
     }
 
     /**

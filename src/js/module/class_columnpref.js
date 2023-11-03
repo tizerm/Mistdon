@@ -277,7 +277,13 @@ class GroupPref {
                     </div>
                     <div class="group_pref">
                         <input type="text" class="__txt_group_height" size="4"/>%
-                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
+                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/><br/>
+                        <select class="__cmb_tl_layout">
+                            <option value="default">ノーマル</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                            <option value="gallery">ギャラリー</option>
+                        </select>
                     </div>
                 </div>
                 <ul></ul>
@@ -293,6 +299,8 @@ class GroupPref {
             jqelm.find(".__txt_group_color").val(this.pref.gp_color)
             jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
         }
+        if (this.pref?.tl_layout) // タイムラインレイアウト
+            jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
         // タイムラインの設定値をDOMと共に生成
         this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create(index + 1)))
 
@@ -343,9 +351,6 @@ class ColumnPref {
             this.pref = pref
 
             // タイムライン設定も追加
-            //const timelines = []
-            //this.pref?.timelines?.forEach(tl => timelines.push(new TimelinePref(tl, this)))
-            //this.timelines = timelines
             const groups = new Map()
             this.pref?.groups?.forEach(group => {
                 const group_obj = new GroupPref(group, this)
@@ -501,9 +506,6 @@ class ColumnPref {
         // グループの高さを再設定
         const reset_rate = Math.round(100 / this.tl_groups.size)
         $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
-        /*
-        $(`#${this.id}>.col_tl_groups>.tl_group>ul`)
-            .css("height", `calc((100vh - 316px) * ${reset_rate / 100} - 46px)`)//*/
         ColumnPref.setButtonPermission()
         setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_head`))
     }
@@ -518,12 +520,6 @@ class ColumnPref {
         const group = this.tl_groups.get(id)
         $(`#${group.id}`).remove()
         this.tl_groups.delete(id)
-        /*
-        // グループの高さを再設定
-        const reset_rate = Math.round(100 / this.tl_groups.size)
-        $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
-        $(`#${this.id}>.col_tl_groups>.tl_group>ul`)
-            .css("height", `calc((100vh - 316px) * ${reset_rate / 100} - 46px)`)//*/
         ColumnPref.setButtonPermission()
     }
 
@@ -543,7 +539,7 @@ class ColumnPref {
                 if (!height) height = 100 - total
                 else total += Number(height)
                 $(gp_elm).css("height", `${height}%`)
-                $(gp_elm).find("ul").css("height", 'calc(100% - 48px)')
+                $(gp_elm).find("ul").css("height", 'calc(100% - 82px)')
 
                 // タイムラインタイトルを再設定
                 $(gp_elm).find("ul>li").each((tl_index, tl_elm) => $(tl_elm)
@@ -601,7 +597,8 @@ class ColumnPref {
                     'timelines': tl_list,
                     // デフォルトグループカラーは#777777(グレー)
                     'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
-                    'gp_height': $(gp_elm).find(".__txt_group_height").val()
+                    'gp_height': $(gp_elm).find(".__txt_group_height").val(),
+                    'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val()
                 })
             })
             col_list.push({ // カラムプリファレンス

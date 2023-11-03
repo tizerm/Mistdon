@@ -226,33 +226,41 @@ class Column {
             const link = $(e.target).closest(".__on_media_expand")
 
             // 動画ファイル(GIFアニメも含む)
-            if (link.attr("type") == 'video' || link.attr("type") == 'gifv') $("#header>#pop_expand_image").html(`
+            if (link.attr("type") == 'video' || link.attr("type") == 'gifv') $("#pop_expand_image").html(`
                 <div class="expand_image_col">
                     <video src="${link.attr("href")}" autoplay controls loop></video>
                 </div>`).show("slide", { direction: "right" }, 80)
             else { // それ以外は画像ファイル
                 const window_aspect = window.innerWidth / window.innerHeight
                 const image_aspect = link.attr("name")
-                $("#header>#pop_expand_image")
+                $("#pop_expand_image")
                     .html(`<div class="expand_image_col"><img src="${link.attr("href")}"/></div>`)
                     .show("slide", { direction: "right" }, 80)
                 if (image_aspect > window_aspect) // ウィンドウよりも画像のほうが横幅ながめ
-                    $("#header>#pop_expand_image>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
+                    $("#pop_expand_image>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
                 else // ウィンドウよりも画像のほうが縦幅ながめ
-                    $("#header>#pop_expand_image>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
+                    $("#pop_expand_image>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
             }
 
             return false
         })
         // 画像以外をクリックすると画像ウィンドウを閉じる
         $("body").on("click", e => {
-            if (!$(e.target).is(".expand_image_col>*")) $("#header>#pop_expand_image")
+            if (!$(e.target).is(".expand_image_col>*")) $("#pop_expand_image")
                 // 閉じたときに動画が裏で再生されないように閉じた後中身を消す
-                .hide("slide", { direction: "right" }, 80, () => $("#header>#pop_expand_image").empty())
+                .hide("slide", { direction: "right" }, 80, () => $("#pop_expand_image").empty())
         })
         // 投稿日付: 投稿の詳細表示
         $(document).on("click", ".__on_datelink", e => Status
             .getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
+        // リストTL: 投稿のポップアップ表示
+        $(document).on("click", "li.short_timeline", e => {
+            const target_li = $(e.target).closest("li")
+            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus(target_li).createExpandWindow(target_li)
+        })
+        // 短縮TL: 投稿のポップアップを消す(ポップアップから出た時)
+        $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
     }
 
     /**
@@ -313,7 +321,7 @@ class Column {
             </div>
         `)
 
-        const query = $("#header>#pop_ex_timeline #__txt_search_query").val()
+        const query = $("#pop_ex_timeline #__txt_search_query").val()
         const search_col = Column.SEARCH_COL
         const rest_promises = []
         search_col.status_map = new Map()

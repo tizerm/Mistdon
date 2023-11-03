@@ -914,7 +914,7 @@ class Account {
      * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
      */
     createEmojiList() {
-        $("#header>#pop_custom_emoji").html(`
+        $("#pop_custom_emoji").html(`
             <div class="emoji_head">
                 <h2>カスタム絵文字一覧</h2>
                 <h3>${this.pref.domain}</h3>
@@ -925,10 +925,10 @@ class Account {
             </div>
             <button type="button" id="__on_emoji_close">×</button>
         `).show("slide", { direction: "left" }, 150)
-        $("#header>#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
+        $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#header>#pop_custom_emoji>.emoji_list").append(`
+        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
     }
@@ -1042,7 +1042,7 @@ class Account {
             </td>
         `)
         // 先に表示フレームだけ生成
-        $("#header>#pop_ex_timeline").html(`
+        $("#pop_ex_timeline").html(`
             <div class="account_timeline">
                 <table id="auth_account_table"><tbody>
                     <tr>${html}</tr>
@@ -1050,10 +1050,10 @@ class Account {
             </div>
             <button type="button" id="__on_search_close">×</button>
         `).show("slide", { direction: "right" }, 150)
-        $("#header>#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
+        $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 
         Account.map.forEach((v, k) => v.getInfo().then(detail => {
-            const column = $(`#header>#pop_ex_timeline>.account_timeline td[id="${k}"]`)
+            const column = $(`#pop_ex_timeline>.account_timeline td[id="${k}"]`)
 
             // ロード待ち画面を消してユーザー情報のプロフィール部分を生成
             column.find(".col_loading").remove()

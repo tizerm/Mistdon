@@ -306,6 +306,7 @@ async function writePrefCols(event, json_data) {
                 'timelines': tl_list,
                 'multi_user': multi_account_flg,
                 'multi_timeline': tl_list.length > 1,
+                'tl_layout': gp.tl_layout,
                 'gp_color': gp.gp_color,
                 // 最後のグループだけは高さを自動決定するためnullにする
                 'gp_height': index < col.groups.length - 1 ? gp.gp_height : null,
