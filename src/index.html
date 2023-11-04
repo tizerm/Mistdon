@@ -27,6 +27,7 @@
     <script type="text/javascript" src="js/mm_viewbind.js"></script>
     <script type="text/javascript" src="js/mm_keybind.js"></script>
     <script type="text/javascript" src="js/mm_main.js"></script>
+    <script type="text/javascript" src="js/mm_event.js"></script>
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 </head>
 <body>
@@ -89,8 +90,9 @@
     </div>
 </header>
 <div id="pop">
-    <div id="pop_postuser">
-    <!-- hidden: ユーザー一覧 -->
+    <div id="pop_postuser" class="pop_context">
+        <!-- hidden: ユーザー一覧 -->
+        <ul class="ui_menu"></ul>
     </div>
     <div id="pop_toast">
     <!-- hidden: トースト -->

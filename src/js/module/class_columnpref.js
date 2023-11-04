@@ -30,7 +30,7 @@ class TimelinePref {
 
         // タイムラインの設定ブロックをjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
-            <li>
+            <li class="ui-sortable">
                 <h4>
                     <span class="tl_header_label">Timeline ${index}</span>
                     <a class="__on_remove_timeline ic_button" title="このタイムラインを削除"
@@ -286,7 +286,7 @@ class GroupPref {
                         </select>
                     </div>
                 </div>
-                <ul></ul>
+                <ul class="__ui_tl_sortable"></ul>
             </div>
         `))
         // 初期値が存在する場合は初期値を設定
@@ -444,7 +444,7 @@ class ColumnPref {
                     <label for="df_${this.id}">デフォルトで可変幅にする</label><br/>
                     色: #<input type="text" class="__txt_col_color __pull_color_palette" size="6"/>
                 </div>
-                <div class="col_tl_groups">
+                <div class="col_tl_groups __ui_gp_sortable">
                 </div>
             </td>
         `))

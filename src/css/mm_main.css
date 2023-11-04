@@ -129,39 +129,6 @@
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {
-    /*=== Post Account Select Menu ===============================================================*/
-    > #pop_postuser {
-        display: none;
-        z-index: 10;
-        width: 400px;
-        position: absolute;
-        top: 108px;
-        left: 72px;
-
-        .account_list>.__lnk_account_elm {
-            display: block;
-            margin: 4px 0px;
-            padding: 8px 16px 16px;
-            border-radius: 8px;
-            background-color: rgba(32,32,32,0.85);
-            font-size: 14px;
-
-            &:hover {
-                background-color: rgba(32,67,96,0.85);
-                cursor: pointer;
-            }
-            > .user_icon {
-                border-radius: 12px;
-                width: 48px;
-                height: 48px;
-                margin-right: 12px;
-                float: left;
-            }
-            > .display_name { font-weight: bold; }
-            > .user_domain { font-size: 13px; }
-        }
-    }
-
     /*=== General Context Menu Layout ============================================================*/
     > .pop_context {
         display: none;
@@ -172,7 +139,7 @@
 
         & ul {
             border-radius: 8px;
-            background-color: #222222;
+            background-color: rgba(34,34,34,0.92);
             border: solid 1px #aaaaaa;
             padding: 4px;
             color: #ffffff;
@@ -189,6 +156,41 @@
                     background-color: rgba(255,255,255,0.15);
                 }
                 > ul { width: 360px; }
+            }
+        }
+    }
+
+    /*=== Post Account Select Menu ===============================================================*/
+    > #pop_postuser {
+        display: none;
+        z-index: 10;
+        width: 360px;
+        position: absolute;
+        top: 108px;
+        left: 72px;
+
+        .__lnk_account_elm>div {
+            position: relative;
+            padding: 2px 6px;
+
+            > .user_icon {
+                border-radius: 12px;
+                width: 48px;
+                height: 48px;
+            }
+            > .display_name {
+                position: absolute;
+                left: 72px;
+                top: 8px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            > .user_domain {
+                position: absolute;
+                left: 72px;
+                top: 32px;
+                font-family: Arial, "メイリオ", sans-selif;
+                font-size: 13px;
             }
         }
     }

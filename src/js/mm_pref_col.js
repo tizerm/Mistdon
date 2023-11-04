@@ -15,13 +15,33 @@
         ColumnPref.each(col => col.create())
         ColumnPref.setButtonPermission();
         setColorPalette();
+
+        $(".__ui_gp_sortable").sortable({
+            connectWith: ".__ui_gp_sortable",
+            delay: 100,
+            distance: 48,
+            handle: ".group_head",
+            placeholder: "ui-state-highlight",
+            revert: 50,
+            tolerance: "pointer"
+        });
+        $(".__ui_tl_sortable").sortable({
+            connectWith: ".__ui_tl_sortable",
+            delay: 100,
+            distance: 48,
+            handle: "h4",
+            placeholder: "ui-state-highlight",
+            revert: 50,
+            tolerance: "pointer"
+        });
     })();
     // カラムをSortableにする(これはカラムの有無にかかわらず実行)
-    $(".__ui_sortable").sortable({
+    $(".__ui_col_sortable").sortable({
         axis: "x",
         delay: 100,
         distance: 48,
         handle: ".col_head",
+        placeholder: "ui-state-highlight",
         revert: 50,
         tolerance: "pointer"
     });

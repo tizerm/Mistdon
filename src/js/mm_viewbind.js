@@ -4,7 +4,7 @@
  */
 function createSearchWindow() {
     // 検索カラムのDOM生成
-    $("#header>#pop_ex_timeline").html(`
+    $("#pop_ex_timeline").html(`
         <h2>Toot/Note検索</h2>
         <div class="search_timeline">
             <div class="search_options">

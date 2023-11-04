@@ -42,7 +42,7 @@ audio { height: 30px; }
     border-radius: 8px;
     font-size: 14px;
 }
-#header>#pop_dialog { display: none; }
+#pop>#pop_dialog { display: none; }
 .ui-dialog {
     background-color: rgba(34,34,34,0.8);
     border-style: none;
@@ -163,7 +163,7 @@ audio { height: 30px; }
         position: absolute;
         font-weight: bold;
         top: 114px;
-        left: 0px;
+        left: 72px;
 
         > span {
             display: block;

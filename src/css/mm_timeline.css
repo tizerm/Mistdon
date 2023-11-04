@@ -517,6 +517,9 @@
                     margin: 0px;
                     padding: 0px;
                     font-size: 13px;
+                    /* TODO: 投稿サイズを一定以上で切るテスト
+                    max-height: 160px;
+                    overflow: hidden;//*/
                 }
                 > .ic_target_account {
                     position: absolute;
@@ -557,7 +560,6 @@
             padding: 0px;
             height: 24px;
             cursor: default;
-            &:hover { background-color: rgba(88,88,88,0.92); }
             & img {
                 width: 24px;
                 height: 24px;
@@ -614,6 +616,10 @@
             }
         }
         > li.short_timeline.short_notification>.content { width: calc(100% - 88px); }
+        > li.short_timeline,
+        > li.chat_timeline>.content {
+            &:hover { background-color: rgba(88,88,88,0.92); }
+        }
 
         /*=== Gallery Layout Style ===============================================================*/
         > li.gallery_timeline {
@@ -652,11 +658,25 @@
                 padding: 0px;
                 font-size: 12px;
             }
-            > .media .media_preview {
+            > .media a.__on_media_expand {
                 display: block;
                 width: 100%;
-                height: auto;
+                position: relative;
+                overflow: hidden;
                 margin: 3px 0px;
+                &::before {
+                    content: "";
+                    padding-top: 100%;
+                    display: block;
+                }
+                > img {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0px;
+                    left: 0px;
+                    object-fit: cover;
+                }
             }
             > .post_footer {
                 font-size: 11px;

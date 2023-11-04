@@ -132,6 +132,8 @@ class Status {
                 if (this.content) this.content = this.content
                     .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
                     .replace(new RegExp('>', 'g'), '&gt;')
+                    .replace(new RegExp('https?://.+?\s?', 'g'), // MisskeyはURLをリンクをリンクとして展開する
+                        match => `<a href="${match}">${match}</a>`)
                     .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
 
                 this.emojis = new Emojis({

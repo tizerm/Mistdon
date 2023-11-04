@@ -23,21 +23,6 @@ $(() => {
             duration: 80
         }
     });
-    // 公開範囲ホバー時にツールチップ表示
-    $("#header>#head_postarea").tooltip({
-        position: {
-            my: "center top",
-            at: "center bottom"
-        },
-        show: {
-            effect: "slideDown",
-            duration: 80
-        },
-        hide: {
-            effect: "slideUp",
-            duration: 80
-        }
-    });
     // ヘルプを表示
     $("#navi #on_help").on("click", e => {
         // ヘルプウィンドウのDOM生成
@@ -145,6 +130,21 @@ function setColorPalette(target) {
         $("body *").removeClass("__target_color_button __target_color_box");
         palette_dom.hide("slide", { direction: "up" }, 50);
     });
+}
+
+function popContextMenu(e, id) {
+    if (window.innerHeight / 2 < e.pageY) // ウィンドウの下の方にある場合は下から展開
+        $(`#${id}`).css({
+            'top': 'auto',
+            'bottom': `${Math.round(window.innerHeight - e.pageY - 8)}px`,
+            'left': `${e.pageX - 8}px`
+        });
+    else $(`#${id}`).css({
+        'bottom': 'auto',
+        'top': `${e.pageY - 8}px`,
+        'left': `${e.pageX - 8}px`
+    });
+    $(`#${id}`).show("slide", { direction: "left" }, 100);
 }
 
 /**

@@ -954,15 +954,14 @@ class Account {
      * 投稿アカウントを選択するリストのDOMを返却
      */
     static createPostAccountList() {
-        let html = '<div class="account_list">'
+        let html = ''
         Account.map.forEach((v, k) => html += `
-            <a name="${k}" class="__lnk_account_elm">
+            <li name="${k}" class="__lnk_account_elm"><div>
                 <img src="${v.pref.avatar_url}" class="user_icon"/>
                 <div class="display_name">${v.pref.username}</div>
                 <div class="user_domain">${k}</div>
-            </a>
+            </div></li>
         `)
-        html += '</div>'
         return html
     }
 
