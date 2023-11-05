@@ -230,7 +230,7 @@
         font-size: 14px;
     }
     & ul {
-        background-color: rgba(255,255,255,0.08);
+        background-color: rgba(255,255,255,0.05);
         margin: 0px;
         padding: 0px;
         height: calc(100vh - 204px);
@@ -757,4 +757,29 @@
     }
     .posts_block>h4 { background-color: #3b5778; }
     .posts { height: calc((100vh - 310px) * 0.6); }
+
+    .ff_short_profile { height: 212px; }
+    .ff_nametags {
+        height: calc((100vh - 310px) * 0.8 - 212px);
+        > li.user_nametag {
+            display: inline-block;
+            width: calc(50% - 28px);
+            height: 32px;
+            margin: 2px 0px;
+            .usericon {
+                width: 36px;
+                height: 36px;
+            }
+            .username, .userid { font-size: 12px; }
+            .username {
+                left: 46px;
+                top: 2px;
+            }
+            .userid {
+                left: 46px;
+                top: 20px;
+            }
+            &:hover { background-color: rgba(88,88,88,0.92); }
+        }
+    }
 }

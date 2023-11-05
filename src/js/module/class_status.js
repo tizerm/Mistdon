@@ -114,14 +114,14 @@ class Status {
 
                 // ユーザーに関するデータ
                 this.user = {
-                    username: data.user.name || data.user.username,
-                    id: data.user.username + (data.user.host ? ('@' + data.user.host) : ''),
+                    username: data.user?.name || data.user?.username,
+                    id: data.user?.username + (data.user?.host ? ('@' + data.user?.host) : ''),
                     full_address: `${data.user?.username}@${data.user?.host ? data.user?.host : host}`,
-                    avatar_url: data.user.avatarUrl,
+                    avatar_url: data.user?.avatarUrl,
                     emojis: new Emojis({
                         host: host,
                         platform: 'Misskey',
-                        emojis: data.user.emojis
+                        emojis: data.user?.emojis
                     })
                 }
                 // 投稿コンテンツに関するデータ
@@ -132,7 +132,7 @@ class Status {
                 if (this.content) this.content = this.content
                     .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
                     .replace(new RegExp('>', 'g'), '&gt;')
-                    .replace(new RegExp('https?://.+?\s?', 'g'), // MisskeyはURLをリンクをリンクとして展開する
+                    .replace(new RegExp('https?://[^ 　\n]+', 'g'), // MisskeyはURLをリンクをリンクとして展開する
                         match => `<a href="${match}">${match}</a>`)
                     .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
 
@@ -164,7 +164,7 @@ class Status {
                 }))
 
                 // 詳細表示に関するデータ
-                this.author_id = data.user.id
+                this.author_id = data.user?.id
                 this.hashtags = data.tags
                 this.count_reply = data.repliesCount
                 this.count_reblog = data.renoteCount
@@ -183,7 +183,7 @@ class Status {
         }
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
-        this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user.full_address}`
+        this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
     }
 
     // Getter: 挿入先カラム

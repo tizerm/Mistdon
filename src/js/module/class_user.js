@@ -6,46 +6,58 @@
  */
 class User {
     // コンストラクタ: APIから来たユーザーデータを受け取って生成
-    constructor(json, host, platform) {
-        this.host = host
-        this.platform = platform
+    constructor(arg) {
+        this.platform = arg.platform
         this.fields = []
-        switch (platform) { // TODO: 暫定
+        let host = null
+
+        switch (arg.platform) { // TODO: 暫定
             case 'Mastodon': // Mastodon
-                this.id = json.id
-                this.user_id = json.username
-                this.full_address = `@${json.username}@${host}`
-                this.username = json.display_name || json.username
-                this.avatar_url = json.avatar
-                this.header_url = json.header
-                this.profile = json.note
-                this.url = json.url
-                this.count_post = json.statuses_count
-                this.count_follow = json.following_count
-                this.count_follower = json.followers_count
+                // リモートの情報を直に取得する場合引数をそのまま使う
+                if (arg.remote) host = arg.host
+                else // ローカルサーバーからユーザー情報を取得している場合
+                    host = arg.json.acct.match(/@/) // リモートホストはアドレスから取得
+                        ? arg.json.acct.substring(arg.json.acct.lastIndexOf('@') + 1) : arg.host
+
+                this.id = arg.json.id
+                this.user_id = arg.json.username
+                this.full_address = `@${arg.json.username}@${host}`
+                this.username = arg.json.display_name || arg.json.username
+                this.avatar_url = arg.json.avatar
+                this.header_url = arg.json.header
+                this.profile = arg.json.note
+                this.url = arg.json.url
+                this.count_post = arg.json.statuses_count
+                this.count_follow = arg.json.following_count
+                this.count_follower = arg.json.followers_count
 
                 // フィールドをセット
-                if (json.fields) json.fields.forEach(f => this.fields.push({
+                if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
                     label: f.name,
                     text: f.value
                 }))
                 break
             case 'Misskey': // Misskey
-                this.id = json.id
-                this.user_id = json.username
-                this.full_address = `@${json.username}@${host}`
-                this.username = json.name || json.username
-                this.avatar_url = json.avatarUrl
-                this.header_url = json.bannerUrl
-                this.profile = json.description
+                // リモートの情報を直に取得する場合引数をそのまま使う
+                if (arg.remote) host = arg.host
+                else // ローカルサーバーからユーザー情報を取得している場合ホスト情報を参照する
+                    host = arg.json.host ?? arg.host
+
+                this.id = arg.json.id
+                this.user_id = arg.json.username
+                this.full_address = `@${arg.json.username}@${host}`
+                this.username = arg.json.name || arg.json.username
+                this.avatar_url = arg.json.avatarUrl
+                this.header_url = arg.json.bannerUrl
+                this.profile = arg.json.description
                 if (this.profile) this.profile = this.profile.replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
-                this.url = `https://${host}/@${json.username}` // URLは自前で生成
-                this.count_post = json.notesCount
-                this.count_follow = json.followingCount
-                this.count_follower = json.followersCount
+                this.url = `https://${host}/@${arg.json.username}` // URLは自前で生成
+                this.count_post = arg.json.notesCount
+                this.count_follow = arg.json.followingCount
+                this.count_follower = arg.json.followersCount
 
                 // フィールドをセット
-                if (json.fields) json.fields.forEach(f => this.fields.push({
+                if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
                     label: f.name,
                     text: f.value.match(/^http/) // URLはリンクにする
                         ? `<a href="${f.value}" class="__lnk_external">${f.value}</a>` : f.value
@@ -53,11 +65,12 @@ class User {
 
                 // ピンどめ投稿はまとめる
                 this.pinneds = [] // この段階ではまだ整形しない
-                if (json.pinnedNotes) json.pinnedNotes.forEach(note => this.pinneds.push(note))
+                if (arg.json.pinnedNotes) arg.json.pinnedNotes.forEach(note => this.pinneds.push(note))
                 break
             default:
                 break
         }
+        this.host = host
     }
 
     /**
@@ -136,7 +149,12 @@ class User {
             default:
                 break
         }
-        return rest_promise.then(data => { return new User(data, arg.host, arg.platform) })
+        return rest_promise.then(data => { return new User({
+            json: data,
+            host: arg.host,
+            remote: true,
+            platform: arg.platform
+        })})
     }
 
     // Getter: プロフィールヘッダのDOMを返却
@@ -202,7 +220,7 @@ class User {
     get short_elm() {
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `
-            <li class="short_userinfo">
+            <li class="short_userinfo" name="${this.full_address}">
                 <div class="label_head user_header">
                     <span>&nbsp;</span>
                 </div>
@@ -379,7 +397,12 @@ class User {
                 }).then(data => {
                     return (async () => {
                         const users = []
-                        data.forEach(u => users.push(new User(data, this.host, account.platform)))
+                        data.forEach(u => users.push(new User({
+                            json: u,
+                            host: this.host,
+                            remote: false,
+                            platform: account.platform
+                        })))
                         return users
                     })()
                 })
@@ -400,7 +423,12 @@ class User {
                 }).then(data => {
                     return (async () => {
                         const users = []
-                        data.forEach(u => users.push(new User(data, this.host, account.platform)))
+                        data.forEach(u => users.push(new User({
+                            json: u.followee ?? u.follower,
+                            host: this.host,
+                            remote: false,
+                            platform: account.platform
+                        })))
                         return users
                     })()
                 })

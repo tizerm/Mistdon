@@ -62,6 +62,22 @@ $(() => {
     });
 });
 
+function delayMouseEvent(arg) {
+    var timer = null;
+    $(document).on("mouseenter", arg.selector, e => {
+        timer = setTimeout(evt => { // タイマーセット
+            timer = null;
+            arg.enterFunc(evt);
+        }, arg.delay, e);
+    });
+    $(document).on("mouseleave", arg.selector, e => {
+        if (timer) { // タイマーが未実行の場合はタイマーを削除
+            clearTimeout(timer);
+            timer = null;
+        } else arg.leaveFunc(e);
+    });
+}
+
 /**
  * #Renderer #jQuery
  * カラーフォームにカラーパレット表示機能を追加

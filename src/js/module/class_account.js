@@ -815,11 +815,15 @@ class Account {
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.then(data => { return new User(data, this.pref.domain, this.pref.platform) })
-            .catch(jqXHR => { // 失敗したらnullを返す
-                toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
-                return null
-            })
+        return rest_promise.then(data => { return new User({
+            json: data,
+            host: this.pref.domain,
+            remote: true,
+            platform: this.pref.platform
+        })}).catch(jqXHR => { // 失敗したらnullを返す
+            toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
+            return null
+        })
     }
 
     /**
@@ -1042,7 +1046,7 @@ class Account {
         `)
         // 先に表示フレームだけ生成
         $("#pop_ex_timeline").html(`
-            <div class="account_timeline">
+            <div class="account_timeline auth_user">
                 <table id="auth_account_table"><tbody>
                     <tr>${html}</tr>
                 </tbody></table>

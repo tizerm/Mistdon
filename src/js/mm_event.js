@@ -419,7 +419,8 @@ $(() => {
      * 投稿本体(チャットレイアウトとリストレイアウト限定)
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
-    $(document).on("click", "li.short_timeline, li.chat_timeline", e => {
+    $(document).on("click", "li.short_timeline, li.chat_timeline>.content", e => {
+        if ($(e.target).is(".expand_header")) return // CW展開は無視
         const target_li = $(e.target).closest("li")
         Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus(target_li).createExpandWindow(target_li)
@@ -454,7 +455,23 @@ $(() => {
      * #Event
      * TODO: まだ実装中やねん
      */
-    $(document).on("click", "#pop_ex_timeline .profile_header>.header_userinfo .count_follow", e => {
+    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_post", e => {
+        $(e.target).closest("td").find(".user_ff_elm").hide()
+        $(e.target).closest("td").find(".user_post_elm").show()
+    })
+
+    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_follow", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('follows')))
+
+    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_follower", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
+
+    delayMouseEvent({ // user_ff_elm ul.ff_short_profile
+        selector: "#pop_ex_timeline>.auth_user .ff_nametags>li",
+        enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
+            .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
+        leaveFunc: e => {},
+        delay: 500
     })
 
     /*=== Context Menu Event =====================================================================================*/
@@ -480,9 +497,14 @@ $(() => {
      * ユーザー詳細を右クリック
      * => ユーザーアクション用のコンテキストメニューを表示
      */
-    $(document).on("contextmenu", "ul.__context_user>li, li.short_userinfo", e => {
+    $(document).on("contextmenu", "ul.__context_user>li", e => {
         popContextMenu(e, "pop_context_user")
         $("#pop_context_user").attr("name", $(e.target).closest("td").attr("id"))
+        return false
+    })
+    $(document).on("contextmenu", "li.short_userinfo, li.user_nametag", e => {
+        popContextMenu(e, "pop_context_user")
+        $("#pop_context_user").attr("name", $(e.target).closest("li").attr("name"))
         return false
     })
 
