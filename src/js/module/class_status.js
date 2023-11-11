@@ -646,7 +646,7 @@ class Status {
 
         if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
             // 外部インスタンスの場合はタイムラインのホスト名にする
-            const address = this.from_timeline?.pref.external ? this.from_timeline?.pref.host : this.from_account.full_address
+            const address = this.from_timeline?.pref?.external ? this.from_timeline?.pref.host : this.from_account.full_address
             html += `<div class="from_address" name="${address}">From ${address}</div>`
         }
         html += `

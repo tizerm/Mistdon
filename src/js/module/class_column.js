@@ -7,32 +7,22 @@
 class Column {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref) {
-        if (pref) { // prefがある(通常のカラム)
-            this.pref = pref
-            this.index = pref.index
-            this.unread = 0
-            this.counter = 0
-            this.ppm_que = []
-            this.timer_id = null
-            this.flex = pref.d_flex
-            this.open_flg = !pref.d_hide
-            this.search_flg = false
+        this.pref = pref
+        this.index = pref.index
+        this.unread = 0
+        this.counter = 0
+        this.ppm_que = []
+        this.timer_id = null
+        this.flex = pref.d_flex
+        this.open_flg = !pref.d_hide
 
-            // グループはインスタンスを作って管理
-            const gps = new Map()
-            pref.groups.forEach((gp, index) => {
-                gp.index = index
-                gps.set(gp.group_id, new Group(gp, this))
-            })
-            this.group_map = gps
-        } else { // prefがない(検索用カラム)
-            this.pref = {
-                "column_id": "__search_timeline",
-                "multi_user": true
-            }
-            this.status_map = new Map()
-            this.search_flg = true
-        }
+        // グループはインスタンスを作って管理
+        const gps = new Map()
+        pref.groups.forEach((gp, index) => {
+            gp.index = index
+            gps.set(gp.group_id, new Group(gp, this))
+        })
+        this.group_map = gps
     }
 
     // Getter: カラムの一意識別IDを取得
@@ -49,8 +39,6 @@ class Column {
             })
             Column.map = col_map
         })()
-        // 検索用の静的カラムを設定
-        Column.SEARCH_COL = new Column(null)
     }
 
     /**
@@ -212,31 +200,6 @@ class Column {
             target.find(".col_head h6").html(insert_text)
             target.prev().find("h2 .speed").html(insert_text)
         })(), 60000) // 1分おきに実行
-    }
-
-    /**
-     * #StaticMethod
-     * 検索カラムに入力された情報をもとに検索処理を実効する
-     */
-    static async search() {
-        // 一旦中身を全消去する
-        $('#pop_ex_timeline').find(".col_loading").remove()
-        $('#pop_ex_timeline').find("ul").empty()
-        $('#pop_ex_timeline').find("ul").before(`
-            <div class="col_loading">
-                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                <span class="loading_text">Now Loading...</span>
-            </div>
-        `)
-
-        const query = $("#pop_ex_timeline #__txt_search_query").val()
-        const search_col = Column.SEARCH_COL
-        const rest_promises = []
-        search_col.status_map = new Map()
-        // すべてのアカウントから検索処理を実行(検索結果をPromise配列に)
-        Account.each(account => rest_promises.push(account.search(query)))
-        // すべての検索結果を取得したらカラムにバインド
-        search_col.onLoadTimeline(rest_promises)
     }
 
     /**

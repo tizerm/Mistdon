@@ -7,6 +7,16 @@
 class Group {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref, column) {
+        if (!pref) { // 空のグループ(検索用)
+            this.pref = {
+                "group_id": "__search_timeline",
+                "tl_layout": "default",
+                "multi_user": true
+            }
+            this.status_map = new Map()
+            this.search_flg = true
+            return
+        }
         this.pref = pref
         this.index = pref.index
         this.__column_id = column.id
@@ -15,6 +25,7 @@ class Group {
         this.counter = 0
         this.ppm_que = []
         this.timer_id = null
+        this.search_flg = false
 
         // タイムラインはインスタンスを作って管理
         const tls = []
@@ -128,8 +139,8 @@ class Group {
                 $(`#${this.id}>.col_loading`).remove()
                 // ソートが終わったらタイムラインをDOMに反映
                 postlist.forEach(post => this.append(post))
-                // 流速タイマーをセット
-                this.initSpeedAnalyzer()
+                // 流速タイマーをセット(検索のときはセットしない)
+                if (!this.search_flg) this.initSpeedAnalyzer()
             } else { // すべてのカラムの取得に失敗した場合
                 $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
                 $(`#${this.id}>.col_loading>.loading_text`)

@@ -564,69 +564,6 @@ class Account {
     }
 
     /**
-     * #Method #Ajax #jQuery
-     * このアカウントから検索処理を実行する
-     * 現状投稿の検索のみ対応
-     * 
-     * @param query 検索文字列
-     */
-    search(query) {
-        let rest_promise = null
-        // 検索文字列を渡して投稿を検索
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v2/search`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
-                    data: {
-                        "q": query,
-                        "type": "statuses",
-                        "limit": 40
-                    }
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.statuses.forEach(p => posts.push(
-                            new Status(p, { "parent_column": Column.SEARCH_COL } , this)))
-                        return posts
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/notes/search`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": this.pref.access_token,
-                        "query": query,
-                        "limit": 40
-                    })
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(
-                            new Status(p, { "parent_column": Column.SEARCH_COL }, this)))
-                        return posts
-                    })()
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
-            toast(`${this.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
-    }
-
-    /**
      * #Method #WebSocket
      * このアカウントにWebSocketの設定を追加する
      * 

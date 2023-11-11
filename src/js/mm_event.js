@@ -6,7 +6,7 @@ $(() => {
      * #Event
      * 検索ボタン
      */
-    $("#navi .navi_search").on("click", e => createSearchWindow())
+    $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
     /**
      * #Event
@@ -577,7 +577,7 @@ $(() => {
      * #Event
      * 検索ウィンドウ: 検索処理実行
      */
-    $(document).on("click", "#__on_search", e => Column.search())
+    $(document).on("click", "#__on_search", e => Query.onSearchTimeline())
 
     /**
      * #Event

@@ -1,6 +1,6 @@
 {
   "name": "Mistdon",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "This is Electron base Mastodon and Misskey client.",
   "main": "main.js",
   "scripts": {
