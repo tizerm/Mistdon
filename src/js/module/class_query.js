@@ -27,7 +27,7 @@ class Query {
     static createSearchWindow() {
         // 検索カラムのDOM生成
         $("#pop_ex_timeline").html(`
-            <h2>Toot/Note検索</h2>
+            <h2>検索(ハッシュタグ検索)</h2>
             <div class="search_timeline">
                 <div class="search_options">
                     <input type="text" id="__txt_search_query" class="__ignore_keyborad"

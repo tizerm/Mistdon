@@ -414,6 +414,13 @@ $(() => {
     $(document).on("click", ".__on_datelink", e =>
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
+    delayHoldEvent({
+        selector: ".__context_posts>li",
+        holdFunc: e =>
+            Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()),
+        delay: 750
+    })
+
     /**
      * #Event
      * 投稿本体(チャットレイアウトとリストレイアウト限定)
@@ -466,12 +473,21 @@ $(() => {
     $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_follower", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
 
-    delayMouseEvent({ // user_ff_elm ul.ff_short_profile
+    delayHoverEvent({
         selector: "#pop_ex_timeline>.auth_user .ff_nametags>li",
         enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
             .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
         leaveFunc: e => {},
         delay: 500
+    })
+
+    $(document).on("click", "#pop_ex_timeline>.auth_user .ff_nametags>li", e =>
+        User.getByAddress($(e.target).closest("li").attr("name")).then(user => user.createDetailPop($(e.target))))
+    $(document).on("mouseleave", "#pop_ex_timeline>.ff_pop_user", e => {
+        const to = $(e.relatedTarget)
+        // コンテキストメニューに移動した場合はなにもしない
+        if (to.closest(".pop_context").length > 0) return
+        $(e.currentTarget).hide("fade", 80)
     })
 
     /*=== Context Menu Event =====================================================================================*/

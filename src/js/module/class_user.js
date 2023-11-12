@@ -173,9 +173,19 @@ class User {
                 <img src="${this.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.username}</h4>
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
-            </div>
         `
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                break
+            case 'Misskey': // Misskey
+                html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                break
+            default:
+                break
+        }
         html += `
+            </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
                 <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
@@ -232,9 +242,19 @@ class User {
                 <img src="${this.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.username}</h4>
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
-            </div>
         `
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                break
+            case 'Misskey': // Misskey
+                html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                break
+            default:
+                break
+        }
         html += `
+            </div>
             <div class="content"><div class="main_content">
                 ${$($.parseHTML(this.profile)).text()}
             </div></div>
@@ -445,43 +465,35 @@ class User {
         })
     }
 
-    /**
-     * #Method
-     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する
-     */
-    createDetailWindow() {
+    createDetailHtml(bind_selector) {
         const jqelm = $($.parseHTML(`
-            <div class="account_timeline single_user">
-                <table><tbody>
-                    <tr><td id="${this.full_address}" class="timeline column_profile">
-                        <div class="col_loading">
-                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                            <span class="loading_text">Now Loading...</span>
-                        </div>
-                        <ul class="profile_header __context_user"></ul>
-                        <ul class="profile_detail __context_user"></ul>
-                        <div class="pinned_block post_div">
-                            <h4>ピンどめ</h4>
-                            <ul class="pinned_post __context_posts"></ul>
-                        </div>
-                        <div class="posts_block post_div">
-                            <h4>投稿一覧</h4>
-                            <ul class="posts __context_posts"></ul>
-                        </div>
-                    </td></tr>
-                </tbody></table>
-            </div>
+            <table><tbody>
+                <tr><td id="${this.full_address}" class="timeline column_profile">
+                    <div class="col_loading">
+                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                        <span class="loading_text">Now Loading...</span>
+                    </div>
+                    <ul class="profile_header __context_user"></ul>
+                    <ul class="profile_detail __context_user"></ul>
+                    <div class="pinned_block post_div">
+                        <h4>ピンどめ</h4>
+                        <ul class="pinned_post __context_posts"></ul>
+                    </div>
+                    <div class="posts_block post_div">
+                        <h4>投稿一覧</h4>
+                        <ul class="posts __context_posts"></ul>
+                    </div>
+                </td></tr>
+            </tbody></table>
         `))
         jqelm.find(".profile_header").html(this.header_element)
         jqelm.find(".profile_detail").html(this.profile_element)
         // 若干横幅が長いのでヘッダサイズを大きくする
         jqelm.find('.profile_header .user_header').css('background-size', '480px auto')
-        $("#pop_ex_timeline").html(jqelm)
-            .append('<button type="button" id="__on_search_close">×</button>')
-            .show("slide", { direction: "right" }, 150)
+        $(bind_selector).html(jqelm)
 
         // ユーザーの投稿を非同期で取得
-        const column = $(`#pop_ex_timeline>.account_timeline td`)
+        const column = $(`${bind_selector} td`)
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.host
             Emojis.replaceDomAsync(column.find(".profile_header .username"), host) // ユーザー名
@@ -512,6 +524,26 @@ class User {
                 Emojis.replaceDomAsync(column.find(".posts .main_content"), host) // 本文
             }
         }))()
+    }
+
+    /**
+     * #Method
+     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する
+     */
+    createDetailWindow() {
+        $("#pop_ex_timeline").html('<div class="account_timeline single_user"></div>')
+        this.createDetailHtml("#pop_ex_timeline>.account_timeline")
+        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close">×</button>')
+            .show("slide", { direction: "right" }, 150)
+    }
+
+    createDetailPop(target) {
+        const pos = target.closest("td").offset()
+        this.createDetailHtml("#pop_ex_timeline>.ff_pop_user")
+        $("#pop_ex_timeline>.ff_pop_user").css({
+            'left': `${pos.left - 138}px`,
+            'top': `${pos.top - 48}px`,
+        }).show("fade", 80)
     }
 
     createFFTaglist(type) {

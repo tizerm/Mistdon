@@ -305,6 +305,12 @@
                     right: -2px;
                     opacity: 0.2;
                 }
+                > .instance_icon {
+                    position: absolute;
+                    top: 0px;
+                    right: 4px;
+                    opacity: 0.3;
+                }
             }
 
             /*=== Contents Warning Expand Header =================================================*/
@@ -616,10 +622,6 @@
             }
         }
         > li.short_timeline.short_notification>.content { width: calc(100% - 88px); }
-        > li.short_timeline,
-        > li.chat_timeline>.content {
-            &:hover { background-color: rgba(88,88,88,0.92); }
-        }
 
         /*=== Gallery Layout Style ===============================================================*/
         > li.gallery_timeline {
@@ -688,6 +690,12 @@
             }
         }
     }
+    .__context_posts {
+        > li:not(.chat_timeline),
+        > li.chat_timeline>.content {
+            &:hover { background-color: rgba(78,78,78,0.92); }
+        }
+    }
 }
 
 /*=== General Timeline Preference ================================================================*/
@@ -705,6 +713,13 @@
 /*=== Profile Column Layout ======================================================================*/
 
 .user_header { background-color: #999999; }
+.ff_pop_user {
+    display: none;
+    position: absolute;
+    z-index: 8;
+    border-radius: 6px;
+    border: solid 2px #cccccc;
+}
 .column_profile {
     width: 420px;
     > .profile_header {

@@ -62,19 +62,50 @@ $(() => {
     });
 });
 
-function delayMouseEvent(arg) {
+function delayHoverEvent(arg) {
     var timer = null;
     $(document).on("mouseenter", arg.selector, e => {
+        $(e.target).css('cursor', 'progress');
         timer = setTimeout(evt => { // タイマーセット
             timer = null;
+            $(evt.target).css('cursor', 'default');
             arg.enterFunc(evt);
         }, arg.delay, e);
     });
     $(document).on("mouseleave", arg.selector, e => {
         if (timer) { // タイマーが未実行の場合はタイマーを削除
+            $(e.target).css('cursor', 'default');
             clearTimeout(timer);
             timer = null;
         } else arg.leaveFunc(e);
+    });
+}
+
+function delayHoldEvent(arg) {
+    var timer = null;
+    $(document).on("mousedown", arg.selector, e => {
+        $(e.target).css('cursor', 'progress');
+        timer = setTimeout(evt => { // タイマーセット
+            timer = null;
+            $(evt.target).css('cursor', 'default');
+            arg.holdFunc(evt);
+        }, arg.delay, e);
+
+    });
+    // タイマー実行前にマウスを外す、もしくはクリックをあげた場合は実行しない
+    $(document).on("mouseleave", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        }
+    });
+    $(document).on("mouseup", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        }
     });
 }
 

@@ -14,26 +14,9 @@
         // カラム設定情報からDOMを生成
         ColumnPref.each(col => col.create())
         ColumnPref.setButtonPermission();
+        ColumnPref.initRemoteInfo();
         setColorPalette();
-
-        $(".__ui_gp_sortable").sortable({
-            connectWith: ".__ui_gp_sortable",
-            delay: 100,
-            distance: 48,
-            handle: ".group_head",
-            placeholder: "ui-state-highlight",
-            revert: 50,
-            tolerance: "pointer"
-        });
-        $(".__ui_tl_sortable").sortable({
-            connectWith: ".__ui_tl_sortable",
-            delay: 100,
-            distance: 48,
-            handle: "h4",
-            placeholder: "ui-state-highlight",
-            revert: 50,
-            tolerance: "pointer"
-        });
+        ColumnPref.setInnerSortable();
     })();
     // カラムをSortableにする(これはカラムの有無にかかわらず実行)
     $(".__ui_col_sortable").sortable({
@@ -41,8 +24,9 @@
         delay: 100,
         distance: 48,
         handle: ".col_head",
-        placeholder: "ui-state-highlight",
+        placeholder: "ui-sortable-placeholder",
         revert: 50,
+        opacity: 0.75,
         tolerance: "pointer"
     });
 

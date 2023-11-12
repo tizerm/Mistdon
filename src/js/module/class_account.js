@@ -988,6 +988,8 @@ class Account {
                     <tr>${html}</tr>
                 </tbody></table>
             </div>
+            <div class="account_timeline single_user ff_pop_user">
+            </div>
             <button type="button" id="__on_search_close">×</button>
         `).show("slide", { direction: "right" }, 150)
         $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示

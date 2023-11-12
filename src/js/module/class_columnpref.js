@@ -18,7 +18,7 @@ class TimelinePref {
      * #Method
      * このタイムラインの設定DOMを生成しjQueryオブジェクトを返却
      */
-    create(index) {
+    create() {
         const uuid = crypto.randomUUID()
         // コンボボックスのアカウントリストを先に生成
         let account_list = ''
@@ -32,7 +32,7 @@ class TimelinePref {
         const jqelm = $($.parseHTML(`
             <li class="ui-sortable">
                 <h4>
-                    <span class="tl_header_label">Timeline ${index}</span>
+                    <span class="tl_header_label">Timeline</span>
                     <a class="__on_remove_timeline ic_button" title="このタイムラインを削除"
                         ><img src="resources/ic_rem24.png" alt="このタイムラインを削除"/></a>
                 </h4>
@@ -93,6 +93,9 @@ class TimelinePref {
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
+
+            // サーバー情報取得処理実行
+            //TimelinePref.changeExternalHostEvent(jqelm.find(".__txt_external_instance"))
         }
         if (this.pref?.timeline_type) { // タイムラインの種類
             jqelm.find(`.__cmb_tl_type>option[value="${this.pref.timeline_type}"]`).prop("selected", true)
@@ -181,7 +184,18 @@ class TimelinePref {
         }
 
         // インスタンス名をセット
-        info_dom.text(`(${instance.platform == 'Mastodon' ? 'M' : 'Mi'}) ${instance.name}`)
+        let img = null
+        switch (instance.platform) {
+            case 'Mastodon': // Mastodon
+                img = '<img src="resources/ic_mastodon.png" class="inline_emoji"/>'
+                break
+            case 'Misskey': // Misskey
+                img = '<img src="resources/ic_misskey.png" class="inline_emoji"/>'
+                break
+            default:
+                break
+        }
+        info_dom.html(`${img} ${instance.name}`)
         target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance.platform)
     }
 
@@ -270,20 +284,20 @@ class GroupPref {
                 <div class="group_head">
                     <h3><input type="text" class="__txt_group_head" placeholder="(グループの名前を設定してください)"/></h3>
                     <div class="group_button">
-                        <a class="__on_add_tl ic_button" title="タイムラインを追加"
-                            ><img src="resources/ic_add24.png" alt="タイムラインを追加"/></a>
-                        <a class="__on_remove_group ic_button" title="このグループを削除"
-                            ><img src="resources/ic_rem24.png" alt="このグループを削除"/></a>
-                    </div>
-                    <div class="group_pref">
-                        <input type="text" class="__txt_group_height" size="4"/>%
-                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/><br/>
                         <select class="__cmb_tl_layout">
                             <option value="default">ノーマル</option>
                             <option value="chat">チャット</option>
                             <option value="list">リスト</option>
                             <option value="gallery">ギャラリー</option>
                         </select>
+                        <a class="__on_add_tl ic_button" title="タイムラインを追加"
+                            ><img src="resources/ic_add24.png" alt="タイムラインを追加"/></a>
+                        <a class="__on_remove_group ic_button" title="このグループを削除"
+                            ><img src="resources/ic_rem24.png" alt="このグループを削除"/></a>
+                    </div>
+                    <div class="group_pref">
+                        <input type="text" class="__txt_group_height" size="3"/>%
+                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
                     </div>
                 </div>
                 <ul class="__ui_tl_sortable"></ul>
@@ -302,7 +316,7 @@ class GroupPref {
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
         // タイムラインの設定値をDOMと共に生成
-        this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create(index + 1)))
+        this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create()))
 
         // jQueryオブジェクトを返却
         return jqelm
@@ -315,7 +329,7 @@ class GroupPref {
     addTimeline() {
         const tl = new TimelinePref(null, this)
         this.timelines.push(tl)
-        const jqelm = tl.create(this.timelines.length)
+        const jqelm = tl.create()
         $(`#${this.id}>ul`).append(jqelm)
         ColumnPref.setButtonPermission()
         setColorPalette($(`#${this.id}>ul>li:last-child`))
@@ -328,11 +342,13 @@ class GroupPref {
      * @param index 削除対象のタイムラインのインデクス
      */
     removeTimeline(index) {
+        const del_tl = this.timelines[index]
         this.timelines.splice(index, 1)
         $(`#${this.id}>ul>li`).eq(index).remove()
         // タイムラインの連番を再生成
         $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
         ColumnPref.setButtonPermission()
+        return del_tl
     }
 }
 
@@ -481,6 +497,7 @@ class ColumnPref {
         column.addGroup()
         ColumnPref.setButtonPermission()
         setColorPalette($(`#columns>table #${column.id}>.col_option`))
+        ColumnPref.setInnerSortable()
     }
 
     /**
@@ -508,6 +525,7 @@ class ColumnPref {
         $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
         ColumnPref.setButtonPermission()
         setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_head`))
+        ColumnPref.setInnerSortable()
     }
 
     /**
@@ -521,6 +539,17 @@ class ColumnPref {
         $(`#${group.id}`).remove()
         this.tl_groups.delete(id)
         ColumnPref.setButtonPermission()
+        return group
+    }
+
+    static initRemoteInfo() {
+        // 「その他のインスタンス」が設定されているタイムラインの情報を取得
+        $('.__cmb_tl_account>option[value="__external"]:checked').each((index, elm) =>
+            TimelinePref.changeExternalHostEvent($(elm).closest(".tl_option").find(".__txt_external_instance")))
+        // 「リスト」が設定されているタイムラインのリストを取得
+        $('.__cmb_tl_type>option[value="list"]:checked').each((index, elm) => {
+            TimelinePref.changeTypeEvent($(elm).closest("select"))
+        })
     }
 
     /**
@@ -539,7 +568,7 @@ class ColumnPref {
                 if (!height) height = 100 - total
                 else total += Number(height)
                 $(gp_elm).css("height", `${height}%`)
-                $(gp_elm).find("ul").css("height", 'calc(100% - 82px)')
+                $(gp_elm).find("ul").css("height", 'calc(100% - 56px)')
 
                 // タイムラインタイトルを再設定
                 $(gp_elm).find("ul>li").each((tl_index, tl_elm) => $(tl_elm)
@@ -560,6 +589,49 @@ class ColumnPref {
             hide: {
                 effect: "slideUp",
                 duration: 80
+            }
+        })
+    }
+
+    static setInnerSortable() {
+        $(".__ui_gp_sortable").sortable({
+            connectWith: ".__ui_gp_sortable",
+            delay: 100,
+            distance: 48,
+            handle: ".group_head",
+            placeholder: "ui-sortable-placeholder",
+            revert: 50,
+            opacity: 0.75,
+            tolerance: "pointer",
+            update: (e, ui) => {
+                console.log(ui)
+                if (ui.sender) { // 他のカラムにグループが移動した場合
+                    /*
+                    const src_dom = ui.sender.closest("td")
+                    const src_col = ColumnPref.get(src_dom)
+                    const dest_dom = ui.item.closest("td")
+                    const dest_col = ColumnPref.get(dest_dom)
+
+                    dest
+                    src_col.removeGroup(ui.item.attr("id"))//*/
+                    return
+                }
+                ColumnPref.setButtonPermission()
+            }
+        })
+        $(".__ui_tl_sortable").sortable({
+            connectWith: ".__ui_tl_sortable",
+            delay: 100,
+            distance: 48,
+            handle: "h4",
+            placeholder: "ui-sortable-placeholder",
+            revert: 50,
+            opacity: 0.75,
+            tolerance: "pointer",
+            update: (e, ui) => {
+                console.log(ui)
+                if (ui.sender) return // 別のリストへ移動したときのイベントは無視
+                ColumnPref.setButtonPermission()
             }
         })
     }
