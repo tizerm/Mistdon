@@ -163,7 +163,7 @@ audio { height: 30px; }
         position: absolute;
         font-weight: bold;
         top: 114px;
-        left: 72px;
+        left: 64px;
 
         > span {
             display: block;

@@ -38,7 +38,8 @@ class Group {
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
 
-    static TIMELINE_LIMIT = 200 // カラムのタイムラインに表示できる限界量
+    static DEFAULT_TIMELINE_LIMIT = 200 // タイムラインに表示できる限界量(通常値)
+    static LIST_TIMELINE_LIMIT = 500 // カラムのタイムラインに表示できる限界量(リスト値)
     static SCROLL = 200         // wsスクロールでスクロールするピクセル量
     static SHIFT_SCROLL = 800   // シフトwsスクロールでスクロールするピクセル量
 
@@ -92,6 +93,7 @@ class Group {
             jqelm.closest(".tl_group_box").css("height", `${this.height}%`)
             jqelm.find("ul").css("height", 'calc(100% - 20px)')
         } else { // 単一タイムライングループの場合はヘッダを非表示
+            jqelm.find(".group_head").css("background-color", `#${this.parent_column.pref.col_color}`)
             jqelm.find(".ic_group_cursor").hide()
             jqelm.find(".group_head>h4").hide()
         }
@@ -101,7 +103,8 @@ class Group {
 
     createClosedLabel() {
         // カラム本体を空の状態で生成(ナンバーアイコンは10未満のカラムのみ表示)
-        const num_img = this.index < 9 ? `<img src="resources/${this.index + 1}.png" class="ic_group_num"/>` : ''
+        const num_img = this.index < 9 && this.parent_column.pref.multi_group
+            ? `<img src="resources/${this.index + 1}.png" class="ic_group_num"/>` : ''
         const jqelm = $($.parseHTML(`
             <span class="group_label" name="${this.id}">
                 ${num_img}
@@ -110,7 +113,10 @@ class Group {
             </span>
         `))
 
-        jqelm.closest(".group_label").css("background-color", `#${this.pref.gp_color}`)
+        if (this.parent_column.pref.multi_group)
+            jqelm.closest(".group_label").css("background-color", `#${this.pref.gp_color}`)
+        else // 単一タイムライングループの場合は背景を透過
+            jqelm.closest(".group_label").css("background-color", 'transparent')
         return jqelm
     }
 
@@ -169,10 +175,11 @@ class Group {
      */
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
+        const limit = this.pref.tl_layout == 'list' ? Group.LIST_TIMELINE_LIMIT : Group.DEFAULT_TIMELINE_LIMIT
         // 重複している投稿を除外する
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            if (ul.find("li").length >= Column.TIMELINE_LIMIT) this.removeStatus(ul.find("li:last-child"))
+            if (ul.find("li").length >= limit) this.removeStatus(ul.find("li:last-child"))
             ul.prepend(post.timeline_element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
@@ -279,6 +286,10 @@ class Group {
         const target = Group.getCursor()
         $(".__target_group").removeClass("__target_group").find(".ic_cursor").remove()
         return target
+    }
+
+    setWarning() {
+        $(`#${this.id}`).find(".ic_group_warn").show()
     }
 
     /**

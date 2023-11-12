@@ -596,6 +596,8 @@ class Account {
             toast(`${this.full_address}で接続エラーが発生しました、再接続してください。`, "error")
             // エラーで切れた場合は再接続しない
             this.reconnect = false
+            // エラーで接続が切れたことをタイムライングループに通知する
+            this.socket_prefs.map(m => m.target_group).forEach(gp => gp.setWarning())
             console.log(event)
         })
         // WebSocket接続停止時処理

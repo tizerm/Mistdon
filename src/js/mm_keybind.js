@@ -38,8 +38,8 @@
                 }
                 break;
             case 115: // F4: 右に表示される拡張カラムを閉じる
-                $("#pop>*").hide("slide", { direction: "right" }, 150);
-                return false;
+                $("#pop_extend_column, #pop_ex_timeline, #pop_custom_emoji").hide("slide", { direction: "right" }, 150);
+                break;
             case 65:
             case 37: // a, <-: カーソルを左に移動
                 col = Column.disposeCursor();

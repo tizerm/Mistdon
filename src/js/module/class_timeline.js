@@ -146,7 +146,7 @@ class Timeline {
         }
         // 認証アカウントの場合はアカウント情報にソケット設定を送信
         if (!this.pref.external) this.target_account.addSocketPref({
-            target_col: this.parent_column,
+            target_group: this.parent_group,
             send_param: send_param,
             messageFunc: message_callback
         })

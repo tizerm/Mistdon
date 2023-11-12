@@ -233,7 +233,7 @@
         background-color: rgba(255,255,255,0.05);
         margin: 0px;
         padding: 0px;
-        height: calc(100vh - 204px);
+        height: calc(100vh - 224px);
         overflow-y: auto;
         overflow-x: hidden;
         &::-webkit-scrollbar { width: 8px; }
