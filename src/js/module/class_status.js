@@ -70,6 +70,7 @@ class Status {
                     type: media.type,
                     url: media.url,
                     thumbnail: media.preview_url,
+                    sensitive: this.sensitive,
                     aspect: media.meta?.original?.aspect ?? 1
                 }))
 
@@ -160,6 +161,7 @@ class Status {
                     type: media.type.substring(0, media.type.indexOf("/")),
                     url: media.url,
                     thumbnail: media.thumbnailUrl,
+                    sensitive: media.isSensitive,
                     aspect: media.properties.width / media.properties.height
                 }))
 
@@ -194,8 +196,6 @@ class Status {
     get account_color() { return this.from_account?.pref.acc_color ?? this.from_timeline?.pref?.color }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
-    // Getter: ミュート判定(現状はBTRN除外のみ)
-    get muted() { return this.from_timeline?.pref?.exclude_reblog && this.reblog }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
     get content_text() { return $.parseHTML(`<div>${this.content}</div>`)[0].innerText }
 
@@ -212,6 +212,11 @@ class Status {
             minute: '2-digit',
             second: '2-digit',
         })
+    }
+
+    // Getter: ミュート判定
+    get muted() { // 文を分けると機能しなくなるっぽい
+        return (this.from_timeline?.pref?.exclude_reblog && this.reblog) || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
     }
 
     /**
@@ -444,11 +449,13 @@ class Status {
                 } else return this.chat_elm
             case 'list': // リスト
                 return this.list_elm
-            case 'gallery': // ギャラリー
+            case 'media': // メディア
                 // 通知は通常と同じ、メディアがあるときだけ専用の様式、あとはリストと同じ
                 if (this.type == 'notification') return this.element
-                else if (this.medias.length > 0) return this.gallery_elm
+                else if (this.medias.length > 0) return this.media_elm
                 else return this.list_elm
+            case 'gallery': // ギャラリー
+                return this.gallery_elm
             default: // デフォルト(ノーマル)
                 return this.element
         }
@@ -801,7 +808,7 @@ class Status {
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             const media = this.medias[0]
             html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
-                <div class="media">
+                <div class="list_media">
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
                         <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
                     </a>
@@ -862,12 +869,12 @@ class Status {
         return jqelm
     }
 
-    // Getter: ギャラリータイプのHTMLを生成して返却
-    get gallery_elm() {
+    // Getter: メディアタイプのHTMLを生成して返却
+    get media_elm() {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
         let target_emojis = null
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">`
+        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="media_timeline">`
         if (this.reblog) { // ブースト/リノートのヘッダ
             const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
              html += `
@@ -961,6 +968,23 @@ class Status {
         return jqelm
     }
 
+    // Getter: ギャラリータイプのHTMLを生成して返却
+    get gallery_elm() {
+        // メディアごとにタイルブロックを生成
+        let html = ''
+        this.medias.forEach(media => html /* name属性にURLを設定 */ += `
+            <li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">
+                <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                    class="__on_media_expand${media.sensitive ? ' warn_sensitive' : ''}">
+                    <img src="${media.thumbnail}" class="media_preview"/>
+                </a>
+            </li>
+        `)
+
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        return $($.parseHTML(html))
+    }
+
     /**
      * #Method
      * この投稿をサーバーから削除する
@@ -1000,6 +1024,28 @@ class Status {
         }
         request_promise.then(() => callback(this, toast_uuid))
             .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
+    }
+
+    createImageModal(url) {
+        // 一旦全部クリア
+        $("#modal_expand_image>*").empty()
+        this.medias.forEach(media => {
+            // 動画ファイルの場合はvideoを使う
+            if (media.type == 'video' || media.type == 'gifv') $("#modal_expand_image>#expand_image_box").append(`
+                <li name="${this.uri}">
+                    <video src="${media.url}" preload controls loop></video>
+                </li>
+            `); else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
+                <li name="${this.uri}"><img src="${media.url}" class="expanded_media"/></li>
+            `)
+            // サムネイルリスト
+            $("#modal_expand_image>#expand_thumbnail_list").append(`
+                <li name="${media.url}"><img src="${media.thumbnail}"/></li>
+            `)
+        })
+        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
+        $("#modal_expand_image").show("fade", 80)
     }
 
     /**

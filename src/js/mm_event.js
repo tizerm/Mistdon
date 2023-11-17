@@ -366,44 +366,24 @@ $(() => {
         return false
     })
 
-    /**
-     * #Event
-     * 画像サムネイル
-     * => 画像を右に拡大表示する
-     */
     $(document).on("click", ".__on_media_expand", e => {
-        const link = $(e.target).closest(".__on_media_expand")
-
-        // 動画ファイル(GIFアニメも含む)
-        if (link.attr("type") == 'video' || link.attr("type") == 'gifv') $("#pop_expand_image").html(`
-            <div class="expand_image_col">
-                <video src="${link.attr("href")}" autoplay controls loop></video>
-            </div>`).show("slide", { direction: "right" }, 80)
-        else { // それ以外は画像ファイル
-            // アプリケーションのアス比を計算
-            const window_aspect = window.innerWidth / window.innerHeight
-            const image_aspect = link.attr("name")
-            $("#pop_expand_image")
-                .html(`<div class="expand_image_col"><img src="${link.attr("href")}"/></div>`)
-                .show("slide", { direction: "right" }, 80)
-            if (image_aspect > window_aspect) // ウィンドウよりも画像のほうが横幅ながめ
-                $("#pop_expand_image>.expand_image_col>img").css('width', '85vw').css('height', 'auto')
-            else // ウィンドウよりも画像のほうが縦幅ながめ
-                $("#pop_expand_image>.expand_image_col>img").css('height', '85vh').css('width', 'auto')
-        }
-
+        const image_url = $(e.target).closest(".__on_media_expand").attr("href")
+        if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
+            .get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            .getStatus($(e.target).closest("li"))
+            .createImageModal(image_url)
+        else Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createImageModal(image_url))
         return false
     })
-
-    /**
-     * #Event
-     * 拡大された画像以外の場所をクリック
-     * => 表示されている拡大画像を閉じる
-     */
-    $("body").on("click", e => {
-        if (!$(e.target).is(".expand_image_col>*")) $("#pop_expand_image")
-            // 閉じたときに動画が裏で再生されないように閉じた後中身を消す
-            .hide("slide", { direction: "right" }, 80, () => $("#pop_expand_image").empty())
+    $(document).on("click", "#modal_expand_image", e => $("#modal_expand_image").hide("fade", 80))
+    $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
+        const url = $(e.target).closest("li").attr("name")
+        $('#modal_expand_image>#expand_image_box img:visible').hide()
+        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        $('#modal_expand_image>#expand_thumbnail_list>*').removeClass("selected_image")
+        $(e.target).closest("li").addClass("selected_image")
+        return false
     })
 
     /**

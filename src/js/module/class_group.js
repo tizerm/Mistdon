@@ -176,6 +176,7 @@ class Group {
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
         const limit = this.pref.tl_layout == 'list' ? Group.LIST_TIMELINE_LIMIT : Group.DEFAULT_TIMELINE_LIMIT
+
         // 重複している投稿を除外する
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
@@ -253,10 +254,12 @@ class Group {
      * @param jqelm 消去対象の投稿のjQueryオブジェクト
      */
     removeStatus(jqelm) {
-        const post = this.status_map.get(jqelm.attr("id"))
+        const key = jqelm.attr("id")
+        const post = this.status_map.get(key)
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
-        jqelm.remove()
+        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
+        jqelm.parent().find(`li[id="${key}"]`).remove()
     }
 
     /**

@@ -288,6 +288,7 @@ class GroupPref {
                             <option value="default">ノーマル</option>
                             <option value="chat">チャット</option>
                             <option value="list">リスト</option>
+                            <option value="media">メディア</option>
                             <option value="gallery">ギャラリー</option>
                         </select>
                         <a class="__on_add_tl ic_button" title="タイムラインを追加"

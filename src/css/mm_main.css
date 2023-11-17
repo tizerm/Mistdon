@@ -132,7 +132,7 @@
     /*=== General Context Menu Layout ============================================================*/
     > .pop_context {
         display: none;
-        z-index: 8;
+        z-index: 15;
         position: absolute;
         top: 108px;
         left: 12px;
@@ -233,16 +233,55 @@
         }
     }
 
-    /*=== Image Expand Window Layout =============================================================*/
-    > #pop_expand_image {
+    /*=== Expand Image Modal Layout ==============================================================*/
+
+    > #modal_expand_image {
+        z-index: 12;
         display: none;
-        z-index: 8;
-        border-radius: 8px;
-        background-color: rgba(34,34,34,0.8);
-        padding: 4px 0px 4px 4px;
-        position: absolute;
-        top: 108px;
-        right: 0px;
+        background-color: rgba(34,34,34,0.75);
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        text-align: center;
+        width: 100vw;
+        height: 100vh;
+
+        > ul {
+            margin: 0px;
+            padding: 0px;
+        }
+        > #expand_image_box>li {
+            list-style-type: none;
+            margin: 0px;
+            padding: 0px;
+            > .expanded_media {
+                display: none;
+                width: 95vw;
+                height: calc(95vh - 128px);
+                margin: 0px auto;
+                object-fit: contain;
+            }
+        }
+        > #expand_thumbnail_list {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            > li {
+                display: inline-block;
+                list-style-type: none;
+                width: 128px;
+                height: 128px;
+                margin: 4px;
+                > img {
+                    border-radius: 8px;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                &.selected_image>img { border: solid 4px #cccccc; }
+            }
+        }
     }
 
     /*=== Post Expand Window Layout ==============================================================*/

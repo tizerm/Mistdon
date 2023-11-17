@@ -3,6 +3,27 @@
     $("body").keydown(e => {
         // ショートカットキーのバインドを無視するフォーム内では実行しない
         if ($(e.target).is(".__ignore_keyborad")) return;
+        if ($("#modal_expand_image").is(":visible")) { // 画像拡大モーダルが動いている場合
+            switch (e.keyCode) {
+                case 65:
+                case 37: // a, <-
+                case 87:
+                case 38: // w, ↑: 前の画像
+                    $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").prev().mouseenter();
+                    return false;
+                case 68:
+                case 39: // d, ->
+                case 83:
+                case 40: // s, ↓: 次の画像
+                    $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").next().mouseenter();
+                    return false;
+                case 13: // Enter: 閉じる
+                    $("#modal_expand_image").hide("fade", 80);
+                    return false;
+                default:
+                    return;
+            }
+        }
         let col = null;
         switch (e.keyCode) {
             case 78: // n: 投稿テキストボックスにフォーカス
