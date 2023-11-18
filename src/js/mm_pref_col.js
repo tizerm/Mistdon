@@ -49,13 +49,15 @@
         e => $(e.target).closest("td").find(".col_head").css("background-color", `#${$(e.target).val()}`));
     // グループカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_color",
-        e => $(e.target).closest(".group_head").css("background-color", `#${$(e.target).val()}`));
+        e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`));
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`));
-    // カラム幅変更イベント(動的バインド)-+
+    // カラム幅変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_width",
         e => $(e.target).closest("td").css("width", `${$(e.target).val()}px`));
+    // グループ高変更イベント(動的バインド)
+    $(document).on("blur", ".__txt_group_height", e => ColumnPref.recalcHeight($(e.target)));
     // 表示アカウント変更イベント(動的バインド)
     $(document).on("change", ".__cmb_tl_account", e => TimelinePref.changeAccountEvent($(e.target)));
     // 外部インスタンスアドレス変更イベント(動的バインド)

@@ -976,7 +976,7 @@ class Status {
             <li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">
                 <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                     class="__on_media_expand${media.sensitive ? ' warn_sensitive' : ''}">
-                    <img src="${media.thumbnail}" class="media_preview"/>
+                    <img src="${!this.from_timeline?.pref?.expand_media && media.sensitive ? 'resources/illust/ic_unauth.jpg' : media.thumbnail}" class="media_preview"/>
                 </a>
             </li>
         `)
@@ -1076,7 +1076,7 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         const replyarea = $("#pop_extend_column #__txt_replyarea")
         replyarea.focus()
@@ -1119,7 +1119,7 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         const replyarea = $("#pop_extend_column #__txt_quotearea")
         replyarea.focus()
@@ -1149,7 +1149,7 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()
 

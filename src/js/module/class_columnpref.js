@@ -33,8 +33,8 @@ class TimelinePref {
             <li class="ui-sortable">
                 <h4>
                     <span class="tl_header_label">Timeline</span>
-                    <a class="__on_remove_timeline ic_button" title="このタイムラインを削除"
-                        ><img src="resources/ic_rem24.png" alt="このタイムラインを削除"/></a>
+                    <a class="__on_remove_timeline ic_button tooltip" title="このタイムラインを削除"
+                        ><img src="resources/ic_rem32.png" alt="このタイムラインを削除"/></a>
                 </h4>
                 <div class="tl_option">
                     <div class="lbl_disp_account">
@@ -59,7 +59,6 @@ class TimelinePref {
                             <option value="federation">連合</option>
                             <option value="list">リスト</option>
                             <option value="notification">通知</option>
-                            <option value="mention">通知(メンションのみ)</option>
                         </select>
                     </div>
                     <div class="lbl_list">
@@ -283,23 +282,25 @@ class GroupPref {
             <div id="${this.id}" class="tl_group timeline ui-sortable">
                 <div class="group_head">
                     <h3><input type="text" class="__txt_group_head" placeholder="(グループの名前を設定してください)"/></h3>
-                    <div class="group_button">
-                        <select class="__cmb_tl_layout">
-                            <option value="default">ノーマル</option>
-                            <option value="chat">チャット</option>
-                            <option value="list">リスト</option>
-                            <option value="media">メディア</option>
-                            <option value="gallery">ギャラリー</option>
-                        </select>
-                        <a class="__on_add_tl ic_button" title="タイムラインを追加"
-                            ><img src="resources/ic_add24.png" alt="タイムラインを追加"/></a>
-                        <a class="__on_remove_group ic_button" title="このグループを削除"
-                            ><img src="resources/ic_rem24.png" alt="このグループを削除"/></a>
-                    </div>
                     <div class="group_pref">
-                        <input type="text" class="__txt_group_height" size="3"/>%
-                        色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
+                        <input type="number" class="__txt_group_height tooltip" max="100" min="1" title="グループの高さ"/>%
                     </div>
+                    <div class="group_button">
+                        <a class="__on_add_tl ic_button tooltip" title="タイムラインを追加"
+                            ><img src="resources/ic_add32.png" alt="タイムラインを追加"/></a>
+                        <a class="__on_remove_group ic_button tooltip" title="このグループを削除"
+                            ><img src="resources/ic_rem32.png" alt="このグループを削除"/></a>
+                    </div>
+                </div>
+                <div class="group_option">
+                    <select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
+                        <option value="default">ノーマル</option>
+                        <option value="chat">チャット</option>
+                        <option value="list">リスト</option>
+                        <option value="media">メディア</option>
+                        <option value="gallery">ギャラリー</option>
+                    </select>
+                    色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
                 </div>
                 <ul class="__ui_tl_sortable"></ul>
             </div>
@@ -329,7 +330,6 @@ class GroupPref {
      */
     addTimeline() {
         const tl = new TimelinePref(null, this)
-        this.timelines.push(tl)
         const jqelm = tl.create()
         $(`#${this.id}>ul`).append(jqelm)
         ColumnPref.setButtonPermission()
@@ -343,13 +343,10 @@ class GroupPref {
      * @param index 削除対象のタイムラインのインデクス
      */
     removeTimeline(index) {
-        const del_tl = this.timelines[index]
-        this.timelines.splice(index, 1)
         $(`#${this.id}>ul>li`).eq(index).remove()
         // タイムラインの連番を再生成
         $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
         ColumnPref.setButtonPermission()
-        return del_tl
     }
 }
 
@@ -376,7 +373,6 @@ class ColumnPref {
             this.tl_groups = groups
         } else { // 設定ファイルがない場合は新規UUIDを生成してカラムを新規作成
             this.pref = { "column_id": crypto.randomUUID() }
-            //this.timelines = []
             this.tl_groups = new Map()
         }
     }
@@ -413,7 +409,7 @@ class ColumnPref {
     }
 
     static getGroup(target) {
-        return ColumnPref.map.get(target.closest("td").attr("id")).tl_groups.get(target.closest(".tl_group").attr("id"))
+        return new GroupPref({ "group_id": target.closest(".tl_group").attr("id") }, this)
     }
 
     /**
@@ -445,13 +441,13 @@ class ColumnPref {
                 <div class="col_head">
                     <h2><input type="text" class="__txt_col_head" placeholder="(カラムの名前を設定してください)"/></h2>
                     <div class="group_button">
-                        <a class="__on_add_group ic_button" title="タイムライングループを追加"
+                        <a class="__on_add_group ic_button tooltip" title="タイムライングループを追加"
                             ><img src="resources/ic_add32.png" alt="タイムライングループを追加"/></a>
-                        <a class="__on_remove_column ic_button" title="このカラムを削除"
+                        <a class="__on_remove_column ic_button tooltip" title="このカラムを削除"
                             ><img src="resources/ic_rem32.png" alt="このカラムを削除"/></a>
                     </div>
                     <div class="col_pref">
-                        <input type="text" class="__txt_col_width" size="5"/>px
+                        <input type="number" class="__txt_col_width tooltip" title="カラムの幅"/>px
                     </div>
                 </div>
                 <div class="col_option">
@@ -517,13 +513,11 @@ class ColumnPref {
      */
     addGroup() {
         const group = new GroupPref(null, this)
-        this.tl_groups.set(group.id, group)
         const jqelm = group.create()
         $(`#${this.id}>.col_tl_groups`).append(jqelm)
         group.addTimeline()
         // グループの高さを再設定
-        const reset_rate = Math.round(100 / this.tl_groups.size)
-        $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
+        this.resetHeight()
         ColumnPref.setButtonPermission()
         setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_head`))
         ColumnPref.setInnerSortable()
@@ -536,11 +530,38 @@ class ColumnPref {
      * @param index 削除対象のタイムラインのインデクス
      */
     removeGroup(id) {
-        const group = this.tl_groups.get(id)
-        $(`#${group.id}`).remove()
-        this.tl_groups.delete(id)
+        $(`#${id}`).remove()
         ColumnPref.setButtonPermission()
-        return group
+    }
+
+    resetHeight() {
+        const size = $(`#${this.id}>.col_tl_groups>.tl_group`).length
+        if (size == 0) return // グループがない場合はなにもしない
+        const reset_rate = Math.round(100 / size)
+        $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
+    }
+
+    static recalcHeight(target) {
+        const target_col = ColumnPref.get(target.closest("td"))
+        if (Number(target.val()) <= 0) { // 0以下が入力されたらリセット
+            target_col.resetHeight()
+            ColumnPref.setButtonPermission()
+            return
+        }
+        $(`#${target_col.id}>.col_tl_groups>.tl_group:last-child .__txt_group_height`).val("")
+        let total = 0
+        for (let gp_elm of $(`#${target_col.id}>.col_tl_groups>.tl_group`).get()) {
+            console.log($(gp_elm).find('.__txt_group_height'))
+            let height = $(gp_elm).find('.__txt_group_height').val()
+            console.log(height)
+            if (!height) break
+            else total += Number(height)
+            if (total >= 99) {
+                target_col.resetHeight()
+                break
+            }
+        }
+        ColumnPref.setButtonPermission()
     }
 
     static initRemoteInfo() {
@@ -565,11 +586,16 @@ class ColumnPref {
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
             let total = 0
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
+                console.log($(gp_elm).find('.__txt_group_height'))
                 let height = $(gp_elm).find('.__txt_group_height').val()
-                if (!height) height = 100 - total
+                console.log(height)
+                if (!height) { // 最後のグループの場合
+                    height = 100 - total
+                    $(gp_elm).find('.__txt_group_height').val(height)
+                }
                 else total += Number(height)
                 $(gp_elm).css("height", `${height}%`)
-                $(gp_elm).find("ul").css("height", 'calc(100% - 56px)')
+                $(gp_elm).find("ul").css("height", 'calc(100% - 64px)')
 
                 // タイムラインタイトルを再設定
                 $(gp_elm).find("ul>li").each((tl_index, tl_elm) => $(tl_elm)
@@ -578,7 +604,7 @@ class ColumnPref {
         })
 
         // ツールチップを設定し直す
-        $(".ic_button").tooltip({
+        $(".tooltip").tooltip({
             position: {
                 my: "center top",
                 at: "center bottom"
@@ -605,17 +631,9 @@ class ColumnPref {
             opacity: 0.75,
             tolerance: "pointer",
             update: (e, ui) => {
-                console.log(ui)
-                if (ui.sender) { // 他のカラムにグループが移動した場合
-                    /*
-                    const src_dom = ui.sender.closest("td")
-                    const src_col = ColumnPref.get(src_dom)
-                    const dest_dom = ui.item.closest("td")
-                    const dest_col = ColumnPref.get(dest_dom)
-
-                    dest
-                    src_col.removeGroup(ui.item.attr("id"))//*/
-                    return
+                if (ui.sender) { // 他のカラムにグループが移動した場合高さを再設定
+                    ColumnPref.get(ui.sender.closest("td")).resetHeight()
+                    ColumnPref.get(ui.item.closest("td")).resetHeight()
                 }
                 ColumnPref.setButtonPermission()
             }
@@ -630,10 +648,21 @@ class ColumnPref {
             opacity: 0.75,
             tolerance: "pointer",
             update: (e, ui) => {
-                console.log(ui)
                 if (ui.sender) return // 別のリストへ移動したときのイベントは無視
                 ColumnPref.setButtonPermission()
             }
+        })
+    }
+
+    static normalize() {
+        // DOM要素から不正な空データを除外する
+        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+            $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
+                // タイムラインが存在しないグループは削除
+                if ($(gp_elm).find("ul>li").length == 0) $(gp_elm).remove()
+            })
+            // グループが存在しないカラムは削除
+            if ($(col_elm).find(".col_tl_groups>.tl_group").length == 0) $(col_elm).remove()
         })
     }
 
@@ -642,6 +671,8 @@ class ColumnPref {
      * タイムライン設定をファイルに保存する
      */
     static async save() {
+        // 一旦データを正規化
+        ColumnPref.normalize()
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
@@ -691,7 +722,9 @@ class ColumnPref {
         dialog({
             type: 'alert',
             title: "カラム設定",
-            text: "カラム設定を保存しました。"
+            text: "カラム設定を保存しました。",
+            // OKボタンを押してから画面をリロード
+            accept: () => location.reload()
         })
     }
 }
