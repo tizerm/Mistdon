@@ -71,6 +71,7 @@ class User {
                 break
         }
         this.host = host
+        this.auth = arg.auth
     }
 
     /**
@@ -153,6 +154,7 @@ class User {
             json: data,
             host: arg.host,
             remote: true,
+            auth: false,
             platform: arg.platform
         })})
     }
@@ -174,12 +176,25 @@ class User {
                 <h4 class="username">${this.username}</h4>
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
         `
+        let bookmarks = ''
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                bookmarks = `
+                    <a class="__on_show_bookmark" title="ブックマーク"
+                        ><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
+                    <a class="__on_show_mastfav" title="お気に入り"
+                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                `
                 break
             case 'Misskey': // Misskey
                 html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                bookmarks = `
+                    <a class="__on_show_reaction" title="リアクション"
+                        ><img src="resources/ic_emoji.png" alt="リアクション"/></a>
+                    <a class="__on_show_miskfav" title="お気に入り"
+                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                `
                 break
             default:
                 break
@@ -200,6 +215,8 @@ class User {
             .css('background-image', `url("${this.header_url}")`)
             .css('background-size', '420px auto')
             .css('background-position', 'center center')
+        if (this.auth) // 認証プロフィール表示の場合はブックマークアイコンを追加
+            jqelm.find('.detail_info').addClass('auth_details').prepend(bookmarks)
         return jqelm
     }
 
@@ -401,6 +418,70 @@ class User {
         })
     }
 
+    getBookmarks(account, type) {
+        let rest_promise = null
+        switch (type) {
+            case 'Favorite_Mastodon': // お気に入り(Mastodon)
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.host}/api/v1/favourites`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: { "limit": 40 }
+                })
+                break
+            case 'Favorite_Misskey': // お気に入り(Misskey)
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.host}/api/i/favorites`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": account.pref.access_token,
+                        "limit": 40
+                    })
+                })
+                break
+            case 'Bookmark': // ブックマーク(Mastodon)
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.host}/api/v1/bookmarks`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: { "limit": 40 }
+                })
+                break
+            case 'Reaction': // リアクション(Misskey)
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.host}/api/users/reactions`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": account.pref.access_token,
+                        "userId": this.id,
+                        "limit": 40
+                    })
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.then(data => {
+            return (async () => {
+                const posts = []
+                data.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
+                return posts
+            })()
+        }).catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
+    }
+
     getFFUsers(account, type) {
         let api_url = null
         let rest_promise = null
@@ -421,6 +502,7 @@ class User {
                             json: u,
                             host: this.host,
                             remote: false,
+                            auth: false,
                             platform: account.platform
                         })))
                         return users
@@ -447,6 +529,7 @@ class User {
                             json: u.followee ?? u.follower,
                             host: this.host,
                             remote: false,
+                            auth: false,
                             platform: account.platform
                         })))
                         return users
@@ -546,9 +629,20 @@ class User {
         }).show("fade", 80)
     }
 
+    createBookmarkList(type) {
+        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.find(".user_post_elm").hide()
+        target.find(".user_ff_elm").hide()
+        target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
+
+        this.getBookmarks(Account.get(this.full_address), type).then(data => (async () => data.forEach(
+            post => target.find(".user_bookmark_elm>.bookmarks").append(post.element)))())
+    }
+
     createFFTaglist(type) {
         const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
         target.find(".user_post_elm").hide()
+        target.find(".user_bookmark_elm").hide()
         target.find(".user_ff_elm").html(`
             <ul class="ff_short_profile">
                 <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>

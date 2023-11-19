@@ -758,6 +758,7 @@ class Account {
             json: data,
             host: this.pref.domain,
             remote: true,
+            auth: true,
             platform: this.pref.platform
         })}).catch(jqXHR => { // 失敗したらnullを返す
             toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
@@ -979,8 +980,8 @@ class Account {
                         <ul class="posts __context_posts"></ul>
                     </div>
                 </div>
-                <div class="user_ff_elm">
-                </div>
+                <div class="user_bookmark_elm"></div>
+                <div class="user_ff_elm"></div>
             </td>
         `)
         // 先に表示フレームだけ生成
@@ -1003,6 +1004,22 @@ class Account {
             column.find(".col_loading").remove()
             column.find(".profile_header").html(detail.header_element)
             column.find(".profile_detail").html(detail.profile_element)
+
+            // ヘッダ部分にツールチップを生成
+            $(`#pop_ex_timeline>.account_timeline td[id="${k}"] .auth_details`).tooltip({
+                position: {
+                    my: "center top",
+                    at: "center bottom"
+                },
+                show: {
+                    effect: "slideDown",
+                    duration: 80
+                },
+                hide: {
+                    effect: "slideUp",
+                    duration: 80
+                }
+            })
 
             // ユーザーの投稿を取得
             detail.getPost(v).then(posts => posts.forEach(p => column.find(".posts").append(p.element)))

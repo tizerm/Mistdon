@@ -442,16 +442,29 @@ $(() => {
      * #Event
      * TODO: まだ実装中やねん
      */
-    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_post", e => {
+    $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
-        $(e.target).closest("td").find(".user_post_elm").show()
+        $(e.target).closest("td").find(".user_bookmark_elm").hide()
+       $(e.target).closest("td").find(".user_post_elm").show()
     })
 
-    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_follow", e =>
+    $(document).on("click", "#pop_ex_timeline .auth_details .count_follow", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('follows')))
 
-    $(document).on("click", "#pop_ex_timeline>.auth_user .profile_header>.header_userinfo .count_follower", e =>
+    $(document).on("click", "#pop_ex_timeline .auth_details .count_follower", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
+
+    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_mastfav", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Mastodon')))
+
+    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_miskfav", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Misskey')))
+
+    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_bookmark", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Bookmark')))
+
+    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
+        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
 
     delayHoverEvent({
         selector: "#pop_ex_timeline>.auth_user .ff_nametags>li",

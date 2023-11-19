@@ -426,6 +426,29 @@
                     background-color: rgba(0,172,255,0.2);
                     padding-right: 8px;
                 }
+                &.auth_details {
+                    margin: -2px -4px 4px;
+                    > a {
+                        position: relative;
+                        top: 6px;
+                        padding: 0px;
+                        margin: 0px;
+                        &:hover>img {
+                            background-color: rgba(255,255,255,0.2);
+                            cursor: pointer;
+                        }
+                    }
+                    > .counter {
+                        width: 64px;
+                        margin: 2px 1px;
+                        padding-left: 8px;
+                        &:hover {
+                            opacity: 0.75;
+                            text-decoration: underline;
+                            cursor: pointer;
+                        }
+                    }
+                }
             }
 
             /*=== Footer Info ====================================================================*/
@@ -819,6 +842,7 @@
     .posts { height: calc((100vh - 310px) * 0.6); }
 
     .ff_short_profile { height: 212px; }
+    .bookmarks { height: calc((100vh - 310px) * 0.8); }
     .ff_nametags {
         height: calc((100vh - 310px) * 0.8 - 212px);
         > li.user_nametag {
