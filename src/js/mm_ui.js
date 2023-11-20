@@ -149,6 +149,55 @@ function setColorPalette(target) {
     });
 }
 
+function setWheelEvent(arg) {
+    var timer = null;
+    $(document).on("mousedown", arg.selector, e => {
+        $(e.target).css('cursor', 'progress');
+        timer = setTimeout(evt => { // タイマーセット
+            timer = null;
+            $(evt.target).css('cursor', 'default');
+            $("#pop_wheel>*").empty();
+            $("#pop_wheel>#wheel_center_elm").addClass(arg.center_class).html(arg.center_element);
+            $("#pop_wheel>#wheel_circle_elm").addClass(arg.circle_class);
+            const element8 = arg.circle_elements.slice(0, 8); // 同時に見られるのは8コまで
+            let background = '';
+            element8.forEach((elm, index) => {
+                $("#pop_wheel>#wheel_circle_elm").append(elm.html);
+                // 円形に色を配置
+                background += `,#${elm.color} ${index * 360 / element8.length}deg ${(index + 1) * 360 / element8.length}deg`
+            });
+            $("#pop_wheel>#wheel_circle_elm>li").each((index, elm) => {
+                // 円形にElementを配置
+                const degree = (index * 360 / element8.length) - 90 + (360 / (element8.length * 2))
+                $(elm).css('translate', `calc(cos(${degree}deg) * 84px - 50%) calc(sin(${degree}deg) * 84px - 50%)`)
+            })
+
+            $("#pop_wheel").css({
+                'background-image': `conic-gradient(${background.substring(1)})`,
+                'top': `${evt.pageY}px`,
+                'left': `${evt.pageX}px`
+            }).show();
+        }, arg.delay, e);
+    });
+    // タイマー実行前にマウスを外す、もしくはクリックをあげた場合は実行しない
+    $(document).on("mouseleave", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        }
+    });
+    $(document).on("mouseup", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        } else {
+            //$("#pop_wheel").hide();
+        }
+    });
+}
+
 function popContextMenu(e, id) {
     if (window.innerHeight / 2 < e.pageY) // ウィンドウの下の方にある場合は下から展開
         $(`#${id}`).css({

@@ -926,6 +926,22 @@ class Account {
         return html
     }
 
+    static createWheelAccountList(platform) {
+        const elements = []
+        if (platform) {
+            // プラットフォーム指定がされている場合は対象プラットフォームだけ表示
+            Account.eachPlatform(platform, elm => elements.push({
+                html: `<li name="${elm.full_address}"><img src="${elm.pref.avatar_url}" class="ic_wheel"></li>`,
+                color: elm.pref.acc_color
+            }))
+        } else // プラットフォーム指定がない場合は普通にすべてのアカウントを表示
+            Account.map.forEach((v, k) => elements.push({
+                html: `<li name="${k}"><img src="${v.pref.avatar_url}" class="ic_wheel"></li>`,
+                color: v.pref.acc_color
+            }))
+        return elements
+    }
+
     /**
      * #StaticMethod
      * アカウント認証画面のアカウントリストのDOMを返却

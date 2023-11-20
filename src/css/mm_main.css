@@ -284,6 +284,47 @@
         }
     }
 
+    /*=== Expand Tool Wheel Layout ===============================================================*/
+
+    > #pop_wheel {
+        z-index: 10;
+        opacity: 0.88;
+        display: none;
+        transform: translate(-50%, -50%);
+        position: absolute;
+        background-color: #808080;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+
+        > #wheel_center_elm {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #cfcfcf;
+            border-radius: 50%;
+            width: 96px;
+            height: 96px;
+        }
+        > #wheel_circle_elm {
+            margin: 0px;
+            padding: 0px;
+            > li {
+                list-style-type: none;
+                display: inline-block;
+                position: absolute;
+                top: calc(50% + 3px);
+                left: 50%;
+                > .ic_wheel {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                }
+            }
+        }
+    }
+
     /*=== Post Expand Window Layout ==============================================================*/
     > #pop_expand_post {
         display: none;

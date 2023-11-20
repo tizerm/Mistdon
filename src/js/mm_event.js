@@ -394,12 +394,22 @@ $(() => {
     $(document).on("click", ".__on_datelink", e =>
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
+    /*
     delayHoldEvent({
         selector: ".__context_posts>li",
         holdFunc: e =>
             Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()),
         delay: 750
+    })//*/
+    setWheelEvent({
+        selector: ".__context_posts>li",
+        center_class: "wheel_reblog",
+        center_element: null,
+        circle_class: "__on_wheel_reblog",
+        circle_elements: Account.createWheelAccountList(null),
+        delay: 750
     })
+    //$("body").on("mouseup", e => $("#pop_wheel").hide())
 
     /**
      * #Event
