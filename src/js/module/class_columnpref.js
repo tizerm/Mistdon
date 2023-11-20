@@ -98,8 +98,10 @@ class TimelinePref {
         }
         if (this.pref?.timeline_type) { // タイムラインの種類
             jqelm.find(`.__cmb_tl_type>option[value="${this.pref.timeline_type}"]`).prop("selected", true)
-            if (this.pref.timeline_type == 'list') // リストの場合はリストブロックを表示
+            if (this.pref.timeline_type == 'list') { // リストの場合はリストブロックを表示(後で検索用にリストIDを記録)
                 jqelm.find(".lbl_list").show()
+                jqelm.find(".__cmb_tl_list").attr("value", this.pref.list_id)
+            }
             else jqelm.find(".lbl_list").hide()
         }
         if (this.pref?.exclude_reblog) // ブースト/リノートを非表示
@@ -216,10 +218,13 @@ class TimelinePref {
         toast("対象アカウントのリストを取得中です...", "progress", toast_uuid)
 
         Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
+            const list_id = li_dom.find(".__cmb_tl_list").attr("value")
             // リストのコンボ値のDOMを生成
             let options = ''
-            lists.forEach(l => options += `<option value="${l.id}">${l.listname}</option>`)
-            li_dom.find('.__cmb_tl_list').html(options)
+            lists.forEach(l => options += `
+                <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
+            `)
+            li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
             li_dom.find(".lbl_list").show()
             toast(null, "hide", toast_uuid)
         }).catch(error => {

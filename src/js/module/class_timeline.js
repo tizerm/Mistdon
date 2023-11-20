@@ -101,6 +101,8 @@ class Timeline {
     setSocketParam() {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はなにもしない
         if (!this.pref.external && !this.target_account) return
+        // Misskeyのリストも一旦WebSocket接続しない
+        if (this.pref.platform == 'Misskey' && this.pref.timeline_type == 'list') return
 
         let message_callback = null
         let send_param = null

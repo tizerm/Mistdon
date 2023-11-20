@@ -253,12 +253,33 @@ audio { height: 30px; }
                 margin: 0px;
                 padding: 12px 24px;
             }
+            > .help_navi {
+                & ul {
+                    margin: 0px;
+                    padding: 0px;
+                    > li {
+                        list-style-type: none;
+                        > a {
+                            display: block;
+                            background-color: rgba(62,62,62,0.92);
+                            margin: 4px 0px;
+                            padding: 2px 24px;
+                            border-radius: 12px;
+                            font-size: 14px;
+                            &:hover {
+                                background-color: rgba(62,96,128,0.92);
+                                padding-left: 32px;
+                            }
+                        }
+                    }
+                }
+            }
             > .help_content {
                 overflow-y: auto;
                 background-color: rgba(34,34,34,0.5);
                 padding: 0px 18px 12px;
                 font-size: 13px;
-                height: calc(100vh - 280px);
+                height: calc(100vh - 340px);
 
                 &::-webkit-scrollbar { width: 8px; }
                 & h3 {
