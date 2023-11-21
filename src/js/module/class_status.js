@@ -550,19 +550,8 @@ class Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
             <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += '<div class="main_content">'
-
-        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content)
-        if (this.reaction_emoji) { // リアクション絵文字がある場合
-            let alias = null
-            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
-                else alias = `${this.reaction_emoji} (キャッシュされていないかリモートのカスタム絵文字です)`
-            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-            html += `<p class="reaction_emoji">${alias}</p>`
-        }
-        html += `
+        `; html += `<div class="main_content">
+                    ${target_emojis.replace(this.content)}
                 </div>
             </div>
         `
@@ -576,6 +565,15 @@ class Status {
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `
+        }
+        if (this.reaction_emoji) { // リアクション絵文字がある場合
+            let alias = null
+            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
+                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
+                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
+                else alias = `${this.reaction_emoji} (未キャッシュです)`
+            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+            html += `<div class="reaction_emoji">${alias}</div>`
         }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             html += '<div class="media">'
@@ -854,7 +852,9 @@ class Status {
                         const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
                         if (emoji) alias = `<img src="${emoji.url}" class="ic_notif_type"/>`
                         else alias = '×'
-                    } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+                    } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.:@_]+$/g)) // リモートの絵文字
+                        alias = '<img src="resources/ic_emoji_remote.png" class="ic_notif_type"/>'
+                    else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
                     jqelm.find('.notif_footer').prepend(alias)
                     break
                 case 'follow': // フォロー通知
@@ -1197,6 +1197,7 @@ class Status {
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
         $("#pop_expand_post>ul").html(this.element).css('width', `${this.from_column.pref.col_width}px`)
+        Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
             $("#pop_expand_post").css({

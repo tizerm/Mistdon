@@ -350,14 +350,17 @@
                         text-overflow: ellipsis;
                         vertical-align: text-bottom;
                     }
-                    & p.reaction_emoji {
-                        font-size: 20px;
-                        border-radius: 8px;
-                        margin: 4px 0px;
-                        padding: 2px 12px;
-                        background-color: rgba(255,255,255,0.08);
-                    }
                     & p:not(:last-child) { margin-bottom: 1em; }
+                }
+            }
+
+            /*=== Reaction Emoji Info ============================================================*/
+            > .reaction_emoji {
+                text-align: right;
+                margin: 4px 8px;
+                > .inline_emoji {
+                    height: 32px;
+                    width: auto;
                 }
             }
 

@@ -294,6 +294,12 @@ audio { height: 30px; }
                     border-left: solid 8px #aaaaaa;
                 }
                 & dd { margin-bottom: 8px; }
+                & th, & td {
+                    margin: 1px;
+                    border-radius: 6px;
+                    padding: 2px 8px;
+                    background-color: rgba(255,255,255,0.08);
+                }
             }
         }
         & button {
