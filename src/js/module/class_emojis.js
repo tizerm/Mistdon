@@ -157,6 +157,8 @@ class Emojis {
     }
 
     static async replaceRemoteAsync(jqelm) {
+        if (jqelm.length == 0) return // マッチしてなかったらなにもしない
+
         let text = jqelm.html()
         // 文章中に存在するショートコードを抽出
         const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+@.+:', 'g'))

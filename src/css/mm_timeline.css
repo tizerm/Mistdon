@@ -777,6 +777,7 @@
 .label_postcount { background-color: #606060; }
 .label_follow    { background-color: #3562cc; }
 .label_follower  { background-color: #cc6a35; }
+.label_bookmark  { background-color: #ff5050; }
 .label_cw        { background-color: #8c720b; }
 .label_sensitive { background-color: #a10000; }
 .cw_content      { display: none; }

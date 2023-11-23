@@ -227,6 +227,9 @@ class Status {
      */
     pushStack(original_text) {
         this.original_text = original_text
+        History.pushPost(this)
+
+        // TODO: deprecated
         Status.post_stack.push(this)
     }
 

@@ -8,6 +8,8 @@ $(() => {
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
+    $("#navi .navi_history").on("click", e => History.createHistoryWindow())
+
     /**
      * #Event
      * 全体プロフィールボタン

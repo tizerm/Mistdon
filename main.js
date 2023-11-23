@@ -14,6 +14,7 @@ const stateKeeper = require('electron-window-state')
 var pref_accounts = null
 var pref_columns = null
 var pref_emojis = new Map()
+var cache_history = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -371,6 +372,38 @@ async function writeCustomEmojis(event, data) {
     pref_emojis.set(data.host, data.emojis)
 }
 
+async function readHistory() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (cache_history) {
+        console.log('@INF: use app_prefs/history.json cache.')
+        return cache_history
+    }
+    const content = readFile('app_prefs/history.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        cache_history = {
+            "post": [],
+            "activity": []
+        }
+        return cache_history
+    }
+    cache_history = JSON.parse(content)
+    console.log('@INF: read app_prefs/history.json.')
+    return cache_history
+}
+
+async function cacheHistory(event, data) {
+    // キャッシュにデータをpush(101件以上は消す)
+    if (data.type == 'post') {
+        cache_history.post.unshift(data)
+        if (cache_history.post.length > 100) cache_history.post.pop()
+    } else {
+        cache_history.activity.unshift(data)
+        if (cache_history.activity.length > 100) cache_history.activity.pop()
+    }
+    await overwriteFile('app_prefs/history.json', cache_history)
+    console.log('@INF: finish write app_prefs/history.json')
+}
+
 /*====================================================================================================================*/
 
 /**
@@ -555,11 +588,13 @@ app.whenReady().then(() => {
     ipcMain.handle('read-pref-accs', readPrefAccs)
     ipcMain.handle('read-pref-cols', readPrefCols)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
+    ipcMain.handle('read-history', readHistory)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
+    ipcMain.on('cache-history', cacheHistory)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 

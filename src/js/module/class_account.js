@@ -166,7 +166,7 @@ class Account {
                         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                     },
                     data: request_param
-                }).then(data => new Status(data, null, this).pushStack(arg.content))
+                })
                 break
             case 'Misskey': // Misskey
                 // 公開範囲を取得
@@ -204,12 +204,14 @@ class Account {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(request_param)
-                }).then(data => new Status(data.createdNote, null, this).pushStack(arg.content))
+                }).then(data => { return data.createdNote })
                 break
             default:
                 break
         }
         request_promise.then(data => {
+            // 投稿を履歴にスタックする
+            new Status(data, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
@@ -241,7 +243,6 @@ class Account {
                         "resolve": true
                     }
                 }).then(data => { return data.statuses[0] })
-                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             case 'Misskey': // Misskey
                 request_promise = $.ajax({
@@ -254,17 +255,17 @@ class Account {
                         "uri": arg.target_url
                     })
                 }).then(data => { return data.object })
-                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             default:
                 break
         }
         // データが取得されるのを待ってtarget_jsonに代入
         target_json = await request_promise
+            .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
         // 投稿を取得できなかったらなにもしない
         if (!target_json) return
         // 取得できた場合はtarget_jsonからStatusインスタンスを生成
-        const target_post = new Status(target_json, null, this)
+        const target_post = new Status(target_json, History.HISTORY_PREF_TIMELINE, this)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 switch (arg.target_mode) {
@@ -278,26 +279,32 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/reblog`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブーストしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'reblog')
+                            toast("投稿をブーストしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'favorite')
+                            toast("投稿をお気に入りしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_bookmark': // ブックマーク
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/bookmark`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブックマークしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'bookmark')
+                            toast("投稿をブックマークしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
                         break
                     default:
                         break
@@ -310,7 +317,7 @@ class Account {
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_reblog': // リノート
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/create`,
                             dataType: "json",
@@ -319,15 +326,17 @@ class Account {
                                 "i": this.pref.access_token,
                                 "renoteId": target_post.id
                             })
-                        }).then(data => toast("投稿をリノートしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'reblog')
+                            toast("投稿をリノートしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_quote': // 引用
                         target_post.createQuoteWindow()
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_favorite': // お気に入り
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/favorites/create`,
                             dataType: "json",
@@ -336,8 +345,10 @@ class Account {
                                 "i": this.pref.access_token,
                                 "noteId": target_post.id
                             })
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'favorite')
+                            toast("投稿をお気に入りしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_reaction': // リアクション
                         target_post.createReactionWindow()
@@ -372,6 +383,11 @@ class Account {
                 "reaction": arg.shortcode
             })
         }).then(data => {
+            // 成功した場合は履歴スタックに保存
+            History.pushActivity({
+                id: arg.id,
+                from_account: this
+            }, 'reaction')
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)

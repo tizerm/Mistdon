@@ -7,12 +7,8 @@
 class Group {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(pref, column) {
-        if (!pref) { // 空のグループ(検索用)
-            this.pref = {
-                "group_id": "__search_timeline",
-                "tl_layout": "default",
-                "multi_user": true
-            }
+        if (!column) { // 特殊グループ(検索、履歴など)
+            this.pref = pref
             this.status_map = new Map()
             this.search_flg = true
             return
