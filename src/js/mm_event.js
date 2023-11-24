@@ -375,7 +375,8 @@ $(() => {
         else Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createImageModal(image_url))
         return false
     })
-    $(document).on("click", "#modal_expand_image", e => $("#modal_expand_image").hide("fade", 80))
+    $(document).on("click", "#modal_expand_image", e => $("#modal_expand_image")
+        .hide("fade", 80, () => $("#modal_expand_image video").remove()))
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
         const url = $(e.target).closest("li").attr("name")
         $('#modal_expand_image>#expand_image_box img:visible').hide()
@@ -394,7 +395,7 @@ $(() => {
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
     delayHoldEvent({
-        selector: ".__context_posts>li",
+        selector: ".__context_posts>li.short_timeline",
         holdFunc: e =>
             Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()),
         delay: 750

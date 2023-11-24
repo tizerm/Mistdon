@@ -319,9 +319,9 @@ audio { height: 30px; }
         position: absolute;
         display: none;
         z-index: 9;
-        border-radius: 4px;
+        border-radius: 12px;
         background-color: rgba(34,34,34,0.85);
-        width: 138px;
+        width: 140px;
         padding: 6px;
     }
 }

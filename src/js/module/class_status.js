@@ -845,7 +845,8 @@ class Status {
                     jqelm.closest('li').addClass('self_post')
                     jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
                     break
-                default: // リプライの場合はヘッダ書かない
+                default: // リプライ、引用の場合はアイコン削除
+                    jqelm.find('.ic_notif_type').remove()
                     break
             }
         }
@@ -1058,7 +1059,7 @@ class Status {
             // 動画ファイルの場合はvideoを使う
             if (media.type == 'video' || media.type == 'gifv') $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}">
-                    <video src="${media.url}" preload controls loop></video>
+                    <video src="${media.url}" class="expanded_media" preload controls loop></video>
                 </li>
             `); else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}"><img src="${media.url}" class="expanded_media"/></li>
@@ -1068,7 +1069,7 @@ class Status {
                 <li name="${media.url}"><img src="${media.thumbnail}"/></li>
             `)
         })
-        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`).show()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
         $("#modal_expand_image").show("fade", 80)
     }
