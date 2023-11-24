@@ -1038,7 +1038,16 @@ class Account {
             })
 
             // ユーザーの投稿を取得
-            detail.getPost(v).then(posts => posts.forEach(p => column.find(".posts").append(p.element)))
+            detail.getPost(v, null).then(posts => {
+                posts.forEach(p => column.find(".posts").append(p.element))
+                // スクロールローダーを生成
+                Status.createScrollLoader({
+                    list: posts,
+                    target: column.find(".posts"),
+                    asyncLoader: async last_id => detail.getPost(v, last_id),
+                    binder: (post, target) => target.append(post.element)
+                })
+            })
             detail.getPinnedPost(v).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
