@@ -8,6 +8,7 @@ class History {
     // コンストラクタ: Statusオブジェクトから履歴データを生成
     constructor(post, type) {
         if (post.status_id) this.post = post
+        else this.renote_id = post.renote_id
         this.account_address = post.account_address ?? post.from_account.full_address
         this.id = post.id
         this.type = type ?? 'post'
@@ -147,10 +148,10 @@ class History {
                     break
             }
             elm.prepend(html)
-            button = '<button type="button" class="__del_history_act">解除</button>'
+            button = '<button type="button" class="__del_history">解除</button>'
         } else { // 通常投稿はIDを書き換える
             elm.find('.user>.userid>a').html(this.account_address)
-            button = '<button type="button" class="__del_history_post">削除</button>'
+            button = '<button type="button" class="__del_history">削除</button>'
         }
         // 末尾にホバーで表示するボタンモーダルを追加
         elm.append(`
@@ -164,21 +165,154 @@ class History {
         const history = new History(post, null)
         History.post_stack.unshift(history)
         if (History.post_stack.length > 100) History.post_stack.pop()
-        window.accessApi.cacheHistory(history.json)
+        History.writeJson()
     }
 
-    static pushActivity(post, type) {
-        const history = new History(post, type)
+    static pushActivity(post, type, renote_id) {
+        let history = new History(post, type)
+        if (renote_id) history.renote_id = renote_id
         History.activity_stack.unshift(history)
         if (History.activity_stack.length > 100) History.activity_stack.pop()
-        window.accessApi.cacheHistory(history.json)
+        History.writeJson()
+    }
+
+    static delete(target) {
+        const index = target.closest("li").index()
+        if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
+            History.activity_stack[index].undo().then(() => {
+                History.activity_stack.splice(index, 1)
+                History.writeJson()
+                target.closest("li").remove()
+            })
+        } else { // 投稿履歴
+            History.post_stack[index].post.delete((post, uuid) => {
+                History.post_stack.splice(index, 1)
+                toast("対象の投稿を削除しました.", "done", uuid)
+                History.writeJson()
+                target.closest("li").remove()
+            })
+        }
+    }
+
+    async undo() {
+        // 先にtoast表示
+        const toast_uuid = crypto.randomUUID()
+        toast("取り消しています...", "progress", toast_uuid)
+
+        const account = Account.get(this.account_address)
+        let request_promise = null
+        switch (this.type) {
+            case 'reblog': // ブースト/リノート
+                switch (account.platform) {
+                    case 'Mastodon': // Mastodon
+                        request_promise = $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unreblog`,
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                        })
+                        break
+                    case 'Misskey': // Misskey
+                        request_promise = $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/delete`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "noteId": this.renote_id
+                            })
+                        })
+                        break
+                    default:
+                        break
+                }
+                break
+            case 'favorite': // お気に入り
+                switch (account.platform) {
+                    case 'Mastodon': // Mastodon
+                        request_promise = $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unfavourite`,
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                        })
+                        break
+                    case 'Misskey': // Misskey
+                        request_promise = $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/favorites/delete`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "noteId": this.id
+                            })
+                        })
+                        break
+                    default:
+                        break
+                }
+                break
+            case 'bookmark': // ブックマーク
+                request_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unbookmark`,
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                })
+                break
+            case 'reaction': // リアクション
+                request_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${account.pref.domain}/api/notes/reactions/delete`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": account.pref.access_token,
+                        "noteId": this.id
+                    })
+                })
+                break
+            default:
+                break
+        }
+        return request_promise.then(() => toast("取り消しが完了しました.", "done", toast_uuid)).catch(jqXHR => {
+            // 取り消しに失敗したらリジェクトする
+            toast("取り消しに失敗しました.", "error", toast_uuid)
+            return Promise.reject(jqXHR)
+        })
+    }
+
+    static popIf(presentCallback, del_flg) {
+        const pop = History.post_stack[0]
+        if (!pop) { // なにもなかったらそのままおしまい
+            toast("直前の投稿がありません.", "error")
+            return
+        }
+        if (!pop.post) { // データ取得前の場合はメッセージを出す
+            toast("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.", "error")
+            return
+        }
+        // 削除する場合
+        if (del_flg) pop.post.delete((post, uuid) => {
+            toast("直前の投稿を削除しました.", "done", uuid)
+            presentCallback(History.post_stack.shift())
+            History.writeJson()
+        }) // 参照だけする場合
+        else presentCallback(pop)
+    }
+
+    static writeJson() {
+        window.accessApi.overwriteHistory({
+            "post": History.post_stack.map(elm => elm.json),
+            "activity": History.activity_stack.map(elm => elm.json)
+        })
     }
 
     get json() {
         return {
             "account_address": this.account_address,
             "id": this.id,
-            "type": this.type
+            "type": this.type,
+            "renote_id": this.renote_id ?? null
         }
     }
 }

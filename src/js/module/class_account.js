@@ -327,7 +327,7 @@ class Account {
                                 "renoteId": target_post.id
                             })
                         }).then(data => {
-                            History.pushActivity(target_post, 'reblog')
+                            History.pushActivity(target_post, 'reblog', data.createdNote.id)
                             toast("投稿をリノートしました.", "done", toast_uuid)
                         }).catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
                         break

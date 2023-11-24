@@ -223,28 +223,25 @@ $(() => {
      * #Event
      * 直前の投稿を削除ボタン
      */
-    $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
-        last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid)), true))
+    $("#header #on_last_delete").on("click", e => History.popIf(last => {}, true))
 
     /**
      * #Event
      * 直前の投稿を削除して編集ボタン
      */
-    $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
-        last => last.delete((post, uuid) => {
-            post.from_account.setPostAccount()
-            $("#__txt_postarea").val(post.original_text)
-            $("#__txt_content_warning").val(post.cw_text)
-            toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid)
-        }), true))
+    $("#header #on_last_delete_paste").on("click", e => History.popIf(last => {
+        last.post.from_account.setPostAccount()
+        $("#__txt_postarea").val(last.post.original_text)
+        $("#__txt_content_warning").val(last.post.cw_text)
+    }, true))
 
     /**
      * #Event
      * 直前の投稿をコピーボタン
      */
-    $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
-        $("#__txt_postarea").val(last.original_text)
-        $("#__txt_content_warning").val(last.cw_text)
+    $("#header #on_last_copy").on("click", e => History.popIf(last => {
+        $("#__txt_postarea").val(last.post.original_text)
+        $("#__txt_content_warning").val(last.post.cw_text)
         toast("直前の投稿内容を再展開しました.", "done")
     }, false))
 
@@ -252,7 +249,7 @@ $(() => {
      * #Event
      * 直前の投稿につなげるボタン
      */
-    $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow(), false))
+    $("#header #on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
     /**
      * #Event #Focus
@@ -422,6 +419,8 @@ $(() => {
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
 
+    $(document).on("click", ".__del_history", e => History.delete($(e.target)))
+
     /**
      * #Event
      * ユーザープロフィール: ピンどめ
@@ -442,7 +441,7 @@ $(() => {
 
     /**
      * #Event
-     * TODO: まだ実装中やねん
+     * TODO: プロフ関連
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()

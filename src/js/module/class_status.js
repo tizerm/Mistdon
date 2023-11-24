@@ -197,10 +197,9 @@ class Status {
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
-    get content_text() { return $.parseHTML(`<div>${this.content}</div>`)[0].innerText }
-
-    // 最後に投稿した投稿データを保持する領域
-    static post_stack = []
+    get content_text() { return $($.parseHTML(this.content)).text() }
+    // Getter: オリジナルテキスト(投稿時そのままの形式)
+    get original_text() { return this.__original_text ?? $($.parseHTML(this.content)).text() }
 
     // 日付フォーマッターはstaticプロパティにする
     static {
@@ -226,26 +225,8 @@ class Status {
      * @param original_text 投稿したときに実際に打ち込んだ生テキスト(改行とかそのままの状態で保存するため)
      */
     pushStack(original_text) {
-        this.original_text = original_text
+        this.__original_text = original_text
         History.pushPost(this)
-
-        // TODO: deprecated
-        Status.post_stack.push(this)
-    }
-
-    /**
-     * #StaticMethod
-     * 直前の投稿が存在する場合、その投稿に対してコールバック関数を実行する
-     * フラグが経っている場合は投稿をスタックからポップする
-     * 
-     * @param presentCallback 直前の投稿が存在した場合に実行するコールバック関数
-     * @param del_flg trueの場合スタックから投稿をポップ(削除)する
-     */
-    static lastStatusIf(presentCallback, del_flg) {
-        const last_status = del_flg
-            ? Status.post_stack.pop() : Status.post_stack[Status.post_stack.length - 1]
-        if (last_status) presentCallback(last_status)
-        else toast("直前の投稿がありません.", "error")
     }
 
     /**

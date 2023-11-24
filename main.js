@@ -391,17 +391,11 @@ async function readHistory() {
     return cache_history
 }
 
-async function cacheHistory(event, data) {
-    // キャッシュにデータをpush(101件以上は消す)
-    if (data.type == 'post') {
-        cache_history.post.unshift(data)
-        if (cache_history.post.length > 100) cache_history.post.pop()
-    } else {
-        cache_history.activity.unshift(data)
-        if (cache_history.activity.length > 100) cache_history.activity.pop()
-    }
-    await overwriteFile('app_prefs/history.json', cache_history)
+async function overwriteHistory(event, data) {
+    const content = await overwriteFile('app_prefs/history.json', data)
     console.log('@INF: finish write app_prefs/history.json')
+
+    cache_history = JSON.parse(content)
 }
 
 /*====================================================================================================================*/
@@ -594,7 +588,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
-    ipcMain.on('cache-history', cacheHistory)
+    ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 

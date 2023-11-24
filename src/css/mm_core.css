@@ -120,7 +120,7 @@ audio { height: 30px; }
 
         > li {
             list-style-type: none;
-            margin: 18px 0px;
+            margin: 16px 0px;
             padding: 0px;
 
             > a:hover>img {
