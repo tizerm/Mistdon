@@ -365,7 +365,6 @@ $(() => {
         return false
     })
 
-    // TODO: 検索カラムを経由して表示するとバグる(videoや外部URLに対応できてないので)
     $(document).on("click", ".__on_media_expand", e => {
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
@@ -373,15 +372,22 @@ $(() => {
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus($(e.target).closest("li"))
             .createImageModal(image_url)
-        else Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createImageModal(image_url))
+        else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
+            Status.getStatus($(e.target).closest("li").attr("name"))
+                .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
         return false
     })
-    $(document).on("click", "#modal_expand_image", e => $("#modal_expand_image")
-        .hide("fade", 80, () => $("#modal_expand_image video").remove()))
+    $(document).on("click", "#modal_expand_image", e => {
+        if ($(e.target).is("video")) return // 動画の場合はなにもしない
+        $("#modal_expand_image").hide("fade", 80, () => $("#modal_expand_image video").remove())
+    })
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
         const url = $(e.target).closest("li").attr("name")
-        $('#modal_expand_image>#expand_image_box img:visible').hide()
-        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        $('#modal_expand_image>#expand_image_box>li>*:visible').hide()
+        const target_media = $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`)
+        target_media.show()
+        // 動画の場合は自動再生
+        if (target_media.is("video")) target_media.get(0).play()
         $('#modal_expand_image>#expand_thumbnail_list>*').removeClass("selected_image")
         $(e.target).closest("li").addClass("selected_image")
         return false

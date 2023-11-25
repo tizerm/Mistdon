@@ -18,7 +18,7 @@
                     $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").next().mouseenter();
                     return false;
                 case 13: // Enter: 閉じる
-                    $("#modal_expand_image").hide("fade", 80);
+                    $("#modal_expand_image").click();
                     return false;
                 default:
                     return;

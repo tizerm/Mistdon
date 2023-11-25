@@ -1052,7 +1052,7 @@ class Status {
         observer.observe(arg.target.find(".__scroll_loader").get(0))
     }
 
-    createImageModal(url) {
+    createImageModal(url, index) {
         // 一旦全部クリア
         $("#modal_expand_image>*").empty()
         this.medias.forEach(media => {
@@ -1069,7 +1069,10 @@ class Status {
                 <li name="${media.url}"><img src="${media.thumbnail}"/></li>
             `)
         })
-        $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`).show()
+        const target_media = !index ? $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`) : $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})>*`)
+        target_media.show()
+        // 動画の場合は自動再生
+        if (target_media.is("video")) target_media.get(0).play()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
         $("#modal_expand_image").show("fade", 80)
     }
