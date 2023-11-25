@@ -586,8 +586,8 @@ class Status {
         if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
             html += '<div class="detail_info">'
             if (this.hashtags) { // ハッシュタグ
-                html += '<div>'
-                this.hashtags.forEach(tag => html += `<a class="hashtag">${tag}</a>`)
+                html += '<div class="hashtags">'
+                this.hashtags.forEach(tag => html += `<a class="__on_detail_hashtag" name="${tag}">#${tag}</a>`)
                 html += '</div>'
             }
             // リプライ数とブースト/リノート数

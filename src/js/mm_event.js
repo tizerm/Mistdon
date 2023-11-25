@@ -365,6 +365,7 @@ $(() => {
         return false
     })
 
+    // TODO: 検索カラムを経由して表示するとバグる(videoや外部URLに対応できてないので)
     $(document).on("click", ".__on_media_expand", e => {
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
@@ -419,6 +420,13 @@ $(() => {
      * => マウスが出たらポップアップを消す
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
+
+    $(document).on("click", ".__on_detail_hashtag", e => {
+        $("#pop_extend_column").hide()
+        Query.createSearchWindow()
+        $("#pop_ex_timeline #__txt_search_query").val(`#${$(e.target).attr('name')}`)
+        $("#pop_ex_timeline #__on_search").click()
+    })
 
     $(document).on("click", ".__del_history", e => History.delete($(e.target)))
 
@@ -560,6 +568,9 @@ $(() => {
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url", e =>
         navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")))
+
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
+        e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
 
     /**
      * #Event #Contextmenu
