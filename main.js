@@ -558,7 +558,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            //devTools: false,
+            devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -566,7 +566,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    //win.setMenuBarVisibility(false)
+    win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)

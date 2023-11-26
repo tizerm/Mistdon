@@ -351,7 +351,7 @@ $(() => {
      * => 非表示にしている閲覧注意情報をトグルする
      */
     $(document).on("click", ".expand_header", e =>
-        $(e.target).next().toggle("slide", { direction: "up" }, 100))
+        $(e.target).closest("a").next().toggle("slide", { direction: "up" }, 100))
 
     /**
      * #Event

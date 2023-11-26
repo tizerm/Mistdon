@@ -1069,7 +1069,9 @@ class Status {
                 <li name="${media.url}"><img src="${media.thumbnail}"/></li>
             `)
         })
-        const target_media = !index ? $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`) : $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})>*`)
+        const target_media = index >= 0
+            ? $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})>.expanded_media`)
+            : $(`#modal_expand_image>#expand_image_box>li>.expanded_media[src="${url}"]`)
         target_media.show()
         // 動画の場合は自動再生
         if (target_media.is("video")) target_media.get(0).play()
