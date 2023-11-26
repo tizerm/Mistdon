@@ -17,7 +17,10 @@
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_ui.js"></script>
-    <script type="text/javascript" src="js/mm_pref_col_viewbind.js"></script>
+    <script type="text/javascript" src="js/mm_help.js"></script>
+    <script type="text/javascript" src="js/module/class_account.js"></script>
+    <script type="text/javascript" src="js/module/class_instance.js"></script>
+    <script type="text/javascript" src="js/module/class_columnpref.js"></script>
     <script type="text/javascript" src="js/mm_pref_col.js"></script>
     <title>Mistdon - カラム設定</title>
 </head>
@@ -40,6 +43,8 @@
         <button type="button" id="on_close">戻る</button>
         <span>※カラムヘッダをドラッグ&amp;ドロップすると、並び替えができます。</span>
     </div>
+</header>
+<div id="pop">
     <div id="pop_toast">
     <!-- hidden: トースト -->
     </div>
@@ -52,10 +57,10 @@
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->
     </div>
-</header>
+</div>
 <section id="columns">
 <table><tbody>
-<tr class="__ui_sortable"><!-- jQueryでバインディング処理をします --></tr>
+<tr class="__ui_col_sortable"><!-- jQueryでバインディング処理をします --></tr>
 </tbody></table>
 </section>
 </body>

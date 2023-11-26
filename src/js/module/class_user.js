@@ -6,46 +6,58 @@
  */
 class User {
     // コンストラクタ: APIから来たユーザーデータを受け取って生成
-    constructor(json, host, platform) {
-        this.host = host
-        this.platform = platform
+    constructor(arg) {
+        this.platform = arg.platform
         this.fields = []
-        switch (platform) { // TODO: 暫定
+        let host = null
+
+        switch (arg.platform) { // TODO: 暫定
             case 'Mastodon': // Mastodon
-                this.id = json.id
-                this.user_id = json.username
-                this.full_address = `@${json.username}@${host}`
-                this.username = json.display_name || json.username
-                this.avatar_url = json.avatar
-                this.header_url = json.header
-                this.profile = json.note
-                this.url = json.url
-                this.count_post = json.statuses_count
-                this.count_follow = json.following_count
-                this.count_follower = json.followers_count
+                // リモートの情報を直に取得する場合引数をそのまま使う
+                if (arg.remote) host = arg.host
+                else // ローカルサーバーからユーザー情報を取得している場合
+                    host = arg.json.acct.match(/@/) // リモートホストはアドレスから取得
+                        ? arg.json.acct.substring(arg.json.acct.lastIndexOf('@') + 1) : arg.host
+
+                this.id = arg.json.id
+                this.user_id = arg.json.username
+                this.full_address = `@${arg.json.username}@${host}`
+                this.username = arg.json.display_name || arg.json.username
+                this.avatar_url = arg.json.avatar
+                this.header_url = arg.json.header
+                this.profile = arg.json.note
+                this.url = arg.json.url
+                this.count_post = arg.json.statuses_count
+                this.count_follow = arg.json.following_count
+                this.count_follower = arg.json.followers_count
 
                 // フィールドをセット
-                if (json.fields) json.fields.forEach(f => this.fields.push({
+                if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
                     label: f.name,
                     text: f.value
                 }))
                 break
             case 'Misskey': // Misskey
-                this.id = json.id
-                this.user_id = json.username
-                this.full_address = `@${json.username}@${host}`
-                this.username = json.name || json.username
-                this.avatar_url = json.avatarUrl
-                this.header_url = json.bannerUrl
-                this.profile = json.description
+                // リモートの情報を直に取得する場合引数をそのまま使う
+                if (arg.remote) host = arg.host
+                else // ローカルサーバーからユーザー情報を取得している場合ホスト情報を参照する
+                    host = arg.json.host ?? arg.host
+
+                this.id = arg.json.id
+                this.user_id = arg.json.username
+                this.full_address = `@${arg.json.username}@${host}`
+                this.username = arg.json.name || arg.json.username
+                this.avatar_url = arg.json.avatarUrl
+                this.header_url = arg.json.bannerUrl
+                this.profile = arg.json.description
                 if (this.profile) this.profile = this.profile.replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
-                this.url = `https://${host}/@${json.username}` // URLは自前で生成
-                this.count_post = json.notesCount
-                this.count_follow = json.followingCount
-                this.count_follower = json.followersCount
+                this.url = `https://${host}/@${arg.json.username}` // URLは自前で生成
+                this.count_post = arg.json.notesCount
+                this.count_follow = arg.json.followingCount
+                this.count_follower = arg.json.followersCount
 
                 // フィールドをセット
-                if (json.fields) json.fields.forEach(f => this.fields.push({
+                if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
                     label: f.name,
                     text: f.value.match(/^http/) // URLはリンクにする
                         ? `<a href="${f.value}" class="__lnk_external">${f.value}</a>` : f.value
@@ -53,11 +65,13 @@ class User {
 
                 // ピンどめ投稿はまとめる
                 this.pinneds = [] // この段階ではまだ整形しない
-                if (json.pinnedNotes) json.pinnedNotes.forEach(note => this.pinneds.push(note))
+                if (arg.json.pinnedNotes) arg.json.pinnedNotes.forEach(note => this.pinneds.push(note))
                 break
             default:
                 break
         }
+        this.host = host
+        this.auth = arg.auth
     }
 
     /**
@@ -136,7 +150,13 @@ class User {
             default:
                 break
         }
-        return rest_promise.then(data => { return new User(data, arg.host, arg.platform) })
+        return rest_promise.then(data => { return new User({
+            json: data,
+            host: arg.host,
+            remote: true,
+            auth: false,
+            platform: arg.platform
+        })})
     }
 
     // Getter: プロフィールヘッダのDOMを返却
@@ -155,9 +175,32 @@ class User {
                 <img src="${this.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.username}</h4>
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
-            </div>
         `
+        let bookmarks = ''
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                bookmarks = `
+                    <a class="__on_show_bookmark" title="ブックマーク"
+                        ><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
+                    <a class="__on_show_mastfav" title="お気に入り"
+                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                `
+                break
+            case 'Misskey': // Misskey
+                html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                bookmarks = `
+                    <a class="__on_show_reaction" title="リアクション"
+                        ><img src="resources/ic_emoji.png" alt="リアクション"/></a>
+                    <a class="__on_show_miskfav" title="お気に入り"
+                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                `
+                break
+            default:
+                break
+        }
         html += `
+            </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
                 <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
@@ -172,7 +215,8 @@ class User {
             .css('background-image', `url("${this.header_url}")`)
             .css('background-size', '420px auto')
             .css('background-position', 'center center')
-        jqelm.find('.detail_info').tooltip()
+        if (this.auth) // 認証プロフィール表示の場合はブックマークアイコンを追加
+            jqelm.find('.detail_info').addClass('auth_details').prepend(bookmarks)
         return jqelm
     }
 
@@ -203,7 +247,7 @@ class User {
     get short_elm() {
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `
-            <li class="short_userinfo">
+            <li class="short_userinfo" name="${this.full_address}">
                 <div class="label_head user_header">
                     <span>&nbsp;</span>
                 </div>
@@ -215,9 +259,19 @@ class User {
                 <img src="${this.avatar_url}" class="usericon"/>
                 <h4 class="username">${this.username}</h4>
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
-            </div>
         `
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                break
+            case 'Misskey': // Misskey
+                html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                break
+            default:
+                break
+        }
         html += `
+            </div>
             <div class="content"><div class="main_content">
                 ${$($.parseHTML(this.profile)).text()}
             </div></div>
@@ -237,7 +291,21 @@ class User {
             .css('background-image', `url("${this.header_url}")`)
             .css('background-size', '480px auto')
             .css('background-position', 'center center')
-        jqelm.find('.detail_info').tooltip()
+        return jqelm
+    }
+
+    // Getter: インラインで名前だけ表示するネームタグ表示用DOM
+    get inline_nametag() {
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(`
+            <li class="user_nametag" name="${this.full_address}">
+                <div class="user">
+                    <img src="${this.avatar_url}" class="usericon"/>
+                    <h4 class="username">${this.username}</h4>
+                    <span class="userid">${this.full_address}</a>
+                </div>
+            </li>
+        `))
         return jqelm
     }
 
@@ -247,10 +315,17 @@ class User {
      * 
      * @param account リモートホストの情報を入れた最小限のアカウントオブジェクト
      */
-    getPost(account) {
+    getPost(account, max_id) {
         let rest_promise = null
+        let query_param = null
         switch (this.platform) {
             case 'Mastodon': // Mastodon
+                query_param = {
+                    "limit": 40,
+                    "exclude_replies": true
+                }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                // あればアクセストークンを設定
                 let header = {}
                 if (account) header = { "Authorization": `Bearer ${account.pref.access_token}` }
                 rest_promise = $.ajax({
@@ -258,25 +333,17 @@ class User {
                     url: `https://${this.host}/api/v1/accounts/${this.id}/statuses`,
                     dataType: "json",
                     headers: header,
-                    data: {
-                        "limit": 40,
-                        "exclude_replies": true
-                    }
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
-                        return posts
-                    })()
+                    data: query_param
                 })
                 break
             case 'Misskey': // Misskey
-                let query_param = {
+                query_param = {
                     "userId": this.id,
                     "includeReplies": false,
                     "limit": 40,
                     "includeMyRenotes": false
                 }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 if (account) query_param.i = account.pref.access_token
                 rest_promise = $.ajax({
                     type: "POST",
@@ -284,19 +351,19 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
-                        return posts
-                    })()
                 })
                 break
             default:
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
+        return rest_promise.then(data => {
+            return (async () => {
+                const posts = []
+                data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                return posts
+            })()
+        }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${this.full_address}の投稿の取得に失敗しました.`, "error")
@@ -350,43 +417,179 @@ class User {
         })
     }
 
-    /**
-     * #Method
-     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する
-     */
-    createDetailWindow() {
+    getBookmarks(account, type, max_id) {
+        let rest_promise = null
+        let query_param = null
+        switch (type) {
+            case 'Favorite_Mastodon': // お気に入り(Mastodon)
+                query_param = { "limit": 40 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.host}/api/v1/favourites`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: query_param
+                })
+                break
+            case 'Favorite_Misskey': // お気に入り(Misskey)
+                query_param = {
+                    "i": account.pref.access_token,
+                    "limit": 40
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.host}/api/i/favorites`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify(query_param)
+                })
+                break
+            case 'Bookmark': // ブックマーク(Mastodon)
+                query_param = { "limit": 40 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.host}/api/v1/bookmarks`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: query_param
+                })
+                break
+            case 'Reaction': // リアクション(Misskey)
+                query_param = {
+                    "i": account.pref.access_token,
+                    "userId": this.id,
+                    "limit": 40
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.host}/api/users/reactions`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify(query_param)
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.then(data => {
+            return (async () => {
+                const posts = []
+                data.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
+                return posts
+            })()
+        }).catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
+    }
+
+    getFFUsers(account, type, max_id) {
+        let api_url = null
+        let rest_promise = null
+        let query_param = null
+        switch (account.platform) {
+            case 'Mastodon': // Mastodon
+                if (type == 'follows') api_url = `https://${this.host}/api/v1/accounts/${this.id}/following`
+                else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
+                query_param = { "limit": 80 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: api_url,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: query_param
+                }).then(data => {
+                    return (async () => {
+                        const users = []
+                        data.forEach(u => users.push(new User({
+                            json: u,
+                            host: this.host,
+                            remote: false,
+                            auth: false,
+                            platform: account.platform
+                        })))
+                        return users
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                if (type == 'follows') api_url = `https://${this.host}/api/users/following`
+                else if (type == 'followers') api_url = `https://${this.host}/api/users/followers`
+                query_param = {
+                    "i": account.pref.access_token,
+                    "userId": this.id,
+                    "limit": 80
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: api_url,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify(query_param)
+                }).then(data => {
+                    return (async () => {
+                        const users = []
+                        data.forEach(u => users.push(new User({
+                            json: u.followee ?? u.follower,
+                            host: this.host,
+                            remote: false,
+                            auth: false,
+                            platform: account.platform
+                        })))
+                        return users
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise.catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
+    }
+
+    createDetailHtml(bind_selector) {
         const jqelm = $($.parseHTML(`
-            <div class="account_timeline single_user">
-                <table><tbody>
-                    <tr><td id="${this.full_address}" class="timeline column_profile">
-                        <div class="col_loading">
-                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                            <span class="loading_text">Now Loading...</span>
-                        </div>
-                        <ul class="profile_header __context_user"></ul>
-                        <ul class="profile_detail __context_user"></ul>
-                        <div class="pinned_block post_div">
-                            <h4>ピンどめ</h4>
-                            <ul class="pinned_post __context_posts"></ul>
-                        </div>
-                        <div class="posts_block post_div">
-                            <h4>投稿一覧</h4>
-                            <ul class="posts __context_posts"></ul>
-                        </div>
-                    </td></tr>
-                </tbody></table>
-            </div>
+            <table><tbody>
+                <tr><td id="${this.full_address}" class="timeline column_profile">
+                    <div class="col_loading">
+                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                        <span class="loading_text">Now Loading...</span>
+                    </div>
+                    <ul class="profile_header __context_user"></ul>
+                    <ul class="profile_detail __context_user"></ul>
+                    <div class="pinned_block post_div">
+                        <h4>ピンどめ</h4>
+                        <ul class="pinned_post __context_posts"></ul>
+                    </div>
+                    <div class="posts_block post_div">
+                        <h4>投稿一覧</h4>
+                        <ul class="posts __context_posts"></ul>
+                    </div>
+                </td></tr>
+            </tbody></table>
         `))
         jqelm.find(".profile_header").html(this.header_element)
         jqelm.find(".profile_detail").html(this.profile_element)
         // 若干横幅が長いのでヘッダサイズを大きくする
         jqelm.find('.profile_header .user_header').css('background-size', '480px auto')
-        $("#header>#pop_ex_timeline").html(jqelm)
-            .append('<button type="button" id="__on_search_close">×</button>')
-            .show("slide", { direction: "right" }, 150)
+        $(bind_selector).html(jqelm)
 
         // ユーザーの投稿を非同期で取得
-        const column = $(`#header>#pop_ex_timeline>.account_timeline td`)
+        const column = $(`${bind_selector} td`)
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.host
             Emojis.replaceDomAsync(column.find(".profile_header .username"), host) // ユーザー名
@@ -396,8 +599,16 @@ class User {
             "platform": this.platform,
             "pref": { "domain": this.host }
         }; (async () => Promise.allSettled([
-            this.getPost(account).then(posts => posts.forEach(p => column.find(".posts").append(p.element))),
-            this.getPinnedPost(account).then(posts => {
+            this.getPost(account, null).then(posts => {
+                posts.forEach(p => column.find(".posts").append(p.element))
+                // スクロールローダーを生成
+                Status.createScrollLoader({
+                    list: posts,
+                    target: column.find(".posts"),
+                    asyncLoader: async last_id => this.getPost(account, last_id),
+                    binder: (post, target) => target.append(post.element)
+                })
+            }), this.getPinnedPost(account).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
                     column.find(".pinned_block").remove()
@@ -417,6 +628,69 @@ class User {
                 Emojis.replaceDomAsync(column.find(".posts .main_content"), host) // 本文
             }
         }))()
+    }
+
+    /**
+     * #Method
+     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する
+     */
+    createDetailWindow() {
+        $("#pop_ex_timeline").html('<div class="account_timeline single_user"></div>')
+        this.createDetailHtml("#pop_ex_timeline>.account_timeline")
+        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close">×</button>')
+            .show("slide", { direction: "right" }, 150)
+    }
+
+    createDetailPop(target) {
+        const pos = target.closest("td").offset()
+        this.createDetailHtml("#pop_ex_timeline>.ff_pop_user")
+        $("#pop_ex_timeline>.ff_pop_user").css({
+            'left': `${pos.left - 138}px`,
+            'top': `${pos.top - 48}px`,
+        }).show("fade", 80)
+    }
+
+    createBookmarkList(type) {
+        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.find(".user_post_elm").hide()
+        target.find(".user_ff_elm").hide()
+        target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
+
+        this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+            data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
+            // TODO: Mastodonのローダーが機能しないので一旦保留
+            /*
+            Status.createScrollLoader({
+                list: data,
+                target: target.find(".user_bookmark_elm>.bookmarks"),
+                asyncLoader: async last_id => this.getBookmarks(Account.get(this.full_address), type, last_id),
+                binder: (post, target) => target.append(post.element)
+            })//*/
+        })())
+    }
+
+    createFFTaglist(type) {
+        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.find(".user_post_elm").hide()
+        target.find(".user_bookmark_elm").hide()
+        target.find(".user_ff_elm").html(`
+            <ul class="ff_short_profile">
+                <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>
+            </ul>
+            <ul class="ff_nametags"></ul>
+        `).show()
+
+        this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+            data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
+            // TODO: Mastodonのローダーが機能しないので一旦保留
+            /*
+            Status.createScrollLoader({
+                list: data,
+                target: target.find(".user_ff_elm>.ff_nametags"),
+                asyncLoader: async last_id => this.getFFUsers(Account.get(this.full_address), type, last_id),
+                binder: (u, target) => target.append(u.inline_nametag)
+            })//*/
+        })())
     }
 }
 

@@ -1,95 +1,199 @@
+﻿/*=== General Stylesheet =========================================================================*/
+
 #header>.head_buttons {
     margin: 12px;
     text-align: center;
-}
-#header>.head_buttons>span {
-    display: block;
-    font-size: 13px;
-}
-#header>.head_buttons>button {
-    border-radius: 8px;
-    border: solid 2px #ffffff;
-    padding: 6px 32px;
-    font-size: 16px;
-    font-weight: bold;
+
+    > span {
+        display: block;
+        font-size: 13px;
+    }
+    > button {
+        border-radius: 8px;
+        border: solid 2px #ffffff;
+        padding: 6px 32px;
+        font-size: 16px;
+        font-weight: bold;
+    }
 }
 
-#columns input, #columns select {
-    background-color: #4f4f4f;
-    color: #ffffff;
-    border: solid 1px #ffffff;
-}
-#columns>table .timeline {
-    width: 330px;
-}
-#columns>table .timeline>.col_head {
-    background-color: #808080;
-    background-image: url("../resources/ic_sort_x.png");
-    background-position: right 12px bottom 5px;
-    background-repeat: no-repeat;
-    position: relative;
-    cursor: move;
-}
-#columns>table .timeline>.col_head>h2,
-#columns>table .timeline>.col_head>h3 {
-    margin: 0px;
-}
-.__txt_col_head {
-    width: calc(100% - 12px);
-}
+/*=== Column Layout ==============================================================================*/
 
-.timeline button {
-    border-radius: 6px;
-    border: solid 1px #ffffff;
-    padding: 2px 8px;
-    font-size: 13px;
-    font-weight: bold;
+#columns {
+    overflow-y: hidden;
+
+    > table {
+        .column_td {
+            width: 330px;
+
+            > .col_head {
+                background-color: #808080;
+                background-image: url("../resources/ic_sort_x.png");
+                background-position: right 82px bottom 7px;
+                background-repeat: no-repeat;
+                position: relative;
+                cursor: move;
+                > h2 { margin: 0px; }
+                > .group_button {
+                    position: absolute;
+                    bottom: 0px;
+                    right: 8px;
+                }
+            }
+            & select {
+                padding: 2px 8px;
+                width: 100%;
+            }
+            > .col_option {
+                background-color: rgba(67,67,67,0.8);
+                border-radius: 12px;
+                margin: 2px 0px;
+                padding: 2px 0px;
+                font-size: 13px;
+                text-align: center;
+            }
+
+            /*=== Group Layout ===================================================================*/
+            > .col_tl_groups {
+                height: calc(100vh - 284px);
+                > .tl_group {
+                    > .group_head {
+                        background-color: #505050;
+                        background-image: url("../resources/ic_sort_move.png");
+                        background-position: right 56px bottom 2px;
+                        background-repeat: no-repeat;
+                        border-top-right-radius: 12px;
+                        border-bottom-right-radius: 12px;
+                        height: 24px;
+                        margin: 2px 0px;
+                        padding: 2px 8px;
+                        font-size: 12px;
+                        text-align: left;
+                        position: relative;
+                        cursor: move;
+                        > h3 { margin: 0px; }
+                        > .group_pref {
+                            position: absolute;
+                            top: 4px;
+                            right: 84px;
+
+                            .__txt_group_height:disabled {
+                                background-color: #808080;
+                                cursor: not-allowed;
+                            }
+                        }
+                        > .group_button {
+                            position: absolute;
+                            top: 2px;
+                            right: 2px;
+                            & img {
+                                width: 24px;
+                                height: 24px;
+                            }
+                        }
+                    }
+                    > .group_option {
+                        background-color: rgba(67,67,67,0.8);
+                        border-radius: 6px;
+                        margin: 2px 0px;
+                        padding: 2px 0px;
+                        height: 24px;
+                        font-size: 13px;
+                        text-align: center;
+
+                        > select.__cmb_tl_layout { width: 96px; }
+                    }
+                    > ul {
+                        margin: 0px;
+                        padding: 0px;
+                        height: calc(100vh - 316px);
+                        overflow-y: auto;
+
+                        /*=== Timeline Layout ====================================================*/
+                        > li {
+                            > h4 {
+                                position: relative;
+                                border-top-left-radius: 12px;
+                                border-top-right-radius: 12px;
+                                background-image: url("../resources/ic_sort_move.png");
+                                background-position: right 32px bottom 4px;
+                                background-repeat: no-repeat;
+                                color: #ffffff;
+                                font-family: Arial, "メイリオ", sans-selif;
+                                font-size: 18px;
+                                font-weight: bold;
+                                margin: -12px -12px 12px;
+                                padding: 6px 24px;
+                                background-color: #808080;
+                                cursor: move;
+                                > a {
+                                    display: inline-block;
+                                    position: absolute;
+                                    top: 4px;
+                                    right: 4px;
+                                    > img {
+                                        width: 24px;
+                                        height: 24px;
+                                    }
+                                }
+                            }
+                            > .tl_option {
+                                font-size: 14px;
+                                margin: 6px 12px;
+                                > div { margin: 12px 0px; }
+                                .lbl_external_instance {
+                                    >.instance_info {
+                                        background-color: rgba(255,255,255,0.08);
+                                        background-size: auto 64px;
+                                        background-position: center center;
+                                        background-repeat: no-repeat;
+                                        border-radius: 12px;
+                                        margin: 6px 0px;
+                                        padding: 2px;
+                                        font-weight: bold;
+                                        font-size: 15px;
+                                        text-align: center;
+                                    }
+                                    > .color_info {
+                                        font-size: 13px;
+                                        text-align: right;
+                                    }
+                                }
+                            }
+                        }
+                        > .ui-sortable-placeholder {
+                            background-color: rgba(168,72,96,0.8);
+                            border-radius: 18px;
+                            height: 160px;
+                        }
+                    }
+                }
+                > .ui-sortable-placeholder {
+                    background-color: rgba(168,72,96,0.8);
+                    border-radius: 18px;
+                    height: 160px;
+                }
+            }
+        }
+        > tbody>tr {
+            > td.ui-sortable-placeholder {
+                background-color: rgba(168,72,96,0.8);
+                border-radius: 18px;
+                width: 300px;
+            }
+        }
+    }
 }
-.timeline select {
-    border-radius: 4px;
-    padding: 2px 8px;
-    width: 100%;
-}
-.timeline>.col_option {
-    background-color: rgba(67,67,67,0.8);
+a.ic_button:hover>img {
     border-radius: 12px;
-    margin: 2px 0px;
-    padding: 4px 0px;
-    font-size: 13px;
-    text-align: center;
+    background-color: rgba(255,255,255,0.2);
+    cursor: pointer;
 }
-.timeline>ul {
-    margin: 0px;
-    padding: 0px;
-    height: calc(100vh - 316px);
-    overflow-y: auto;
-}
+label { font-size: 12px; }
+.__txt_col_head          { width: calc(100% - 12px); }
+.__txt_col_width         { width: 64px; }
+.__txt_group_head        { width: calc(100% - 152px); }
+.__txt_group_height      { width: 48px; }
+.__cmb_tl_layout         { font-size: 12px; }
+.__txt_external_instance { width: calc(100% - 72px); }
 
-.timeline>ul>li>h4 {
-    position: relative;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: bold;
-    margin: -12px -12px 12px;
-    padding: 8px 24px;
-    background-color: #808080;
-}
-.timeline>ul>li>h4>.tl_color {
-    position: absolute;
-    right: 24px;
-    top: 8px;
-}
-
-.timeline>ul>li>.tl_option {
-    font-size: 14px;
-    margin: 6px 12px;
-}
-.timeline>ul>li>.tl_option>div {
-    margin: 12px 0px;
-}
-.timeline>ul>li>.tl_option>.foot_button {
-    text-align: right;
-    margin: 12px 0px;
-}

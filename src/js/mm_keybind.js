@@ -3,6 +3,27 @@
     $("body").keydown(e => {
         // ショートカットキーのバインドを無視するフォーム内では実行しない
         if ($(e.target).is(".__ignore_keyborad")) return;
+        if ($("#modal_expand_image").is(":visible")) { // 画像拡大モーダルが動いている場合
+            switch (e.keyCode) {
+                case 65:
+                case 37: // a, <-
+                case 87:
+                case 38: // w, ↑: 前の画像
+                    $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").prev().mouseenter();
+                    return false;
+                case 68:
+                case 39: // d, ->
+                case 83:
+                case 40: // s, ↓: 次の画像
+                    $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").next().mouseenter();
+                    return false;
+                case 13: // Enter: 閉じる
+                    $("#modal_expand_image").click();
+                    return false;
+                default:
+                    return;
+            }
+        }
         let col = null;
         switch (e.keyCode) {
             case 78: // n: 投稿テキストボックスにフォーカス
@@ -38,8 +59,10 @@
                 }
                 break;
             case 115: // F4: 右に表示される拡張カラムを閉じる
-                $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150);
-                return false;
+                $("#pop_extend_column:visible").hide("slide", { direction: "right" }, 150);
+                $("#pop_ex_timeline:visible").hide("slide", { direction: "up" }, 150);
+                $("#pop_custom_emoji:visible").hide("slide", { direction: "left" }, 150);
+                break;
             case 65:
             case 37: // a, <-: カーソルを左に移動
                 col = Column.disposeCursor();
@@ -72,19 +95,19 @@
                 return false;
             case 87:
             case 38: // w, ↑: カーソルのカラムを上にスクロール
-                col = Column.getCursor();
+                col = Group.getCursor();
                 // Ctrl+W: 先頭まで移動
                 if (event.ctrlKey || event.metaKey) col.scroll(0);
                 // Shift+W: 通常より多めにスクロールする
-                else if (event.shiftKey) col.scroll(-Column.SHIFT_SCROLL);
-                else col.scroll(-Column.SCROLL);
+                else if (event.shiftKey) col.scroll(-Group.SHIFT_SCROLL);
+                else col.scroll(-Group.SCROLL);
                 return false;
             case 83:
             case 40: // s, ↓: カーソルのカラムを下にスクロール
-                col = Column.getCursor();
+                col = Group.getCursor();
                 // Shift+S: 通常より多めにスクロールする
-                if (event.shiftKey) col.scroll(Column.SHIFT_SCROLL);
-                else col.scroll(Column.SCROLL);
+                if (event.shiftKey) col.scroll(Group.SHIFT_SCROLL);
+                else col.scroll(Group.SCROLL);
                 return false;
             case 70: // f: カーソルカラムの可変幅表示をトグルする
                 if (event.ctrlKey || event.metaKey) { // Ctrl+F: 検索
@@ -93,13 +116,28 @@
                 }
                 Column.getCursor().toggleFlex();
                 return false;
+            case 72: // Ctrl+h: 送信履歴
+                if (event.ctrlKey || event.metaKey) {
+                    $("#navi .navi_history").click();
+                    return false;
+                }
+                break;
             case 116: // F5: カーソルのカラムをリロードする
                 if (event.ctrlKey || event.metaKey) {
                     // Ctrl+F5: 画面そのものを読み込みなおす(ブラウザリロード)
                     location.reload();
                     return false;
                 }
-                Column.getCursor().reload();
+                Group.getCursor().reload();
+                return false;
+            case 13: // Enter: カーソルを下に移動
+                gp = Group.disposeCursor();
+                if (event.shiftKey) {
+                    // Shift+Enter: カーソルを上に移動
+                    gp.prev.setCursor();
+                    return false;
+                }
+                gp.next.setCursor();
                 return false;
             default:
                 // 1～9(+テンキー): カラムの表示をトグル
@@ -161,6 +199,14 @@
         // Ctrl+EnterかShift+Enterで投稿処理実行
         if ((event.ctrlKey || event.metaKey || event.shiftKey) && e.keyCode === 13) {
             $("#__on_reply_submit").click();
+            return false;
+        }
+    });
+    // ショートカットキーバインド(引用フォーム内)
+    $(document).on("keydown", "#__txt_quotearea", e => {
+        // Ctrl+EnterかShift+Enterで投稿処理実行
+        if ((event.ctrlKey || event.metaKey || event.shiftKey) && e.keyCode === 13) {
+            $("#__on_quote_submit").click();
             return false;
         }
     });

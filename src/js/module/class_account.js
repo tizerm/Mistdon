@@ -166,7 +166,7 @@ class Account {
                         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
                     },
                     data: request_param
-                }).then(data => new Status(data, null, this).pushStack(arg.content))
+                })
                 break
             case 'Misskey': // Misskey
                 // 公開範囲を取得
@@ -204,12 +204,14 @@ class Account {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(request_param)
-                }).then(data => new Status(data.createdNote, null, this).pushStack(arg.content))
+                }).then(data => { return data.createdNote })
                 break
             default:
                 break
         }
         request_promise.then(data => {
+            // 投稿を履歴にスタックする
+            new Status(data, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
@@ -241,7 +243,6 @@ class Account {
                         "resolve": true
                     }
                 }).then(data => { return data.statuses[0] })
-                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             case 'Misskey': // Misskey
                 request_promise = $.ajax({
@@ -254,17 +255,17 @@ class Account {
                         "uri": arg.target_url
                     })
                 }).then(data => { return data.object })
-                    .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
                 break
             default:
                 break
         }
         // データが取得されるのを待ってtarget_jsonに代入
         target_json = await request_promise
+            .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
         // 投稿を取得できなかったらなにもしない
         if (!target_json) return
         // 取得できた場合はtarget_jsonからStatusインスタンスを生成
-        const target_post = new Status(target_json, null, this)
+        const target_post = new Status(target_json, History.HISTORY_PREF_TIMELINE, this)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 switch (arg.target_mode) {
@@ -278,26 +279,32 @@ class Account {
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/reblog`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブーストしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'reblog')
+                            toast("投稿をブーストしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'favorite')
+                            toast("投稿をお気に入りしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_bookmark': // ブックマーク
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/bookmark`,
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                        }).then(data => toast("投稿をブックマークしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'bookmark')
+                            toast("投稿をブックマークしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
                         break
                     default:
                         break
@@ -310,7 +317,7 @@ class Account {
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_reblog': // リノート
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/create`,
                             dataType: "json",
@@ -319,15 +326,17 @@ class Account {
                                 "i": this.pref.access_token,
                                 "renoteId": target_post.id
                             })
-                        }).then(data => toast("投稿をリノートしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'reblog', data.createdNote.id)
+                            toast("投稿をリノートしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_quote': // 引用
                         target_post.createQuoteWindow()
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_favorite': // お気に入り
-                        $.ajax({
+                        request_promise = $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/favorites/create`,
                             dataType: "json",
@@ -336,8 +345,10 @@ class Account {
                                 "i": this.pref.access_token,
                                 "noteId": target_post.id
                             })
-                        }).then(data => toast("投稿をお気に入りしました.", "done", toast_uuid))
-                            .catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                        }).then(data => {
+                            History.pushActivity(target_post, 'favorite')
+                            toast("投稿をお気に入りしました.", "done", toast_uuid)
+                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_reaction': // リアクション
                         target_post.createReactionWindow()
@@ -372,6 +383,11 @@ class Account {
                 "reaction": arg.shortcode
             })
         }).then(data => {
+            // 成功した場合は履歴スタックに保存
+            History.pushActivity({
+                id: arg.id,
+                from_account: this
+            }, 'reaction')
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)
@@ -564,69 +580,6 @@ class Account {
     }
 
     /**
-     * #Method #Ajax #jQuery
-     * このアカウントから検索処理を実行する
-     * 現状投稿の検索のみ対応
-     * 
-     * @param query 検索文字列
-     */
-    search(query) {
-        let rest_promise = null
-        // 検索文字列を渡して投稿を検索
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v2/search`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
-                    data: {
-                        "q": query,
-                        "type": "statuses",
-                        "limit": 40
-                    }
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.statuses.forEach(p => posts.push(
-                            new Status(p, { "parent_column": Column.SEARCH_COL } , this)))
-                        return posts
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/notes/search`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": this.pref.access_token,
-                        "query": query,
-                        "limit": 40
-                    })
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(
-                            new Status(p, { "parent_column": Column.SEARCH_COL }, this)))
-                        return posts
-                    })()
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
-            toast(`${this.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
-    }
-
-    /**
      * #Method #WebSocket
      * このアカウントにWebSocketの設定を追加する
      * 
@@ -659,6 +612,8 @@ class Account {
             toast(`${this.full_address}で接続エラーが発生しました、再接続してください。`, "error")
             // エラーで切れた場合は再接続しない
             this.reconnect = false
+            // エラーで接続が切れたことをタイムライングループに通知する
+            this.socket_prefs.map(m => m.target_group).forEach(gp => gp.setWarning())
             console.log(event)
         })
         // WebSocket接続停止時処理
@@ -815,11 +770,71 @@ class Account {
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.then(data => { return new User(data, this.pref.domain, this.pref.platform) })
-            .catch(jqXHR => { // 失敗したらnullを返す
-                toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
-                return null
-            })
+        return rest_promise.then(data => { return new User({
+            json: data,
+            host: this.pref.domain,
+            remote: true,
+            auth: true,
+            platform: this.pref.platform
+        })}).catch(jqXHR => { // 失敗したらnullを返す
+            toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
+            return null
+        })
+    }
+
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントが作成したリストの一覧を取得する
+     */
+    getLists() {
+        let rest_promise = null
+        switch (this.pref.platform) {
+            case 'Mastodon': // Mastodon
+                rest_promise = $.ajax({
+                    type: "GET",
+                    url: `https://${this.pref.domain}/api/v1/lists`,
+                    dataType: "json",
+                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                }).then(data => {
+                    // リストを持っていない場合はreject
+                    if (data.length == 0) return Promise.reject('empty')
+                    return (async () => {
+                        // リスト一覧を整形
+                        const lists = []
+                        data.forEach(l => lists.push({
+                            "listname": l.title,
+                            "id": l.id
+                        }))
+                        return lists
+                    })()
+                })
+                break
+            case 'Misskey': // Misskey
+                rest_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/users/lists/list`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                }).then(data => {
+                    // リストを持っていない場合はreject
+                    if (data.length == 0) return Promise.reject('empty')
+                    return (async () => {
+                        // リスト一覧を整形
+                        const lists = []
+                        data.forEach(l => lists.push({
+                            "listname": l.name,
+                            "id": l.id
+                        }))
+                        return lists
+                    })()
+                })
+                break
+            default:
+                break
+        }
+        // Promiseを返却(実質非同期)
+        return rest_promise
     }
 
     /**
@@ -859,19 +874,21 @@ class Account {
      * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
      */
     createEmojiList() {
-        $("#header>#pop_custom_emoji").html(`
+        $("#pop_custom_emoji").html(`
             <div class="emoji_head">
                 <h2>カスタム絵文字一覧</h2>
                 <h3>${this.pref.domain}</h3>
             </div>
+            <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
+                placeholder="ショートコードを入力するとサジェストされます"/>
             <div class="emoji_list">
             </div>
             <button type="button" id="__on_emoji_close">×</button>
         `).show("slide", { direction: "left" }, 150)
-        $("#header>#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
+        $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#header>#pop_custom_emoji>.emoji_list").append(`
+        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
     }
@@ -897,15 +914,14 @@ class Account {
      * 投稿アカウントを選択するリストのDOMを返却
      */
     static createPostAccountList() {
-        let html = '<div class="account_list">'
+        let html = ''
         Account.map.forEach((v, k) => html += `
-            <a name="${k}" class="__lnk_account_elm">
+            <li name="${k}" class="__lnk_account_elm"><div>
                 <img src="${v.pref.avatar_url}" class="user_icon"/>
                 <div class="display_name">${v.pref.username}</div>
                 <div class="user_domain">${k}</div>
-            </a>
+            </div></li>
         `)
-        html += '</div>'
         return html
     }
 
@@ -970,36 +986,68 @@ class Account {
                 </div>
                 <ul class="profile_header"></ul>
                 <ul class="profile_detail"></ul>
-                <div class="pinned_block post_div">
-                    <h4>ピンどめ</h4>
-                    <ul class="pinned_post __context_posts"></ul>
+                <div class="user_post_elm">
+                    <div class="pinned_block post_div">
+                        <h4>ピンどめ</h4>
+                        <ul class="pinned_post __context_posts"></ul>
+                    </div>
+                    <div class="posts_block post_div">
+                        <h4>投稿一覧</h4>
+                        <ul class="posts __context_posts"></ul>
+                    </div>
                 </div>
-                <div class="posts_block post_div">
-                    <h4>投稿一覧</h4>
-                    <ul class="posts __context_posts"></ul>
-                </div>
+                <div class="user_bookmark_elm"></div>
+                <div class="user_ff_elm"></div>
             </td>
         `)
         // 先に表示フレームだけ生成
-        $("#header>#pop_ex_timeline").html(`
-            <div class="account_timeline">
+        $("#pop_ex_timeline").html(`
+            <div class="account_timeline auth_user">
                 <table id="auth_account_table"><tbody>
                     <tr>${html}</tr>
                 </tbody></table>
             </div>
+            <div class="account_timeline single_user ff_pop_user">
+            </div>
             <button type="button" id="__on_search_close">×</button>
         `).show("slide", { direction: "right" }, 150)
+        $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 
         Account.map.forEach((v, k) => v.getInfo().then(detail => {
-            const column = $(`#header>#pop_ex_timeline>.account_timeline td[id="${k}"]`)
+            const column = $(`#pop_ex_timeline>.account_timeline td[id="${k}"]`)
 
             // ロード待ち画面を消してユーザー情報のプロフィール部分を生成
             column.find(".col_loading").remove()
             column.find(".profile_header").html(detail.header_element)
             column.find(".profile_detail").html(detail.profile_element)
 
+            // ヘッダ部分にツールチップを生成
+            $(`#pop_ex_timeline>.account_timeline td[id="${k}"] .auth_details`).tooltip({
+                position: {
+                    my: "center top",
+                    at: "center bottom"
+                },
+                show: {
+                    effect: "slideDown",
+                    duration: 80
+                },
+                hide: {
+                    effect: "slideUp",
+                    duration: 80
+                }
+            })
+
             // ユーザーの投稿を取得
-            detail.getPost(v).then(posts => posts.forEach(p => column.find(".posts").append(p.element)))
+            detail.getPost(v, null).then(posts => {
+                posts.forEach(p => column.find(".posts").append(p.element))
+                // スクロールローダーを生成
+                Status.createScrollLoader({
+                    list: posts,
+                    target: column.find(".posts"),
+                    asyncLoader: async last_id => detail.getPost(v, last_id),
+                    binder: (post, target) => target.append(post.element)
+                })
+            })
             detail.getPinnedPost(v).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす

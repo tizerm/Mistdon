@@ -1,13 +1,19 @@
 ﻿const color_palette = [
     // デフォルトで選択できるカラーパレット(15色)
-    'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667',
-    '666666', '997460', '87995f', '738c83', '676a82', '996a88'
+    'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667', '666666',
+    '997460', '87995f', '738c83', '676a82', '996a88', '694444', '693147', '3b3e63', '3b634b', '4a4a4a'
 ]
 
 $(() => {
     // 背景をランダムに変更
-    if (Math.random() < 0.55) $("body").css("background-image", 'url("resources/illust/mitlin_back2.jpg")');
-    else $("body").css("background-image", 'url("resources/illust/mitlin_back1.jpg")');
+    const back_rand = Math.random()
+    if (back_rand < 0.2)  // Mitlin v0.1.1
+        $("body").css("background-image", 'url("resources/illust/mitlin_back1.jpg")');
+    else if (back_rand < 0.55)  // Mitlin v0.3.1
+        $("body").css("background-image", 'url("resources/illust/mitlin_back2.jpg")');
+    else // Mitlin v0.4.1
+        $("body").css("background-image", 'url("resources/illust/mitlin_back3.jpg")');
+
     // ナビゲーションメニューホバー時にツールチップ表示
     $("#navi").tooltip({
         position: {
@@ -23,44 +29,6 @@ $(() => {
             duration: 80
         }
     });
-    // 公開範囲ホバー時にツールチップ表示
-    $("#header>#head_postarea").tooltip({
-        position: {
-            my: "center top",
-            at: "center bottom"
-        },
-        show: {
-            effect: "slideDown",
-            duration: 80
-        },
-        hide: {
-            effect: "slideUp",
-            duration: 80
-        }
-    });
-    // ヘルプを表示
-    $("#navi #on_help").on("click", e => {
-        // ヘルプウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="help_col">
-                <h2>Mistdon Help</h2>
-                <div class="help_content"></div>
-                <button type="button" id="__on_help_close">×</button>
-            </div>
-        `))
-        $("#header>#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        $.ajax({
-            url: "help/help_main.html",
-            cache: false
-        }).then(data => {
-            $.each($.parseHTML(data), (index, value) => {
-                if ($(value).is("#main")) $("#header>#pop_extend_column .help_content").html($(value));
-            });
-        });
-    });
-    // 閉じるボタンクリックイベント
-    $(document).on("click", "#__on_help_close", 
-        e => $("#header>#pop_extend_column").hide("slide", { direction: "right" }, 150));
     // 外部表示リンククリックイベント
     $(document).on("click", ".__lnk_external", e => {
         const url = $(e.target).closest("a").attr("href");
@@ -68,14 +36,54 @@ $(() => {
         // リンク先に飛ばないようにする
         return false;
     });
-    $("body").keydown(e => {
-        if (e.keyCode == 112) { // ヘルプだけは全画面共通
-            if ($("#header>#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();
-            else $("#navi #on_help").click();
-            return false;
+});
+
+function delayHoverEvent(arg) {
+    var timer = null;
+    $(document).on("mouseenter", arg.selector, e => {
+        $(e.target).css('cursor', 'progress');
+        timer = setTimeout(evt => { // タイマーセット
+            timer = null;
+            $(evt.target).css('cursor', 'default');
+            arg.enterFunc(evt);
+        }, arg.delay, e);
+    });
+    $(document).on("mouseleave", arg.selector, e => {
+        if (timer) { // タイマーが未実行の場合はタイマーを削除
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        } else arg.leaveFunc(e);
+    });
+}
+
+function delayHoldEvent(arg) {
+    var timer = null;
+    $(document).on("mousedown", arg.selector, e => {
+        $(e.target).css('cursor', 'progress');
+        timer = setTimeout(evt => { // タイマーセット
+            timer = null;
+            $(evt.target).css('cursor', 'default');
+            arg.holdFunc(evt);
+        }, arg.delay, e);
+
+    });
+    // タイマー実行前にマウスを外す、もしくはクリックをあげた場合は実行しない
+    $(document).on("mouseleave", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
         }
     });
-});
+    $(document).on("mouseup", arg.selector, e => {
+        if (timer) {
+            $(e.target).css('cursor', 'default');
+            clearTimeout(timer);
+            timer = null;
+        }
+    });
+}
 
 /**
  * #Renderer #jQuery
@@ -83,7 +91,7 @@ $(() => {
  * (動的に生成する関係で後付しないと動かないので関数化)
  */
 function setColorPalette(target) {
-    if (target) {
+    if (target) { // 付与先のターゲットが指定されている場合は指定先にあるカラーパレットにだけセット
         target.find(".__pull_color_palette")
             .after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
         target.find(".__pull_color_palette+.__on_call_palette").tooltip({
@@ -102,7 +110,7 @@ function setColorPalette(target) {
         });
         return;
     }
-    const palette_dom = $("#header>#pop_palette");
+    const palette_dom = $("#pop_palette");
     color_palette.forEach(color => {
         palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
         palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
@@ -147,6 +155,21 @@ function setColorPalette(target) {
     });
 }
 
+function popContextMenu(e, id) {
+    if (window.innerHeight / 2 < e.pageY) // ウィンドウの下の方にある場合は下から展開
+        $(`#${id}`).css({
+            'top': 'auto',
+            'bottom': `${Math.round(window.innerHeight - e.pageY - 8)}px`,
+            'left': `${e.pageX - 8}px`
+        });
+    else $(`#${id}`).css({
+        'bottom': 'auto',
+        'top': `${e.pageY - 8}px`,
+        'left': `${e.pageX - 8}px`
+    });
+    $(`#${id}`).show("slide", { direction: "left" }, 100);
+}
+
 /**
  * #Renderer #jQuery
  * トーストを表示
@@ -156,7 +179,7 @@ function setColorPalette(target) {
  * @param type トーストを一意に認識するためのID
  */
 function toast(text, type, progress_id) {
-    const toast_block = $("#header>#pop_toast");
+    const toast_block = $("#pop_toast");
     if (type != 'progress' && progress_id) {
         // progressモード以外でIDが渡ってきた場合は対象toastを削除
         const target_toast = toast_block.find(`#${progress_id}`);
@@ -173,7 +196,7 @@ function toast(text, type, progress_id) {
         // 実行中トースト以外は3秒後に消去する
         if (type == 'error') {
             added.addClass("toast_error");
-            prependNotification(text, true);
+            //prependNotification(text, true);
         } else added.addClass("toast_done");
         // 3秒後に隠して要素自体を削除
         (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()
@@ -189,7 +212,7 @@ function toast(text, type, progress_id) {
  * @param arg 設定オブジェクト
  */
 function dialog(arg) {
-    const dialog_elm = $("#header>#pop_dialog");
+    const dialog_elm = $("#pop_dialog");
     dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
     if (arg.type == 'alert') dialog_elm.dialog({ // アラート
         resizable: false,
@@ -232,3 +255,4 @@ function dialog(arg) {
         }
     });
 }
+

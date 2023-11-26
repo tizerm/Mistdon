@@ -12,18 +12,28 @@
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mm_main.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_ui.js"></script>
+    <script type="text/javascript" src="js/mm_help.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
+
+    <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1) -->
+    <script type="text/javascript" src="js/mm_updater_032.js"></script>
+
+    <script type="text/javascript" src="js/module/class_timeline.js"></script>
+    <script type="text/javascript" src="js/module/class_group.js"></script>
     <script type="text/javascript" src="js/module/class_column.js"></script>
-    <script type="text/javascript" src="js/mm_viewbind.js"></script>
+    <script type="text/javascript" src="js/module/class_history.js"></script>
+    <script type="text/javascript" src="js/module/class_query.js"></script>
     <script type="text/javascript" src="js/mm_keybind.js"></script>
-    <script type="text/javascript" src="js/mm_core.js"></script>
+    <script type="text/javascript" src="js/mm_main.js"></script>
+    <script type="text/javascript" src="js/mm_event.js"></script>
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 </head>
 <body>
@@ -32,7 +42,8 @@
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
-        <li><a class="navi_search" title="検索(β)"><img src="resources/ic_search.png" alt="検索"/></a></li>
+        <li><a class="navi_search" title="検索(ハッシュタグ検索)"><img src="resources/ic_search.png" alt="検索"/></a></li>
+        <li><a class="navi_history" title="送信履歴"><img src="resources/ic_history.png" alt="送信履歴"/></a></li>
         <li><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"
                 ><img src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
         <li><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"
@@ -41,7 +52,7 @@
     <ul id="bottom_navi">
         <li><a id="on_help_keybind" title="キーボードショートカット早見表"><img src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
         <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
-        <li><button type="button" class="__on_show_notifications">0</button></li>
+        <!--<li><button type="button" class="__on_show_notifications">0</button></li>-->
     </ul>
     <div id="pop_notification_console">
     <!-- hidden: 通知ボックス -->
@@ -84,8 +95,11 @@
             </div>
         </div>
     </div>
-    <div id="pop_postuser">
-    <!-- hidden: ユーザー一覧 -->
+</header>
+<div id="pop">
+    <div id="pop_postuser" class="pop_context">
+        <!-- hidden: ユーザー一覧 -->
+        <ul class="ui_menu"></ul>
     </div>
     <div id="pop_toast">
     <!-- hidden: トースト -->
@@ -119,6 +133,7 @@
             </li>
             <li class="__menu_post_detail"><div>詳細表示</div></li>
             <li class="__menu_post_url"><div>URLをコピー</div></li>
+            <li class="__menu_post_open_browser"><div>ブラウザで開く</div></li>
             <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
     </div>
@@ -136,8 +151,14 @@
             </li>
         </ul>
     </div>
-    <div id="pop_expand_image">
-    <!-- hidden: 画像拡大表示 -->
+    <div id="modal_expand_image">
+        <!-- hidden: 画像拡大モーダル -->
+        <ul id="expand_image_box" class="__context_posts"></ul>
+        <ul id="expand_thumbnail_list"></ul>
+    </div>
+    <div id="pop_expand_post" class="timeline">
+        <ul class="__context_posts"></ul>
+    <!-- hidden: 投稿拡大ウィンドウ -->
     </div>
     <div id="pop_ex_timeline">
     <!-- hidden: 拡張カラム -->
@@ -145,7 +166,7 @@
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->
     </div>
-</header>
+</div>
 <section id="columns">
 <table><tbody>
 <tr><!-- jQueryでバインディング処理をします --></tr>
