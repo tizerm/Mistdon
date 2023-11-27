@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <meta
+        http-equiv="X-Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <title>Mistdon General Preference</title>
+</head>
+<body>
+<article id="main">
+    <article id="general_preference">
+        <dl>
+            <dt>タイムライングループのキャッシュ件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の画面に表示する最大の投稿数です。これを超えると古い順から消えていきます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_tlcache_default" size="6"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen__tlcache_chat" size="6"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>リスト</th>
+                        <td><input type="text" id="__txt_gen__tlcache_list" size="6"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen__tlcache_gallery" size="6"/>件</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>投稿本文のフォントサイズ
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の投稿本文のフォントサイズをpxで指定します。リストは変更できません。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_fontsize_default" size="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_fontsize_chat" size="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen_fontsize_gallery" size="2"/>px</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>チャットレイアウトの高さ制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="チャットレイアウト時に投稿ひとつの高さが高すぎる場合に指定した高さで切り落とします。0以下を指定した場合は切り落とさずにすべて表示します。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_chatmaxheight" size="6"/>px
+            </dd>
+            <dt>背景
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="背景を好きなように変更できます。あまり明るすぎると一部UIが見づらくなる場合がありますのでご了承ください。"/>
+            </dt>
+            <dd>
+                <input type="radio" id="__opt_gen_background1" class="__opt_gen_background" value="mono_color"/>
+                <label for="__opt_gen_background1">単色カラー</label>
+                #<input type="text" id="__txt_gen_background_color" class="__pull_color_palette" size="6"/>
+                <input type="radio" id="__opt_gen_background2" class="__opt_gen_background" value="mitlin"/>
+                <label for="__opt_gen_background2">ミトリンにする</label>
+                #<input type="text" id="__txt_gen_background_color" class="__pull_color_palette" size="6"/>
+            </dd>
+        </dl>
+    </article>
+</article>
+</body>
+</html>
