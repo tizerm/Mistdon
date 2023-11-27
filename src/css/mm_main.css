@@ -349,6 +349,7 @@
         top: 32px;
         right: 0px;
 
+        > h2 { background-color: #2a637d; }
         & input {
             font-family: "メイリオ", sans-selif;
             font-size: 16px;
@@ -356,7 +357,6 @@
             border-radius: 4px;
             border: solid 1px #888888;
             color: #ffffff;
-            width: 100%;
         }
         #__on_search { display: none; }
 
@@ -369,6 +369,46 @@
             &::-webkit-scrollbar { height: 8px; }
         }
         > .single_user { width: 480px; }
+
+        /*=== History Timeline Layout ============================================================*/
+        > .history_timeline {
+            & td {
+                width: 360px;
+                > .col_head {
+                    border-top-left-radius: 18px;
+                    border-top-right-radius: 18px;
+                    padding: 8px 0px;
+                    > h3 {
+                        margin: 0px;
+                        padding: 0px;
+                        text-align: center;
+                    }
+                }
+                > .timeline li {
+                    position: relative;
+                    > .delete_modal {
+                        display: none;
+                        border-radius: 12px;
+                        position: absolute;
+                        top: 0px;
+                        left: 0px;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(255,255,255,0.25);
+                        > button {
+                            width: 50%;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        }
+                    }
+                    &:hover>.delete_modal { display: block; }
+                }
+                &.reaction_history>.col_head { background-color: #408a08; }
+                &.post_history>.col_head     { background-color: #3562cc; }
+            }
+        }
     }
 
     /*=== Extend Column (Optional) ===============================================================*/
@@ -454,7 +494,8 @@
 }
 #pop_extend_column>.quote_col #__txt_quote_cw,
 #pop_extend_column>.reaction_col #__txt_reaction_search,
-#pop_custom_emoji #__txt_emoji_search {
+#pop_custom_emoji #__txt_emoji_search,
+#pop_ex_timeline #__txt_search_query {
     width: calc(100% - 8px);
 }
 #pop_extend_column>.reply_col #__txt_replyarea,

@@ -18,7 +18,7 @@
                     $("#modal_expand_image>#expand_thumbnail_list>li.selected_image").next().mouseenter();
                     return false;
                 case 13: // Enter: 閉じる
-                    $("#modal_expand_image").hide("fade", 80);
+                    $("#modal_expand_image").click();
                     return false;
                 default:
                     return;
@@ -59,7 +59,9 @@
                 }
                 break;
             case 115: // F4: 右に表示される拡張カラムを閉じる
-                $("#pop_extend_column, #pop_ex_timeline, #pop_custom_emoji").hide("slide", { direction: "right" }, 150);
+                $("#pop_extend_column:visible").hide("slide", { direction: "right" }, 150);
+                $("#pop_ex_timeline:visible").hide("slide", { direction: "up" }, 150);
+                $("#pop_custom_emoji:visible").hide("slide", { direction: "left" }, 150);
                 break;
             case 65:
             case 37: // a, <-: カーソルを左に移動
@@ -114,6 +116,12 @@
                 }
                 Column.getCursor().toggleFlex();
                 return false;
+            case 72: // Ctrl+h: 送信履歴
+                if (event.ctrlKey || event.metaKey) {
+                    $("#navi .navi_history").click();
+                    return false;
+                }
+                break;
             case 116: // F5: カーソルのカラムをリロードする
                 if (event.ctrlKey || event.metaKey) {
                     // Ctrl+F5: 画面そのものを読み込みなおす(ブラウザリロード)

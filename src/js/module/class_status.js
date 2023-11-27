@@ -197,10 +197,9 @@ class Status {
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
-    get content_text() { return $.parseHTML(`<div>${this.content}</div>`)[0].innerText }
-
-    // 最後に投稿した投稿データを保持する領域
-    static post_stack = []
+    get content_text() { return $($.parseHTML(this.content)).text() }
+    // Getter: オリジナルテキスト(投稿時そのままの形式)
+    get original_text() { return this.__original_text ?? $($.parseHTML(this.content)).text() }
 
     // 日付フォーマッターはstaticプロパティにする
     static {
@@ -226,23 +225,8 @@ class Status {
      * @param original_text 投稿したときに実際に打ち込んだ生テキスト(改行とかそのままの状態で保存するため)
      */
     pushStack(original_text) {
-        this.original_text = original_text
-        Status.post_stack.push(this)
-    }
-
-    /**
-     * #StaticMethod
-     * 直前の投稿が存在する場合、その投稿に対してコールバック関数を実行する
-     * フラグが経っている場合は投稿をスタックからポップする
-     * 
-     * @param presentCallback 直前の投稿が存在した場合に実行するコールバック関数
-     * @param del_flg trueの場合スタックから投稿をポップ(削除)する
-     */
-    static lastStatusIf(presentCallback, del_flg) {
-        const last_status = del_flg
-            ? Status.post_stack.pop() : Status.post_stack[Status.post_stack.length - 1]
-        if (last_status) presentCallback(last_status)
-        else toast("直前の投稿がありません.", "error")
+        this.__original_text = original_text
+        History.pushPost(this)
     }
 
     /**
@@ -550,19 +534,8 @@ class Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
             <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += '<div class="main_content">'
-
-        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content)
-        if (this.reaction_emoji) { // リアクション絵文字がある場合
-            let alias = null
-            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
-                else alias = `${this.reaction_emoji} (キャッシュされていないかリモートのカスタム絵文字です)`
-            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-            html += `<p class="reaction_emoji">${alias}</p>`
-        }
-        html += `
+        `; html += `<div class="main_content">
+                    ${target_emojis.replace(this.content)}
                 </div>
             </div>
         `
@@ -576,6 +549,15 @@ class Status {
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `
+        }
+        if (this.reaction_emoji) { // リアクション絵文字がある場合
+            let alias = null
+            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
+                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
+                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
+                else alias = `${this.reaction_emoji} (未キャッシュです)`
+            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+            html += `<div class="reaction_emoji">${alias}</div>`
         }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             html += '<div class="media">'
@@ -604,8 +586,8 @@ class Status {
         if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
             html += '<div class="detail_info">'
             if (this.hashtags) { // ハッシュタグ
-                html += '<div>'
-                this.hashtags.forEach(tag => html += `<a class="hashtag">${tag}</a>`)
+                html += '<div class="hashtags">'
+                this.hashtags.forEach(tag => html += `<a class="__on_detail_hashtag" name="${tag}">#${tag}</a>`)
                 html += '</div>'
             }
             // リプライ数とブースト/リノート数
@@ -854,14 +836,17 @@ class Status {
                         const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
                         if (emoji) alias = `<img src="${emoji.url}" class="ic_notif_type"/>`
                         else alias = '×'
-                    } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+                    } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.:@_]+$/g)) // リモートの絵文字
+                        alias = '<img src="resources/ic_emoji_remote.png" class="ic_notif_type"/>'
+                    else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
                     jqelm.find('.notif_footer').prepend(alias)
                     break
                 case 'follow': // フォロー通知
                     jqelm.closest('li').addClass('self_post')
                     jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
                     break
-                default: // リプライの場合はヘッダ書かない
+                default: // リプライ、引用の場合はアイコン削除
+                    jqelm.find('.ic_notif_type').remove()
                     break
             }
         }
@@ -1026,14 +1011,55 @@ class Status {
             .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
-    createImageModal(url) {
+    static createScrollLoader(arg) {
+        const last_id = arg.list.pop().id
+        // ローダーエレメントを生成
+        arg.target.append(`
+            <li id="${last_id}" class="__scroll_loader">
+                <span class="loader_message">続きを読み込みます...</span>
+            </li>
+        `)
+        // Intersection Observerを生成
+        const observer = new IntersectionObserver((entries, obs) => (async () => {
+            const e = entries[0]
+            if (!e.isIntersecting) return // 見えていないときは実行しない
+            console.log('ローダー表示: ' + last_id)
+            // ローダーを一旦削除
+            obs.disconnect()
+            $(e.target).remove()
+            const data = await arg.asyncLoader(last_id)
+            console.log(data)
+            if (data?.length > 0) { // データが存在する場合は取得して再帰的にローダーを生成
+                /* TODO: 勘違いで実装した処理なので一旦保留
+                { // 最初のデータだけは重複判定のために独自実装
+                    arg.binder(data.shift(), arg.target)
+                    const key = arg.target.find(">li:last-child").attr("name")
+                    if (arg.target.find(`>li[name="${key}"]:not(:last-child)`).length > 0) {
+                        // 既に存在するデータがある場合は要素を削除して再帰を終了
+                        arg.target.find(">li:last-child").remove()
+                        return
+                    }
+                }//*/
+                data.forEach(elm => arg.binder(elm, arg.target))
+                arg.list = data
+                Status.createScrollLoader(arg)
+            }
+        })(), {
+            root: arg.target.get(0),
+            rootMargin: "0px",
+            threshold: 1.0,
+        })
+        observer.observe(arg.target.find(".__scroll_loader").get(0))
+    }
+
+    createImageModal(url, index) {
         // 一旦全部クリア
         $("#modal_expand_image>*").empty()
         this.medias.forEach(media => {
             // 動画ファイルの場合はvideoを使う
             if (media.type == 'video' || media.type == 'gifv') $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}">
-                    <video src="${media.url}" preload controls loop></video>
+                    <video src="${media.url}" class="expanded_media" preload controls loop></video>
                 </li>
             `); else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}"><img src="${media.url}" class="expanded_media"/></li>
@@ -1043,7 +1069,12 @@ class Status {
                 <li name="${media.url}"><img src="${media.thumbnail}"/></li>
             `)
         })
-        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        const target_media = index >= 0
+            ? $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})>.expanded_media`)
+            : $(`#modal_expand_image>#expand_image_box>li>.expanded_media[src="${url}"]`)
+        target_media.show()
+        // 動画の場合は自動再生
+        if (target_media.is("video")) target_media.get(0).play()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
         $("#modal_expand_image").show("fade", 80)
     }
@@ -1197,6 +1228,7 @@ class Status {
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
         $("#pop_expand_post>ul").html(this.element).css('width', `${this.from_column.pref.col_width}px`)
+        Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
             $("#pop_expand_post").css({

@@ -524,7 +524,7 @@ class ColumnPref {
         // グループの高さを再設定
         this.resetHeight()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_head`))
+        setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_option`))
         ColumnPref.setInnerSortable()
     }
 

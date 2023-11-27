@@ -120,7 +120,7 @@ audio { height: 30px; }
 
         > li {
             list-style-type: none;
-            margin: 18px 0px;
+            margin: 16px 0px;
             padding: 0px;
 
             > a:hover>img {
@@ -294,6 +294,12 @@ audio { height: 30px; }
                     border-left: solid 8px #aaaaaa;
                 }
                 & dd { margin-bottom: 8px; }
+                & th, & td {
+                    margin: 1px;
+                    border-radius: 6px;
+                    padding: 2px 8px;
+                    background-color: rgba(255,255,255,0.08);
+                }
             }
         }
         & button {
@@ -313,9 +319,9 @@ audio { height: 30px; }
         position: absolute;
         display: none;
         z-index: 9;
-        border-radius: 4px;
+        border-radius: 12px;
         background-color: rgba(34,34,34,0.85);
-        width: 138px;
+        width: 140px;
         padding: 6px;
     }
 }

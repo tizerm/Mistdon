@@ -8,6 +8,8 @@ $(() => {
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
+    $("#navi .navi_history").on("click", e => History.createHistoryWindow())
+
     /**
      * #Event
      * 全体プロフィールボタン
@@ -221,28 +223,25 @@ $(() => {
      * #Event
      * 直前の投稿を削除ボタン
      */
-    $("#header #on_last_delete").on("click", e => Status.lastStatusIf(
-        last => last.delete((post, uuid) => toast("直前の投稿を削除しました.", "done", uuid)), true))
+    $("#header #on_last_delete").on("click", e => History.popIf(last => {}, true))
 
     /**
      * #Event
      * 直前の投稿を削除して編集ボタン
      */
-    $("#header #on_last_delete_paste").on("click", e => Status.lastStatusIf(
-        last => last.delete((post, uuid) => {
-            post.from_account.setPostAccount()
-            $("#__txt_postarea").val(post.original_text)
-            $("#__txt_content_warning").val(post.cw_text)
-            toast("直前の投稿を削除しました. 内容を再展開します.", "done", uuid)
-        }), true))
+    $("#header #on_last_delete_paste").on("click", e => History.popIf(last => {
+        last.post.from_account.setPostAccount()
+        $("#__txt_postarea").val(last.post.original_text)
+        $("#__txt_content_warning").val(last.post.cw_text)
+    }, true))
 
     /**
      * #Event
      * 直前の投稿をコピーボタン
      */
-    $("#header #on_last_copy").on("click", e => Status.lastStatusIf(last => {
-        $("#__txt_postarea").val(last.original_text)
-        $("#__txt_content_warning").val(last.cw_text)
+    $("#header #on_last_copy").on("click", e => History.popIf(last => {
+        $("#__txt_postarea").val(last.post.original_text)
+        $("#__txt_content_warning").val(last.post.cw_text)
         toast("直前の投稿内容を再展開しました.", "done")
     }, false))
 
@@ -250,7 +249,7 @@ $(() => {
      * #Event
      * 直前の投稿につなげるボタン
      */
-    $("#header #on_last_replychain").on("click", e => Status.lastStatusIf(last => last.createReplyWindow(), false))
+    $("#header #on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
     /**
      * #Event #Focus
@@ -352,7 +351,7 @@ $(() => {
      * => 非表示にしている閲覧注意情報をトグルする
      */
     $(document).on("click", ".expand_header", e =>
-        $(e.target).next().toggle("slide", { direction: "up" }, 100))
+        $(e.target).closest("a").next().toggle("slide", { direction: "up" }, 100))
 
     /**
      * #Event
@@ -373,14 +372,22 @@ $(() => {
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus($(e.target).closest("li"))
             .createImageModal(image_url)
-        else Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createImageModal(image_url))
+        else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
+            Status.getStatus($(e.target).closest("li").attr("name"))
+                .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
         return false
     })
-    $(document).on("click", "#modal_expand_image", e => $("#modal_expand_image").hide("fade", 80))
+    $(document).on("click", "#modal_expand_image", e => {
+        if ($(e.target).is("video")) return // 動画の場合はなにもしない
+        $("#modal_expand_image").hide("fade", 80, () => $("#modal_expand_image video").remove())
+    })
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
         const url = $(e.target).closest("li").attr("name")
-        $('#modal_expand_image>#expand_image_box img:visible').hide()
-        $(`#modal_expand_image>#expand_image_box img[src="${url}"]`).show()
+        $('#modal_expand_image>#expand_image_box>li>*:visible').hide()
+        const target_media = $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`)
+        target_media.show()
+        // 動画の場合は自動再生
+        if (target_media.is("video")) target_media.get(0).play()
         $('#modal_expand_image>#expand_thumbnail_list>*').removeClass("selected_image")
         $(e.target).closest("li").addClass("selected_image")
         return false
@@ -396,7 +403,7 @@ $(() => {
 
     /*
     delayHoldEvent({
-        selector: ".__context_posts>li",
+        selector: ".__context_posts>li.short_timeline",
         holdFunc: e =>
             Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()),
         delay: 750
@@ -430,6 +437,15 @@ $(() => {
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
 
+    $(document).on("click", ".__on_detail_hashtag", e => {
+        $("#pop_extend_column").hide()
+        Query.createSearchWindow()
+        $("#pop_ex_timeline #__txt_search_query").val(`#${$(e.target).attr('name')}`)
+        $("#pop_ex_timeline #__on_search").click()
+    })
+
+    $(document).on("click", ".__del_history", e => History.delete($(e.target)))
+
     /**
      * #Event
      * ユーザープロフィール: ピンどめ
@@ -450,7 +466,7 @@ $(() => {
 
     /**
      * #Event
-     * TODO: まだ実装中やねん
+     * TODO: プロフ関連
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
@@ -568,6 +584,9 @@ $(() => {
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url", e =>
         navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")))
+
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
+        e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
 
     /**
      * #Event #Contextmenu

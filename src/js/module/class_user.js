@@ -315,10 +315,17 @@ class User {
      * 
      * @param account リモートホストの情報を入れた最小限のアカウントオブジェクト
      */
-    getPost(account) {
+    getPost(account, max_id) {
         let rest_promise = null
+        let query_param = null
         switch (this.platform) {
             case 'Mastodon': // Mastodon
+                query_param = {
+                    "limit": 40,
+                    "exclude_replies": true
+                }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                // あればアクセストークンを設定
                 let header = {}
                 if (account) header = { "Authorization": `Bearer ${account.pref.access_token}` }
                 rest_promise = $.ajax({
@@ -326,25 +333,17 @@ class User {
                     url: `https://${this.host}/api/v1/accounts/${this.id}/statuses`,
                     dataType: "json",
                     headers: header,
-                    data: {
-                        "limit": 40,
-                        "exclude_replies": true
-                    }
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
-                        return posts
-                    })()
+                    data: query_param
                 })
                 break
             case 'Misskey': // Misskey
-                let query_param = {
+                query_param = {
                     "userId": this.id,
                     "includeReplies": false,
                     "limit": 40,
                     "includeMyRenotes": false
                 }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 if (account) query_param.i = account.pref.access_token
                 rest_promise = $.ajax({
                     type: "POST",
@@ -352,19 +351,19 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                }).then(data => {
-                    return (async () => {
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
-                        return posts
-                    })()
                 })
                 break
             default:
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
+        return rest_promise.then(data => {
+            return (async () => {
+                const posts = []
+                data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                return posts
+            })()
+        }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${this.full_address}の投稿の取得に失敗しました.`, "error")
@@ -418,50 +417,59 @@ class User {
         })
     }
 
-    getBookmarks(account, type) {
+    getBookmarks(account, type, max_id) {
         let rest_promise = null
+        let query_param = null
         switch (type) {
             case 'Favorite_Mastodon': // お気に入り(Mastodon)
+                query_param = { "limit": 40 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "GET",
                     url: `https://${this.host}/api/v1/favourites`,
                     dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: { "limit": 40 }
+                    data: query_param
                 })
                 break
             case 'Favorite_Misskey': // お気に入り(Misskey)
+                query_param = {
+                    "i": account.pref.access_token,
+                    "limit": 40
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "POST",
                     url: `https://${this.host}/api/i/favorites`,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": account.pref.access_token,
-                        "limit": 40
-                    })
+                    data: JSON.stringify(query_param)
                 })
                 break
             case 'Bookmark': // ブックマーク(Mastodon)
+                query_param = { "limit": 40 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "GET",
                     url: `https://${this.host}/api/v1/bookmarks`,
                     dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: { "limit": 40 }
+                    data: query_param
                 })
                 break
             case 'Reaction': // リアクション(Misskey)
+                query_param = {
+                    "i": account.pref.access_token,
+                    "userId": this.id,
+                    "limit": 40
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "POST",
                     url: `https://${this.host}/api/users/reactions`,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": account.pref.access_token,
-                        "userId": this.id,
-                        "limit": 40
-                    })
+                    data: JSON.stringify(query_param)
                 })
                 break
             default:
@@ -482,19 +490,22 @@ class User {
         })
     }
 
-    getFFUsers(account, type) {
+    getFFUsers(account, type, max_id) {
         let api_url = null
         let rest_promise = null
+        let query_param = null
         switch (account.platform) {
             case 'Mastodon': // Mastodon
                 if (type == 'follows') api_url = `https://${this.host}/api/v1/accounts/${this.id}/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
+                query_param = { "limit": 80 }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "GET",
                     url: api_url,
                     dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: { "limit": 80 }
+                    data: query_param
                 }).then(data => {
                     return (async () => {
                         const users = []
@@ -512,16 +523,18 @@ class User {
             case 'Misskey': // Misskey
                 if (type == 'follows') api_url = `https://${this.host}/api/users/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/users/followers`
+                query_param = {
+                    "i": account.pref.access_token,
+                    "userId": this.id,
+                    "limit": 80
+                }
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 rest_promise = $.ajax({
                     type: "POST",
                     url: api_url,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": account.pref.access_token,
-                        "userId": this.id,
-                        "limit": 80
-                    })
+                    data: JSON.stringify(query_param)
                 }).then(data => {
                     return (async () => {
                         const users = []
@@ -586,8 +599,16 @@ class User {
             "platform": this.platform,
             "pref": { "domain": this.host }
         }; (async () => Promise.allSettled([
-            this.getPost(account).then(posts => posts.forEach(p => column.find(".posts").append(p.element))),
-            this.getPinnedPost(account).then(posts => {
+            this.getPost(account, null).then(posts => {
+                posts.forEach(p => column.find(".posts").append(p.element))
+                // スクロールローダーを生成
+                Status.createScrollLoader({
+                    list: posts,
+                    target: column.find(".posts"),
+                    asyncLoader: async last_id => this.getPost(account, last_id),
+                    binder: (post, target) => target.append(post.element)
+                })
+            }), this.getPinnedPost(account).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
                     column.find(".pinned_block").remove()
@@ -635,8 +656,17 @@ class User {
         target.find(".user_ff_elm").hide()
         target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
-        this.getBookmarks(Account.get(this.full_address), type).then(data => (async () => data.forEach(
-            post => target.find(".user_bookmark_elm>.bookmarks").append(post.element)))())
+        this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+            data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
+            // TODO: Mastodonのローダーが機能しないので一旦保留
+            /*
+            Status.createScrollLoader({
+                list: data,
+                target: target.find(".user_bookmark_elm>.bookmarks"),
+                asyncLoader: async last_id => this.getBookmarks(Account.get(this.full_address), type, last_id),
+                binder: (post, target) => target.append(post.element)
+            })//*/
+        })())
     }
 
     createFFTaglist(type) {
@@ -650,8 +680,17 @@ class User {
             <ul class="ff_nametags"></ul>
         `).show()
 
-        this.getFFUsers(Account.get(this.full_address), type).then(data => (async () => data.forEach(
-            u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag)))())
+        this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+            data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
+            // TODO: Mastodonのローダーが機能しないので一旦保留
+            /*
+            Status.createScrollLoader({
+                list: data,
+                target: target.find(".user_ff_elm>.ff_nametags"),
+                asyncLoader: async last_id => this.getFFUsers(Account.get(this.full_address), type, last_id),
+                binder: (u, target) => target.append(u.inline_nametag)
+            })//*/
+        })())
     }
 }
 

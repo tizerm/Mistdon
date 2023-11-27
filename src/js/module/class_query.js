@@ -15,9 +15,12 @@ class Query {
     // スタティックマップを初期化(非同期)
     static {
         Query.SEARCH_PREF_TIMELINE = {
-            "parent_group": new Group(null, null)
+            "parent_group": new Group({
+                "group_id": "__search_timeline",
+                "tl_layout": "default",
+                "multi_user": true
+            }, null)
         }
-
     }
 
     /**
@@ -43,7 +46,7 @@ class Query {
                 </div>
             </div>
             <button type="button" id="__on_search_close">×</button>
-        `).show("slide", { direction: "right" }, 150, () => $("#__txt_search_query").focus())
+        `).show("slide", { direction: "up" }, 150, () => $("#__txt_search_query").focus())
     }
 
     /**
@@ -62,12 +65,11 @@ class Query {
         `)
 
         const query = new Query($("#pop_ex_timeline #__txt_search_query").val())
-        const search_window = new Group(null, null)
         const rest_promises = []
         // すべてのアカウントから検索処理を実行(検索結果をPromise配列に)
         Account.each(account => rest_promises.push(query.search(account)))
         // すべての検索結果を取得したらカラムにバインド
-        search_window.onLoadTimeline(rest_promises)
+        Query.SEARCH_PREF_TIMELINE.parent_group.onLoadTimeline(rest_promises)
     }
 
     async search(account) {
