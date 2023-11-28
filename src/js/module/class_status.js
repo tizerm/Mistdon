@@ -97,6 +97,7 @@ class Status {
 
                 // リノートの場合はリノート先を参照データに設定
                 data = this.reblog ? json.renote : json
+
                 // ノートURL生成
                 // uriが入っていない場合は自鯖の投稿なのでホストからURIを生成
                 if (!data.uri) { // uriが入っていない場合は自鯖の投稿
@@ -105,8 +106,8 @@ class Status {
                     else this.uri = `https://${host}/notes/${data.id}`
                 } // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
                 else if (data.user?.instance?.softwareName == "misskey") this.uri = data.uri
-                // TODO: それ以外は一旦Mastodonとして解釈する
-                else this.uri = data.url
+                // TODO: それ以外は一旦Mastodonとして解釈する(Misskey v11も同じ)
+                else this.uri = data.url ?? data.uri
                 this.id = data.id // 投稿ID
 
                 // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する

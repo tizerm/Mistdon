@@ -263,7 +263,10 @@ async function writePrefCols(event, json_data) {
                             case 'list': // リスト
                                 rest_url = `https://${host}/api/notes/user-list-timeline`
                                 query_param = { 'listId': tl.list_id }
-                                socket_param = { 'channel': 'userList', 'listId': tl.list_id }
+                                socket_param = {
+                                    'channel': 'userList',
+                                    'params': { 'listId': tl.list_id }
+                                }
                                 break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/i/notifications`
@@ -558,7 +561,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            devTools: false,
+            //devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -566,7 +569,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    win.setMenuBarVisibility(false)
+    //win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)
