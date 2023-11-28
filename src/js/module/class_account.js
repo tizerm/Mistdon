@@ -839,6 +839,32 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
+     * このアカウントがお気に入りに追加しているチャンネル一覧を取得する(Misskey専用)
+     */
+    getChannels() {
+        return $.ajax({
+            type: "POST",
+            url: `https://${this.pref.domain}/api/channels/my-favorites`,
+            dataType: "json",
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({ "i": this.pref.access_token })
+        }).then(data => {
+            // チャンネルをお気に入りしていない場合はreject
+            if (data.length == 0) return Promise.reject('empty')
+            return (async () => {
+                // リスト一覧を整形
+                const channels = []
+                data.forEach(c => channels.push({
+                    "name": c.name,
+                    "id": c.id
+                }))
+                return channels
+            })()
+        })
+    }
+
+    /**
+     * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
      * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
      * 

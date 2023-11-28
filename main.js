@@ -268,6 +268,14 @@ async function writePrefCols(event, json_data) {
                                     'params': { 'listId': tl.list_id }
                                 }
                                 break
+                            case 'channel': // チャンネル
+                                rest_url = `https://${host}/api/channels/timeline`
+                                query_param = { 'channelId': tl.channel_id }
+                                socket_param = {
+                                    'channel': 'channel',
+                                    'params': { 'channelId': tl.channel_id }
+                                }
+                                break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/i/notifications`
                                 query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
@@ -294,6 +302,7 @@ async function writePrefCols(event, json_data) {
                     'color': color,
                     'timeline_type': tl.timeline_type,
                     'list_id': tl.timeline_type == 'list' ? tl.list_id : null,
+                    'channel_id': tl.timeline_type == 'channel' ? tl.channel_id : null,
                     'rest_url': rest_url,
                     'socket_url': socket_url,
                     'query_param': query_param,
