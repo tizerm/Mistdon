@@ -86,6 +86,26 @@ $(() => {
         $(e.target).closest(".__lnk_visibility").find("img").addClass("selected")
     })
 
+    $("#header>#head_postarea #__on_post_to_misskey").on("click", e =>
+        $("#pop_post_to").show("slide", { direction: "up" }, 150))
+
+    $(document).on("click", ".__lnk_post_to", e => {
+        const send = $(e.target).closest(".__lnk_post_to").attr('name')
+        $("#__on_post_to_misskey>img").attr('name', send)
+
+        switch (send) {
+            case '__to_normal': // 通常投稿
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_public.png')
+                break
+            case '__to_local_only': // ローカルのみ
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_local.png')
+                break
+            default: // チャンネル
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_channel.png')
+                break
+        }
+    })
+
     /**
      * #Event
      * カスタム絵文字呼び出しボタン
@@ -168,6 +188,7 @@ $(() => {
             content: $("#__txt_postarea").val(),
             cw_text: $("#__txt_content_warning").val(),
             visibility_id: $("#header>#head_postarea .visibility_icon .selected").attr("id"),
+            post_to: $("#header>#head_postarea #__on_post_to_misskey>img").attr("name"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__txt_postarea").val("")
@@ -544,6 +565,9 @@ $(() => {
         if (!$(e.target).is("#header>#head_postarea .posticon")) 
             // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
             $("#pop_postuser").hide("slide", { direction: "up" }, 150)
+        if (!$(e.target).is("#header>#head_postarea #__on_post_to_misskey>*")) 
+            // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
+            $("#pop_post_to").hide("slide", { direction: "up" }, 150)
     })
 
     /**

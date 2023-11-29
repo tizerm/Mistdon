@@ -77,7 +77,8 @@
                 <a id="on_custom_emoji" title="カスタム絵文字を使用"
                     ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
                 <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
-                <input type="checkbox" id="__chk_localonly"/><label for="__chk_localonly">家</label>
+                <button type="button" id="__on_post_to_misskey" title="投稿先(Misskey)"
+                    ><img src="resources/ic_public.png" name="__to_normal"/></button>
             </div>
         </div>
         <div class="right_block">
@@ -100,6 +101,10 @@
 <div id="pop">
     <div id="pop_postuser" class="pop_context">
         <!-- hidden: ユーザー一覧 -->
+        <ul class="ui_menu"></ul>
+    </div>
+    <div id="pop_post_to" class="pop_context">
+        <!-- hidden: 投稿先一覧 -->
         <ul class="ui_menu"></ul>
     </div>
     <div id="pop_toast">
@@ -125,7 +130,6 @@
             </li>
             <li><div>お気に入り</div>
                 <ul id="__menu_favorite"></ul>
-            </li>
             <li><div>リアクション(Misskey)</div>
                 <ul id="__menu_reaction" name="Misskey"></ul>
             </li>

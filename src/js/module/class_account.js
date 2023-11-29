@@ -112,6 +112,9 @@ class Account {
         $("#header>#head_postarea .__lnk_postuser>img").attr('name', this.full_address)
         $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
         $("#header>h1").css("background-color", `#${this.pref.acc_color}`)
+
+        // 投稿先メニューを生成
+        this.createPostToMenu()
     }
 
     /**
@@ -198,6 +201,19 @@ class Account {
                 if (arg.reply_id) request_param.replyId = arg.reply_id
                 // 引用の場合は引用ノートIDを設定
                 if (arg.quote_id) request_param.renoteId = arg.quote_id
+                // 投稿先を設定
+                switch (arg.post_to) {
+                    case '__to_normal': // 通常投稿
+                        request_param.localOnly = false
+                        break
+                    case '__to_local_only': // ローカルのみ
+                        request_param.localOnly = true
+                        break
+                    default: // チャンネル
+                        request_param.localOnly = true
+                        request_param.channelId = arg.post_to
+                        break
+                }
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
@@ -863,6 +879,16 @@ class Account {
         })
     }
 
+    async getChannelsCache() {
+        // キャッシュがあればキャッシュを使用
+        if (this.channels_cache) return this.channels_cache
+
+        // キャッシュがない場合はキャッシュを取得して返す
+        const channels = await this.getChannels()
+        this.channels_cache = channels
+        return channels
+    }
+
     /**
      * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
@@ -917,6 +943,43 @@ class Account {
         ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
+    }
+
+    async createPostToMenu() {
+        //$("#pop_post_to>ul").menu("destroy")
+        if (this.platform == 'Mastodon') { // Mastodonの場合は無効化
+            $("#__on_post_to_misskey").prop('disabled', true)
+            $("#__on_post_to_misskey>img").attr({
+                src: "resources/ic_mastodon.png",
+                name: "__to_normal"
+            })
+            return
+        }
+        let html = `
+            <li name="__to_normal" class="__lnk_post_to to_normal">
+                <div>通常投稿</div>
+            </li>
+            <li name="__to_local_only" class="__lnk_post_to to_local_only">
+                <div>ローカルのみ</div>
+            </li>
+        `
+        try {
+            const channels = await this.getChannelsCache()
+            channels?.forEach(c => html += `
+                <li name="${c.id}" class="__lnk_post_to to_channel">
+                    <div>${c.name}</div>
+                </li>
+            `)
+        } catch (err) {
+            console.log(err)
+        }
+        $("#pop_post_to>ul").html(html)
+        $("#__on_post_to_misskey").prop('disabled', false)
+        $("#__on_post_to_misskey>img").attr({
+            src: "resources/ic_public.png",
+            name: "__to_normal"
+        })
+        $("#pop_post_to>ul").menu()
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得
