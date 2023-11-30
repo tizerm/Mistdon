@@ -76,34 +76,38 @@ class History {
             // Statusインスタンスがキャッシュされている場合はそのまま表示
             if (elm.post) ul.append(elm.element)
             else { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
-                const account = Account.get(elm.account_address)
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "GET",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
-                            dataType: "json",
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/show`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": elm.id
+                try {
+                    const account = Account.get(elm.account_address)
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            request_promise = $.ajax({
+                                type: "GET",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
+                                dataType: "json",
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                             })
-                        })
-                        break
-                    default:
-                        return
+                            break
+                        case 'Misskey': // Misskey
+                            request_promise = $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/show`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": elm.id
+                                })
+                            })
+                            break
+                        default:
+                            break
+                    }
+                    const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
+                    elm.post = post
+                    ul.append(elm.element)
+                } catch (err) { // エラーはログに出す
+                    console.log(err)
                 }
-                const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
-                elm.post = post
-                ul.append(elm.element)
             }
         }
     }

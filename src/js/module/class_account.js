@@ -108,10 +108,15 @@ class Account {
      * このアカウントを投稿先アカウントに設定
      */
     setPostAccount() {
-        $("#header>#head_postarea .__lnk_postuser>img").attr('src', this.pref.avatar_url)
-        $("#header>#head_postarea .__lnk_postuser>img").attr('name', this.full_address)
+        // 変わってなかったらなにもしない
+        if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') == this.full_address) return
+
+        $("#header>#head_postarea .__lnk_postuser>img").attr({
+            src: this.pref.avatar_url,
+            name: this.full_address
+        })
         $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
-        $("#header>h1").css("background-color", `#${this.pref.acc_color}`)
+            .css("background-color", `#${this.pref.acc_color}`)
 
         // 投稿先メニューを生成
         this.createPostToMenu()
@@ -879,6 +884,11 @@ class Account {
         })
     }
 
+    /**
+     * #Method #Ajax
+     * このアカウントのチャンネル一覧キャッシュを取得する
+     * キャッシュが取れていない場合は取得メソッドを呼び出す
+     */
     async getChannelsCache() {
         // キャッシュがあればキャッシュを使用
         if (this.channels_cache) return this.channels_cache
@@ -945,8 +955,11 @@ class Account {
             `)))()
     }
 
+    /**
+     * #Method
+     * このアカウントの投稿先メニューを生成する
+     */
     async createPostToMenu() {
-        //$("#pop_post_to>ul").menu("destroy")
         if (this.platform == 'Mastodon') { // Mastodonの場合は無効化
             $("#__on_post_to_misskey").prop('disabled', true)
             $("#__on_post_to_misskey>img").attr({
@@ -955,20 +968,11 @@ class Account {
             })
             return
         }
-        let html = `
-            <li name="__to_normal" class="__lnk_post_to to_normal">
-                <div>通常投稿</div>
-            </li>
-            <li name="__to_local_only" class="__lnk_post_to to_local_only">
-                <div>ローカルのみ</div>
-            </li>
-        `
+        let html = ''
         try {
             const channels = await this.getChannelsCache()
             channels?.forEach(c => html += `
-                <li name="${c.id}" class="__lnk_post_to to_channel">
-                    <div>${c.name}</div>
-                </li>
+                <li><a name="${c.id}" class="__lnk_post_to to_channel">${c.name}</a></li>
             `)
         } catch (err) {
             console.log(err)
@@ -979,7 +983,6 @@ class Account {
             src: "resources/ic_public.png",
             name: "__to_normal"
         })
-        $("#pop_post_to>ul").menu()
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得

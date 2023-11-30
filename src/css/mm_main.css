@@ -219,6 +219,47 @@
         position: absolute;
         top: 108px;
         left: 288px;
+
+        > a {
+            display: inline-block;
+            border-radius: 12px;
+            background-color: rgba(34,34,34,0.92);
+            background-position: top 4px center;
+            background-repeat: no-repeat;
+            width: 64px;
+            height: 24px;
+            padding-top: 52px;
+            font-size: 12px;
+            text-align: center;
+            &:hover         { background-color: rgba(62,82,96,0.92); }
+            &.to_normal     { background-image: url("../resources/ic_public.png"); }
+            &.to_local_only { background-image: url("../resources/ic_local.png"); }
+        }
+        > ul.channel_menu {
+            margin: 4px 0px;
+            padding: 0px;
+            > li {
+                list-style-type: none;
+                > a.to_channel {
+                    display: inline-block;
+                    border-radius: 8px;
+                    background-color: rgba(34,34,34,0.92);
+                    background-position: center left 4px;
+                    background-repeat: no-repeat;
+                    background-size: 32px 32px;
+                    background-image: url("../resources/ic_channel.png");
+                    margin: 2px 0px;
+                    padding: 4px 18px;
+                    padding-left: 48px;
+                    font-size: 13px;
+                    &:hover { background-color: rgba(62,82,96,0.92); }
+                }
+            }
+        }
+        & a {
+            cursor: pointer;
+            border: solid 2px #aaaaaa;
+        }
     }
 
     /*=== Custom Emojis Palette Layout ===========================================================*/

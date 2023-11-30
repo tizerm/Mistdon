@@ -545,8 +545,10 @@ class Status {
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>${this.quote.username}</div>
-                    <div>@${this.quote.user_id}</div>
+                    <div class="quote_userarea">
+                        <span>${this.quote.username}</span>
+                        <span>@${this.quote.user_id}</span>
+                    </div>
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `
@@ -718,8 +720,10 @@ class Status {
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>${this.quote.username}</div>
-                    <div>@${this.quote.user_id}</div>
+                    <div>
+                        <span>${this.quote.username}</span>
+                        <span>@${this.quote.user_id}</span>
+                    </div>
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `

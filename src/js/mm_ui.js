@@ -38,6 +38,12 @@ $(() => {
     });
 });
 
+/**
+ * #Event #jQuery
+ * 遅延ホバーによるイベントをバインド
+ * 
+ * @param arg パラメータオブジェクト
+ */
 function delayHoverEvent(arg) {
     var timer = null;
     $(document).on("mouseenter", arg.selector, e => {
@@ -57,6 +63,12 @@ function delayHoverEvent(arg) {
     });
 }
 
+/**
+ * #Event #jQuery
+ * クリック長押し(ホールド)によるイベントをバインド
+ * 
+ * @param arg パラメータオブジェクト
+ */
 function delayHoldEvent(arg) {
     var timer = null;
     $(document).on("mousedown", arg.selector, e => {
@@ -155,6 +167,13 @@ function setColorPalette(target) {
     });
 }
 
+/**
+ * #Renderer #jQuery
+ * コンテキストメニューを表示
+ * 
+ * @param e マウスイベントオブジェクト
+ * @param id 表示するコンテキストメニューのID
+ */
 function popContextMenu(e, id) {
     if (window.innerHeight / 2 < e.pageY) // ウィンドウの下の方にある場合は下から展開
         $(`#${id}`).css({
@@ -176,7 +195,7 @@ function popContextMenu(e, id) {
  * 
  * @param text 表示する文章
  * @param type トーストのタイプ
- * @param type トーストを一意に認識するためのID
+ * @param progress_id トーストを一意に認識するためのID
  */
 function toast(text, type, progress_id) {
     const toast_block = $("#pop_toast");

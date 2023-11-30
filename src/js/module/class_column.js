@@ -82,6 +82,12 @@ class Column {
         return Column.map.size == 0
     }
 
+    /**
+     * #Method
+     * このカラムに属するグループをIDで取得
+     * 
+     * @param id グループID
+     */
     getGroup(id) {
         return this.group_map.get(id)
     }

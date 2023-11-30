@@ -384,6 +384,13 @@ async function writeCustomEmojis(event, data) {
     pref_emojis.set(data.host, data.emojis)
 }
 
+/**
+ * #IPC
+ * 保存してある送信履歴を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 送信履歴キャッシュ情報(マップで返却)
+ */
 async function readHistory() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (cache_history) {
@@ -403,6 +410,13 @@ async function readHistory() {
     return cache_history
 }
 
+/**
+ * #IPC
+ * 送信履歴をJSONファイルとして書き込む
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function overwriteHistory(event, data) {
     const content = await overwriteFile('app_prefs/history.json', data)
     console.log('@INF: finish write app_prefs/history.json')

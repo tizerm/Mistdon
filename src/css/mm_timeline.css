@@ -389,11 +389,18 @@
 
             /*=== Quote Info =====================================================================*/
             > .post_quote {
+                margin: 2px;
                 border-radius: 8px;
                 background-color: rgba(255,255,255,0.08);
                 overflow-wrap: break-word;
-                font-size: 13px;
-                padding: 8px 12px;
+                font-size: 11px;
+                padding: 6px 12px;
+                > .quote_userarea {
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
             }
 
             /*=== Detail Info ====================================================================*/

@@ -314,7 +314,7 @@ class GroupPref {
     get id() { return this.pref?.group_id }
     // Getter: このタイムライングループが所属するカラム
     get parent_column() { return ColumnPref.get(this.__column_id) }
-
+    // Getter: このタイムライングループの高さ
     get height() {
         // 高さがnullでなければそのまま返却
         if (this.pref.gp_height) return this.pref.gp_height
@@ -390,7 +390,7 @@ class GroupPref {
 
     /**
      * #Method
-     * このカラムのタイムラインを削除する
+     * このグループのタイムラインを削除する
      * 
      * @param index 削除対象のタイムラインのインデクス
      */
@@ -460,6 +460,12 @@ class ColumnPref {
         else return ColumnPref.map.get(arg.attr("id"))
     }
 
+    /**
+     * #StaticMethod
+     * 対照グループのGroupPrefオブジェクトを生成する
+     * 
+     * @param target 対象のグループ
+     */
     static getGroup(target) {
         return new GroupPref({ "group_id": target.closest(".tl_group").attr("id") }, this)
     }
@@ -586,6 +592,10 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
     }
 
+    /**
+     * #StaticMethod
+     * このカラムのグループの高さを初期化する
+     */
     resetHeight() {
         const size = $(`#${this.id}>.col_tl_groups>.tl_group`).length
         if (size == 0) return // グループがない場合はなにもしない
@@ -593,6 +603,12 @@ class ColumnPref {
         $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
     }
 
+    /**
+     * #StaticMethod
+     * カラムに属するグループの高さを再計算する
+     *
+     * @param target 再計算対象のカラム
+     */
     static recalcHeight(target) {
         const target_col = ColumnPref.get(target.closest("td"))
         if (Number(target.val()) <= 0) { // 0以下が入力されたらリセット
@@ -616,6 +632,10 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
     }
 
+    /**
+     * #StaticMethod
+     * 初期表示時にリモートの情報を取得する必要のあるフォームに情報を設定する
+     */
     static initRemoteInfo() {
         // 「その他のインスタンス」が設定されているタイムラインの情報を取得
         $('.__cmb_tl_account>option[value="__external"]:checked').each((index, elm) =>
@@ -674,6 +694,10 @@ class ColumnPref {
         })
     }
 
+    /**
+     * #StaticMethod
+     * グループとタイムラインのソート設定を行う
+     */
     static setInnerSortable() {
         $(".__ui_gp_sortable").sortable({
             connectWith: ".__ui_gp_sortable",
@@ -708,6 +732,10 @@ class ColumnPref {
         })
     }
 
+    /**
+     * #StaticMethod
+     * タイムラインやグループが存在しないカラムを削除して正常な状態にする
+     */
     static normalize() {
         // DOM要素から不正な空データを除外する
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
