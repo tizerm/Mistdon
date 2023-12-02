@@ -8,6 +8,10 @@ $(() => {
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
+    /**
+     * #Event
+     * 送信履歴ボタン
+     */
     $("#navi .navi_history").on("click", e => History.createHistoryWindow())
 
     /**
@@ -84,6 +88,35 @@ $(() => {
         // 選択中のオプションにselectedクラスを付与
         $(e.target).closest(".visibility_icon").find("img").removeClass("selected")
         $(e.target).closest(".__lnk_visibility").find("img").addClass("selected")
+    })
+
+    /**
+     * #Event
+     * 投稿先アイコン
+     * => 投稿先変更メニューを表示(Misskeyのみ)
+     */
+    $("#header>#head_postarea #__on_post_to_misskey").on("click", e =>
+        $("#pop_post_to").show("slide", { direction: "up" }, 150))
+
+    /**
+     * #Event
+     * 投稿先変更メニュー項目
+     * => 投稿先情報を変更
+     */
+    $(document).on("click", ".__lnk_post_to", e => {
+        const send = $(e.target).closest(".__lnk_post_to").attr('name')
+        $("#__on_post_to_misskey>img").attr('name', send)
+        switch (send) {
+            case '__to_normal': // 通常投稿
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_public.png')
+                break
+            case '__to_local_only': // ローカルのみ
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_local.png')
+                break
+            default: // チャンネル
+                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_channel.png')
+                break
+        }
     })
 
     /**
@@ -168,6 +201,7 @@ $(() => {
             content: $("#__txt_postarea").val(),
             cw_text: $("#__txt_content_warning").val(),
             visibility_id: $("#header>#head_postarea .visibility_icon .selected").attr("id"),
+            post_to: $("#header>#head_postarea #__on_post_to_misskey>img").attr("name"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__txt_postarea").val("")
@@ -365,6 +399,11 @@ $(() => {
         return false
     })
 
+    /**
+     * #Event
+     * 画像サムネイル
+     * => 画像拡大モーダルを表示
+     */
     $(document).on("click", ".__on_media_expand", e => {
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
@@ -377,10 +416,22 @@ $(() => {
                 .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
         return false
     })
+
+    /**
+     * #Event
+     * モーダル内部の要素をクリック
+     * => 画像拡大モーダルを閉じる(動画には反応しない)
+     */
     $(document).on("click", "#modal_expand_image", e => {
         if ($(e.target).is("video")) return // 動画の場合はなにもしない
         $("#modal_expand_image").hide("fade", 80, () => $("#modal_expand_image video").remove())
     })
+
+    /**
+     * #Event #Mouseenter
+     * モーダル下部の画像サムネイルにホバー
+     * => 対象の画像に切り替える
+     */
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
         const url = $(e.target).closest("li").attr("name")
         $('#modal_expand_image>#expand_image_box>li>*:visible').hide()
@@ -401,6 +452,11 @@ $(() => {
     $(document).on("click", ".__on_datelink", e =>
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
+    /**
+     * #Event #Hold
+     * リストレイアウトの投稿本体を長押し
+     * => 詳細表示ウィンドウを表示
+     */
     delayHoldEvent({
         selector: ".__context_posts>li.short_timeline",
         holdFunc: e =>
@@ -427,6 +483,11 @@ $(() => {
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
 
+    /**
+     * #Event
+     * 詳細表示: ハッシュタグ
+     * => ハッシュタグ検索を実行
+     */
     $(document).on("click", ".__on_detail_hashtag", e => {
         $("#pop_extend_column").hide()
         Query.createSearchWindow()
@@ -434,6 +495,11 @@ $(() => {
         $("#pop_ex_timeline #__on_search").click()
     })
 
+    /**
+     * #Event
+     * 送信履歴: 削除/解除ボタン
+     * => 対象の投稿を削除/アクション解除する
+     */
     $(document).on("click", ".__del_history", e => History.delete($(e.target)))
 
     /**
@@ -456,7 +522,8 @@ $(() => {
 
     /**
      * #Event
-     * TODO: プロフ関連
+     * ユーザープロフィール: 投稿数
+     * => ユーザーの投稿を表示
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
@@ -464,24 +531,59 @@ $(() => {
        $(e.target).closest("td").find(".user_post_elm").show()
     })
 
+    /**
+     * #Event
+     * ユーザープロフィール: フォロー数
+     * => フォロイー一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .count_follow", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('follows')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: フォロワー数
+     * => フォロワー一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .count_follower", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: お気に入り(Mastodon)
+     * => お気に入り一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_mastfav", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Mastodon')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: お気に入り(Misskey)
+     * => お気に入り一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_miskfav", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Misskey')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: ブックマーク
+     * => ブックマーク一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_bookmark", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Bookmark')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: リアクション
+     * => 最近リアクションを送信したノート一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
 
+    /**
+     * #Event #Delayhover
+     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー
+     * => 上部に簡易プロフィールを表示
+     */
     delayHoverEvent({
         selector: "#pop_ex_timeline>.auth_user .ff_nametags>li",
         enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
@@ -490,8 +592,19 @@ $(() => {
         delay: 500
     })
 
+    /**
+     * #Event
+     * ユーザープロフィール: フォロー/フォロワーのネームタグ
+     * => フルプロフィールの簡易ポップアップを表示
+     */
     $(document).on("click", "#pop_ex_timeline>.auth_user .ff_nametags>li", e =>
         User.getByAddress($(e.target).closest("li").attr("name")).then(user => user.createDetailPop($(e.target))))
+
+    /**
+     * #Event #Delayhover
+     * ユーザープロフィール: 簡易ポップアップからリリース
+     * => 簡易ポップアップを閉じる
+     */
     $(document).on("mouseleave", "#pop_ex_timeline>.ff_pop_user", e => {
         const to = $(e.relatedTarget)
         // コンテキストメニューに移動した場合はなにもしない
@@ -544,6 +657,9 @@ $(() => {
         if (!$(e.target).is("#header>#head_postarea .posticon")) 
             // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
             $("#pop_postuser").hide("slide", { direction: "up" }, 150)
+        if (!$(e.target).is("#header>#head_postarea #__on_post_to_misskey>*")) 
+            // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
+            $("#pop_post_to").hide("slide", { direction: "up" }, 150)
     })
 
     /**
@@ -575,6 +691,10 @@ $(() => {
         navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")))
 
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: ブラウザで開く
+     */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
         e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
 

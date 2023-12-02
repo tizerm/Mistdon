@@ -314,6 +314,7 @@ class User {
      * このユーザーの投稿一覧を取得する
      * 
      * @param account リモートホストの情報を入れた最小限のアカウントオブジェクト
+     * @param max_id 前のページの最後の投稿のページングID
      */
     getPost(account, max_id) {
         let rest_promise = null
@@ -417,6 +418,14 @@ class User {
         })
     }
 
+    /**
+     * #Method
+     * このユーザーのお気に入り/ブックマーク/リアクション履歴一覧を取得する
+     * 
+     * @param account このユーザーのアカウントオブジェクト
+     * @param type お気に入り/ブックマーク/リアクションか指定
+     * @param max_id 前のページの最後の投稿のページングID
+     */
     getBookmarks(account, type, max_id) {
         let rest_promise = null
         let query_param = null
@@ -490,6 +499,14 @@ class User {
         })
     }
 
+    /**
+     * #Method
+     * このユーザーのフォロー/フォロワー一覧を取得する
+     * 
+     * @param account このユーザーのアカウントオブジェクト
+     * @param type フォローかフォロワーか指定
+     * @param max_id 前のページの最後のユーザーのページングID
+     */
     getFFUsers(account, type, max_id) {
         let api_url = null
         let rest_promise = null
@@ -561,6 +578,12 @@ class User {
         })
     }
 
+    /**
+     * #Method
+     * このユーザーの詳細情報を表示するDOMを対象セレクタに対して生成
+     * 
+     * @param bind_selector 生成した詳細情報をバインドする要素のjQueryオブジェクト
+     */
     createDetailHtml(bind_selector) {
         const jqelm = $($.parseHTML(`
             <table><tbody>
@@ -641,6 +664,12 @@ class User {
             .show("slide", { direction: "right" }, 150)
     }
 
+    /**
+     * #Method
+     * このユーザーの詳細情報を表示するポップアップウィンドウのDOMを生成して表示する
+     * 
+     * @param target クリックしたElementの親のユーザーのjQueryオブジェクト
+     */
     createDetailPop(target) {
         const pos = target.closest("td").offset()
         this.createDetailHtml("#pop_ex_timeline>.ff_pop_user")
@@ -650,13 +679,27 @@ class User {
         }).show("fade", 80)
     }
 
+    /**
+     * #Method
+     * このユーザーのお気に入り/ブックマーク/リアクション履歴を取得して表示する
+     * 
+     * @param type お気に入り/ブックマーク/リアクションのどれかを指定
+     */
     createBookmarkList(type) {
         const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
         target.find(".user_post_elm").hide()
         target.find(".user_ff_elm").hide()
         target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
         this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+            // ロード待ち画面を消去
+            target.find(".col_loading").remove()
             data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*
@@ -669,8 +712,20 @@ class User {
         })())
     }
 
+    /**
+     * #Method
+     * このユーザーのフォロー/フォロワーの一覧を表示するリストを生成する
+     * 
+     * @param type フォローを取得するかフォロワーを取得するか指定
+     */
     createFFTaglist(type) {
         const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
         target.find(".user_post_elm").hide()
         target.find(".user_bookmark_elm").hide()
         target.find(".user_ff_elm").html(`
@@ -681,6 +736,8 @@ class User {
         `).show()
 
         this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+            // ロード待ち画面を消去
+            target.find(".col_loading").remove()
             data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*

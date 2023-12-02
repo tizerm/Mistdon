@@ -192,7 +192,9 @@ async function writePrefCols(event, json_data) {
                 const host = tl.account?.domain ?? tl.ex_host
                 const platform = tl.account?.platform ?? tl.ex_platform
                 const external = !tl.account
-                const color = external ? tl.ex_color : null
+                let color = null
+                if (external) color = tl.ex_color
+                else if (tl.timeline_type == 'channel') color = tl.channel_color
 
                 let rest_url = null
                 let socket_url = null
@@ -263,7 +265,18 @@ async function writePrefCols(event, json_data) {
                             case 'list': // リスト
                                 rest_url = `https://${host}/api/notes/user-list-timeline`
                                 query_param = { 'listId': tl.list_id }
-                                socket_param = { 'channel': 'userList', 'listId': tl.list_id }
+                                socket_param = {
+                                    'channel': 'userList',
+                                    'params': { 'listId': tl.list_id }
+                                }
+                                break
+                            case 'channel': // チャンネル
+                                rest_url = `https://${host}/api/channels/timeline`
+                                query_param = { 'channelId': tl.channel_id }
+                                socket_param = {
+                                    'channel': 'channel',
+                                    'params': { 'channelId': tl.channel_id }
+                                }
                                 break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/i/notifications`
@@ -291,6 +304,8 @@ async function writePrefCols(event, json_data) {
                     'color': color,
                     'timeline_type': tl.timeline_type,
                     'list_id': tl.timeline_type == 'list' ? tl.list_id : null,
+                    'channel_id': tl.timeline_type == 'channel' ? tl.channel_id : null,
+                    'channel_name': tl.timeline_type == 'channel' ? tl.channel_name : null,
                     'rest_url': rest_url,
                     'socket_url': socket_url,
                     'query_param': query_param,
@@ -372,6 +387,13 @@ async function writeCustomEmojis(event, data) {
     pref_emojis.set(data.host, data.emojis)
 }
 
+/**
+ * #IPC
+ * 保存してある送信履歴を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 送信履歴キャッシュ情報(マップで返却)
+ */
 async function readHistory() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (cache_history) {
@@ -391,6 +413,13 @@ async function readHistory() {
     return cache_history
 }
 
+/**
+ * #IPC
+ * 送信履歴をJSONファイルとして書き込む
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function overwriteHistory(event, data) {
     const content = await overwriteFile('app_prefs/history.json', data)
     console.log('@INF: finish write app_prefs/history.json')

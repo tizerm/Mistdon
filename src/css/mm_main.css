@@ -38,25 +38,43 @@
         position: absolute;
         top: 49px;
         left: 76px;
-    }
-    #on_custom_emoji {
-        display: inline-block;
-        vertical-align: text-bottom;
-        &:hover>img {
-            background-color: #225588;
-            cursor: pointer;
+        width: 210px;
+        #on_custom_emoji {
+            display: inline-block;
+            vertical-align: text-bottom;
+            &:hover>img {
+                background-color: #225588;
+                cursor: pointer;
+            }
         }
-    }
-    #__txt_content_warning {
-        position: relative;
-        top: -7px;
-        font-family: "メイリオ", sans-selif;
-        text-align: left;
-        background-color: #434343;
-        border-radius: 4px;
-        border: solid 1px #888888;
-        color: #ffffff;
-        width: 174px;
+        #__txt_content_warning {
+            transform: translate(-2px, -8px);
+            font-family: "メイリオ", sans-selif;
+            text-align: left;
+            background-color: #434343;
+            border-radius: 4px;
+            border: solid 1px #888888;
+            color: #ffffff;
+            width: 152px;
+        }
+        #__on_post_to_misskey {
+            border-style: none;
+            background-color: transparent;
+            margin: 0px;
+            padding: 0px;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            cursor: pointer;
+            & img {
+                width: 24px;
+                height: 24px;
+            }
+            &[disabled]>img {
+                opacity: 0.25;
+                cursor: not-allowed;
+            }
+        }
     }
     #__txt_postarea {
         position: absolute;
@@ -192,6 +210,55 @@
                 font-family: Arial, "メイリオ", sans-selif;
                 font-size: 13px;
             }
+        }
+    }
+    /*=== Post Account Select Menu ===============================================================*/
+    > #pop_post_to {
+        display: none;
+        z-index: 10;
+        position: absolute;
+        top: 108px;
+        left: 288px;
+
+        > a {
+            display: inline-block;
+            border-radius: 12px;
+            background-color: rgba(34,34,34,0.92);
+            background-position: top 4px center;
+            background-repeat: no-repeat;
+            width: 64px;
+            height: 24px;
+            padding-top: 52px;
+            font-size: 12px;
+            text-align: center;
+            &:hover         { background-color: rgba(62,82,96,0.92); }
+            &.to_normal     { background-image: url("../resources/ic_public.png"); }
+            &.to_local_only { background-image: url("../resources/ic_local.png"); }
+        }
+        > ul.channel_menu {
+            margin: 4px 0px;
+            padding: 0px;
+            > li {
+                list-style-type: none;
+                > a.to_channel {
+                    display: inline-block;
+                    border-radius: 8px;
+                    background-color: rgba(34,34,34,0.92);
+                    background-position: center left 4px;
+                    background-repeat: no-repeat;
+                    background-size: 32px 32px;
+                    background-image: url("../resources/ic_channel.png");
+                    margin: 2px 0px;
+                    padding: 4px 18px;
+                    padding-left: 48px;
+                    font-size: 13px;
+                    &:hover { background-color: rgba(62,82,96,0.92); }
+                }
+            }
+        }
+        & a {
+            cursor: pointer;
+            border: solid 2px #aaaaaa;
         }
     }
 

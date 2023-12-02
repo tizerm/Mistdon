@@ -97,6 +97,7 @@ class Status {
 
                 // リノートの場合はリノート先を参照データに設定
                 data = this.reblog ? json.renote : json
+
                 // ノートURL生成
                 // uriが入っていない場合は自鯖の投稿なのでホストからURIを生成
                 if (!data.uri) { // uriが入っていない場合は自鯖の投稿
@@ -105,8 +106,8 @@ class Status {
                     else this.uri = `https://${host}/notes/${data.id}`
                 } // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
                 else if (data.user?.instance?.softwareName == "misskey") this.uri = data.uri
-                // TODO: それ以外は一旦Mastodonとして解釈する
-                else this.uri = data.url
+                // TODO: それ以外は一旦Mastodonとして解釈する(Misskey v11も同じ)
+                else this.uri = data.url ?? data.uri
                 this.id = data.id // 投稿ID
 
                 // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する
@@ -127,6 +128,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.local_only = data.localOnly
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // 本文(通知の場合はstatusから)
@@ -192,8 +194,6 @@ class Status {
     get from_column() { return this.from_timeline?.parent_column }
     // Getter: 挿入先タイムライングループ
     get from_group() { return this.from_timeline?.parent_group }
-    // Getter: 取得元アカウントのアカウントカラー
-    get account_color() { return this.from_account?.pref.acc_color ?? this.from_timeline?.pref?.color }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
@@ -213,6 +213,10 @@ class Status {
         })
     }
 
+    // Getter: 取得元アカウントのアカウントカラー
+    get account_color() {
+        return this.from_timeline?.pref?.timeline_type == 'channel' || this.from_timeline?.pref?.external ? this.from_timeline?.pref?.color : this.from_account?.pref.acc_color
+    }
     // Getter: ミュート判定
     get muted() { // 文を分けると機能しなくなるっぽい
         return (this.from_timeline?.pref?.exclude_reblog && this.reblog) || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
@@ -445,7 +449,7 @@ class Status {
         }
     }
 
-    // Getter: 投稿データからHTMLを生成して返却
+    // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
@@ -512,6 +516,9 @@ class Status {
                 </span>
         `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
             html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+            // 連合なしのノートはアイコン表示(チャンネルは除外)
+            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
             switch (this.visibility) {
                 case 'unlisted':
@@ -544,8 +551,10 @@ class Status {
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>${this.quote.username}</div>
-                    <div>@${this.quote.user_id}</div>
+                    <div class="quote_userarea">
+                        <span>${this.quote.username}</span>
+                        <span>@${this.quote.user_id}</span>
+                    </div>
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `
@@ -633,10 +642,13 @@ class Status {
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
 
-        if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            // 外部インスタンスの場合はタイムラインのホスト名にする
-            const address = this.from_timeline?.pref?.external ? this.from_timeline?.pref.host : this.from_account.full_address
-            html += `<div class="from_address" name="${address}">From ${address}</div>`
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
+        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
+            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
+                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
+            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
         html += `
                 </div>
@@ -646,6 +658,8 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address.from_auth_user')
+            .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -680,6 +694,9 @@ class Status {
         `
         if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
             html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+            // 連合なしのノートはアイコン表示(チャンネルは除外)
+            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
             switch (this.visibility) {
                 case 'unlisted':
@@ -700,9 +717,24 @@ class Status {
             <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
         `
         html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
-        if (this.from_group?.pref?.multi_user && !this.from_timeline?.pref.external && !self_flg)
-            // マルチアカウントカラムで認証済みの場合は表示元ユーザー(のアイコン)を表示
-            html += `<img src="${this.from_account?.pref.avatar_url}" class="ic_target_account"/>`
+
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address">
+                <div class="from_channel"><span>${this.from_timeline?.pref?.channel_name}</span></div>
+            </div>`
+        if (this.from_group?.pref?.multi_user && !self_flg) {
+            if (this.from_timeline?.pref.external) // 外部インスタンスの場合
+                html += `<div class="from_address">
+                    <div class="from_external ${this.from_timeline?.pref.platform}">
+                        <span>${this.from_timeline?.pref.host}</span>
+                    </div>
+                </div>`
+            else html += `<div class="from_address">
+                <div class="from_auth_user"><span>${this.from_account.full_address}</span></div>
+            </div>`
+        }
+
         html += '</div>'
         if (this.reblog) { // ブースト/リノートのヘッダ
             const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
@@ -717,8 +749,10 @@ class Status {
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>${this.quote.username}</div>
-                    <div>@${this.quote.user_id}</div>
+                    <div>
+                        <span>${this.quote.username}</span>
+                        <span>@${this.quote.user_id}</span>
+                    </div>
                     <div>${target_emojis.replace(this.quote.content)}</div>
                 </div>
             `
@@ -753,9 +787,10 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+        jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
+        jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
-        if (!this.user_profile_flg && self_flg)
-            jqelm.closest('li').addClass('self_post')
+        if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
@@ -927,10 +962,13 @@ class Status {
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
 
-        if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            // 外部インスタンスの場合はタイムラインのホスト名にする
-            const address = this.from_timeline?.pref.external ? this.from_timeline?.pref.host : this.from_account.full_address
-            html += `<div class="from_address" name="${address}">From ${address}</div>`
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
+        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
+            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
+                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
+            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
         html += `
                 </div>
@@ -940,6 +978,8 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address.from_auth_user')
+            .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1011,6 +1051,12 @@ class Status {
             .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #StaticMethod
+     * スクロール末尾に表示されたら自動で続きを読み込むローダーを生成する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     static createScrollLoader(arg) {
         const last_id = arg.list.pop().id
         // ローダーエレメントを生成
@@ -1052,6 +1098,13 @@ class Status {
         observer.observe(arg.target.find(".__scroll_loader").get(0))
     }
 
+    /**
+     * #Method
+     * この投稿に添付されているメディアを拡大表示するモーダルウィンドウを生成
+     * 
+     * @param url ターゲットの画像URL
+     * @param index ターゲットの画像のインデクス
+     */
     createImageModal(url, index) {
         // 一旦全部クリア
         $("#modal_expand_image>*").empty()
@@ -1224,6 +1277,12 @@ class Status {
         this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
     }
 
+    /**
+     * #Method
+     * この投稿をノーマルレイアウトでポップアップするウィンドウを生成
+     * 
+     * @param target この投稿のjQueryオブジェクト(座標決定に使用)
+     */
     createExpandWindow(target) {
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()

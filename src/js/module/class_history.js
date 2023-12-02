@@ -36,8 +36,8 @@ class History {
     }
 
     /**
-     * #Method
-     * このカラムのDOMを生成してテーブルにアペンドする
+     * #StaticMethod
+     * 送信履歴を表示する画面を表示
      */
     static createHistoryWindow() {
         // 検索カラムのDOM生成
@@ -70,44 +70,56 @@ class History {
         History.bindAsync($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
     }
 
+    /**
+     * #StaticMethod
+     * 履歴スタックの投稿情報を、非同期でHTMLにバインドする
+     * 
+     * @param ul アペンド対象のul要素jQueryオブジェクト
+     * @param stack 走査するスタック
+     */
     static async bindAsync(ul, stack) {
         let request_promise = null
         for (const elm of stack) { // 時間がかかっても上から順番に処理するためforでループする
             // Statusインスタンスがキャッシュされている場合はそのまま表示
             if (elm.post) ul.append(elm.element)
             else { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
-                const account = Account.get(elm.account_address)
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "GET",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
-                            dataType: "json",
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/show`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": elm.id
+                try {
+                    const account = Account.get(elm.account_address)
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            request_promise = $.ajax({
+                                type: "GET",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
+                                dataType: "json",
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                             })
-                        })
-                        break
-                    default:
-                        return
+                            break
+                        case 'Misskey': // Misskey
+                            request_promise = $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/show`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": elm.id
+                                })
+                            })
+                            break
+                        default:
+                            break
+                    }
+                    const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
+                    elm.post = post
+                    ul.append(elm.element)
+                } catch (err) { // エラーはログに出す
+                    console.log(err)
                 }
-                const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
-                elm.post = post
-                ul.append(elm.element)
             }
         }
     }
 
+    // Getter: 投稿履歴のDOM Elementを生成
     get element() {
         // まず投稿本体のjQueryオブジェクトを取得
         const elm = this.post.element
@@ -161,6 +173,12 @@ class History {
         return elm
     }
 
+    /**
+     * #StaticMethod
+     * 投稿時に投稿データを投稿スタックにプッシュする
+     * 
+     * @param post プッシュ対象の投稿Statusオブジェクト
+     */
     static pushPost(post) {
         const history = new History(post, null)
         History.post_stack.unshift(history)
@@ -168,6 +186,14 @@ class History {
         History.writeJson()
     }
 
+    /**
+     * #StaticMethod
+     * アクション実行時に実行対象の投稿をアクティビティスタックにプッシュする
+     * 
+     * @param post プッシュ対象の投稿Statusオブジェクト
+     * @param type アクションのタイプ
+     * @param renote_id (Misskey限定)リノートの場合の生成ノートID
+     */
     static pushActivity(post, type, renote_id) {
         let history = new History(post, type)
         if (renote_id) history.renote_id = renote_id
@@ -176,6 +202,12 @@ class History {
         History.writeJson()
     }
 
+    /**
+     * #StaticMethod
+     * 引数のターゲットエレメントの履歴の投稿を削除する
+     * 
+     * @param target 削除対象の投稿のjQueryオブジェクト
+     */
     static delete(target) {
         const index = target.closest("li").index()
         if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
@@ -194,6 +226,10 @@ class History {
         }
     }
 
+    /**
+     * #Method
+     * このアクティビティ履歴に対してアクティビティを取り消す
+     */
     async undo() {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
@@ -281,6 +317,14 @@ class History {
         })
     }
 
+    /**
+     * #StaticMethod
+     * 投稿スタックに対して先頭のデータを取得してコールバックを実行する
+     * 削除フラグが立っている場合はポップ(削除)する
+     * 
+     * @param presentCallback データが存在したときに実行するコールバック関数
+     * @param del_flg 先頭のデータをポップ(削除)する場合はtrue
+     */
     static popIf(presentCallback, del_flg) {
         const pop = History.post_stack[0]
         if (!pop) { // なにもなかったらそのままおしまい
@@ -300,6 +344,10 @@ class History {
         else presentCallback(pop)
     }
 
+    /**
+     * #StaticMethod
+     * キャッシュしてある履歴オブジェクトリストをJSONファイルとして保存
+     */
     static writeJson() {
         window.accessApi.overwriteHistory({
             "post": History.post_stack.map(elm => elm.json),
@@ -307,6 +355,7 @@ class History {
         })
     }
 
+    // Getter: オブジェクトの情報を保存用のJSONとして返却
     get json() {
         return {
             "account_address": this.account_address,

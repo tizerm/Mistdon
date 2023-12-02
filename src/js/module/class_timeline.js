@@ -101,8 +101,6 @@ class Timeline {
     setSocketParam() {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はなにもしない
         if (!this.pref.external && !this.target_account) return
-        // Misskeyのリストも一旦WebSocket接続しない
-        if (this.pref.platform == 'Misskey' && this.pref.timeline_type == 'list') return
 
         let message_callback = null
         let send_param = null
@@ -113,8 +111,12 @@ class Timeline {
                 // メッセージ受信時のコールバック関数
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
+
                     // TLと違うStreamは無視
                     if (data.stream[0] != this.pref.socket_param.stream) return
+                    // TLと違うリストは無視
+                    if (this.pref.socket_param.stream == 'list' && data.stream[1] != this.pref.socket_param.list) return
+
                     // タイムラインの更新通知
                     if (data.event == "update"
                         || (this.pref.timeline_type == "notification" && data.event == "notification"))
@@ -130,6 +132,7 @@ class Timeline {
                 const uuid = crypto.randomUUID()
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
+
                     // TLと違うStreamは無視
                     if (data.body.id != uuid) return
                     if (data.body.type == "note"
@@ -162,6 +165,12 @@ class Timeline {
         })
     }
 
+    /**
+     * #Method
+     * このタイムラインから外部インスタンスにWebSocket接続する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     async connectExternal(arg) {
         // WebSocket接続を開始
         this.socket = new WebSocket(this.pref.socket_url)
@@ -197,7 +206,7 @@ class Timeline {
      * #Method
      * このタイムラインに保存してあるステータス情報を削除する
      * 
-     * @param arg 投稿ID
+     * @param id投稿ID
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)

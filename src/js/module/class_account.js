@@ -108,10 +108,18 @@ class Account {
      * このアカウントを投稿先アカウントに設定
      */
     setPostAccount() {
-        $("#header>#head_postarea .__lnk_postuser>img").attr('src', this.pref.avatar_url)
-        $("#header>#head_postarea .__lnk_postuser>img").attr('name', this.full_address)
+        // 変わってなかったらなにもしない
+        if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') == this.full_address) return
+
+        $("#header>#head_postarea .__lnk_postuser>img").attr({
+            src: this.pref.avatar_url,
+            name: this.full_address
+        })
         $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
-        $("#header>h1").css("background-color", `#${this.pref.acc_color}`)
+            .css("background-color", `#${this.pref.acc_color}`)
+
+        // 投稿先メニューを生成
+        this.createPostToMenu()
     }
 
     /**
@@ -198,6 +206,19 @@ class Account {
                 if (arg.reply_id) request_param.replyId = arg.reply_id
                 // 引用の場合は引用ノートIDを設定
                 if (arg.quote_id) request_param.renoteId = arg.quote_id
+                // 投稿先を設定
+                switch (arg.post_to) {
+                    case '__to_normal': // 通常投稿
+                        request_param.localOnly = false
+                        break
+                    case '__to_local_only': // ローカルのみ
+                        request_param.localOnly = true
+                        break
+                    default: // チャンネル
+                        request_param.localOnly = true
+                        request_param.channelId = arg.post_to
+                        break
+                }
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
@@ -839,6 +860,47 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
+     * このアカウントがお気に入りに追加しているチャンネル一覧を取得する(Misskey専用)
+     */
+    getChannels() {
+        return $.ajax({
+            type: "POST",
+            url: `https://${this.pref.domain}/api/channels/my-favorites`,
+            dataType: "json",
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({ "i": this.pref.access_token })
+        }).then(data => {
+            // チャンネルをお気に入りしていない場合はreject
+            if (data.length == 0) return Promise.reject('empty')
+            return (async () => {
+                // リスト一覧を整形
+                const channels = []
+                data.forEach(c => channels.push({
+                    "name": c.name,
+                    "id": c.id
+                }))
+                return channels
+            })()
+        })
+    }
+
+    /**
+     * #Method #Ajax
+     * このアカウントのチャンネル一覧キャッシュを取得する
+     * キャッシュが取れていない場合は取得メソッドを呼び出す
+     */
+    async getChannelsCache() {
+        // キャッシュがあればキャッシュを使用
+        if (this.channels_cache) return this.channels_cache
+
+        // キャッシュがない場合はキャッシュを取得して返す
+        const channels = await this.getChannels()
+        this.channels_cache = channels
+        return channels
+    }
+
+    /**
+     * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
      * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
      * 
@@ -891,6 +953,36 @@ class Account {
         ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
+    }
+
+    /**
+     * #Method
+     * このアカウントの投稿先メニューを生成する
+     */
+    async createPostToMenu() {
+        if (this.platform == 'Mastodon') { // Mastodonの場合は無効化
+            $("#__on_post_to_misskey").prop('disabled', true)
+            $("#__on_post_to_misskey>img").attr({
+                src: "resources/ic_mastodon.png",
+                name: "__to_normal"
+            })
+            return
+        }
+        let html = ''
+        try {
+            const channels = await this.getChannelsCache()
+            channels?.forEach(c => html += `
+                <li><a name="${c.id}" class="__lnk_post_to to_channel">${c.name}</a></li>
+            `)
+        } catch (err) {
+            console.log(err)
+        }
+        $("#pop_post_to>ul").html(html)
+        $("#__on_post_to_misskey").prop('disabled', false)
+        $("#__on_post_to_misskey>img").attr({
+            src: "resources/ic_public.png",
+            name: "__to_normal"
+        })
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得

@@ -58,12 +58,20 @@ class TimelinePref {
                             <option value="local">ローカル</option>
                             <option value="federation">連合</option>
                             <option value="list">リスト</option>
+                            <option value="channel">チャンネル</option>
                             <option value="notification">通知</option>
                         </select>
                     </div>
                     <div class="lbl_list">
                         対象リスト:<br/><select class="__cmb_tl_list">
                         </select>
+                    </div>
+                    <div class="lbl_channel">
+                        対象チャンネル:<br/><select class="__cmb_tl_channel">
+                        </select>
+                        <div class="color_info">
+                            色: #<input type="text" class="__txt_channel_color __pull_color_palette" size="6"/>
+                        </div>
                     </div>
                     <div class="lbl_checkbox">
                         <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"/>
@@ -78,8 +86,11 @@ class TimelinePref {
         `))
         // 初期値が存在する場合は初期値を設定
         if (this.pref?.key_address) { // 表示対象アカウント
+            const account = Account.get(this.pref.key_address)
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
-            jqelm.find("h4").css("background-color", `#${Account.get(this.pref.key_address)?.pref.acc_color}`)
+            jqelm.find("h4").css("background-color", `#${account?.pref.acc_color}`)
+            jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+            jqelm.find(".__txt_channel_color").val(this.pref.color)
             jqelm.find(".lbl_external_instance").hide()
         } else if (this.pref?.external) { // 外部インスタンスが表示対象の場合は「その他」を初期設定
             jqelm.find(`.__cmb_tl_account>option[value="__external"]`).prop("selected", true)
@@ -90,19 +101,24 @@ class TimelinePref {
             jqelm.find(".lbl_external_instance").show()
             jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+            jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
-
-            // サーバー情報取得処理実行
-            //TimelinePref.changeExternalHostEvent(jqelm.find(".__txt_external_instance"))
         }
         if (this.pref?.timeline_type) { // タイムラインの種類
             jqelm.find(`.__cmb_tl_type>option[value="${this.pref.timeline_type}"]`).prop("selected", true)
-            if (this.pref.timeline_type == 'list') { // リストの場合はリストブロックを表示(後で検索用にリストIDを記録)
+            if (this.pref.timeline_type == 'list') {
+                // リストの場合はリストブロックを表示(後で検索用にリストIDを記録)
                 jqelm.find(".lbl_list").show()
                 jqelm.find(".__cmb_tl_list").attr("value", this.pref.list_id)
             }
             else jqelm.find(".lbl_list").hide()
+            if (this.pref.timeline_type == 'channel') {
+                // チャンネルの場合はチャンネルブロックを表示(後で検索用にリストIDを記録)
+                jqelm.find(".lbl_channel").show()
+                jqelm.find(".__cmb_tl_channel").attr("value", this.pref.channel_id)
+            }
+            else jqelm.find(".lbl_channel").hide()
         }
         if (this.pref?.exclude_reblog) // ブースト/リノートを非表示
             jqelm.find(".__chk_exclude_reblog").prop("checked", true)
@@ -114,14 +130,18 @@ class TimelinePref {
         // 初期値が存在しない(追加)場合は初期表示設定
         if (!this.pref) {
             if (!Account.isEmpty()) {  // アカウント情報があれば背景色は先頭にしてホスト情報を非表示
-                jqelm.find("h4").css("background-color", `#${Account.get(0).pref.acc_color}`)
+                const account = Account.get(0)
+                jqelm.find("h4").css("background-color", `#${account.pref.acc_color}`)
+                jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find(".lbl_list").hide()
+                jqelm.find(".lbl_channel").hide()
                 jqelm.find(".lbl_external_instance").hide()
             } else { // アカウント情報がない場合は
                 jqelm.find(`.__cmb_tl_account>option[value="__external"]`).prop("selected", true)
                 jqelm.find(".lbl_external_instance").show()
                 jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+                jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
             }
@@ -144,18 +164,21 @@ class TimelinePref {
             target_li.find("h4").css("background-color", `#${account.pref.acc_color}`)
             target_li.find(".lbl_external_instance").hide()
             target_li.find('.__cmb_tl_type>option').prop("disabled", false)
+            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
             target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
         } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
             target_li.find("h4").css("background-color", `#999999`)
             target_li.find(".lbl_external_instance").show()
             target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
         }
-        // リストは一律非表示
+        // リスト/チャンネルは一律非表示
         target_li.find(".lbl_list").hide()
+        target_li.find(".lbl_channel").hide()
         ColumnPref.setButtonPermission()
     }
 
@@ -208,33 +231,61 @@ class TimelinePref {
      */
     static async changeTypeEvent(target) {
         const li_dom = target.closest("li")
-        if (target.val() != 'list') { // リスト以外の場合はリストウィンドウを閉じて終了
-            li_dom.find(".lbl_list").hide()
-            return
+        let toast_uuid = null
+        switch (target.val()) {
+            case 'list': // リスト
+                toast_uuid = crypto.randomUUID()
+                toast("対象アカウントのリストを取得中です...", "progress", toast_uuid)
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
+                    const list_id = li_dom.find(".__cmb_tl_list").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    lists.forEach(l => options += `
+                        <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
+                    li_dom.find(".lbl_list").show()
+                    li_dom.find(".lbl_channel").hide()
+                    toast(null, "hide", toast_uuid)
+                }).catch(error => {
+                    if (error == 'empty') { // リストを持っていない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+                        toast("このアカウントにはリストがありません.", "error", toast_uuid)
+                    } else // それ以外は単にリストの取得エラー
+                        toast("リストの取得で問題が発生しました.", "error", toast_uuid)
+                })
+                break
+            case 'channel': // チャンネル
+                toast_uuid = crypto.randomUUID()
+                toast("対象アカウントのお気に入りチャンネルを取得中です...", "progress", toast_uuid)
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
+                    const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    channels.forEach(c => options += `
+                        <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
+                    li_dom.find(".lbl_channel").show()
+                    li_dom.find(".lbl_list").hide()
+                    toast(null, "hide", toast_uuid)
+                }).catch(error => {
+                    if (error == 'empty') { // お気に入りのチャンネルがない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+                        toast("このアカウントがお気に入りしているチャンネルがありません.", "error", toast_uuid)
+                    } else // それ以外は単にリストの取得エラー
+                        toast("チャンネルの取得で問題が発生しました.", "error", toast_uuid)
+                })
+                break
+            default: // リスト/チャンネル以外はウィンドウを閉じて終了
+                li_dom.find(".lbl_list").hide()
+                li_dom.find(".lbl_channel").hide()
+                break
         }
-
-        // リストの場合はリスト取得処理を実行
-        const toast_uuid = crypto.randomUUID()
-        toast("対象アカウントのリストを取得中です...", "progress", toast_uuid)
-
-        Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
-            const list_id = li_dom.find(".__cmb_tl_list").attr("value")
-            // リストのコンボ値のDOMを生成
-            let options = ''
-            lists.forEach(l => options += `
-                <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
-            `)
-            li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
-            li_dom.find(".lbl_list").show()
-            toast(null, "hide", toast_uuid)
-        }).catch(error => {
-            if (error == 'empty') { // リストを持っていない
-                li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                toast("このアカウントにはリストがありません.", "error", toast_uuid)
-            } else // それ以外は単にリストの取得エラー
-                toast("リストの取得で問題が発生しました.", "error", toast_uuid)
-        })
     }
 }
 
@@ -267,7 +318,7 @@ class GroupPref {
     get id() { return this.pref?.group_id }
     // Getter: このタイムライングループが所属するカラム
     get parent_column() { return ColumnPref.get(this.__column_id) }
-
+    // Getter: このタイムライングループの高さ
     get height() {
         // 高さがnullでなければそのまま返却
         if (this.pref.gp_height) return this.pref.gp_height
@@ -343,7 +394,7 @@ class GroupPref {
 
     /**
      * #Method
-     * このカラムのタイムラインを削除する
+     * このグループのタイムラインを削除する
      * 
      * @param index 削除対象のタイムラインのインデクス
      */
@@ -413,6 +464,12 @@ class ColumnPref {
         else return ColumnPref.map.get(arg.attr("id"))
     }
 
+    /**
+     * #StaticMethod
+     * 対照グループのGroupPrefオブジェクトを生成する
+     * 
+     * @param target 対象のグループ
+     */
     static getGroup(target) {
         return new GroupPref({ "group_id": target.closest(".tl_group").attr("id") }, this)
     }
@@ -539,6 +596,10 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
     }
 
+    /**
+     * #StaticMethod
+     * このカラムのグループの高さを初期化する
+     */
     resetHeight() {
         const size = $(`#${this.id}>.col_tl_groups>.tl_group`).length
         if (size == 0) return // グループがない場合はなにもしない
@@ -546,6 +607,12 @@ class ColumnPref {
         $(`#${this.id}>.col_tl_groups>.tl_group .__txt_group_height`).val(reset_rate)
     }
 
+    /**
+     * #StaticMethod
+     * カラムに属するグループの高さを再計算する
+     *
+     * @param target 再計算対象のカラム
+     */
     static recalcHeight(target) {
         const target_col = ColumnPref.get(target.closest("td"))
         if (Number(target.val()) <= 0) { // 0以下が入力されたらリセット
@@ -569,14 +636,20 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
     }
 
+    /**
+     * #StaticMethod
+     * 初期表示時にリモートの情報を取得する必要のあるフォームに情報を設定する
+     */
     static initRemoteInfo() {
         // 「その他のインスタンス」が設定されているタイムラインの情報を取得
         $('.__cmb_tl_account>option[value="__external"]:checked').each((index, elm) =>
             TimelinePref.changeExternalHostEvent($(elm).closest(".tl_option").find(".__txt_external_instance")))
         // 「リスト」が設定されているタイムラインのリストを取得
-        $('.__cmb_tl_type>option[value="list"]:checked').each((index, elm) => {
-            TimelinePref.changeTypeEvent($(elm).closest("select"))
-        })
+        $('.__cmb_tl_type>option[value="list"]:checked').each(
+            (index, elm) => TimelinePref.changeTypeEvent($(elm).closest("select")))
+        // 「チャンネル」が設定されているタイムラインのチャンネルを取得
+        $('.__cmb_tl_type>option[value="channel"]:checked').each(
+            (index, elm) => TimelinePref.changeTypeEvent($(elm).closest("select")))
     }
 
     /**
@@ -625,6 +698,10 @@ class ColumnPref {
         })
     }
 
+    /**
+     * #StaticMethod
+     * グループとタイムラインのソート設定を行う
+     */
     static setInnerSortable() {
         $(".__ui_gp_sortable").sortable({
             connectWith: ".__ui_gp_sortable",
@@ -659,6 +736,10 @@ class ColumnPref {
         })
     }
 
+    /**
+     * #StaticMethod
+     * タイムラインやグループが存在しないカラムを削除して正常な状態にする
+     */
     static normalize() {
         // DOM要素から不正な空データを除外する
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
@@ -695,6 +776,9 @@ class ColumnPref {
                         'ex_platform': $(tl_elm).find(".__hdn_external_platform").val(),
                         'ex_color': $(tl_elm).find(".__txt_external_color").val(),
                         'list_id': $(tl_elm).find(".__cmb_tl_list").val(),
+                        'channel_id': $(tl_elm).find(".__cmb_tl_channel").val(),
+                        'channel_name': $(tl_elm).find(".__cmb_tl_channel>option:checked").text(),
+                        'channel_color': $(tl_elm).find(".__txt_channel_color").val(),
                         'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
                         'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
                         'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
