@@ -687,11 +687,19 @@ class User {
      */
     createBookmarkList(type) {
         const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
         target.find(".user_post_elm").hide()
         target.find(".user_ff_elm").hide()
         target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
         this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+            // ロード待ち画面を消去
+            target.find(".col_loading").remove()
             data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*
@@ -712,6 +720,12 @@ class User {
      */
     createFFTaglist(type) {
         const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
         target.find(".user_post_elm").hide()
         target.find(".user_bookmark_elm").hide()
         target.find(".user_ff_elm").html(`
@@ -722,6 +736,8 @@ class User {
         `).show()
 
         this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+            // ロード待ち画面を消去
+            target.find(".col_loading").remove()
             data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*
