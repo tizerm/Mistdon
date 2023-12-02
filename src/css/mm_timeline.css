@@ -483,10 +483,19 @@
                     }
                 }
                 > .from_address {
+                    background-position: center right;
+                    background-repeat: no-repeat;
+                    background-size: 32px 32px;
                     border-bottom-left-radius: 12px;
                     border-bottom-right-radius: 12px;
                     padding: 3px 18px;
                     margin: 4px -12px -8px;
+                    padding-right: 42px;
+                    &.from_channel { background-image: url("../resources/ic_channel.png"); }
+                    &.from_external {
+                        &.Mastodon { background-image: url("../resources/ic_mastodon.png"); }
+                        &.Misskey  { background-image: url("../resources/ic_misskey.png"); }
+                    }
                 }
             }
         }
@@ -579,14 +588,32 @@
                     max-height: 160px;
                     overflow: hidden;//*/
                 }
-                > .ic_target_account {
-                    position: absolute;
-                    right: 0px;
-                    bottom: 0px;
-                    border-radius: 12px;
-                    width: 24px;
-                    height: 24px;
+                > .from_address {
+                    text-align: right;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 11px;
+                    margin-bottom: -12px;
+                    margin-right: -12px;
+                    > div {
+                        display: inline-block;
+                        border-radius: 6px;
+                        background-position: center right;
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
+                        max-width: 70%;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        padding-left: 12px;
+                        padding-right: 38px;
+                        &.from_channel { background-image: url("../resources/ic_channel.png"); }
+                        &.from_external {
+                            &.Mastodon { background-image: url("../resources/ic_mastodon.png"); }
+                            &.Misskey  { background-image: url("../resources/ic_misskey.png"); }
+                        }
+                    }
                 }
+
             }
             > .label_head {
                 font-size: 11px;
@@ -721,8 +748,7 @@
             > .post_footer {
                 font-size: 11px;
                 > .from_address {
-                    border-radius: 6px;
-                    padding: 3px 18px;
+                    border-radius: 8px;
                     margin: 4px 0px;
                 }
             }

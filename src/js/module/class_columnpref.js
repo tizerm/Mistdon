@@ -69,6 +69,9 @@ class TimelinePref {
                     <div class="lbl_channel">
                         対象チャンネル:<br/><select class="__cmb_tl_channel">
                         </select>
+                        <div class="color_info">
+                            色: #<input type="text" class="__txt_channel_color __pull_color_palette" size="6"/>
+                        </div>
                     </div>
                     <div class="lbl_checkbox">
                         <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"/>
@@ -87,6 +90,7 @@ class TimelinePref {
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
             jqelm.find("h4").css("background-color", `#${account?.pref.acc_color}`)
             jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+            jqelm.find(".__txt_channel_color").val(this.pref.color)
             jqelm.find(".lbl_external_instance").hide()
         } else if (this.pref?.external) { // 外部インスタンスが表示対象の場合は「その他」を初期設定
             jqelm.find(`.__cmb_tl_account>option[value="__external"]`).prop("selected", true)
@@ -773,6 +777,8 @@ class ColumnPref {
                         'ex_color': $(tl_elm).find(".__txt_external_color").val(),
                         'list_id': $(tl_elm).find(".__cmb_tl_list").val(),
                         'channel_id': $(tl_elm).find(".__cmb_tl_channel").val(),
+                        'channel_name': $(tl_elm).find(".__cmb_tl_channel>option:checked").text(),
+                        'channel_color': $(tl_elm).find(".__txt_channel_color").val(),
                         'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
                         'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
                         'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")

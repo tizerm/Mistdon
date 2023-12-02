@@ -192,7 +192,9 @@ async function writePrefCols(event, json_data) {
                 const host = tl.account?.domain ?? tl.ex_host
                 const platform = tl.account?.platform ?? tl.ex_platform
                 const external = !tl.account
-                const color = external ? tl.ex_color : null
+                let color = null
+                if (external) color = tl.ex_color
+                else if (tl.timeline_type == 'channel') color = tl.channel_color
 
                 let rest_url = null
                 let socket_url = null
@@ -303,6 +305,7 @@ async function writePrefCols(event, json_data) {
                     'timeline_type': tl.timeline_type,
                     'list_id': tl.timeline_type == 'list' ? tl.list_id : null,
                     'channel_id': tl.timeline_type == 'channel' ? tl.channel_id : null,
+                    'channel_name': tl.timeline_type == 'channel' ? tl.channel_name : null,
                     'rest_url': rest_url,
                     'socket_url': socket_url,
                     'query_param': query_param,

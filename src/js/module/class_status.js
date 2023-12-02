@@ -193,8 +193,6 @@ class Status {
     get from_column() { return this.from_timeline?.parent_column }
     // Getter: 挿入先タイムライングループ
     get from_group() { return this.from_timeline?.parent_group }
-    // Getter: 取得元アカウントのアカウントカラー
-    get account_color() { return this.from_account?.pref.acc_color ?? this.from_timeline?.pref?.color }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
@@ -214,6 +212,10 @@ class Status {
         })
     }
 
+    // Getter: 取得元アカウントのアカウントカラー
+    get account_color() {
+        return this.from_timeline?.pref?.timeline_type == 'channel' || this.from_timeline?.pref?.external ? this.from_timeline?.pref?.color : this.from_account?.pref.acc_color
+    }
     // Getter: ミュート判定
     get muted() { // 文を分けると機能しなくなるっぽい
         return (this.from_timeline?.pref?.exclude_reblog && this.reblog) || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
@@ -636,10 +638,13 @@ class Status {
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
 
-        if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            // 外部インスタンスの場合はタイムラインのホスト名にする
-            const address = this.from_timeline?.pref?.external ? this.from_timeline?.pref.host : this.from_account.full_address
-            html += `<div class="from_address" name="${address}">From ${address}</div>`
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
+        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
+            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
+                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
+            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
         html += `
                 </div>
@@ -649,6 +654,8 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address.from_auth_user')
+            .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -703,9 +710,24 @@ class Status {
             <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
         `
         html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
-        if (this.from_group?.pref?.multi_user && !this.from_timeline?.pref.external && !self_flg)
-            // マルチアカウントカラムで認証済みの場合は表示元ユーザー(のアイコン)を表示
-            html += `<img src="${this.from_account?.pref.avatar_url}" class="ic_target_account"/>`
+
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address">
+                <div class="from_channel"><span>${this.from_timeline?.pref?.channel_name}</span></div>
+            </div>`
+        if (this.from_group?.pref?.multi_user && !self_flg) {
+            if (this.from_timeline?.pref.external) // 外部インスタンスの場合
+                html += `<div class="from_address">
+                    <div class="from_external ${this.from_timeline?.pref.platform}">
+                        <span>${this.from_timeline?.pref.host}</span>
+                    </div>
+                </div>`
+            else html += `<div class="from_address">
+                <div class="from_auth_user"><span>${this.from_account.full_address}</span></div>
+            </div>`
+        }
+
         html += '</div>'
         if (this.reblog) { // ブースト/リノートのヘッダ
             const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
@@ -758,9 +780,10 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+        jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
+        jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
-        if (!this.user_profile_flg && self_flg)
-            jqelm.closest('li').addClass('self_post')
+        if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
@@ -932,10 +955,13 @@ class Status {
                 <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
         `
 
-        if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            // 外部インスタンスの場合はタイムラインのホスト名にする
-            const address = this.from_timeline?.pref.external ? this.from_timeline?.pref.host : this.from_account.full_address
-            html += `<div class="from_address" name="${address}">From ${address}</div>`
+        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
+            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
+            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
+        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
+            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
+                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
+            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
         html += `
                 </div>
@@ -945,6 +971,8 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address.from_auth_user')
+            .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
