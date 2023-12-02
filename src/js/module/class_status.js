@@ -128,6 +128,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.local_only = data.localOnly
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // 本文(通知の場合はstatusから)
@@ -448,7 +449,7 @@ class Status {
         }
     }
 
-    // Getter: 投稿データからHTMLを生成して返却
+    // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
@@ -515,6 +516,9 @@ class Status {
                 </span>
         `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
             html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+            // 連合なしのノートはアイコン表示(チャンネルは除外)
+            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
             switch (this.visibility) {
                 case 'unlisted':
@@ -690,6 +694,9 @@ class Status {
         `
         if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
             html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+            // 連合なしのノートはアイコン表示(チャンネルは除外)
+            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
             switch (this.visibility) {
                 case 'unlisted':
@@ -1044,6 +1051,12 @@ class Status {
             .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
+    /**
+     * #StaticMethod
+     * スクロール末尾に表示されたら自動で続きを読み込むローダーを生成する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     static createScrollLoader(arg) {
         const last_id = arg.list.pop().id
         // ローダーエレメントを生成
@@ -1085,6 +1098,13 @@ class Status {
         observer.observe(arg.target.find(".__scroll_loader").get(0))
     }
 
+    /**
+     * #Method
+     * この投稿に添付されているメディアを拡大表示するモーダルウィンドウを生成
+     * 
+     * @param url ターゲットの画像URL
+     * @param index ターゲットの画像のインデクス
+     */
     createImageModal(url, index) {
         // 一旦全部クリア
         $("#modal_expand_image>*").empty()
@@ -1257,6 +1277,12 @@ class Status {
         this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
     }
 
+    /**
+     * #Method
+     * この投稿をノーマルレイアウトでポップアップするウィンドウを生成
+     * 
+     * @param target この投稿のjQueryオブジェクト(座標決定に使用)
+     */
     createExpandWindow(target) {
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()

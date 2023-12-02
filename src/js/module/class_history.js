@@ -36,8 +36,8 @@ class History {
     }
 
     /**
-     * #Method
-     * このカラムのDOMを生成してテーブルにアペンドする
+     * #StaticMethod
+     * 送信履歴を表示する画面を表示
      */
     static createHistoryWindow() {
         // 検索カラムのDOM生成
@@ -70,6 +70,13 @@ class History {
         History.bindAsync($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
     }
 
+    /**
+     * #StaticMethod
+     * 履歴スタックの投稿情報を、非同期でHTMLにバインドする
+     * 
+     * @param ul アペンド対象のul要素jQueryオブジェクト
+     * @param stack 走査するスタック
+     */
     static async bindAsync(ul, stack) {
         let request_promise = null
         for (const elm of stack) { // 時間がかかっても上から順番に処理するためforでループする
@@ -112,6 +119,7 @@ class History {
         }
     }
 
+    // Getter: 投稿履歴のDOM Elementを生成
     get element() {
         // まず投稿本体のjQueryオブジェクトを取得
         const elm = this.post.element
@@ -165,6 +173,12 @@ class History {
         return elm
     }
 
+    /**
+     * #StaticMethod
+     * 投稿時に投稿データを投稿スタックにプッシュする
+     * 
+     * @param post プッシュ対象の投稿Statusオブジェクト
+     */
     static pushPost(post) {
         const history = new History(post, null)
         History.post_stack.unshift(history)
@@ -172,6 +186,14 @@ class History {
         History.writeJson()
     }
 
+    /**
+     * #StaticMethod
+     * アクション実行時に実行対象の投稿をアクティビティスタックにプッシュする
+     * 
+     * @param post プッシュ対象の投稿Statusオブジェクト
+     * @param type アクションのタイプ
+     * @param renote_id (Misskey限定)リノートの場合の生成ノートID
+     */
     static pushActivity(post, type, renote_id) {
         let history = new History(post, type)
         if (renote_id) history.renote_id = renote_id
@@ -180,6 +202,12 @@ class History {
         History.writeJson()
     }
 
+    /**
+     * #StaticMethod
+     * 引数のターゲットエレメントの履歴の投稿を削除する
+     * 
+     * @param target 削除対象の投稿のjQueryオブジェクト
+     */
     static delete(target) {
         const index = target.closest("li").index()
         if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
@@ -198,6 +226,10 @@ class History {
         }
     }
 
+    /**
+     * #Method
+     * このアクティビティ履歴に対してアクティビティを取り消す
+     */
     async undo() {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
@@ -285,6 +317,14 @@ class History {
         })
     }
 
+    /**
+     * #StaticMethod
+     * 投稿スタックに対して先頭のデータを取得してコールバックを実行する
+     * 削除フラグが立っている場合はポップ(削除)する
+     * 
+     * @param presentCallback データが存在したときに実行するコールバック関数
+     * @param del_flg 先頭のデータをポップ(削除)する場合はtrue
+     */
     static popIf(presentCallback, del_flg) {
         const pop = History.post_stack[0]
         if (!pop) { // なにもなかったらそのままおしまい
@@ -304,6 +344,10 @@ class History {
         else presentCallback(pop)
     }
 
+    /**
+     * #StaticMethod
+     * キャッシュしてある履歴オブジェクトリストをJSONファイルとして保存
+     */
     static writeJson() {
         window.accessApi.overwriteHistory({
             "post": History.post_stack.map(elm => elm.json),
@@ -311,6 +355,7 @@ class History {
         })
     }
 
+    // Getter: オブジェクトの情報を保存用のJSONとして返却
     get json() {
         return {
             "account_address": this.account_address,

@@ -144,10 +144,10 @@ class Emojis {
 
     /**
      * #StaticMethod
-     * 指定したDOMのカスタム絵文字ショートコードを非同期で絵文字に置換する
+     * 引数の文字列に含まれる絵文字ショートコードをサーバーから取得して絵文字に置換する
+     * (※Misskey専用機能)
      * 
-     * @param jqelm 置換対象のテキストのあるjQueryオブジェクト
-     * @param host ホストアドレス
+     * @param arg パラメータオブジェクト
      */
     static async replaceDomAsync(jqelm, host) {
         jqelm.each((index, elm) => Emojis.replaceAsync({
@@ -156,6 +156,12 @@ class Emojis {
         }).then(text => $(elm).html(text)))
     }
 
+    /**
+     * #StaticMethod
+     * 指定したDOMのカスタム絵文字ショートコードを非同期で絵文字に置換する(ホスト名が含まれているパターン)
+     * 
+     * @param jqelm 置換対象のテキストのあるjQueryオブジェクト
+     */
     static async replaceRemoteAsync(jqelm) {
         if (jqelm.length == 0) return // マッチしてなかったらなにもしない
 

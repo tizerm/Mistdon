@@ -165,6 +165,12 @@ class Timeline {
         })
     }
 
+    /**
+     * #Method
+     * このタイムラインから外部インスタンスにWebSocket接続する
+     * 
+     * @param arg パラメータオブジェクト
+     */
     async connectExternal(arg) {
         // WebSocket接続を開始
         this.socket = new WebSocket(this.pref.socket_url)
@@ -200,7 +206,7 @@ class Timeline {
      * #Method
      * このタイムラインに保存してあるステータス情報を削除する
      * 
-     * @param arg 投稿ID
+     * @param id投稿ID
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)

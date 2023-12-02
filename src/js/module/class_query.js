@@ -25,7 +25,7 @@ class Query {
 
     /**
      * #Method
-     * このカラムのDOMを生成してテーブルにアペンドする
+     * 検索欄を表示する画面を表示
      */
     static createSearchWindow() {
         // 検索カラムのDOM生成
@@ -72,6 +72,12 @@ class Query {
         Query.SEARCH_PREF_TIMELINE.parent_group.onLoadTimeline(rest_promises)
     }
 
+    /**
+     * #Method
+     * 引数のアカウントを使って検索処理を実行
+     * 
+     * @param account 検索処理を実行するアカウント
+     */
     async search(account) {
         let rest_promise = null
         // 検索文字列を渡して投稿を検索

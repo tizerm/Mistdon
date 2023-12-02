@@ -49,6 +49,7 @@ class Group {
         this.timelines.forEach(callback)
     }
 
+    // Getter: このグループの高さを返却する
     get height() {
         // 高さがnullでなければそのまま返却
         if (this.pref.gp_height) return this.pref.gp_height
@@ -58,6 +59,10 @@ class Group {
         return 100 - others
     }
 
+    /**
+     * #Method
+     * このグループのDOMを生成してjQueryオブジェクトを返却する
+     */
     create() {
         // カラム本体を空の状態で生成(ナンバーアイコンは10未満のカラムのみ表示)
         const num_img = this.index < 9 ? `<img src="resources/${this.index + 1}.png" class="ic_group_num"/>` : ''
@@ -97,6 +102,10 @@ class Group {
         return jqelm
     }
 
+    /**
+     * #Method
+     * このグループのカラムを閉じている時の情報のDOMを生成してjQueryオブジェクトを返却する
+     */
     createClosedLabel() {
         // カラム本体を空の状態で生成(ナンバーアイコンは10未満のカラムのみ表示)
         const num_img = this.index < 9 && this.parent_column.pref.multi_group
@@ -189,6 +198,12 @@ class Group {
         if (post.type == 'notification') window.accessApi.notification(post.notification)
     }
 
+    /**
+     * #Method
+     * 投稿のDOM要素からStatusオブジェクトを返却する
+     * 
+     * @param status_key 対象の投稿のユニークキー
+     */
     getStatus(target_li) {
         return this.status_map.get(target_li.attr("id"))
     }
@@ -287,6 +302,10 @@ class Group {
         return target
     }
 
+    /**
+     * #Method
+     * このグループを警告表示にする(！を出す)
+     */
     setWarning() {
         $(`#${this.id}`).find(".ic_group_warn").show()
     }
