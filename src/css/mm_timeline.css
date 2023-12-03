@@ -420,6 +420,43 @@
                     background-repeat: no-repeat;
                     padding-right: 32px;
                 }
+                > a.card_link {
+                    display: block;
+                    position: relative;
+                    border-radius: 18px;
+                    padding: 0px;
+                    width: 100%;
+                    background-color: #808080;
+                    background-position: center center;
+                    background-size: cover;
+                    &::before {
+                        content: "";
+                        padding-top: 100%;
+                        display: block;
+                    }
+                    > .descriptions {
+                        position: absolute;
+                        bottom: 0px;
+                        left: 0px;
+                        padding: 2px 12px;
+                        border-bottom-left-radius: 18px;
+                        border-bottom-right-radius: 18px;
+                        width: calc(100% - 24px);
+                        background-color: rgba(34,34,34,0.8);
+                        color: #ffffff;
+                        > h6 {
+                            margin: 0px;
+                            padding: 0px;
+                            font-size: 14px;
+                            font-weight: bold;
+                        }
+                        > .desc_text {
+                            font-size: 12px;
+                            font-weight: normal;
+                        }
+                    }
+                    &:hover>.descriptions { background-color: rgba(62,82,96,0.8); }
+                }
                 > .hashtags>a {
                     background-color: rgba(255,255,255,0.1);
                     background-image: url("../resources/ic_tag.png");

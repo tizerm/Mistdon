@@ -21,6 +21,7 @@ class Status {
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
+
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -76,6 +77,7 @@ class Status {
 
                 // 詳細表示に関するデータ
                 this.author_id = data.account.id
+                this.card = data.card
                 if (data.tags) { // ハッシュタグ
                     const hashtags = []
                     data.tags.forEach(t => hashtags.push(t.name))
@@ -594,6 +596,14 @@ class Status {
         }
         if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
             html += '<div class="detail_info">'
+            // カード
+            if (this.card) html += `
+                <a href="${this.card.url}" class="card_link __lnk_external">
+                    <div class="descriptions">
+                        <h6>${this.card.title}</h6>
+                        <div class="desc_text">${this.card.description}</div>
+                    </div>
+                </a>`
             if (this.hashtags) { // ハッシュタグ
                 html += '<div class="hashtags">'
                 this.hashtags.forEach(tag => html += `<a class="__on_detail_hashtag" name="${tag}">#${tag}</a>`)
@@ -658,8 +668,11 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
-        jqelm.find('.post_footer>.from_address.from_auth_user')
+        jqelm.find('.detail_info>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
+        // カードがある場合はカードに背景を設定
+        if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
+            .css("background-image", `url("${this.card.image}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1074,7 +1087,7 @@ class Status {
             obs.disconnect()
             $(e.target).remove()
             const data = await arg.asyncLoader(last_id)
-            console.log(data)
+            //console.log(data)
             if (data?.length > 0) { // データが存在する場合は取得して再帰的にローダーを生成
                 /* TODO: 勘違いで実装した処理なので一旦保留
                 { // 最初のデータだけは重複判定のために独自実装
