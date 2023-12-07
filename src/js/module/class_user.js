@@ -433,13 +433,15 @@ class User {
             case 'Favorite_Mastodon': // お気に入り(Mastodon)
                 query_param = { "limit": 40 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: `https://${this.host}/api/v1/favourites`,
-                    dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                })
+                }).then(data => { return {
+                    body: data.body,
+                    link: data.headers.get("link")
+                }})
                 break
             case 'Favorite_Misskey': // お気に入り(Misskey)
                 query_param = {
@@ -453,18 +455,20 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                })
+                }).then(data => { return { body: data }})
                 break
             case 'Bookmark': // ブックマーク(Mastodon)
                 query_param = { "limit": 40 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: `https://${this.host}/api/v1/bookmarks`,
-                    dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                })
+                }).then(data => { return {
+                    body: data.body,
+                    link: data.headers.get("link")
+                }})
                 break
             case 'Reaction': // リアクション(Misskey)
                 query_param = {
@@ -479,7 +483,7 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                })
+                }).then(data => { return { body: data }})
                 break
             default:
                 break
@@ -488,8 +492,14 @@ class User {
         return rest_promise.then(data => {
             return (async () => {
                 const posts = []
-                data.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
-                return posts
+                data.body.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
+                let max_id = null
+                if (data.link) max_id = data.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
+                else max_id = data.body.pop().id
+                return {
+                    datas: posts,
+                    max_id: max_id
+                }
             })()
         }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
@@ -700,7 +710,8 @@ class User {
         this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
             // ロード待ち画面を消去
             target.find(".col_loading").remove()
-            data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
+            data.datas.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
+            console.log(data.max_id)
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*
             Status.createScrollLoader({

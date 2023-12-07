@@ -668,7 +668,7 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
-        jqelm.find('.detail_info>.from_address.from_auth_user')
+        jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // カードがある場合はカードに背景を設定
         if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
@@ -1236,6 +1236,9 @@ class Status {
                 </div>
                 <input type="text" id="__txt_reaction_search" class="__ignore_keyborad"
                     placeholder="ショートコードを入力するとサジェストされます"/>
+                <div class="recent_reaction">
+                    <h5>最近送ったリアクション</h5>
+                </div>
                 <div class="reaction_list">
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
@@ -1246,6 +1249,11 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
+        // リアクション履歴を表示する
+        this.from_account.reaction_history.map(code => this.from_account.emojis.get(code))
+            .forEach(emoji => jqelm.find('.recent_reaction').append(`
+                <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `))
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()

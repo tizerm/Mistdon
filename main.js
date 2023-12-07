@@ -15,6 +15,7 @@ var pref_accounts = null
 var pref_columns = null
 var pref_emojis = new Map()
 var cache_history = null
+var cache_emoji_history = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -427,6 +428,31 @@ async function overwriteHistory(event, data) {
     cache_history = JSON.parse(content)
 }
 
+async function readEmojiHistory() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (cache_emoji_history) {
+        console.log('@INF: use app_prefs/emoji_history.json cache.')
+        return cache_emoji_history
+    }
+    const content = readFile('app_prefs/emoji_history.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        cache_emoji_history = {}
+        return cache_emoji_history
+    }
+    cache_emoji_history = JSON.parse(content)
+    console.log('@INF: read app_prefs/emoji_history.json.')
+    return cache_emoji_history
+}
+
+async function cacheEmojiHistory(event, data) {
+    cache_emoji_history = data
+}
+
+async function overwriteEmojiHistory() {
+    const content = await overwriteFile('app_prefs/emoji_history.json', cache_emoji_history)
+    console.log('@INF: finish write app_prefs/emoji_history.json')
+}
+
 /*====================================================================================================================*/
 
 /**
@@ -587,7 +613,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            devTools: false,
+            //devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -595,7 +621,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    win.setMenuBarVisibility(false)
+    //win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)
@@ -612,12 +638,14 @@ app.whenReady().then(() => {
     ipcMain.handle('read-pref-cols', readPrefCols)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-history', readHistory)
+    ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-history', overwriteHistory)
+    ipcMain.on('cache-emoji-history', cacheEmojiHistory)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 
@@ -630,7 +658,8 @@ app.whenReady().then(() => {
     })
 })
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+    if (process.platform !== 'darwin') app.quit()
 })
+
+// アプリ終了直前にカスタム絵文字履歴を保存する
+app.on('before-quit', () => overwriteEmojiHistory())

@@ -190,6 +190,9 @@ $(() => {
         if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
         target.val(target_text.substr(0, cursor_pos) + target_emoji + target_text.substr(cursor_pos, target_text.length))
         target.focus()
+
+        // 最近使った絵文字に登録
+        target_account.updateEmojiHistory(target_emoji)
     })
 
     /**

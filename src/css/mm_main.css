@@ -286,10 +286,18 @@
                 margin: 0px;
             }
         }
+        > .recent_emoji {
+            background-color: rgba(62,68,82,0.8);
+            border-radius: 12px;
+            > h5 {
+                margin: 0px;
+                padding: 0px;
+            }
+        }
         > .emoji_list {
             background-color: rgba(34,34,34,0.8);
             overflow-y: auto;
-            height: calc(100vh - 380px);
+            height: calc(100vh - 480px);
             &::-webkit-scrollbar { width: 8px; }
         }
         & button {
@@ -467,9 +475,17 @@
                 overflow-y: auto;
                 height: 320px;
             }
+            > .recent_reaction {
+                background-color: rgba(62,68,82,0.8);
+                border-radius: 12px;
+                > h5 {
+                    margin: 0px;
+                    padding: 0px;
+                }
+            }
             > .reaction_list {
                 overflow-y: auto;
-                height: calc(100vh - 500px);
+                height: calc(100vh - 640px);
                 &::-webkit-scrollbar { width: 8px; }
             }
         }
@@ -485,8 +501,17 @@
     width: auto;
     vertical-align: text-bottom;
 }
+#pop_custom_emoji>.recent_emoji img,
+#pop_extend_column>.reaction_col>.recent_reaction img {
+    display: inline-block;
+    height: 48px;
+    width: auto;
+    vertical-align: text-bottom;
+}
 #pop_custom_emoji>.emoji_list a:hover img,
-#pop_extend_column>.reaction_col>.reaction_list a:hover img {
+#pop_extend_column>.reaction_col>.reaction_list a:hover img,
+#pop_custom_emoji>.recent_emoji a:hover img,
+#pop_extend_column>.reaction_col>.recent_reaction a:hover img {
     background-color: rgba(255,255,255,0.2);
     cursor: pointer;
 }

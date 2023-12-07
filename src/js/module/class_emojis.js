@@ -85,6 +85,10 @@ class Emojis {
         else this.list.forEach(callback)
     }
 
+    get(code) {
+        return this.emoji_map.get(code)
+    }
+
     /**
      * #Method
      * 引数のテキストに含まれているショートコードを絵文字に置換する

@@ -14,6 +14,9 @@ class Account {
         this.socket = null
         this.reconnect = false
         this.emoji_cache = null
+
+        this.emoji_history = []
+        this.reaction_history = []
     }
 
     // Getter: プラットフォーム
@@ -39,6 +42,7 @@ class Account {
     // スタティックマップを初期化(非同期)
     static {
         (async () => {
+            // アカウント情報をファイルから読み込み
             const accounts = await window.accessApi.readPrefAccs()
             const acc_map = new Map()
             const keys = []
@@ -48,6 +52,15 @@ class Account {
                 acc_map.set(k, new Account(v))
                 keys.push(k)
             })
+
+            // カスタム絵文字の履歴をファイルから読み込み
+            const em_history = await window.accessApi.readEmojiHistory()
+            em_history?.forEach(elm => {
+                const account = acc_map.get(elm.address)
+                account.emoji_history = elm.emoji_history
+                account.reaction_history = elm.reaction_history
+            })
+
             Account.map = acc_map
             Account.keys = keys
         })()
@@ -409,6 +422,7 @@ class Account {
                 id: arg.id,
                 from_account: this
             }, 'reaction')
+            this.updateReactionHistory(arg.shortcode)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)
@@ -931,6 +945,26 @@ class Account {
         }
     }
 
+    static cacheEmojiHistory() {
+        const json_array = []
+        Account.each(elm => json_array.push({
+            "address": elm.full_address,
+            "emoji_history": elm.emoji_history,
+            "reaction_history": elm.reaction_history
+        }))
+        window.accessApi.cacheEmojiHistory(json_array)
+    }
+
+    updateEmojiHistory(code) {
+        shiftArray(this.emoji_history, code.trim(), 10)
+        Account.cacheEmojiHistory()
+    }
+
+    updateReactionHistory(code) {
+        shiftArray(this.reaction_history, code.trim(), 10)
+        Account.cacheEmojiHistory()
+    }
+
     /**
      * #Method
      * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
@@ -943,10 +977,18 @@ class Account {
             </div>
             <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
                 placeholder="ショートコードを入力するとサジェストされます"/>
+            <div class="recent_emoji">
+                <h5>最近使った絵文字</h5>
+            </div>
             <div class="emoji_list">
             </div>
             <button type="button" id="__on_emoji_close">×</button>
         `).show("slide", { direction: "left" }, 150)
+        // 絵文字履歴を表示する
+        this.emoji_history.map(code => this.emojis.get(code)).forEach(
+            emoji => $("#pop_custom_emoji>.recent_emoji").append(`
+                <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `))
         $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
