@@ -173,7 +173,23 @@
                     border: solid 1px rgba(255,255,255,0.1);
                     background-color: rgba(255,255,255,0.15);
                 }
-                > ul { width: 360px; }
+            }
+        }
+        > ul>li>ul { width: 360px; }
+        & ul.recent_reaction {
+            width: 160px;
+            > li {
+                > div.ui-state-active {
+                    border-style: none;
+                    background-color: transparent;
+                }
+                & img {
+                    display: inline-block;
+                    height: 24px;
+                    width: auto;
+                    vertical-align: text-bottom;
+                    cursor: pointer;
+                }
             }
         }
     }

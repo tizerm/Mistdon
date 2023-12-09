@@ -494,8 +494,9 @@ class User {
                 const posts = []
                 data.body.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
                 let max_id = null
+                // Headerのlinkからページング処理のmax_idを抽出
                 if (data.link) max_id = data.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
-                else max_id = data.body.pop().id
+                else max_id = data.body.pop().id // 特殊ページング以外は普通に投稿IDをmax_idとする
                 return {
                     datas: posts,
                     max_id: max_id
@@ -527,23 +528,25 @@ class User {
                 else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
                 query_param = { "limit": 80 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: api_url,
-                    dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
                 }).then(data => {
                     return (async () => {
                         const users = []
-                        data.forEach(u => users.push(new User({
+                        data.body.forEach(u => users.push(new User({
                             json: u,
                             host: this.host,
                             remote: false,
                             auth: false,
                             platform: account.platform
                         })))
-                        return users
+                        return {
+                            body: users,
+                            link: data.headers.get("link")
+                        }
                     })()
                 })
                 break
@@ -572,7 +575,7 @@ class User {
                             auth: false,
                             platform: account.platform
                         })))
-                        return users
+                        return { body: users }
                     })()
                 })
                 break
@@ -580,7 +583,16 @@ class User {
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
+        return rest_promise.then(data => {
+            let max_id = null
+            // Headerのlinkからページング処理のmax_idを抽出
+            if (data.link) max_id = data.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
+            else max_id = data.body[data.body.length - 1].id // 特殊ページング以外は普通に投稿IDをmax_idとする
+            return {
+                datas: data.body,
+                max_id: max_id
+            }
+        }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
@@ -749,7 +761,7 @@ class User {
         this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
             // ロード待ち画面を消去
             target.find(".col_loading").remove()
-            data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
+            data.datas.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
             // TODO: Mastodonのローダーが機能しないので一旦保留
             /*
             Status.createScrollLoader({

@@ -22,6 +22,9 @@ class Status {
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
+        // TODO: debug
+        if (this.detail_flg) console.log(json)
+
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -63,6 +66,18 @@ class Status {
                     platform: 'Mastodon',
                     emojis: data.status?.emojis ?? data.emojis
                 })
+
+                // 投票がある場合は投票に関するデータ
+                if (data.poll) {
+                    this.poll_expired = data.poll.expired
+                    this.poll_expired_time = new Date(data.poll.expires_at)
+                    this.poll_multiple = data.poll.multiple
+                    this.poll_options = []
+                    data.poll.options.forEach(elm => this.poll_options.push({
+                        text: elm.title,
+                        count: elm.votes_count
+                    }))
+                }
 
                 // 添付メディア
                 this.sensitive = data.sensitive // 閲覧注意設定
@@ -156,6 +171,18 @@ class Status {
                         platform: 'Misskey',
                         emojis: data.renote.emojis
                     })
+                }
+
+                // 投票がある場合は投票に関するデータ
+                if (data.poll) {
+                    //this.poll_expired = data.poll.expired
+                    this.poll_expired_time = new Date(data.poll.expiresAt)
+                    this.poll_multiple = data.poll.multiple
+                    this.poll_options = []
+                    data.poll.choices.forEach(elm => this.poll_options.push({
+                        text: elm.text,
+                        count: elm.votes
+                    }))
                 }
 
                 // 添付メディア
@@ -548,6 +575,18 @@ class Status {
                 </div>
             </div>
         `
+        if (this.poll_options) { // 投票
+            let options = ''
+            this.poll_options.forEach(elm => options += `
+                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
+            `)
+            html /* 投票ブロック */ += `
+                <div class="post_poll">
+                    <div class="options">${options}</div>
+                    <div class="poll_info">${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで</div>
+                </div>
+            `
+        }
         if (this.platform == 'Misskey' && this.quote_flg) {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
@@ -754,6 +793,17 @@ class Status {
             html += `
                 <div class="label_head label_reblog">
                     <span>${label} by @${this.reblog_by}</span>
+                </div>
+            `
+        }
+        if (this.poll_options) { // 投票
+            let options = ''
+            this.poll_options.forEach(elm => options += `
+                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
+            `)
+            html /* 投票ブロック */ += `
+                <div class="post_poll">
+                    <div class="options">${options}</div>
                 </div>
             `
         }
@@ -1250,10 +1300,7 @@ class Status {
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
         // リアクション履歴を表示する
-        this.from_account.reaction_history.map(code => this.from_account.emojis.get(code))
-            .forEach(emoji => jqelm.find('.recent_reaction').append(`
-                <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `))
+        jqelm.find('.recent_reaction').append(this.from_account.recent_reaction_html)
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()

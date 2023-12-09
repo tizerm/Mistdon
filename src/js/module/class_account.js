@@ -963,6 +963,17 @@ class Account {
     updateReactionHistory(code) {
         shiftArray(this.reaction_history, code.trim(), 10)
         Account.cacheEmojiHistory()
+
+        // コンテキストメニューのリアクション履歴を更新
+        $("#__menu_reaction>li>.recent_reaction>li").html(this.recent_reaction_html)
+    }
+
+    get recent_reaction_html() {
+        let html = ''
+        this.reaction_history.map(code => this.emojis.get(code)).forEach(emoji => html += `
+            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+        `)
+        return html
     }
 
     /**
@@ -1073,6 +1084,19 @@ class Account {
                 html = `<li class="ui-state-disabled"><div>(${platform}のアカウントがありません)</div></li>`
         } else // プラットフォーム指定がない場合は普通にすべてのアカウントを表示
             Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
+        return html
+    }
+
+    static createReactionMenuAccountList() {
+        let html = ''
+        if (Account.eachPlatform('Misskey', elm => html += `
+            <li name="${elm.full_address}">
+                <div>${elm.pref.username} - ${elm.full_address}</div>
+                <ul class="recent_reaction"><li><div>${elm.recent_reaction_html}</div></li></ul>
+            </li>
+        `))
+            // 対象プラットフォームが認証されていない場合は選択不可の項目を作る
+            html = `<li class="ui-state-disabled"><div>(Misskeyのアカウントがありません)</div></li>`
         return html
     }
 

@@ -7,7 +7,7 @@
 async function ajax(arg) {
     try {
         let response = null
-        if (arg.method == "GET") {
+        if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
             const param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
             const url = `${arg.url}?${param.substring(1)}`
             response = await fetch(url, {
@@ -22,6 +22,7 @@ async function ajax(arg) {
             body: arg.data
         })
 
+        // ステータスコードがエラーの場合はエラーを投げる
         if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
 
         return {

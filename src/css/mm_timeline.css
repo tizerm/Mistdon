@@ -387,6 +387,30 @@
                 .media_preview { border-radius: 8px; }
             }
 
+            /*=== Poll Info ======================================================================*/
+            > .post_poll {
+                margin: 2px;
+                > .options>button.__on_poll_vote {
+                    display: inline-block;
+                    background-color: rgba(62,82,96,0.8);
+                    border: solid 1px #cccccc;
+                    border-radius: 6px;
+                    width: calc(50% - 4px);
+                    margin: 0px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    font-size: 12px;
+                    font-weight: normal;
+                    &:hover     { background-color: rgba(62,96,82,0.8); }
+                    &[disabled] { background-color: rgba(34,34,34,0.8); }
+                }
+                > .poll_info {
+                    text-align: right;
+                    font-size: 12px;
+                }
+            }
+
             /*=== Quote Info =====================================================================*/
             > .post_quote {
                 margin: 2px;
