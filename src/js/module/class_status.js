@@ -18,6 +18,9 @@ class Status {
         this.platform = this.from_account?.platform ?? this.from_timeline?.platform
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
 
+        if (timeline?.__extended_timeline == 'profile_post') // プロフィールのユーザー投稿の場合
+            this.profile_post_flg = true
+
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
@@ -532,40 +535,42 @@ class Status {
                 </div>
             `
         }
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-        html /* ユーザーアカウント情報 */ += `
-            <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon"/>
-                <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                <span class="userid">
-                    <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                        @${this.user.id}
-                    </a>
-                </span>
-        `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
-            html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
-        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
-            // 連合なしのノートはアイコン表示(チャンネルは除外)
-            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
-        else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-            switch (this.visibility) {
-                case 'unlisted':
-                case 'home': // ホーム
-                    html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
-                    break
-                case 'private':
-                case 'followers': // フォロ限
-                    html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
-                    break
-                default:
-                    break
+
+        // プロフィール表示の場合はユーザーアカウント情報を省略
+        if (!this.profile_post_flg || this.reblog) {
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
+            html /* ユーザーアカウント情報 */ += `
+                <div class="user">
+                    <img src="${this.user.avatar_url}" class="usericon"/>
+                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                    <span class="userid">
+                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
+                            @${this.user.id}
+                        </a>
+                    </span>
+            `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
+                html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+            else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+                // 連合なしのノートはアイコン表示(チャンネルは除外)
+                html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
+            else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
+                switch (this.visibility) {
+                    case 'unlisted':
+                    case 'home': // ホーム
+                        html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
+                        break
+                    case 'private':
+                    case 'followers': // フォロ限
+                        html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
+                        break
+                    default:
+                        break
+                }
             }
+            html += '</div>'
         }
-        html += `
-            </div>
-            <div class="content">
-        `
+        html += '<div class="content">'
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `

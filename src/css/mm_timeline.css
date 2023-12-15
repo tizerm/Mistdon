@@ -533,13 +533,15 @@
                 font-size: 12px;
                 > .created_at {
                     display: block;
-                    background-color: rgba(255,255,255,0.05);
-                    padding: 2px 12px;
-                    border-radius: 6px;
-                    color: #dddddd;
+                    border-top: solid 1px #bbbbbb;
+                    padding: 2px 16px;
+                    margin-bottom: -4px;
+                    color: #bbbbbb;
+                    font-size: 11px;
                     &:hover {
-                        background-color: rgba(255,255,255,0.1);
-                        padding-right: 18px;
+                        padding-right: 24px;
+                        text-decoration: underline;
+                        color: #dddddd;
                         cursor: pointer;
                     }
                 }

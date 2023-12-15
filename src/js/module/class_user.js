@@ -11,6 +11,9 @@ class User {
         this.fields = []
         let host = null
 
+        // TODO: debug
+        console.log(arg.json)
+
         switch (arg.platform) { // TODO: 暫定
             case 'Mastodon': // Mastodon
                 // リモートの情報を直に取得する場合引数をそのまま使う
@@ -361,7 +364,7 @@ class User {
         return rest_promise.then(data => {
             return (async () => {
                 const posts = []
-                data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                data.forEach(p => posts.push(new Status(p, { "__extended_timeline": "profile_post" }, account)))
                 return posts
             })()
         }).catch(jqXHR => {

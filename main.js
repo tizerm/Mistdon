@@ -444,13 +444,11 @@ async function readEmojiHistory() {
     return cache_emoji_history
 }
 
-async function cacheEmojiHistory(event, data) {
-    cache_emoji_history = data
-}
-
-async function overwriteEmojiHistory() {
-    const content = await overwriteFile('app_prefs/emoji_history.json', cache_emoji_history)
+async function overwriteEmojiHistory(event, data) {
+    const content = await overwriteFile('app_prefs/emoji_history.json', data)
     console.log('@INF: finish write app_prefs/emoji_history.json')
+
+    cache_emoji_history = JSON.parse(content)
 }
 
 /*====================================================================================================================*/
@@ -556,7 +554,7 @@ async function writeDirFile(filepath, content) {
     fs.writeFileSync(pref_path, content, 'utf8')
     console.log('@INF: file write successed.')
 }
-
+ 
 /**
  * #Utils #JS
  * 配列型JSONをmapに変換する
@@ -645,7 +643,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-history', overwriteHistory)
-    ipcMain.on('cache-emoji-history', cacheEmojiHistory)
+    ipcMain.on('write-emoji-history', overwriteEmojiHistory)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 

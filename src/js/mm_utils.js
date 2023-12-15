@@ -38,10 +38,13 @@ function shiftArray(array, obj, limit) {
     const index = array.indexOf(obj)
     if (index < 0) // 存在しないオブジェクトは先頭に保存
         array.unshift(obj)
-    else { // オブジェクトが配列に存在する場合は先頭に場所を移す
+    else if (index > 0) { // オブジェクトが配列の先頭以外に存在する場合は先頭に場所を移す
         const removed = array.splice(index, 1)[0]
         array.unshift(removed)
-    }
+    } else // 先頭に同じオブジェクトが存在する場合はなにもせずにfalseを返す
+        return false
     // 限界値をオーバーしていたらオーバーした分を消す
     if (array.length > limit) array.splice(limit)
+
+    return true
 }

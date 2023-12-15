@@ -249,6 +249,9 @@ class Account {
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
+
+            // 絵文字を使っていたら投稿時に履歴を保存
+            if (this.use_emoji_flg) Account.cacheEmojiHistory()
         }).catch(jqXHR => toast("投稿に失敗しました.", "error", toast_uuid))
     }
 
@@ -952,20 +955,23 @@ class Account {
             "emoji_history": elm.emoji_history,
             "reaction_history": elm.reaction_history
         }))
-        window.accessApi.cacheEmojiHistory(json_array)
+        window.accessApi.overwriteEmojiHistory(json_array)
+        // 絵文字使用フラグをもとに戻す
+        this.use_emoji_flg = false
     }
 
     updateEmojiHistory(code) {
-        shiftArray(this.emoji_history, code.trim(), 10)
-        Account.cacheEmojiHistory()
+        // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
+        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 10)
     }
 
     updateReactionHistory(code) {
-        shiftArray(this.reaction_history, code.trim(), 10)
+        // リアクション履歴の更新を試行して、変更があったら履歴ファイルを上書き
+        if (!shiftArray(this.reaction_history, code.trim(), 10)) return
         Account.cacheEmojiHistory()
 
         // コンテキストメニューのリアクション履歴を更新
-        $("#__menu_reaction>li>.recent_reaction>li").html(this.recent_reaction_html)
+        $(`#__menu_reaction>li[name="${this.full_address}"]>.recent_reaction>li`).html(this.recent_reaction_html)
     }
 
     get recent_reaction_html() {
@@ -998,7 +1004,7 @@ class Account {
         // 絵文字履歴を表示する
         this.emoji_history.map(code => this.emojis.get(code)).forEach(
             emoji => $("#pop_custom_emoji>.recent_emoji").append(`
-                <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+                <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `))
         $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
 

@@ -213,5 +213,23 @@ class Timeline {
         // タイムラインに存在する投稿だけ削除対象とする
         if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key))
     }
+
+    createTemporaryTimelineWindow() {
+        // 検索カラムのDOM生成
+        $("#pop_window_timeline").html(`
+            <h2>
+                Window
+                <button type="button" id="__on_search_close">×</button>
+            </h2>
+            <div id="__search_timeline" class="timeline">
+                <div class="col_loading">
+                    <img src="resources/illust/il_done.png" alt="done"/><br/>
+                    <span class="loading_text">検索結果がここに表示されます。</span>
+                </div>
+                <ul class="search_ul __context_posts"></ul>
+            </div>
+        `).show("fade", 150)
+    }
+
 }
 

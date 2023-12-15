@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('accessApi', {
     writePrefCols: (json_data) => ipcRenderer.send('write-pref-cols', json_data),
     writeCustomEmojis: (json_data) => ipcRenderer.send('write-pref-emojis', json_data),
     overwriteHistory: (json_data) => ipcRenderer.send('write-history', json_data),
-    cacheEmojiHistory: (json_data) => ipcRenderer.send('cache-emoji-history', json_data),
+    overwriteEmojiHistory: (json_data) => ipcRenderer.send('write-emoji-history', json_data),
     openExternalBrowser: (url) => ipcRenderer.send('open-external-browser', url),
     notification: (arg) => ipcRenderer.send('notification', arg)
 })
