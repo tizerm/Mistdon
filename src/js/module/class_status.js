@@ -1120,53 +1120,6 @@ class Status {
     }
 
     /**
-     * #StaticMethod
-     * スクロール末尾に表示されたら自動で続きを読み込むローダーを生成する
-     * 
-     * @param arg パラメータオブジェクト
-     */
-    static createScrollLoader(arg) {
-        const last_id = arg.list.pop().id
-        // ローダーエレメントを生成
-        arg.target.append(`
-            <li id="${last_id}" class="__scroll_loader">
-                <span class="loader_message">続きを読み込みます...</span>
-            </li>
-        `)
-        // Intersection Observerを生成
-        const observer = new IntersectionObserver((entries, obs) => (async () => {
-            const e = entries[0]
-            if (!e.isIntersecting) return // 見えていないときは実行しない
-            console.log('ローダー表示: ' + last_id)
-            // ローダーを一旦削除
-            obs.disconnect()
-            $(e.target).remove()
-            const data = await arg.asyncLoader(last_id)
-            //console.log(data)
-            if (data?.length > 0) { // データが存在する場合は取得して再帰的にローダーを生成
-                /* TODO: 勘違いで実装した処理なので一旦保留
-                { // 最初のデータだけは重複判定のために独自実装
-                    arg.binder(data.shift(), arg.target)
-                    const key = arg.target.find(">li:last-child").attr("name")
-                    if (arg.target.find(`>li[name="${key}"]:not(:last-child)`).length > 0) {
-                        // 既に存在するデータがある場合は要素を削除して再帰を終了
-                        arg.target.find(">li:last-child").remove()
-                        return
-                    }
-                }//*/
-                data.forEach(elm => arg.binder(elm, arg.target))
-                arg.list = data
-                Status.createScrollLoader(arg)
-            }
-        })(), {
-            root: arg.target.get(0),
-            rootMargin: "0px",
-            threshold: 1.0,
-        })
-        observer.observe(arg.target.find(".__scroll_loader").get(0))
-    }
-
-    /**
      * #Method
      * この投稿に添付されているメディアを拡大表示するモーダルウィンドウを生成
      * 

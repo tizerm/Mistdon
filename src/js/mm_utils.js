@@ -48,3 +48,36 @@ function shiftArray(array, obj, limit) {
 
     return true
 }
+
+function createScrollLoader(arg) {
+    // 最初に取得したデータをもとにデータのバインド処理を行う(返り値はページング用max_id)
+    const max_id = arg.bind(arg.data, arg.target)
+    if (!max_id) return // max_idが空の場合はデータ終端として終了
+
+    // Loader Elementを生成
+    arg.target.append(`
+        <li id="${max_id}" class="__scroll_loader">
+            <span class="loader_message">続きを読み込みます...</span>
+        </li>
+    `)
+
+    // Intersection Observerを生成
+    const observer = new IntersectionObserver((entries, obs) => (async () => {
+        const e = entries[0]
+        if (!e.isIntersecting) return // 見えていないときは実行しない
+        console.log('ローダー表示: ' + max_id)
+        // Loaderを一旦削除
+        obs.disconnect()
+        $(e.target).remove()
+
+        // Loaderのmax_idを使ってデータ取得処理を実行
+        arg.data = await arg.load(max_id)
+        // 再帰的にLoader生成関数を実行
+        createScrollLoader(arg)
+    })(), {
+        root: arg.target.get(0),
+        rootMargin: "0px",
+        threshold: 1.0,
+    })
+    observer.observe(arg.target.find(".__scroll_loader").get(0))
+}

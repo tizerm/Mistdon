@@ -11,9 +11,6 @@ class User {
         this.fields = []
         let host = null
 
-        // TODO: debug
-        console.log(arg.json)
-
         switch (arg.platform) { // TODO: 暫定
             case 'Mastodon': // Mastodon
                 // リモートの情報を直に取得する場合引数をそのまま使う
@@ -647,16 +644,17 @@ class User {
             "platform": this.platform,
             "pref": { "domain": this.host }
         }; (async () => Promise.allSettled([
-            this.getPost(account, null).then(posts => {
-                posts.forEach(p => column.find(".posts").append(p.element))
-                // スクロールローダーを生成
-                Status.createScrollLoader({
-                    list: posts,
-                    target: column.find(".posts"),
-                    asyncLoader: async last_id => this.getPost(account, last_id),
-                    binder: (post, target) => target.append(post.element)
-                })
-            }), this.getPinnedPost(account).then(posts => {
+            this.getPost(account, null).then(posts => createScrollLoader({
+                // 最新投稿データはスクロールローダーを生成
+                data: posts,
+                target: column.find(".posts"),
+                bind: (data, target) => {
+                    data.forEach(p => target.append(p.element))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop().id
+                },
+                load: async max_id => this.getPost(account, max_id)
+            })), this.getPinnedPost(account).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
                     column.find(".pinned_block").remove()
@@ -711,30 +709,30 @@ class User {
      * @param type お気に入り/ブックマーク/リアクションのどれかを指定
      */
     createBookmarkList(type) {
-        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
-        target.prepend(`
+        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
         `)
-        target.find(".user_post_elm").hide()
-        target.find(".user_ff_elm").hide()
-        target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
+        target_td.find(".user_post_elm").hide()
+        target_td.find(".user_ff_elm").hide()
+        target_td.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
-        this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+        this.getBookmarks(Account.get(this.full_address), type, null).then(body => (async () => {
             // ロード待ち画面を消去
-            target.find(".col_loading").remove()
-            data.datas.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
-            console.log(data.max_id)
-            // TODO: Mastodonのローダーが機能しないので一旦保留
-            /*
-            Status.createScrollLoader({
-                list: data,
-                target: target.find(".user_bookmark_elm>.bookmarks"),
-                asyncLoader: async last_id => this.getBookmarks(Account.get(this.full_address), type, last_id),
-                binder: (post, target) => target.append(post.element)
-            })//*/
+            target_td.find(".col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: target_td.find(".user_bookmark_elm>.bookmarks"),
+                bind: (data, target) => {
+                    data.datas.forEach(post => target.append(post.element))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data.max_id
+                },
+                load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
+            })
         })())
     }
 
@@ -745,34 +743,35 @@ class User {
      * @param type フォローを取得するかフォロワーを取得するか指定
      */
     createFFTaglist(type) {
-        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
-        target.prepend(`
+        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
         `)
-        target.find(".user_post_elm").hide()
-        target.find(".user_bookmark_elm").hide()
-        target.find(".user_ff_elm").html(`
+        target_td.find(".user_post_elm").hide()
+        target_td.find(".user_bookmark_elm").hide()
+        target_td.find(".user_ff_elm").html(`
             <ul class="ff_short_profile">
                 <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>
             </ul>
             <ul class="ff_nametags"></ul>
         `).show()
 
-        this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+        this.getFFUsers(Account.get(this.full_address), type, null).then(body => (async () => {
             // ロード待ち画面を消去
-            target.find(".col_loading").remove()
-            data.datas.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
-            // TODO: Mastodonのローダーが機能しないので一旦保留
-            /*
-            Status.createScrollLoader({
-                list: data,
-                target: target.find(".user_ff_elm>.ff_nametags"),
-                asyncLoader: async last_id => this.getFFUsers(Account.get(this.full_address), type, last_id),
-                binder: (u, target) => target.append(u.inline_nametag)
-            })//*/
+            target_td.find(".col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: target_td.find(".user_ff_elm>.ff_nametags"),
+                bind: (data, target) => {
+                    data.datas.forEach(u => target.append(u.inline_nametag))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data.max_id
+                },
+                load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
+            })
         })())
     }
 }

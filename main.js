@@ -659,5 +659,3 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-// アプリ終了直前にカスタム絵文字履歴を保存する
-app.on('before-quit', () => overwriteEmojiHistory())
