@@ -324,8 +324,58 @@
         }
     }
 
-    /*=== Expand Image Modal Layout ==============================================================*/
+    /*=== Custom Emojis Suggester Layout =========================================================*/
+    > #pop_emoji_suggester {
+        display: none;
+        background-color: rgba(34,34,34,0.8);
+        border: solid 1px #cccccc;
+        border-radius: 8px;
+        z-index: 7;
+        position: absolute;
+        top: 198px;
+        left: 64px;
+        width: 360px;
+        padding: 4px;
+        > ul {
+            margin: 0px;
+            padding: 0px;
+            > li {
+                display: inline-block;
+                list-style-type: none;
+                > a>img {
+                    height: 24px;
+                    width: auto;
+                }
+                &.__selected_emoji, &:hover {
+                    border: solid 1px #cccccc;
+                    background-color: rgba(62,82,96,0.92);
+                    border-radius: 4px;
+                }
+            }
+        }
+        > .recent_emoji_list>li {
+            padding-left: 18px;
+            background-position: top +4px left;
+            background-repeat: no-repeat;
+            background-size: 16px 16px;
+            &:nth-child(1) { background-image: url("../resources/1.png"); }
+            &:nth-child(2) { background-image: url("../resources/2.png"); }
+            &:nth-child(3) { background-image: url("../resources/3.png"); }
+            &:nth-child(4) { background-image: url("../resources/4.png"); }
+            &:nth-child(5) { background-image: url("../resources/5.png"); }
+            &:nth-child(6) { background-image: url("../resources/6.png"); }
+            &:nth-child(7) { background-image: url("../resources/7.png"); }
+            &:nth-child(8) { background-image: url("../resources/8.png"); }
+            &:nth-child(9) { background-image: url("../resources/9.png"); }
+        }
+        > .suggest_emoji_list {
+            height: 128px;
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
+        }
+    }
 
+    /*=== Expand Image Modal Layout ==============================================================*/
     > #modal_expand_image {
         z-index: 12;
         display: none;
@@ -461,6 +511,43 @@
         }
     }
 
+    /*=== Internal Extend Timeline Window Layout =================================================*/
+    > #pop_window_timeline {
+        display: none;
+        z-index: 4;
+        border-radius: 12px;
+        background-color: rgba(34,34,34,0.8);
+        width: 50vw;
+        height: 50vh;
+        color: #fff;
+
+        & a { color: #bbb; }
+        > h2 {
+            position: relative;
+            background-color: #87995f;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            margin: 0px;
+            padding: 4px 12px;
+            font-size: 14px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            > #__on_pop_window_close {
+                position: absolute;
+                top: 4px;
+                right: 8px;
+                border-radius: 12px;
+                font-size: 14px;
+                border: solid 2px #ffffff;
+            }
+        }
+        >.timeline {
+            height: calc(100% - 32px);
+            > ul { height: 100%; }
+        }
+    }
+
     /*=== Extend Column (Optional) ===============================================================*/
     > #pop_extend_column {
         > .post_detail_col {
@@ -511,16 +598,11 @@
 /*=== Grouping Preferance ========================================================================*/
 
 #pop_custom_emoji>.emoji_list img,
-#pop_extend_column>.reaction_col>.reaction_list img {
-    display: inline-block;
-    height: 32px;
-    width: auto;
-    vertical-align: text-bottom;
-}
+#pop_extend_column>.reaction_col>.reaction_list img,
 #pop_custom_emoji>.recent_emoji img,
 #pop_extend_column>.reaction_col>.recent_reaction img {
     display: inline-block;
-    height: 48px;
+    height: 32px;
     width: auto;
     vertical-align: text-bottom;
 }

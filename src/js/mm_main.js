@@ -27,13 +27,18 @@ $(() => (async () => {
     $("#pop_postuser>ul").html(Account.createPostAccountList());
     $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
         // リアクションの場合はリアクション絵文字を表示する
-        if ($(elm).is("#__menu_reaction")) $(elm).html(Account.createReactionMenuAccountList());
+        //if ($(elm).is("#__menu_reaction")) $(elm).html(Account.createReactionMenuAccountList());
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
-        else if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
+        if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
         // それ以外は全アカウントをリストに表示
         else $(elm).html(Account.createContextMenuAccountList());
     });
     $("#pop>.pop_context>.ui_menu").menu();
+    // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
+    $("#pop_window_timeline").draggable({
+        handle: "h2"
+    });
+    $("#pop_window_timeline").resizable();
     // 公開範囲ホバー時にツールチップ表示
     $("#header>#head_postarea").tooltip({
         position: {

@@ -89,6 +89,12 @@ class Emojis {
         return this.emoji_map.get(code)
     }
 
+    filter(code, callback) {
+        this.emoji_map.forEach((v, k) => {
+            if (k.match(new RegExp(`^:${code}`, 'g'))) callback(v)
+        })
+    }
+
     /**
      * #Method
      * 引数のテキストに含まれているショートコードを絵文字に置換する
@@ -191,6 +197,41 @@ class Emojis {
                     new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
         })
         jqelm.html(replace_text)
+    }
+
+    static createEmojiSuggester(target_elm) {
+        // 絵文字取得対象アカウントを取得
+        let target_account = null
+        if (target_elm.is("#__txt_replyarea")) // リプライウィンドウ
+            target_account = Account.get($("#__hdn_reply_account").val())
+        else if (target_elm.is("#__txt_quotearea")) // 引用ウィンドウ
+            target_account = Account.get($("#__hdn_quote_account").val())
+        else target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+
+        // サジェスター生成時点でのカーソル位置を保持
+        const suggest_pos = target_elm.get(0).selectionStart
+
+        // サジェスターウィンドウを初期化
+        $("#pop_emoji_suggester>.target_account").val(target_account.full_address)
+        $("#pop_emoji_suggester>.target_cursor").val(suggest_pos)
+        $("#pop_emoji_suggester>.target_elm_id").val(target_elm.attr("id"))
+        $("#pop_emoji_suggester>.recent_emoji_list").empty()
+        $("#pop_emoji_suggester>.suggest_emoji_list").empty()
+        // 絵文字履歴を表示する
+        target_account.emoji_history.map(code => target_account.emojis.get(code)).forEach(
+            emoji => $("#pop_emoji_suggester>.recent_emoji_list").append(`
+                <li>
+                    <a class="__on_emoji_suggest_append" name="${emoji.shortcode}">
+                        <img src="${emoji.url}" alt="${emoji.name}"/>
+                    </a>
+                </li>
+            `))
+        // サジェスターを表示
+        const pos = target_elm.offset()
+        $("#pop_emoji_suggester").css({
+            'left': `${pos.left - 32}px`,
+            'top': `${pos.top + 72}px`,
+        }).show()
     }
 }
 

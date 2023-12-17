@@ -971,7 +971,7 @@ class Account {
         Account.cacheEmojiHistory()
 
         // コンテキストメニューのリアクション履歴を更新
-        $(`#__menu_reaction>li[name="${this.full_address}"]>.recent_reaction>li`).html(this.recent_reaction_html)
+        //$(`#__menu_reaction>li[name="${this.full_address}"]>.recent_reaction>li`).html(this.recent_reaction_html)
     }
 
     get recent_reaction_html() {
@@ -1093,6 +1093,7 @@ class Account {
         return html
     }
 
+    /*
     static createReactionMenuAccountList() {
         let html = ''
         if (Account.eachPlatform('Misskey', elm => html += `
@@ -1104,7 +1105,7 @@ class Account {
             // 対象プラットフォームが認証されていない場合は選択不可の項目を作る
             html = `<li class="ui-state-disabled"><div>(Misskeyのアカウントがありません)</div></li>`
         return html
-    }
+    }//*/
 
     /**
      * #StaticMethod
@@ -1156,7 +1157,6 @@ class Account {
                         <ul class="pinned_post __context_posts"></ul>
                     </div>
                     <div class="posts_block post_div">
-                        <h4>投稿一覧</h4>
                         <ul class="posts __context_posts"></ul>
                     </div>
                 </div>

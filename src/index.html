@@ -33,6 +33,7 @@
     <script type="text/javascript" src="js/module/class_history.js"></script>
     <script type="text/javascript" src="js/module/class_query.js"></script>
     <script type="text/javascript" src="js/mm_keybind.js"></script>
+    <script type="text/javascript" src="js/mm_emoji_suggester.js"></script>
     <script type="text/javascript" src="js/mm_main.js"></script>
     <script type="text/javascript" src="js/mm_event.js"></script>
 
@@ -78,13 +79,14 @@
             <div class="cw_block">
                 <a id="on_custom_emoji" title="カスタム絵文字を使用"
                     ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
-                <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
+                <input type="text" id="__txt_content_warning"
+                    class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
                 <button type="button" id="__on_post_to_misskey" title="投稿先(Misskey)"
                     ><img src="resources/ic_public.png" name="__to_normal"/></button>
             </div>
         </div>
         <div class="right_block">
-            <textarea id="__txt_postarea" class="__ignore_keyborad"
+            <textarea id="__txt_postarea" class="__ignore_keyborad __emoji_suggest"
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
             <div class="submit_buttons">
                 <a id="on_submit" title="投稿"><img src="resources/ic_post.png" alt="投稿"/></a>
@@ -119,6 +121,14 @@
     </div>
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
+    </div>
+    <div id="pop_emoji_suggester">
+    <!-- hidden: カスタム絵文字サジェスター -->
+        <input type="hidden" class="target_account" value=""/>
+        <input type="hidden" class="target_cursor" value=""/>
+        <input type="hidden" class="target_elm_id" value=""/>
+        <ul class="recent_emoji_list"></ul>
+        <ul class="suggest_emoji_list"></ul>
     </div>
     <div id="pop_context_menu" class="pop_context" name="{post_id}">
         <!-- hidden: 右クリックコンテキストメニュー -->
@@ -170,10 +180,21 @@
     <!-- hidden: 投稿拡大ウィンドウ -->
     </div>
     <div id="pop_ex_timeline">
-    <!-- hidden: 拡張カラム -->
+    <!-- hidden: 拡張タイムライン(横付け) -->
     </div>
     <div id="pop_window_timeline" class="ui-widget-content">
-    <!-- hidden: 拡張カラム -->
+    <!-- hidden: 拡張タイムライン(ウィンドウ) -->
+        <h2>
+            <span>Window</span>
+            <button type="button" id="__on_pop_window_close">×</button>
+        </h2>
+        <div class="timeline">
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+            <ul class="__context_posts"></ul>
+        </div>
     </div>
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->

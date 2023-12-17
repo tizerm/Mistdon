@@ -188,7 +188,7 @@ $(() => {
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
         // Mastodonの場合前後にスペースを入れる
         if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
-        target.val(target_text.substr(0, cursor_pos) + target_emoji + target_text.substr(cursor_pos, target_text.length))
+        target.val(target_text.substring(0, cursor_pos) + target_emoji + target_text.substring(cursor_pos, target_text.length))
         target.focus()
 
         // 最近使った絵文字に登録
@@ -479,6 +479,13 @@ $(() => {
             .getStatus(target_li).createExpandWindow(target_li)
     })
 
+    $(document).on("click", ".column_td .tl_group_box>ul>li:not(.chat_timeline), li.chat_timeline>.content", e => {
+        if (!(e.ctrlKey || e.metaKey)) return // キーボード押してなかったら無視
+        const target_li = $(e.target).closest("li")
+        Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            .getStatus(target_li).openScrollableWindow()
+    })
+
     /**
      * #Event #Mouseleave
      * 投稿ポップアップ
@@ -683,15 +690,15 @@ $(() => {
      * #Event #Contextmenu
      * 投稿系メニュー: 詳細表示
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_detail", e =>
-        Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.createDetailWindow()))
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_detail",
+        e => Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.createDetailWindow()))
 
     /**
      * #Event #Contextmenu
      * 投稿系メニュー: URLをコピー
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url", e =>
-        navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url",
+        e => navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")))
 
     /**
@@ -740,4 +747,6 @@ $(() => {
         $("#pop_ex_timeline").hide("slide", { direction: "right" }, 150))
     $(document).on("click", "#__on_emoji_close", e =>
         $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
+    $(document).on("click", "#__on_pop_window_close", e =>
+        $("#pop_window_timeline").hide("fade", 150))
 })

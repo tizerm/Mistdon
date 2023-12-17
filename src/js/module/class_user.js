@@ -621,7 +621,6 @@ class User {
                         <ul class="pinned_post __context_posts"></ul>
                     </div>
                     <div class="posts_block post_div">
-                        <h4>投稿一覧</h4>
                         <ul class="posts __context_posts"></ul>
                     </div>
                 </td></tr>

@@ -34,11 +34,12 @@ class Timeline {
      * このタイムラインの最新の投稿を30件取得する
      * (返り値は取得データのpromise)
      */
-    getTimeline() {
+    getTimeline(max_id) {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
         if (!this.pref.external && !this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
-        this.pref.query_param.limit = 30
+        let query_param = this.pref.query_param
+        query_param.limit = 30
         let rest_promise = null
         // プラットフォーム判定
         switch (this.platform) {
@@ -46,13 +47,14 @@ class Timeline {
                 // ヘッダにアクセストークンをセット(認証済みの場合)
                 let header = {}
                 if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
+                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
                 // REST APIで最新TLを30件取得、する処理をプロミスとして格納
                 rest_promise = $.ajax({
                     type: "GET",
                     url: this.pref.rest_url,
                     dataType: "json",
                     headers: header,
-                    data: this.pref.query_param
+                    data: query_param
                 }).then(data => {
                     return (async () => {
                         // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
@@ -64,14 +66,15 @@ class Timeline {
                 break
             case 'Misskey': // Misskey
                 // クエリパラメータにアクセストークンをセット(認証済みの場合)
-                if (!this.pref.external) this.pref.query_param.i = this.target_account.pref.access_token
+                if (!this.pref.external) query_param.i = this.target_account.pref.access_token
+                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                 // REST APIで最新TLを30件取得、する処理をプロミスとして格納
                 rest_promise = $.ajax({
                     type: "POST",
                     url: this.pref.rest_url,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(this.pref.query_param)
+                    data: JSON.stringify(query_param)
                 }).then(data => {
                     return (async () => {
                         // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
@@ -214,22 +217,33 @@ class Timeline {
         if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key))
     }
 
-    createTemporaryTimelineWindow() {
-        // 検索カラムのDOM生成
-        $("#pop_window_timeline").html(`
-            <h2>
-                Window
-                <button type="button" id="__on_search_close">×</button>
-            </h2>
-            <div id="__search_timeline" class="timeline">
-                <div class="col_loading">
-                    <img src="resources/illust/il_done.png" alt="done"/><br/>
-                    <span class="loading_text">検索結果がここに表示されます。</span>
-                </div>
-                <ul class="search_ul __context_posts"></ul>
+    createScrollableTimeline(ref_id) {
+        // 一旦中身を消去
+        $("#pop_window_timeline>.timeline").prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
             </div>
-        `).show("fade", 150)
-    }
+        `).find("ul").empty()
+        $("#pop_window_timeline>h2>span").text(this.host)
 
+        // 参照した投稿からタイムラインを取得
+        this.getTimeline(ref_id).then(body => {
+            // ロード画面を削除
+            $("#pop_window_timeline>.timeline>.col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: $("#pop_window_timeline>.timeline>ul"),
+                bind: (data, target) => {
+                    data.forEach(p => target.append(p.timeline_element))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop().id
+                },
+                load: async max_id => this.getTimeline(max_id)
+            })
+        })
+
+        $("#pop_window_timeline").show("fade", 150)
+    }
 }
 

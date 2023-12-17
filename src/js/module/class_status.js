@@ -1329,6 +1329,11 @@ class Status {
         $("#pop_expand_post").show("fade", 80)
     }
 
+    openScrollableWindow() {
+        console.log(`window-call: ${this.id}`)
+        this.from_timeline?.createScrollableTimeline(this.id)
+    }
+
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
     get notification() {
         let title = null

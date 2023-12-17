@@ -860,6 +860,14 @@
                 }
             }
         }
+
+        /*=== Scroll Loader Layout ===============================================================*/
+        > li.__scroll_loader {
+            background-image: url("../resources/ic_reload.png");
+            background-position: center center;
+            background-repeat: no-repeat;
+            height: 32px;
+        }
     }
     .__context_posts {
         > li:not(.chat_timeline),

@@ -55,24 +55,21 @@ function createScrollLoader(arg) {
     if (!max_id) return // max_idが空の場合はデータ終端として終了
 
     // Loader Elementを生成
-    arg.target.append(`
-        <li id="${max_id}" class="__scroll_loader">
-            <span class="loader_message">続きを読み込みます...</span>
-        </li>
-    `)
+    arg.target.append(`<li id="${max_id}" class="__scroll_loader">&nbsp;</li>`)
 
     // Intersection Observerを生成
     const observer = new IntersectionObserver((entries, obs) => (async () => {
         const e = entries[0]
         if (!e.isIntersecting) return // 見えていないときは実行しない
         console.log('ローダー表示: ' + max_id)
-        // Loaderを一旦削除
+        // Loaderを一旦解除してロード画面に変更
         obs.disconnect()
-        $(e.target).remove()
+        $(e.target).css('background-image', 'url("resources/illust/ani_wait.png")')
 
         // Loaderのmax_idを使ってデータ取得処理を実行
         arg.data = await arg.load(max_id)
-        // 再帰的にLoader生成関数を実行
+        // Loaderを削除して再帰的にLoader生成関数を実行
+        $(e.target).remove()
         createScrollLoader(arg)
     })(), {
         root: arg.target.get(0),
