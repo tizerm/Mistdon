@@ -45,7 +45,7 @@ class Query {
                     <ul class="search_ul __context_posts"></ul>
                 </div>
             </div>
-            <button type="button" id="__on_search_close">×</button>
+            <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "up" }, 150, () => $("#__txt_search_query").focus())
     }
 

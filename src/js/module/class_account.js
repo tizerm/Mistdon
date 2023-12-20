@@ -999,7 +999,7 @@ class Account {
             </div>
             <div class="emoji_list">
             </div>
-            <button type="button" id="__on_emoji_close">×</button>
+            <button type="button" id="__on_emoji_close" class="close_button">×</button>
         `).show("slide", { direction: "left" }, 150)
         // 絵文字履歴を表示する
         this.emoji_history.map(code => this.emojis.get(code)).forEach(
@@ -1173,7 +1173,7 @@ class Account {
             </div>
             <div class="account_timeline single_user ff_pop_user">
             </div>
-            <button type="button" id="__on_search_close">×</button>
+            <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
         $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 

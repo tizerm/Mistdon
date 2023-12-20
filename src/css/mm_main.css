@@ -316,12 +316,6 @@
             height: calc(100vh - 480px);
             &::-webkit-scrollbar { width: 8px; }
         }
-        & button {
-            display: block;
-            padding: 6px;
-            text-align: center;
-            width: 100%;
-        }
     }
 
     /*=== Custom Emojis Suggester Layout =========================================================*/
@@ -501,6 +495,13 @@
                             top: 50%;
                             left: 50%;
                             transform: translate(-50%, -50%);
+                            display: block;
+                            border-radius: 12px;
+                            padding: 4px;
+                            text-align: center;
+                            border: solid 2px #ffffff;
+                            font-size: 16px;
+                            font-weight: bold;
                         }
                     }
                     &:hover>.delete_modal { display: block; }
@@ -658,18 +659,5 @@
     margin-top: 6px;
     width: calc(100% - 8px);
     height: 108px;
-}
-#pop_extend_column button,
-#pop_ex_timeline button,
-#pop_custom_emoji button {
-    display: block;
-    border-radius: 6px;
-    padding: 6px;
-    text-align: center;
-    width: 100%;
-    border: solid 2px #ffffff;
-    padding: 4px 32px;
-    font-size: 16px;
-    font-weight: bold;
 }
 

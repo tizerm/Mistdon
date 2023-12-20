@@ -682,7 +682,7 @@ class User {
     createDetailWindow() {
         $("#pop_ex_timeline").html('<div class="account_timeline single_user"></div>')
         this.createDetailHtml("#pop_ex_timeline>.account_timeline")
-        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close">×</button>')
+        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close" class="close_button">×</button>')
             .show("slide", { direction: "right" }, 150)
     }
 

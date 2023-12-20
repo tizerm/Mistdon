@@ -241,6 +241,7 @@
         /*=== Normal Layout Style ================================================================*/
         > li {
             background-color: rgba(62,62,62,0.92);
+            position: relative;
             border-radius: 12px;
             list-style-type: none;
             margin: 6px;
@@ -254,6 +255,14 @@
                 font-size: 12px;
                 text-align: right;
             }
+            > .visibilityicon {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                width: 36px;
+                height: 36px;
+                opacity: 0.2;
+            }
 
             /*=== User Info ======================================================================*/
             > .user {
@@ -264,6 +273,7 @@
                     border-radius: 12px;
                     width: 48px;
                     height: 48px;
+                    cursor: pointer;
                 }
                 > .username {
                     position: absolute;
@@ -299,17 +309,38 @@
                         }
                     }
                 }
-                > .visibilityicon {
-                    position: absolute;
-                    top: -2px;
-                    right: -2px;
-                    opacity: 0.2;
-                }
                 > .instance_icon {
                     position: absolute;
                     top: 0px;
                     right: 4px;
                     opacity: 0.3;
+                }
+
+                /*=== User Info (Normal2 Layout) =================================================*/
+                &.prof_normal2 {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    margin: -4px -6px 2px;
+                    > .usericon {
+                        border-radius: 12px;
+                        width: 24px;
+                        height: 24px;
+                        display: inline-block;
+                        vertical-align: text-bottom;
+                    }
+                    > .username {
+                        position: static;
+                        font-size: 13px;
+                        font-weight: bold;
+                        display: inline;
+                        > .inline_emoji { height: 18px; }
+                    }
+                    > .userid {
+                        position: static;
+                        display: inline;
+                        font-size: 12px;
+                    }
                 }
             }
 
@@ -407,7 +438,25 @@
                 }
                 > .poll_info {
                     text-align: right;
-                    font-size: 12px;
+                    font-size: 11px;
+                    color: #cccccc;
+                }
+            }
+            > .poll_graph_section {
+                > .poll_opt_graph {
+                    margin: 1px;
+                    padding: 0px 12px;
+                    border-radius: 6px;
+                    > .text { font-size: 12px; }
+                    > .rate {
+                        font-size: 11px;
+                        color: #cccccc;
+                    }
+                }
+                > .poll_footer {
+                    text-align: right;
+                    font-size: 11px;
+                    color: #cccccc;
                 }
             }
 
@@ -859,6 +908,12 @@
                     border-radius: 16px;
                 }
             }
+        }
+        > li>.label_head.label_reblog {
+            background-position: center right;
+            background-repeat: no-repeat;
+            background-size: 32px 32px;
+            padding-right: 42px;
         }
 
         /*=== Scroll Loader Layout ===============================================================*/

@@ -25,15 +25,13 @@ class Status {
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
-        // TODO: debug
-        if (this.detail_flg) console.log(json)
-
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
                 original_date = json.created_at
                 this.reblog = json.reblog ? true : false // ブーストフラグ
                 this.reblog_by = this.reblog ? json.account.acct : null // ブースト元ユーザー
+                this.reblog_by_icon = this.reblog ? json.account.avatar : null // ブースト元ユーザーアイコン
 
                 // ブーストの場合はブースト先を参照データに設定
                 data = this.reblog ? json.reblog : json
@@ -72,14 +70,12 @@ class Status {
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
+                    this.poll_id = data.poll.id
                     this.poll_expired = data.poll.expired
                     this.poll_expired_time = new Date(data.poll.expires_at)
                     this.poll_multiple = data.poll.multiple
-                    this.poll_options = []
-                    data.poll.options.forEach(elm => this.poll_options.push({
-                        text: elm.title,
-                        count: elm.votes_count
-                    }))
+                    this.poll_options = Status.asArrayPoll(data.poll, this.platform)
+                    this.poll_voted = data.poll.voted
                 }
 
                 // 添付メディア
@@ -113,6 +109,7 @@ class Status {
                 this.reblog = json.renote && !json.text // リノートフラグ
                 this.reblog_by = this.reblog ? json.user.username
                     + (json.user.host ? ('@' + json.user.host) : '') : null // リノート元ユーザー
+                this.reblog_by_icon = this.reblog ? json.user?.avatarUrl : null // リノート元ユーザーアイコン
                 this.quote_flg = json.renote && json.text
 
                 // リノートの場合はリノート先を参照データに設定
@@ -178,14 +175,11 @@ class Status {
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
-                    //this.poll_expired = data.poll.expired
                     this.poll_expired_time = new Date(data.poll.expiresAt)
+                    this.poll_expired = this.poll_expired_time < new Date()
                     this.poll_multiple = data.poll.multiple
-                    this.poll_options = []
-                    data.poll.choices.forEach(elm => this.poll_options.push({
-                        text: elm.text,
-                        count: elm.votes
-                    }))
+                    this.poll_options = Status.asArrayPoll(data.poll, this.platform)
+                    this.poll_voted = data.poll.choices.some(v => v.isVoted)
                 }
 
                 // 添付メディア
@@ -233,6 +227,9 @@ class Status {
     // Getter: オリジナルテキスト(投稿時そのままの形式)
     get original_text() { return this.__original_text ?? $($.parseHTML(this.content)).text() }
 
+    // コンテキストメニュー呼び出し時に一時的に保存する場所
+    static TEMPORARY_CONTEXT_STATUS = null
+
     // 日付フォーマッターはstaticプロパティにする
     static {
         Status.DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
@@ -252,6 +249,32 @@ class Status {
     // Getter: ミュート判定
     get muted() { // 文を分けると機能しなくなるっぽい
         return (this.from_timeline?.pref?.exclude_reblog && this.reblog) || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
+    }
+
+    static asArrayPoll(poll, platform) {
+        let total_vote = 0
+        const poll_options = []
+        switch (platform) {
+            case 'Mastodon': // Mastodon
+                total_vote = poll.options.reduce((sum, elm) => sum + elm.votes_count, 0)
+                poll.options.forEach(elm => poll_options.push({
+                    text: elm.title,
+                    count: elm.votes_count,
+                    rate: Math.round((elm.votes_count / total_vote) * 1000) / 10
+                }))
+                break
+            case 'Misskey': // Misskey
+                total_vote = poll.choices.reduce((sum, elm) => sum + elm.votes, 0)
+                poll.choices.forEach(elm => poll_options.push({
+                    text: elm.text,
+                    count: elm.votes,
+                    rate: Math.round((elm.votes / total_vote) * 1000) / 10
+                }))
+                break
+            default:
+                break
+        }
+        return poll_options
     }
 
     /**
@@ -536,39 +559,41 @@ class Status {
             `
         }
 
+        // 投稿識別アイコン
+        if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
+            html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
+        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+            // 連合なしのノートはアイコン表示(チャンネルは除外)
+            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
+        else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
+            switch (this.visibility) {
+                case 'unlisted':
+                case 'home': // ホーム
+                    html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
+                    break
+                case 'private':
+                case 'followers': // フォロ限
+                    html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
+                    break
+                default:
+                    break
+            }
+        }
         // プロフィール表示の場合はユーザーアカウント情報を省略
         if (!this.profile_post_flg || this.reblog) {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-            html /* ユーザーアカウント情報 */ += `
-                <div class="user">
-                    <img src="${this.user.avatar_url}" class="usericon"/>
+            html /* ユーザーアカウント情報(ノーマル2を使っている場合は専用のクラスを付ける) */ += `
+                <div class="user${this.from_group?.pref?.tl_layout == 'normal2' ? ' prof_normal2' : ''}">
+                    <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                     <span class="userid">
                         <a class="__lnk_userdetail" name="@${this.user.full_address}">
                             @${this.user.id}
                         </a>
                     </span>
-            `; if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
-                html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
-            else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
-                // 連合なしのノートはアイコン表示(チャンネルは除外)
-                html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
-            else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-                switch (this.visibility) {
-                    case 'unlisted':
-                    case 'home': // ホーム
-                        html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
-                        break
-                    case 'private':
-                    case 'followers': // フォロ限
-                        html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
-                        break
-                    default:
-                        break
-                }
-            }
-            html += '</div>'
+                </div>
+            `
         }
         html += '<div class="content">'
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -714,14 +739,19 @@ class Status {
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
+        // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
+        if (this.poll_options && (this.detail_flg || this.poll_voted || this.poll_expired))
+            jqelm.find('.post_poll').after(this.poll_graph).remove()
         // カードがある場合はカードに背景を設定
         if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
             .css("background-image", `url("${this.card.image}")`)
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
-        // BTRNにはクラスをつける
-        if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
+        if (this.reblog) { // BTRNにはクラスをつけて背景をセット
+            jqelm.closest('li').addClass('rebloged_post')
+            jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+        }
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
             jqelm.find('.content>.main_content').hide()  // CWを非表示にする
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
@@ -739,7 +769,7 @@ class Status {
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="chat_timeline">`
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon"/>
+                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                 <span class="userid">
                     <a class="__lnk_userdetail" name="@${this.user.full_address}">
                         @${this.user.id}
@@ -857,6 +887,10 @@ class Status {
         const jqelm = $($.parseHTML(html))
         jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
+        jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+        // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
+        if (this.poll_options && !this.detail_flg && (this.poll_voted || this.poll_expired))
+            jqelm.find('.post_poll').after(this.poll_graph).remove()
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
@@ -877,7 +911,7 @@ class Status {
         let target_emojis = null
         let html = `
             <li id="${this.status_key}" name="${this.uri}" class="short_timeline">
-                <img src="${this.user.avatar_url}" class="usericon"/>
+                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                 <div class="content">
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -975,7 +1009,7 @@ class Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon"/>
+                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                 <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                 <span class="userid">
                     <a class="__lnk_userdetail" name="@${this.user.full_address}">
@@ -1078,6 +1112,94 @@ class Status {
         return $($.parseHTML(html))
     }
 
+    async vote(target_elm) {
+        // 先にtoast表示
+        const toast_uuid = crypto.randomUUID()
+        toast(`${target_elm.text()} に投票しています...`, "progress", toast_uuid)
+
+        const index = target_elm.index()
+        let request_promise = null
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                request_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
+                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
+                    data: { "choices": [index] }
+                })
+                break
+            case 'Misskey': // Misskey
+                const request_param = {
+                    "i": this.from_account.pref.access_token,
+                    "noteId": this.status_id,
+                    "choice": index
+                }
+                request_promise = $.ajax({
+                    type: "POST",
+                    url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify(request_param)
+                })
+                break
+            default:
+                break
+        }
+        try { // 投票リクエストを送信
+            let response = await request_promise
+            if (!response) // Misskeyの場合投票結果がresponseに返ってこないので投稿データから取得
+                response = await $.ajax({
+                    type: "POST",
+                    url: `https://${this.from_account.pref.domain}/api/notes/show`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": this.from_account.pref.access_token,
+                        "noteId": this.id
+                    })
+                }).then(data => { return data.poll })
+            toast(`${target_elm.text()} に投票しました. 中間結果を表示します.`, "done", toast_uuid)
+
+            // 最新の投票データをステータスに書き込む
+            this.poll_options = Status.asArrayPoll(response, this.platform)
+            this.poll_voted = true
+
+            // 投票ボタンを消して投票結果のグラフを表示
+            target_elm.closest(".post_poll").after(this.poll_graph).remove()
+        } catch (err) { // 投票失敗時
+            toast("投票に失敗しました.", "error", toast_uuid)
+            console.log(err)
+        }
+    }
+
+    get poll_graph() {
+        let total_vote = 0
+        let html = '<div class="poll_graph_section">'
+        this.poll_options.forEach(opt => { // 投票データを生成
+            total_vote += opt.count
+            html += `
+                <div class="poll_opt_graph">
+                    <span class="text">${opt.text}</span>
+                    <span class="rate">${opt.rate}%</span>
+                </div>
+            `
+        })
+        html += `
+            <div class="poll_footer">
+                <span>${total_vote} 票</span>
+                <span>${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで</span>
+            </div>
+        </div>`
+
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(html))
+        this.poll_options.forEach((opt, index) => // 投票データからグラフCSSを生成
+            jqelm.find(`.poll_opt_graph:nth-child(${index + 1})`).css('background-image',
+                `linear-gradient(to right, #3c5f7a ${opt.rate}%, transparent ${opt.rate}%)`))
+
+        return jqelm
+    }
+
     /**
      * #Method
      * この投稿をサーバーから削除する
@@ -1170,12 +1292,12 @@ class Status {
                     <input type="hidden" id="__hdn_reply_visibility" value="${this.visibility}"/>
                     <textarea id="__txt_replyarea" class="__ignore_keyborad"
                         placeholder="(Ctrl+Enterでも投稿できます)">${userid}</textarea>
-                    <button type="button" id="__on_reply_submit">投稿</button>
+                    <button type="button" id="__on_reply_submit" class="close_button">投稿</button>
                 </div>
                 <div class="timeline">
                     <ul></ul>
                 </div>
-                <button type="button" id="__on_reply_close">×</button>
+                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
         `))
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
@@ -1213,12 +1335,12 @@ class Status {
                     <input type="text" id="__txt_quote_cw" class="__ignore_keyborad" placeholder="CWの場合入力"/>
                     <textarea id="__txt_quotearea" class="__ignore_keyborad"
                         placeholder="(Ctrl+Enterでも投稿できます)"></textarea>
-                    <button type="button" id="__on_quote_submit">投稿</button>
+                    <button type="button" id="__on_quote_submit" class="close_button">投稿</button>
                 </div>
                 <div class="timeline">
                     <ul></ul>
                 </div>
-                <button type="button" id="__on_reply_close">×</button>
+                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
         `))
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
@@ -1251,7 +1373,7 @@ class Status {
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
                 </div>
-                <button type="button" id="__on_reply_close">×</button>
+                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
         `))
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
@@ -1282,7 +1404,7 @@ class Status {
                 <div class="timeline">
                     <ul class="__context_posts"></ul>
                 </div>
-                <button type="button" id="__on_reply_close">×</button>
+                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
         `))
         // Classを設定してDOMを拡張カラムにバインド

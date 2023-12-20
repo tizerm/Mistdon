@@ -46,7 +46,7 @@ $(() => {
             <div class="help_col">
                 <h2>キーボードショートカット早見表</h2>
                 <div class="help_content"></div>
-                <button type="button" id="__on_help_close">×</button>
+                <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
@@ -378,7 +378,7 @@ $(() => {
      * ユーザーアドレス
      * => リモートのユーザー情報を右ウィンドウに表示
      */
-    $(document).on("click", ".__lnk_userdetail", e => User.getByAddress($(e.target).attr("name"))
+    $(document).on("click", ".__lnk_userdetail, .usericon", e => User.getByAddress($(e.target).attr("name"))
         .then(user => user.createDetailWindow())
         .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error")))
 
@@ -447,6 +447,10 @@ $(() => {
         return false
     })
 
+    $(document).on("click", ".__on_poll_vote", e => Column.get($(e.target).closest("td"))
+        .getGroup($(e.target).closest(".tl_group_box").attr("id"))
+        .getStatus($(e.target).closest("li")).vote($(e.target)))
+
     /**
      * #Event
      * 投稿日時
@@ -477,13 +481,6 @@ $(() => {
         const target_li = $(e.target).closest("li")
         Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus(target_li).createExpandWindow(target_li)
-    })
-
-    $(document).on("click", ".column_td .tl_group_box>ul>li:not(.chat_timeline), li.chat_timeline>.content", e => {
-        if (!(e.ctrlKey || e.metaKey)) return // キーボード押してなかったら無視
-        const target_li = $(e.target).closest("li")
-        Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus(target_li).openScrollableWindow()
     })
 
     /**
@@ -538,7 +535,7 @@ $(() => {
     $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
         $(e.target).closest("td").find(".user_bookmark_elm").hide()
-       $(e.target).closest("td").find(".user_post_elm").show()
+        $(e.target).closest("td").find(".user_post_elm").show()
     })
 
     /**
@@ -635,7 +632,11 @@ $(() => {
             $("#pop_context_menu .__menu_post_del") // 削除クラスを消してnameにアカウントアドレスを付与
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
         else $("#pop_context_menu .__menu_post_del").addClass("ui-state-disabled")
+
+        // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
+        Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
         $("#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"))
         return false
     })
@@ -707,6 +708,9 @@ $(() => {
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
         e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
+
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
 
     /**
      * #Event #Contextmenu

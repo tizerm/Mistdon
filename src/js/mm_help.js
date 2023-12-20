@@ -7,7 +7,7 @@
                 <h2>Mistdon Help</h2>
                 <nav class="help_navi"></nav>
                 <div class="help_content"></div>
-                <button type="button" id="__on_help_close">×</button>
+                <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
