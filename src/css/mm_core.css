@@ -176,7 +176,8 @@ audio { height: 30px; }
 
     > h1 {
         margin: 0px;
-        padding: 2px 32px;
+        padding: 2px 18px;
+        padding-left: 32px;
         text-align: left;
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 18px;

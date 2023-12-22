@@ -128,8 +128,12 @@ class Account {
             src: this.pref.avatar_url,
             name: this.full_address
         })
-        $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
-            .css("background-color", `#${this.pref.acc_color}`)
+
+        // 背景アイコンとアカウントカラーを設定
+        $("#header>h1>.head_user").css('background-image',
+            `url("resources/${this.platform == 'Mastodon' ? 'ic_mastodon.png' : 'ic_misskey.png'}"`
+        ).text(`${this.pref.username} - ${this.full_address}`)
+        $("#header>h1").css('background-color', `#${this.pref.acc_color}`)
 
         // 投稿先メニューを生成
         this.createPostToMenu()

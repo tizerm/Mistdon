@@ -1432,9 +1432,12 @@ class Status {
      * @param target この投稿のjQueryオブジェクト(座標決定に使用)
      */
     createExpandWindow(target) {
+        // 強制的に通常表示にする
+        this.detail_flg = false
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
-        $("#pop_expand_post>ul").html(this.element).css('width', `${this.from_column.pref.col_width}px`)
+        $("#pop_expand_post>ul").html(this.element).css( // 横幅指定がない場合は320px固定
+            'width', `${this.from_column?.pref.col_width ?? 320}px`)
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開

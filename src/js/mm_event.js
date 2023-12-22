@@ -479,8 +479,11 @@ $(() => {
     $(document).on("click", "li.short_timeline, li.chat_timeline>.content", e => {
         if ($(e.target).is(".expand_header")) return // CW展開は無視
         const target_li = $(e.target).closest("li")
-        Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus(target_li).createExpandWindow(target_li)
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus(target_li).createExpandWindow(target_li)
+        else // 他の部分は直接リモートの投稿を取る
+            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
 
     /**
@@ -627,15 +630,20 @@ $(() => {
      * => 投稿用のコンテキストメニューを表示
      */
     $(document).on("contextmenu", "ul.__context_posts>li", e => {
+        // タイムライングループでの表示(メイン画面のTL)の場合のフラグを保存
+        const tl_group_flg = $(e.target).closest(".tl_group_box").length > 0
         if ($(e.target).closest("li").is(".short_userinfo")) return // 簡易プロフィールは無視
         if ($(e.target).closest("table").is("#auth_account_table")) // 認証アカウント一覧のときは削除可能にする
             $("#pop_context_menu .__menu_post_del") // 削除クラスを消してnameにアカウントアドレスを付与
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
         else $("#pop_context_menu .__menu_post_del").addClass("ui-state-disabled")
+        if (!tl_group_flg) // メイン画面のTL出ない場合は遡りを禁止
+            $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
-        Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
+        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
         $("#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"))
         return false
