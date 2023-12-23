@@ -550,29 +550,6 @@
                     background-color: rgba(0,172,255,0.2);
                     padding-right: 8px;
                 }
-                &.auth_details {
-                    margin: -2px -4px 4px;
-                    > a {
-                        position: relative;
-                        top: 6px;
-                        padding: 0px;
-                        margin: 0px;
-                        &:hover>img {
-                            background-color: rgba(255,255,255,0.2);
-                            cursor: pointer;
-                        }
-                    }
-                    > .counter {
-                        width: 64px;
-                        margin: 2px 1px;
-                        padding-left: 8px;
-                        &:hover {
-                            opacity: 0.75;
-                            text-decoration: underline;
-                            cursor: pointer;
-                        }
-                    }
-                }
             }
 
             /*=== Footer Info ====================================================================*/
@@ -943,6 +920,7 @@
 .label_bookmark  { background-color: #c10000; }
 .label_cw        { background-color: #8c720b; }
 .label_sensitive { background-color: #a10000; }
+.label_private   { background-color: #dfdfdf; color: #333333; }
 .cw_content      { display: none; }
 
 /*=== Profile Column Layout ======================================================================*/
@@ -962,6 +940,32 @@
         height: 214px;
         overflow-y: hidden;
         .user_header { height: 96px; }
+        .detail_info {
+            > .counter {
+                width: 82px;
+                margin: 2px 1px;
+                padding-left: 8px;
+                &:hover {
+                    opacity: 0.75;
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+            &.auth_details {
+                margin: -2px -4px 4px;
+                > a {
+                    position: relative;
+                    top: 6px;
+                    padding: 0px;
+                    margin: 0px;
+                    &:hover>img {
+                        background-color: rgba(255,255,255,0.2);
+                        cursor: pointer;
+                    }
+                }
+                > .counter { width: 64px; }
+            }
+        }
     }
     .profile_detail, .pinned_post { height: calc((100vh - 310px) * 0.2); }
     > .profile_detail {
@@ -1043,4 +1047,16 @@
         }
     }
 }
-
+.column_profile>.profile_header, .post_detail_col .short_userinfo {
+    .detail_info>.counter.ff_private {
+        width: 184px;
+        font-size: 14px;
+        padding: 2px 12px;
+        text-align: center;
+        &:hover {
+            opacity: 1.0;
+            text-decoration: none;
+            cursor: not-allowed;
+        }
+    }
+}

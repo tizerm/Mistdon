@@ -232,7 +232,7 @@ async function writePrefCols(event, json_data) {
                                 break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/v1/notifications`
-                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite', 'poll'] }
                                 socket_param = { 'stream': 'user:notification' }
                                 break
                             case 'mention': // メンション

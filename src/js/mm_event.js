@@ -535,7 +535,7 @@ $(() => {
      * ユーザープロフィール: 投稿数
      * => ユーザーの投稿を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
         $(e.target).closest("td").find(".user_bookmark_elm").hide()
         $(e.target).closest("td").find(".user_post_elm").show()
@@ -546,16 +546,16 @@ $(() => {
      * ユーザープロフィール: フォロー数
      * => フォロイー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_follow", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('follows')))
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow", e =>
+        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('follows')))
 
     /**
      * #Event
      * ユーザープロフィール: フォロワー数
      * => フォロワー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_follower", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower", e =>
+        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('followers')))
 
     /**
      * #Event

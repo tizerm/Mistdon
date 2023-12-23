@@ -61,7 +61,10 @@ class Status {
                 this.visibility = data.visibility
                 this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
-                this.content = data.status?.content ?? data.content // 本文(通知の場合はstatusから)
+                if (this.notif_type && this.notif_type != 'follow') { // 本文(通知の場合はstatusから)
+                    this.content = data.status?.content
+                    data = data.status
+                } else this.content = data.content
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Mastodon',
@@ -110,7 +113,6 @@ class Status {
                 this.reblog_by = this.reblog ? json.user.username
                     + (json.user.host ? ('@' + json.user.host) : '') : null // リノート元ユーザー
                 this.reblog_by_icon = this.reblog ? json.user?.avatarUrl : null // リノート元ユーザーアイコン
-                this.quote_flg = json.renote && json.text
 
                 // リノートの場合はリノート先を参照データに設定
                 data = this.reblog ? json.renote : json
@@ -148,7 +150,13 @@ class Status {
                 this.local_only = data.localOnly
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
-                this.content = data.note?.renote?.text ?? data.note?.text ?? data.text // 本文(通知の場合はstatusから)
+                if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
+                    this.content = data.note.renote.text
+                    data = data.note.renote
+                } else if (this.notif_type) { // リノート以外の通知の場合は本文を対象ノートにする
+                    this.content = data.note?.text
+                    data = data?.note ?? data
+                } else this.content = data.text // それ以外は通常の本文テキストを参照
                 if (this.content) this.content = this.content
                     .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
                     .replace(new RegExp('>', 'g'), '&gt;')
@@ -156,6 +164,7 @@ class Status {
                         match => `<a href="${match}">${match}</a>`)
                     .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
 
+                this.quote_flg = data.renote && data.text
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Misskey',
@@ -485,11 +494,10 @@ class Status {
     get timeline_element() {
         switch (this.from_group.pref.tl_layout) {
             case 'chat': // チャット
-                if (this.type == 'notification') { // 通知の場合リプライ以外はリスト
-                    if (this.notif_type == 'mention' || this.notif_type == 'reply')
-                        return this.chat_elm
-                    else this.list_elm
-                } else return this.chat_elm
+                if (this.type != 'notification' || this.notif_type == 'mention'
+                    || this.notif_type == 'reply' || this.notif_type == 'quote')
+                    return this.chat_elm
+                else this.list_elm // 通知以外はリスト表示にする
             case 'list': // リスト
                 return this.list_elm
             case 'media': // メディア

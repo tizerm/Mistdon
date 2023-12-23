@@ -11,6 +11,8 @@ class User {
         this.fields = []
         let host = null
 
+        console.log(arg.json)
+
         switch (arg.platform) { // TODO: 暫定
             case 'Mastodon': // Mastodon
                 // リモートの情報を直に取得する場合引数をそのまま使う
@@ -55,6 +57,7 @@ class User {
                 this.count_post = arg.json.notesCount
                 this.count_follow = arg.json.followingCount
                 this.count_follower = arg.json.followersCount
+                this.hide_ff = (arg.json.ffVisibility ?? 'public') != 'public'
 
                 // フィールドをセット
                 if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
@@ -203,11 +206,15 @@ class User {
             </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-                <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-                <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-            </div>
         `
-        html += '</li>'
+        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
+        if (this.hide_ff) html += `
+            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
+        `; else html += `
+            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
+            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+        `
+        html += '</div></li>'
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -279,11 +286,15 @@ class User {
         html += `
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-                <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-                <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-            </div>
         `
-        html += '</li>'
+        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
+        if (this.hide_ff) html += `
+            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
+        `; else html += `
+            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
+            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+        `
+        html += '</div></li>'
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -519,19 +530,23 @@ class User {
      * @param max_id 前のページの最後のユーザーのページングID
      */
     getFFUsers(account, type, max_id) {
+        const platform = account?.platform ?? this.platform
         let api_url = null
         let rest_promise = null
         let query_param = null
-        switch (account.platform) {
+        switch (platform) {
             case 'Mastodon': // Mastodon
                 if (type == 'follows') api_url = `https://${this.host}/api/v1/accounts/${this.id}/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
                 query_param = { "limit": 80 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                // あればアクセストークンを設定
+                let header = {}
+                if (account) header = { "Authorization": `Bearer ${account.pref.access_token}` }
                 rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
                     method: "GET",
                     url: api_url,
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    headers: header,
                     data: query_param
                 }).then(data => {
                     return (async () => {
@@ -541,7 +556,7 @@ class User {
                             host: this.host,
                             remote: false,
                             auth: false,
-                            platform: account.platform
+                            platform: platform
                         })))
                         return {
                             body: users,
@@ -554,11 +569,11 @@ class User {
                 if (type == 'follows') api_url = `https://${this.host}/api/users/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/users/followers`
                 query_param = {
-                    "i": account.pref.access_token,
                     "userId": this.id,
                     "limit": 80
                 }
                 if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                if (account) query_param.i = account.pref.access_token
                 rest_promise = $.ajax({
                     type: "POST",
                     url: api_url,
@@ -573,7 +588,7 @@ class User {
                             host: this.host,
                             remote: false,
                             auth: false,
-                            platform: account.platform
+                            platform: platform
                         })))
                         return { body: users }
                     })()
@@ -616,13 +631,16 @@ class User {
                     </div>
                     <ul class="profile_header __context_user"></ul>
                     <ul class="profile_detail __context_user"></ul>
-                    <div class="pinned_block post_div">
-                        <h4>ピンどめ</h4>
-                        <ul class="pinned_post __context_posts"></ul>
+                    <div class="user_post_elm">
+                        <div class="pinned_block post_div">
+                            <h4>ピンどめ</h4>
+                            <ul class="pinned_post __context_posts"></ul>
+                        </div>
+                        <div class="posts_block post_div">
+                            <ul class="posts __context_posts"></ul>
+                        </div>
                     </div>
-                    <div class="posts_block post_div">
-                        <ul class="posts __context_posts"></ul>
-                    </div>
+                    <div class="user_ff_elm"></div>
                 </td></tr>
             </tbody></table>
         `))
@@ -639,6 +657,23 @@ class User {
             Emojis.replaceDomAsync(column.find(".profile_header .username"), host) // ユーザー名
             Emojis.replaceDomAsync(column.find(".profile_detail .main_content"), host) // プロフィール文
         }
+
+        // ヘッダ部分にツールチップを生成
+        $(`#pop_ex_timeline>.account_timeline .detail_info`).tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
+
         const account = { // accountには最低限の情報だけ入れる
             "platform": this.platform,
             "pref": { "domain": this.host }
