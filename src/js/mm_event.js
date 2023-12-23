@@ -447,9 +447,13 @@ $(() => {
         return false
     })
 
-    $(document).on("click", ".__on_poll_vote", e => Column.get($(e.target).closest("td"))
-        .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-        .getStatus($(e.target).closest("li")).vote($(e.target)))
+    $(document).on("click", ".__on_poll_vote", e => {
+        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
+            Column.get($(e.target).closest("td"))
+                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus($(e.target).closest("li")).vote($(e.target))
+        else Status.TEMPORARY_CONTEXT_STATUS.vote($(e.target)) // ポップアップの場合は一時保存から取得
+    })
 
     /**
      * #Event
@@ -748,6 +752,11 @@ $(() => {
      * 検索ウィンドウ: 検索処理実行
      */
     $(document).on("click", "#__on_search", e => Query.onSearchTimeline())
+
+    $(document).on("change", "#__window_opacity", e => {
+        if ($(e.target).prop('checked')) $("#pop_window_timeline").addClass("__opacity_on")
+        else $("#pop_window_timeline").removeClass("__opacity_on")
+    })
 
     /**
      * #Event

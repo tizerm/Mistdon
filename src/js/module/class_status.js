@@ -275,7 +275,7 @@ class Status {
                 poll.options.forEach(elm => poll_options.push({
                     text: elm.title,
                     count: elm.votes_count,
-                    rate: Math.round((elm.votes_count / total_vote) * 1000) / 10
+                    rate: total_vote > 0 ? Math.round((elm.votes_count / total_vote) * 1000) / 10 : 0
                 }))
                 break
             case 'Misskey': // Misskey
@@ -283,7 +283,7 @@ class Status {
                 poll.choices.forEach(elm => poll_options.push({
                     text: elm.text,
                     count: elm.votes,
-                    rate: Math.round((elm.votes / total_vote) * 1000) / 10
+                    rate: total_vote > 0 ? Math.round((elm.votes / total_vote) * 1000) / 10 : 0
                 }))
                 break
             default:
@@ -500,10 +500,10 @@ class Status {
     get timeline_element() {
         switch (this.from_group.pref.tl_layout) {
             case 'chat': // チャット
-                if (this.type != 'notification' || this.notif_type == 'mention'
-                    || this.notif_type == 'reply' || this.notif_type == 'quote')
+                if (this.type != 'notification' || this.notif_type == 'poll'
+                    || this.notif_type == 'mention' || this.notif_type == 'reply' || this.notif_type == 'quote')
                     return this.chat_elm
-                else this.list_elm // 通知以外はリスト表示にする
+                else this.list_elm // 通知はリスト表示にする
             case 'list': // リスト
                 return this.list_elm
             case 'media': // メディア
@@ -1181,6 +1181,13 @@ class Status {
             // 投票ボタンを消して投票結果のグラフを表示
             target_elm.closest(".post_poll").after(this.poll_graph).remove()
         } catch (err) { // 投票失敗時
+            if (err.status == 422 // Mastodonの場合、期限切れは422が返ってくる
+               || err.responseJSON.error?.code == 'ALREADY_EXPIRED' // Misskeyの場合
+                ) { // 投票期限の切れたアンケートに投票した場合
+                toast("既に投票を終了しているアンケートです.", "error", toast_uuid)
+                return
+            }
+            // それ以外は失敗メッセージを出す
             toast("投票に失敗しました.", "error", toast_uuid)
             console.log(err)
         }
@@ -1304,7 +1311,7 @@ class Status {
                     <input type="hidden" id="__hdn_reply_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reply_account" value="${this.from_account.full_address}"/>
                     <input type="hidden" id="__hdn_reply_visibility" value="${this.visibility}"/>
-                    <textarea id="__txt_replyarea" class="__ignore_keyborad"
+                    <textarea id="__txt_replyarea" class="__ignore_keyborad __emoji_suggest"
                         placeholder="(Ctrl+Enterでも投稿できます)">${userid}</textarea>
                     <button type="button" id="__on_reply_submit" class="close_button">投稿</button>
                 </div>
@@ -1346,8 +1353,9 @@ class Status {
                         <a class="__lnk_visibility" title="ダイレクトメッセージ">
                             <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
                     </div>
-                    <input type="text" id="__txt_quote_cw" class="__ignore_keyborad" placeholder="CWの場合入力"/>
-                    <textarea id="__txt_quotearea" class="__ignore_keyborad"
+                    <input type="text" id="__txt_quote_cw"
+                        class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
+                    <textarea id="__txt_quotearea" class="__ignore_keyborad __emoji_suggest"
                         placeholder="(Ctrl+Enterでも投稿できます)"></textarea>
                     <button type="button" id="__on_quote_submit" class="close_button">投稿</button>
                 </div>
@@ -1449,6 +1457,9 @@ class Status {
         // 強制的に通常表示にする
         this.detail_flg = false
         this.popout_flg = true
+        // 一時ステータスに保存
+        Status.TEMPORARY_CONTEXT_STATUS = this
+
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
         $("#pop_expand_post>ul").html(this.element).css( // 横幅指定がない場合は320px固定

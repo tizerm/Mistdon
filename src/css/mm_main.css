@@ -319,34 +319,42 @@
         top: 198px;
         left: 64px;
 
-        > .emoji_head {
-            border-top-right-radius: 18px;
-            border-bottom-right-radius: 18px;
-            font-family: Arial, "メイリオ", sans-selif;
-            color: #ffffff;
-            margin: 0px;
-            margin-bottom: 6px;
-            padding: 8px 24px;
-
-            > * {
-                font-size: 18px;
-                padding: 0px;
+        > .palette_block {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 240px);
+            > .emoji_head {
+                border-top-right-radius: 18px;
+                border-bottom-right-radius: 18px;
+                font-family: Arial, "メイリオ", sans-selif;
+                color: #ffffff;
                 margin: 0px;
+                margin-bottom: 6px;
+                padding: 8px 24px;
+                > * {
+                    font-size: 18px;
+                    padding: 0px;
+                    margin: 0px;
+                }
             }
-        }
-        > .recent_emoji {
-            background-color: rgba(62,68,82,0.8);
-            border-radius: 12px;
-            > h5 {
-                margin: 0px;
-                padding: 0px;
+            > .recent_emoji {
+                background-color: rgba(62,68,82,0.8);
+                border-radius: 12px;
+                > h5 {
+                    margin: 2px 8px;
+                    padding: 1px 16px;
+                    border-bottom: solid 1px #dddddd;
+                    color: #dddddd;
+                    font-size: 14px;
+                    text-align: right;
+                }
             }
-        }
-        > .emoji_list {
-            background-color: rgba(34,34,34,0.8);
-            overflow-y: auto;
-            height: calc(100vh - 480px);
-            &::-webkit-scrollbar { width: 8px; }
+            > .emoji_list {
+                background-color: rgba(34,34,34,0.8);
+                overflow-y: auto;
+                flex-grow: 1;
+                &::-webkit-scrollbar { width: 8px; }
+            }
         }
     }
 
@@ -579,6 +587,11 @@
             height: calc(100% - 32px);
             > ul { height: 100%; }
         }
+        &.__opacity_on {
+            opacity: 0.25;
+            transition: opacity 0.2s;
+            &:hover { opacity: 1.0; }
+        }
     }
 
     /*=== Extend Column (Optional) ===============================================================*/
@@ -607,21 +620,31 @@
             height: calc(100vh - 480px);
         }
         > .reaction_col {
-            & ul {
-                overflow-y: auto;
-                height: 320px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+            > .timeline {
+                flex-basis: 280px;
+                > ul {
+                    overflow-y: auto;
+                    height: 100%;
+                }
             }
             > .recent_reaction {
                 background-color: rgba(62,68,82,0.8);
                 border-radius: 12px;
                 > h5 {
-                    margin: 0px;
-                    padding: 0px;
+                    margin: 2px 8px;
+                    padding: 1px 16px;
+                    border-bottom: solid 1px #dddddd;
+                    color: #dddddd;
+                    font-size: 14px;
+                    text-align: right;
                 }
             }
             > .reaction_list {
                 overflow-y: auto;
-                height: calc(100vh - 640px);
+                flex-grow: 1;
                 &::-webkit-scrollbar { width: 8px; }
             }
         }
@@ -630,18 +653,18 @@
 
 /*=== Grouping Preferance ========================================================================*/
 
-#pop_custom_emoji>.emoji_list img,
+#pop_custom_emoji .emoji_list img,
 #pop_extend_column>.reaction_col>.reaction_list img,
-#pop_custom_emoji>.recent_emoji img,
+#pop_custom_emoji .recent_emoji img,
 #pop_extend_column>.reaction_col>.recent_reaction img {
     display: inline-block;
     height: 32px;
     width: auto;
     vertical-align: text-bottom;
 }
-#pop_custom_emoji>.emoji_list a:hover img,
+#pop_custom_emoji .emoji_list a:hover img,
 #pop_extend_column>.reaction_col>.reaction_list a:hover img,
-#pop_custom_emoji>.recent_emoji a:hover img,
+#pop_custom_emoji .recent_emoji a:hover img,
 #pop_extend_column>.reaction_col>.recent_reaction a:hover img {
     background-color: rgba(255,255,255,0.2);
     cursor: pointer;

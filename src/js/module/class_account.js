@@ -966,12 +966,12 @@ class Account {
 
     updateEmojiHistory(code) {
         // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
-        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 10)
+        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 9)
     }
 
     updateReactionHistory(code) {
         // リアクション履歴の更新を試行して、変更があったら履歴ファイルを上書き
-        if (!shiftArray(this.reaction_history, code.trim(), 10)) return
+        if (!shiftArray(this.reaction_history, code.trim(), 20)) return
         Account.cacheEmojiHistory()
 
         // コンテキストメニューのリアクション履歴を更新
@@ -992,28 +992,30 @@ class Account {
      */
     createEmojiList() {
         $("#pop_custom_emoji").html(`
-            <div class="emoji_head">
-                <h2>カスタム絵文字一覧</h2>
-                <h3>${this.pref.domain}</h3>
+            <div class="palette_block">
+                <div class="emoji_head">
+                    <h2>カスタム絵文字一覧</h2>
+                    <h3>${this.pref.domain}</h3>
+                </div>
+                <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
+                    placeholder="ショートコードを入力するとサジェストされます"/>
+                <div class="recent_emoji">
+                    <h5>最近使った絵文字</h5>
+                </div>
+                <div class="emoji_list">
+                </div>
+                <button type="button" id="__on_emoji_close" class="close_button">×</button>
             </div>
-            <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
-                placeholder="ショートコードを入力するとサジェストされます"/>
-            <div class="recent_emoji">
-                <h5>最近使った絵文字</h5>
-            </div>
-            <div class="emoji_list">
-            </div>
-            <button type="button" id="__on_emoji_close" class="close_button">×</button>
         `).show("slide", { direction: "left" }, 150)
         // 絵文字履歴を表示する
         this.emoji_history.map(code => this.emojis.get(code)).forEach(
-            emoji => $("#pop_custom_emoji>.recent_emoji").append(`
+            emoji => $("#pop_custom_emoji .recent_emoji").append(`
                 <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `))
-        $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
+        $("#pop_custom_emoji .emoji_head").css("background-color", `#${this.pref.acc_color}`)
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
+        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji .emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
     }

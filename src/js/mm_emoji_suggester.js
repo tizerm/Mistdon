@@ -1,6 +1,6 @@
 ﻿$(() => {
     // 絵文字サジェスターが有効な入力フォームでのサジェスター処理
-    $(".__emoji_suggest").keyup(e => {
+    $(document).on("keyup", ".__emoji_suggest", e => {
         if (e.key == ':') { // 半角コロンを入力したらサジェスターを起動
             Emojis.createEmojiSuggester($(e.target));
             return;
@@ -36,7 +36,7 @@
     });
 
     // 一部入力イベントを無効化する処理はkeydownで処理
-    $(".__emoji_suggest").keydown(e => {
+    $(document).on("keydown", ".__emoji_suggest", e => {
         // サジェスター停止中は以後なにもしない
         if (!$("#pop_emoji_suggester").is(":visible")) return;
 
