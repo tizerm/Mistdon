@@ -231,8 +231,6 @@ class Status {
     get from_group() { return this.from_timeline?.parent_group }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.from_account?.emojis }
-    // Getter: 本文をHTML解析して文章の部分だけを抜き出す
-    get content_text() { return $($.parseHTML(this.content)).text() }
     // Getter: オリジナルテキスト(投稿時そのままの形式)
     get original_text() { return this.__original_text ?? $($.parseHTML(this.content)).text() }
 
@@ -253,11 +251,19 @@ class Status {
 
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() {
-        return this.from_timeline?.pref?.timeline_type == 'channel' || this.from_timeline?.pref?.external ? this.from_timeline?.pref?.color : this.from_account?.pref.acc_color
+        return this.from_timeline?.pref?.timeline_type == 'channel'
+            || this.from_timeline?.pref?.external ? this.from_timeline?.pref?.color : this.from_account?.pref.acc_color
     }
     // Getter: ミュート判定
-    get muted() { // 文を分けると機能しなくなるっぽい
-        return (this.from_timeline?.pref?.exclude_reblog && this.reblog) || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
+    get muted() {
+        return (this.from_timeline?.pref?.exclude_reblog && this.reblog)
+            || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
+    }
+    // Getter: 本文をHTML解析して文章の部分だけを抜き出す
+    get content_text() {
+        return $($.parseHTML(this.content)).text()
+            .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
+            .replace(new RegExp('>', 'g'), '&gt;')
     }
 
     static asArrayPoll(poll, platform) {
@@ -597,7 +603,7 @@ class Status {
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                     <span class="userid">
                         <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                            @${this.user.id}
+                            @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
                         </a>
                     </span>
                 </div>
@@ -1442,6 +1448,7 @@ class Status {
     createExpandWindow(target) {
         // 強制的に通常表示にする
         this.detail_flg = false
+        this.popout_flg = true
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
         $("#pop_expand_post>ul").html(this.element).css( // 横幅指定がない場合は320px固定
@@ -1463,7 +1470,6 @@ class Status {
     }
 
     openScrollableWindow() {
-        console.log(`window-call: ${this.id}`)
         this.from_timeline?.createScrollableTimeline(this.id)
     }
 

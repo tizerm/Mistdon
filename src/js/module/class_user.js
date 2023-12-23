@@ -11,9 +11,7 @@ class User {
         this.fields = []
         let host = null
 
-        console.log(arg.json)
-
-        switch (arg.platform) { // TODO: 暫定
+        switch (arg.platform) {
             case 'Mastodon': // Mastodon
                 // リモートの情報を直に取得する場合引数をそのまま使う
                 if (arg.remote) host = arg.host
