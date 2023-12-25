@@ -402,6 +402,7 @@
                 position: relative;
                 overflow: hidden;
                 margin: 0px;
+                max-height: 240px;
                 &::before {
                     content: "";
                     padding-top: 100%;
@@ -714,6 +715,7 @@
             }
             > .media a.__on_media_expand {
                 width: calc(25% - 6px);
+                max-height: 160px;
                 .media_preview { border-radius: 6px; }
             }
         }
@@ -832,6 +834,7 @@
             > .media a.__on_media_expand {
                 display: block;
                 width: 100%;
+                max-height: 320px;
                 margin: 3px 0px;
             }
             > .post_footer {
