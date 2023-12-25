@@ -46,7 +46,14 @@
     }
 });
 
+/**
+ * #Util
+ * Tipsをヘッダ部に表示させるタイマーをセットする関数
+ * 
+ * @param msec Tipsを表示させるインターバル(ミリセカンド)
+ */
 function setTipsTimer(msec) {
+    // タイムアウトでTipsのHTMLを読み込む
     setTimeout(() => $.ajax({
         url: "help/help_tips.html",
         cache: false

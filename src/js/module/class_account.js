@@ -952,8 +952,13 @@ class Account {
         }
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字の使用履歴をキャッシュしてファイルに保存する
+     */
     static cacheEmojiHistory() {
         const json_array = []
+        // 履歴データをJSON化
         Account.each(elm => json_array.push({
             "address": elm.full_address,
             "emoji_history": elm.emoji_history,
@@ -964,20 +969,30 @@ class Account {
         this.use_emoji_flg = false
     }
 
+    /**
+     * #Method
+     * 引数のコードのカスタム絵文字を使用絵文字履歴に追加する
+     * 
+     * @param code 追加するカスタム絵文字
+     */
     updateEmojiHistory(code) {
         // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
         this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 9)
     }
 
+    /**
+     * #Method
+     * 引数のコードのカスタム絵文字を使用リアクション履歴に追加する
+     * 
+     * @param code 追加するカスタム絵文字
+     */
     updateReactionHistory(code) {
         // リアクション履歴の更新を試行して、変更があったら履歴ファイルを上書き
         if (!shiftArray(this.reaction_history, code.trim(), 20)) return
         Account.cacheEmojiHistory()
-
-        // コンテキストメニューのリアクション履歴を更新
-        //$(`#__menu_reaction>li[name="${this.full_address}"]>.recent_reaction>li`).html(this.recent_reaction_html)
     }
 
+    // Getter: 最近使用したカスタム絵文字を一覧で出力
     get recent_reaction_html() {
         let html = ''
         this.reaction_history.map(code => this.emojis.get(code)).forEach(emoji => html += `
@@ -1098,20 +1113,6 @@ class Account {
             Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
         return html
     }
-
-    /*
-    static createReactionMenuAccountList() {
-        let html = ''
-        if (Account.eachPlatform('Misskey', elm => html += `
-            <li name="${elm.full_address}">
-                <div>${elm.pref.username} - ${elm.full_address}</div>
-                <ul class="recent_reaction"><li><div>${elm.recent_reaction_html}</div></li></ul>
-            </li>
-        `))
-            // 対象プラットフォームが認証されていない場合は選択不可の項目を作る
-            html = `<li class="ui-state-disabled"><div>(Misskeyのアカウントがありません)</div></li>`
-        return html
-    }//*/
 
     /**
      * #StaticMethod

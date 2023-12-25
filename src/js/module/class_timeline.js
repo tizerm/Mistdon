@@ -33,6 +33,9 @@ class Timeline {
      * #Method
      * このタイムラインの最新の投稿を30件取得する
      * (返り値は取得データのpromise)
+     * 引数を指定した場合は、指定した投稿よりも前を30件取得する
+     * 
+     * @param max_id この投稿よりも前の投稿を取得する起点のID
      */
     getTimeline(max_id) {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
@@ -209,7 +212,7 @@ class Timeline {
      * #Method
      * このタイムラインに保存してあるステータス情報を削除する
      * 
-     * @param id投稿ID
+     * @param id 投稿ID
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
@@ -217,6 +220,12 @@ class Timeline {
         if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key))
     }
 
+    /**
+     * #Method
+     * 対象の投稿IDからこのタイムラインの設定で遡りウィンドウを生成
+     * 
+     * @param ref_id 起点にする投稿ID
+     */
     createScrollableTimeline(ref_id) {
         // 一旦中身を消去
         $("#pop_window_timeline>.timeline").prepend(`

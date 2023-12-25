@@ -447,6 +447,11 @@ $(() => {
         return false
     })
 
+    /**
+     * #Event
+     * アンケートの投票ボタン
+     * => 押した内容で投票して中間結果を表示する
+     */
     $(document).on("click", ".__on_poll_vote", e => {
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
             Column.get($(e.target).closest("td"))
@@ -721,6 +726,10 @@ $(() => {
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
         e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
 
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: ここから前に遡る
+     */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
 
@@ -753,6 +762,11 @@ $(() => {
      */
     $(document).on("click", "#__on_search", e => Query.onSearchTimeline())
 
+    /**
+     * #Event
+     * 一時ウィンドウ: 透過ボックス
+     * => ホバーアウトしたときにウィンドウを透過するクラスを付与する
+     */
     $(document).on("change", "#__window_opacity", e => {
         if ($(e.target).prop('checked')) $("#pop_window_timeline").addClass("__opacity_on")
         else $("#pop_window_timeline").removeClass("__opacity_on")

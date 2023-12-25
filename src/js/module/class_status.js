@@ -266,6 +266,13 @@ class Status {
             .replace(new RegExp('>', 'g'), '&gt;')
     }
 
+    /**
+     * #StaticMethod
+     * Response JSONのアンケート情報を統一化した配列にして返却する
+     * 
+     * @param poll 生の投票データ
+     * @param platform 対象プラットフォーム
+     */
     static asArrayPoll(poll, platform) {
         let total_vote = 0
         const poll_options = []
@@ -523,7 +530,7 @@ class Status {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
         let target_emojis = null
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}">`
+        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="normal_layout">`
         if (this.type == 'notification') { // 通知タイプによって表示を変更
             switch (this.notif_type) {
                 case 'favourite': // お気に入り
@@ -1126,6 +1133,12 @@ class Status {
         return $($.parseHTML(html))
     }
 
+    /**
+     * #Method
+     * この投稿のアンケートに対して投票する
+     * 
+     * @param target_elm 票を入れるボタンのjQueryオブジェクト
+     */
     async vote(target_elm) {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
@@ -1193,6 +1206,7 @@ class Status {
         }
     }
 
+    // Getter: 投票結果のグラフのjQueryオブジェクトを返却する
     get poll_graph() {
         let total_vote = 0
         let html = '<div class="poll_graph_section">'
@@ -1480,6 +1494,10 @@ class Status {
         $("#pop_expand_post").show("fade", 80)
     }
 
+    /**
+     * #Method
+     * この投稿よりも前のタイムラインを取得するウィンドウを生成
+     */
     openScrollableWindow() {
         this.from_timeline?.createScrollableTimeline(this.id)
     }

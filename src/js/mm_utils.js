@@ -34,6 +34,15 @@ async function ajax(arg) {
     }
 }
 
+/**
+ * #Util
+ * 引数の配列の先頭に要素を追加して容量超過した場合は最後の要素を削除する
+ * 同一の要素が配列内に存在する場合は長さは変えずに要素を先頭に移動する
+ * 
+ * @param array 編集対象配列
+ * @param obj 追加する要素
+ * @param limit 要素を追加できる上限数
+ */
 function shiftArray(array, obj, limit) {
     const index = array.indexOf(obj)
     if (index < 0) // 存在しないオブジェクトは先頭に保存
@@ -49,6 +58,12 @@ function shiftArray(array, obj, limit) {
     return true
 }
 
+/**
+ * #Util
+ * 要素を表示したら続きを読み込むスクロールローダーを生成する
+ * 
+ * @param arg パラメータオブジェクト
+ */
 function createScrollLoader(arg) {
     // 最初に取得したデータをもとにデータのバインド処理を行う(返り値はページング用max_id)
     const max_id = arg.bind(arg.data, arg.target)
