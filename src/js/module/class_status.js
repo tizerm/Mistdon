@@ -1004,6 +1004,9 @@ class Status {
                     jqelm.closest('li').addClass('self_post')
                     jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
                     break
+                case 'poll': // 投票終了
+                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_poll.png')
+                    break
                 default: // リプライ、引用の場合はアイコン削除
                     jqelm.find('.ic_notif_type').remove()
                     break

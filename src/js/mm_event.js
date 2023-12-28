@@ -503,11 +503,17 @@ $(() => {
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
 
+    /**
+     * #Event #Mouseenter
+     * 投稿本体に対してホバー(ノーマルレイアウトとチャットレイアウト限定)
+     * => 表示アカウントのアクションバーを表示
+     */
     $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
         // メイン画面のタイムラインのみ有効
         if ($(e.target).closest(".tl_group_box").length == 0) return
         const target_post = Column.get($(e.target).closest("td"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+        // 外部インスタンスに対しては使用不可
         if (target_post.from_timeline?.pref?.external) return
         const pos = $(e.currentTarget).offset()
         const height = $(e.currentTarget).innerHeight()
@@ -516,9 +522,11 @@ $(() => {
         if (target_post.from_account.platform == 'Misskey') { // Misskey
             $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
             $("#pop_expand_action .__short_bookmark").hide()
+            $("#pop_expand_action .__short_quote").show()
             $("#pop_expand_action .__short_open_reaction").show()
         } else { // Mastodon
             $("#pop_expand_action .__short_bookmark").show()
+            $("#pop_expand_action .__short_quote").hide()
             $("#pop_expand_action .__short_open_reaction").hide()
         }
         $("#pop_expand_action>.reactions").hide()
@@ -531,29 +539,76 @@ $(() => {
         }).show()
     })
 
+    /**
+     * #Event
+     * 簡易アクションバー: リプライ
+     */
     $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reply',
         target_url: Status.TEMPORARY_ACTION_STATUS.uri
     }))
 
+    /**
+     * #Event
+     * 簡易アクションバー: ブースト/リノート
+     */
     $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reblog',
         target_url: Status.TEMPORARY_ACTION_STATUS.uri
     }))
 
+    /**
+     * #Event
+     * 簡易アクションバー: 引用
+     */
+    $(document).on("click", ".__short_quote", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_quote',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: お気に入り
+     */
     $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_favorite',
         target_url: Status.TEMPORARY_ACTION_STATUS.uri
     }))
 
+    /**
+     * #Event
+     * 簡易アクションバー: ブックマーク
+     */
     $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_bookmark',
         target_url: Status.TEMPORARY_ACTION_STATUS.uri
     }))
 
+    /**
+     * #Event
+     * 簡易アクションバー: 最近のリアクションを開く
+     */
     $(document).on("click", ".__short_open_reaction",
         e => $("#pop_expand_action>.reactions").show("slide", { direction: "up" }, 80))
 
+    /**
+     * #Event
+     * 簡易アクションバー: 外部ブラウザで開く
+     */
+    $(document).on("click", ".__short_browser",
+        e => window.accessApi.openExternalBrowser(Status.TEMPORARY_ACTION_STATUS.uri))
+
+    /**
+     * #Event
+     * 簡易アクションバー: ここから遡る
+     */
+    $(document).on("click", ".__short_prepost",
+        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    /**
+     * #Event
+     * 簡易アクションバー: 直近のリアクション
+     */
     $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
         e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
             id: Status.TEMPORARY_ACTION_STATUS.id,
@@ -561,11 +616,20 @@ $(() => {
             success: () => $("#pop_expand_action").hide()
         }))
 
+    /**
+     * #Event
+     * 簡易アクションバー: 他のリアクションを送る
+     */
     $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reaction',
         target_url: Status.TEMPORARY_ACTION_STATUS.uri
     }))
 
+    /**
+     * #Event #Mouseleave
+     * 投稿本体からマウスアウト
+     * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
+     */
     $(document).on("mouseleave", "li.normal_layout, li.chat_timeline>.content", e => {
         // メイン画面のタイムラインのみ有効
         if ($(e.target).closest(".tl_group_box").length == 0) return
@@ -574,6 +638,11 @@ $(() => {
         $("#pop_expand_action").hide()
     })
 
+    /**
+     * #Event #Mouseleave
+     * アクションバーからマウスアウト
+     * => アクションバーポップアップを消す
+     */
     $(document).on("mouseleave", "#pop_expand_action", e => {
         // 元のウィンドウに移動した場合は消さない
         if ($(e.relatedTarget).closest("li.normal_layout, li.chat_timeline>.content").length > 0) return

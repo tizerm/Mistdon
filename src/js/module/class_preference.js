@@ -1,6 +1,6 @@
 ﻿/**
  * #Class
- * タイムラインの設定値を管理するクラス(カラムに内包)
+ * アプリケーションの全体設定を管理する静的クラス
  *
  * @author tizerm@mofu.kemo.no
  */
@@ -24,6 +24,10 @@ class Preference {
         })()
     }
 
+    /**
+     * #StaticMethod
+     * 設定ファイルの内容でウィンドウ設定を書き換える
+     */
     static setTempWindow() {
         if (!Preference.TEMPORARY_WINDOW_POSITION) return // 設定ファイルがなかったら何もしない
         const window_elm = $("#pop_window_timeline")
@@ -38,6 +42,12 @@ class Preference {
                 .prop("checked", Preference.TEMPORARY_WINDOW_POSITION.opacity)
     }
 
+    /**
+     * #StaticMethod
+     * 一時ウィンドウの位置データを保存する
+     * 
+     * @param ui Draggableのイベントオブジェクト
+     */
     static storeTempWindowPosition(ui) {
         Preference.TEMPORARY_WINDOW_POSITION = {
             "top": Math.round(ui.offset.top),
@@ -45,6 +55,12 @@ class Preference {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 一時ウィンドウのサイズデータを保存する
+     * 
+     * @param ui Resizableのイベントオブジェクト
+     */
     static storeTempWindowSize(ui) {
         Preference.TEMPORARY_WINDOW_SIZE = {
             "width": Math.round(ui.size.width),
@@ -52,6 +68,12 @@ class Preference {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 一時ウィンドウ設定値をファイルに書き出す
+     * 
+     * @param target 一時ウィンドウのjQueryオブジェクト
+     */
     static saveTempWindowPref(target) {
         window.accessApi.writeWindowPref({
             "top": Preference.TEMPORARY_WINDOW_POSITION.top,
