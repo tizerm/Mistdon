@@ -249,12 +249,13 @@ $(() => {
      * リアクション絵文字一覧の絵文字
      * => リアクションを送信
      */
-    $(document).on("click", ".__on_emoji_reaction", e => Account.get($("#__hdn_reaction_account").val()).sendReaction({
-        id: $("#__hdn_reaction_id").val(),
-        shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
-        // 投稿成功時処理(リプライウィンドウを閉じる)
-        success: () => $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-    }))
+    $(document).on("click", "#pop_extend_column>.reaction_col .__on_emoji_reaction",
+        e => Account.get($("#__hdn_reaction_account").val()).sendReaction({
+            id: $("#__hdn_reaction_id").val(),
+            shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
+            // 投稿成功時処理(リプライウィンドウを閉じる)
+            success: () => $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
+        }))
 
     /**
      * #Event
@@ -501,6 +502,83 @@ $(() => {
      * => マウスが出たらポップアップを消す
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
+
+    $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
+        // メイン画面のタイムラインのみ有効
+        if ($(e.target).closest(".tl_group_box").length == 0) return
+        const target_post = Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+        if (target_post.from_timeline?.pref?.external) return
+        const pos = $(e.currentTarget).offset()
+        const height = $(e.currentTarget).innerHeight()
+
+        // プラットフォームによって初期表示を変更
+        if (target_post.from_account.platform == 'Misskey') { // Misskey
+            $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+            $("#pop_expand_action .__short_bookmark").hide()
+            $("#pop_expand_action .__short_open_reaction").show()
+        } else { // Mastodon
+            $("#pop_expand_action .__short_bookmark").show()
+            $("#pop_expand_action .__short_open_reaction").hide()
+        }
+        $("#pop_expand_action>.reactions").hide()
+
+        // 一時データに設定してアクションバーを開く
+        Status.TEMPORARY_ACTION_STATUS = target_post
+        $("#pop_expand_action").css({
+            "top": `${pos.top + height - 2}px`,
+            "left": `${pos.left}px`,
+        }).show()
+    })
+
+    $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reply',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reblog',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_favorite',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_bookmark',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    $(document).on("click", ".__short_open_reaction",
+        e => $("#pop_expand_action>.reactions").show("slide", { direction: "up" }, 80))
+
+    $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
+        e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
+            id: Status.TEMPORARY_ACTION_STATUS.id,
+            shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
+            success: () => $("#pop_expand_action").hide()
+        }))
+
+    $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reaction',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    $(document).on("mouseleave", "li.normal_layout, li.chat_timeline>.content", e => {
+        // メイン画面のタイムラインのみ有効
+        if ($(e.target).closest(".tl_group_box").length == 0) return
+        // アクションバーに移動した場合は消さない
+        if ($(e.relatedTarget).closest("#pop_expand_action").length > 0) return
+        $("#pop_expand_action").hide()
+    })
+
+    $(document).on("mouseleave", "#pop_expand_action", e => {
+        // 元のウィンドウに移動した場合は消さない
+        if ($(e.relatedTarget).closest("li.normal_layout, li.chat_timeline>.content").length > 0) return
+        $("#pop_expand_action").hide()
+    })
 
     /**
      * #Event

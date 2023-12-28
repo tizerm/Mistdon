@@ -234,8 +234,9 @@ class Status {
     // Getter: オリジナルテキスト(投稿時そのままの形式)
     get original_text() { return this.__original_text ?? $($.parseHTML(this.content)).text() }
 
-    // コンテキストメニュー呼び出し時に一時的に保存する場所
+    // 投稿データを一次保存するスタティックフィールド
     static TEMPORARY_CONTEXT_STATUS = null
+    static TEMPORARY_ACTION_STATUS = null
 
     // 日付フォーマッターはstaticプロパティにする
     static {

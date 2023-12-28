@@ -54,6 +54,20 @@ $(() => (async () => {
             duration: 80
         }
     });
+    $("#pop_expand_action").tooltip({
+        position: {
+            my: "center bottom",
+            at: "center top"
+        },
+        show: {
+            effect: "slideDown",
+            duration: 80
+        },
+        hide: {
+            effect: "slideUp",
+            duration: 80
+        }
+    });
 
     // カラム生成
     Column.each(col => {

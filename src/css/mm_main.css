@@ -374,9 +374,10 @@
             margin: 0px;
             padding: 0px;
             > li {
-                display: inline-block;
                 list-style-type: none;
                 > a>img {
+                    display: inline-block;
+                    vertical-align: text-bottom;
                     height: 24px;
                     width: auto;
                 }
@@ -392,6 +393,7 @@
             background-position: top +4px left;
             background-repeat: no-repeat;
             background-size: 16px 16px;
+            display: inline-block;
             &:nth-child(1) { background-image: url("../resources/1.png"); }
             &:nth-child(2) { background-image: url("../resources/2.png"); }
             &:nth-child(3) { background-image: url("../resources/3.png"); }
@@ -406,6 +408,7 @@
             height: 128px;
             overflow-y: auto;
             &::-webkit-scrollbar { width: 8px; }
+            > li { display: inline; }
         }
     }
 
@@ -470,6 +473,33 @@
             height: auto;
             > li { border: solid 2px #cccccc; }
         }
+    }
+
+    /*=== Post Default Action Pop Layout =========================================================*/
+    > #pop_expand_action {
+        display: none;
+        z-index: 6;
+        position: absolute;
+        border-radius: 8px;
+        background-color: rgba(62,62,62,0.8);
+        border: solid 1px #bbbbbb;
+        max-width: 320px;
+        padding: 4px;
+
+        & a {
+            > img {
+                display: inline-block;
+                vertical-align: text-bottom;
+                border-radius: 6px;
+                height: 24px;
+                width: auto;
+            }
+            &:hover>img {
+                background-color: rgba(255,255,255,0.2);
+                cursor: pointer;
+            }
+        }
+        > .reactions>.recent { display: inline; }
     }
 
     /*=== Extra Timeline Window Layout ===========================================================*/
