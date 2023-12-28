@@ -614,7 +614,7 @@
             }
         }
         >.timeline {
-            height: calc(100% - 32px);
+            height: calc(100% - 34px);
             > ul { height: 100%; }
         }
         &.__opacity_on {

@@ -3,6 +3,7 @@ $(() => (async () => {
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs();
     await window.accessApi.readPrefCols();
+    await window.accessApi.readWindowPref();
     await window.accessApi.readCustomEmojis();
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
@@ -36,9 +37,15 @@ $(() => (async () => {
     $("#pop>.pop_context>.ui_menu").menu();
     // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
     $("#pop_window_timeline").draggable({
-        handle: "h2"
+        handle: "h2",
+        stop: (ext, ui) => Preference.storeTempWindowPosition(ui)
     });
-    $("#pop_window_timeline").resizable();
+    $("#pop_window_timeline").resizable({
+        stop: (ext, ui) => Preference.storeTempWindowSize(ui)
+    });
+    // 一時タイムラインウィンドウの保存をするイベントを登録
+    Preference.setTempWindow();
+    window.addEventListener("beforeunload", e => Preference.saveTempWindowPref($("#pop_window_timeline")));
     // 公開範囲ホバー時にツールチップ表示
     $("#header>#head_postarea").tooltip({
         position: {
@@ -56,15 +63,16 @@ $(() => (async () => {
     });
     $("#pop_expand_action").tooltip({
         position: {
-            my: "center bottom",
+            my: "center bottom-8",
             at: "center top"
-        },
+        }
+        ,
         show: {
-            effect: "slideDown",
+            effect: "fade",
             duration: 80
         },
         hide: {
-            effect: "slideUp",
+            effect: "fade",
             duration: 80
         }
     });
