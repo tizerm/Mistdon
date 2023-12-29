@@ -426,6 +426,13 @@ async function overwriteHistory(event, data) {
     cache_history = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * 保存してあるカスタム絵文字の使用履歴を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return カスタム絵文字履歴JSON
+ */
 async function readEmojiHistory() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (cache_emoji_history) {
@@ -442,6 +449,13 @@ async function readEmojiHistory() {
     return cache_emoji_history
 }
 
+/**
+ * #IPC
+ * カスタム絵文字の使用履歴をJSONファイルとして書き込む
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function overwriteEmojiHistory(event, data) {
     const content = await overwriteFile('app_prefs/emoji_history.json', data)
     console.log('@INF: finish write app_prefs/emoji_history.json')
@@ -449,6 +463,13 @@ async function overwriteEmojiHistory(event, data) {
     cache_emoji_history = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * 保存してあるウィンドウ設定を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return ウィンドウ設定JSON
+ */
 async function readWindowPref() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_window) {
@@ -463,6 +484,14 @@ async function readWindowPref() {
     return pref_window
 }
 
+/**
+ * #IPC
+ * ウィンドウ設定をJSONファイルとして書き込む
+ * 変更がない場合は何もしない
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function writeWindowPref(event, data) {
     // 変更がなかったらなにもしない
     if (JSON.stringify(data) == JSON.stringify(pref_window)) return
@@ -633,7 +662,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            //devTools: false,
+            devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -641,7 +670,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    //win.setMenuBarVisibility(false)
+    win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)

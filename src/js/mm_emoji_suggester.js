@@ -69,8 +69,10 @@
             $("#pop_emoji_suggester").hide("fade", 120);
             return false;
         }
-
     });
+
+    // フォーカスアウトでサジェスターを閉じる
+    $(document).on("blur", ".__emoji_suggest", e => $("#pop_emoji_suggester").hide("fade", 120));
 
     // サジェスターから絵文字選択した時のイベント
     $(document).on("click", "#pop_emoji_suggester .__on_emoji_suggest_append", e => {

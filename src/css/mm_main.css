@@ -618,7 +618,7 @@
             > ul { height: 100%; }
         }
         &.__opacity_on {
-            opacity: 0.25;
+            opacity: 0.2;
             transition: opacity 0.2s;
             &:hover { opacity: 1.0; }
         }

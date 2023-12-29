@@ -7,12 +7,14 @@
 $(() => {
     // 背景をランダムに変更
     const back_rand = Math.random()
-    if (back_rand < 0.2)  // Mitlin v0.1.1
+    if (back_rand < 0.15)  // Mitlin v0.1.1
         $("body").css("background-image", 'url("resources/illust/mitlin_back1.jpg")');
-    else if (back_rand < 0.55)  // Mitlin v0.3.1
+    else if (back_rand < 0.3)  // Mitlin v0.3.1
         $("body").css("background-image", 'url("resources/illust/mitlin_back2.jpg")');
-    else // Mitlin v0.4.1
+    else if (back_rand < 0.6)  // Mitlin v0.4.1
         $("body").css("background-image", 'url("resources/illust/mitlin_back3.jpg")');
+    else // Mitlin v0.5.1
+        $("body").css("background-image", 'url("resources/illust/mitlin_back4.jpg")');
 
     // ナビゲーションメニューホバー時にツールチップ表示
     $("#navi").tooltip({

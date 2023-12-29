@@ -464,11 +464,14 @@
             /*=== Quote Info =====================================================================*/
             > .post_quote {
                 margin: 2px;
-                border-radius: 8px;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
                 background-color: rgba(255,255,255,0.08);
+                border-left: solid 8px #cccccc;
                 overflow-wrap: break-word;
                 font-size: 11px;
-                padding: 6px 12px;
+                padding: 4px 8px;
+                padding-left: 12px;
                 > .quote_userarea {
                     width: 100%;
                     overflow: hidden;

@@ -57,6 +57,7 @@ class Account {
             const em_history = await window.accessApi.readEmojiHistory()
             em_history?.forEach(elm => {
                 const account = acc_map.get(elm.address)
+                if (!account) return // 削除済みのアカウント情報は無視
                 account.emoji_history = elm.emoji_history
                 account.reaction_history = elm.reaction_history
             })
@@ -944,7 +945,21 @@ class Account {
                 }).then(callback)
                 break
             case 'Misskey': // Misskey
-                // 認証解除APIがないのでそのままコールバックを実行
+                // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
+                /*
+                $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/i/revoke-token`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": this.pref.access_token,
+                        "token": this.pref.access_token
+                    })
+                }).then(data => {
+                    console.log(data)
+                    callback()
+                }).catch(jqXHR => console.log(jqXHR))//*/
                 callback()
                 break
             default:

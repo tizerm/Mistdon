@@ -25,6 +25,7 @@ class Status {
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
+        //if (this.detail_flg) console.log(json)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -76,6 +77,7 @@ class Status {
                     this.poll_id = data.poll.id
                     this.poll_expired = data.poll.expired
                     this.poll_expired_time = new Date(data.poll.expires_at)
+                    this.poll_unlimited = !data.poll.expires_at
                     this.poll_multiple = data.poll.multiple
                     this.poll_options = Status.asArrayPoll(data.poll, this.platform)
                     this.poll_voted = data.poll.voted
@@ -185,7 +187,8 @@ class Status {
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
                     this.poll_expired_time = new Date(data.poll.expiresAt)
-                    this.poll_expired = this.poll_expired_time < new Date()
+                    this.poll_unlimited = !data.poll.expiresAt
+                    this.poll_expired = !this.poll_unlimited && this.poll_expired_time < new Date()
                     this.poll_multiple = data.poll.multiple
                     this.poll_options = Status.asArrayPoll(data.poll, this.platform)
                     this.poll_voted = data.poll.choices.some(v => v.isVoted)
@@ -632,10 +635,12 @@ class Status {
             this.poll_options.forEach(elm => options += `
                 <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
             `)
+            const label_limit = this.poll_unlimited // 投票期限テキスト
+                ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
             html /* 投票ブロック */ += `
                 <div class="post_poll">
                     <div class="options">${options}</div>
-                    <div class="poll_info">${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで</div>
+                    <div class="poll_info">${label_limit}</div>
                 </div>
             `
         }
@@ -762,7 +767,7 @@ class Status {
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
-        if (this.poll_options && (this.detail_flg || this.poll_voted || this.poll_expired))
+        if (this.poll_options && (this.detail_flg || this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
         // カードがある場合はカードに背景を設定
         if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
@@ -911,7 +916,7 @@ class Status {
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
-        if (this.poll_options && !this.detail_flg && (this.poll_voted || this.poll_expired))
+        if (this.poll_options && !this.detail_flg && (this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
@@ -1223,10 +1228,12 @@ class Status {
                 </div>
             `
         })
+        const label_limit = this.poll_unlimited // 投票期限テキスト
+            ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
         html += `
             <div class="poll_footer">
                 <span>${total_vote} 票</span>
-                <span>${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで</span>
+                <span>${label_limit}</span>
             </div>
         </div>`
 
