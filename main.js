@@ -441,7 +441,7 @@ async function readEmojiHistory() {
     }
     const content = readFile('app_prefs/emoji_history.json')
     if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
-        cache_emoji_history = {}
+        cache_emoji_history = []
         return cache_emoji_history
     }
     cache_emoji_history = JSON.parse(content)
