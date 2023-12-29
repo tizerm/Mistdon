@@ -27,6 +27,8 @@
             }
         }
     }
+
+    /*=== Default Post Area Layout ===============================================================*/
     > #head_postarea {
         position: relative;
         margin-top: 4px;
@@ -82,7 +84,7 @@
                 border-radius: 4px;
                 border: solid 1px #888888;
                 color: #ffffff;
-                width: 152px;
+                width: 120px;
             }
             #__on_post_to_misskey {
                 border-style: none;
@@ -152,6 +154,23 @@
                 top: 36px;
                 right: 0px;
             }
+        }
+    }
+
+    /*=== Advanced Post Options Layout ===========================================================*/
+    > #post_options {
+        display: none;
+        position: absolute;
+        top: 108px;
+        left: 0px;
+        margin-top: 4px;
+        z-index: 10;
+        border-radius: 8px;
+        background-color: rgba(62,62,62,0.8);
+        border: solid 1px #bbbbbb;
+        > .flex_section {
+            display: flex;
+            width: calc(100vw - 72px);
         }
     }
 }
@@ -229,7 +248,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_postuser {
         display: none;
-        z-index: 10;
+        z-index: 11;
         width: 360px;
         position: absolute;
         top: 108px;
@@ -263,7 +282,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_post_to {
         display: none;
-        z-index: 10;
+        z-index: 11;
         position: absolute;
         top: 108px;
         left: 288px;

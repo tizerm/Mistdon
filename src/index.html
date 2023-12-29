@@ -81,6 +81,8 @@
                     <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
             </div>
             <div class="cw_block">
+                <a id="open_post_options" title="投稿設定を開く"
+                    ><img src="resources/ic_return.png" alt="投稿設定を開く"/></a>
                 <a id="on_custom_emoji" title="カスタム絵文字を使用"
                     ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
                 <input type="text" id="__txt_content_warning"
@@ -102,6 +104,43 @@
                     ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></a>
                 <a id="on_last_replychain" title="直前の投稿につなげる"
                     ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
+            </div>
+        </div>
+    </div>
+    <div id="post_options">
+        <div class="flex_section">
+            <div class="additional_users">
+                <h4>追加投稿アカウント</h4>
+                <ul class="account_list"></ul>
+            </div>
+            <div class="poll_setting">
+                <h4>アンケート</h4>
+                <ul class="poll_options">
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答1"/></li>
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答2"/></li>
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答3"/></li>
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答4"/></li>
+                </ul>
+                <div class="poll_expire">
+                    期限: <input type="text"
+                        class="__txt_poll_expire_date __ignore_keyborad" placeholder="回答1"/>
+                </div>
+            </div>
+            <div class="attached_media">
+                <h4>添付メディア</h4>
+                <ul class="media_list"></ul>
+                <div class="sensitive_option">
+                    <input type="checkbox" id="__chk_sensitive_media"/>
+                    <label for="__chk_sensitive_media">すべてのメディアを閲覧注意にする</label>
+                </div>
+            </div>
+            <div class="refernced_post">
+                <h4>返信/引用元</h4>
+                <ul class="refernce_post timeline"></ul>
             </div>
         </div>
     </div>

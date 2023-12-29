@@ -195,6 +195,9 @@ $(() => {
         target_account.updateEmojiHistory(target_emoji)
     })
 
+    $("#header>#head_postarea #open_post_options").on("click",
+        e => $("#header>#post_options").toggle("slide", { direction: "up" }, 80))
+
     /**
      * #Event
      * 投稿ボタン
