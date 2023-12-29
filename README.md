@@ -10,6 +10,10 @@ Electronを使って開発しているMastodonとMisskeyがいっぺんに見ら
 <h3>Change Log</h3>
 
 <p>
+2023/12/29 v0.5.1 (beta)<br/>
+・主な機能はカスタム絵文字履歴、アンケート、タイムライン遡りなど<br/>
+・詳細はReleaseを見てね……<br/>
+<br/>
 2023/12/02 v0.4.2 (beta)<br/>
 ・各種バグフィックス、Misskeyのチャンネル機能搭載など<br/>
 <br/>
