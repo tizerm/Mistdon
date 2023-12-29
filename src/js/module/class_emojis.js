@@ -75,7 +75,7 @@ class Emojis {
 
     /**
      * #Method
-     * カスタム絵文字を走査する.
+     * カスタム絵文字を走査する
      * 投稿に付属する絵文字にもキャッシュしている絵文字にも使える
      * 
      * @param callback 各要素で実効するコールバック関数
@@ -83,6 +83,29 @@ class Emojis {
     each(callback) {
         if (this.cache_flg) this.emoji_map.forEach((v, k) => callback(v))
         else this.list.forEach(callback)
+    }
+
+    /**
+     * #Method
+     * カスタム絵文字キャッシュから指定の絵文字を返却する
+     * 
+     * @param code 取得対象の絵文字のショートコード
+     */
+    get(code) {
+        return this.emoji_map.get(code)
+    }
+
+    /**
+     * #Method
+     * 指定の文字列が先頭にくるカスタム絵文字を抽出してコールバック関数を実行
+     * 
+     * @param code 検索文字列
+     * @param callback ヒットした絵文字に対して実行するコールバック関数
+     */
+    filter(code, callback) {
+        this.emoji_map.forEach((v, k) => {
+            if (k.match(new RegExp(`^:${code}`, 'g'))) callback(v)
+        })
     }
 
     /**
@@ -187,6 +210,47 @@ class Emojis {
                     new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
         })
         jqelm.html(replace_text)
+    }
+
+    /**
+     * #StaticMethod
+     * カスタム絵文字サジェスターを起動する
+     * 
+     * @param target_elm 起動対称の入力フォームElement
+     */
+    static createEmojiSuggester(target_elm) {
+        // 絵文字取得対象アカウントを取得
+        let target_account = null
+        if (target_elm.is("#__txt_replyarea")) // リプライウィンドウ
+            target_account = Account.get($("#__hdn_reply_account").val())
+        else if (target_elm.is("#__txt_quotearea")) // 引用ウィンドウ
+            target_account = Account.get($("#__hdn_quote_account").val())
+        else target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+
+        // サジェスター生成時点でのカーソル位置を保持
+        const suggest_pos = target_elm.get(0).selectionStart
+
+        // サジェスターウィンドウを初期化
+        $("#pop_emoji_suggester>.target_account").val(target_account.full_address)
+        $("#pop_emoji_suggester>.target_cursor").val(suggest_pos)
+        $("#pop_emoji_suggester>.target_elm_id").val(target_elm.attr("id"))
+        $("#pop_emoji_suggester>.recent_emoji_list").empty()
+        $("#pop_emoji_suggester>.suggest_emoji_list").empty()
+        // 絵文字履歴を表示する
+        target_account.emoji_history.map(code => target_account.emojis.get(code)).forEach(
+            emoji => $("#pop_emoji_suggester>.recent_emoji_list").append(`
+                <li>
+                    <a class="__on_emoji_suggest_append" name="${emoji.shortcode}">
+                        <img src="${emoji.url}" alt="${emoji.name}"/>
+                    </a>
+                </li>
+            `))
+        // サジェスターを表示
+        const pos = target_elm.offset()
+        $("#pop_emoji_suggester").css({
+            'left': `${pos.left - 32}px`,
+            'top': `${pos.top + 72}px`,
+        }).show()
     }
 }
 

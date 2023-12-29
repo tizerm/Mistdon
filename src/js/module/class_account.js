@@ -14,6 +14,9 @@ class Account {
         this.socket = null
         this.reconnect = false
         this.emoji_cache = null
+
+        this.emoji_history = []
+        this.reaction_history = []
     }
 
     // Getter: プラットフォーム
@@ -39,6 +42,7 @@ class Account {
     // スタティックマップを初期化(非同期)
     static {
         (async () => {
+            // アカウント情報をファイルから読み込み
             const accounts = await window.accessApi.readPrefAccs()
             const acc_map = new Map()
             const keys = []
@@ -48,6 +52,16 @@ class Account {
                 acc_map.set(k, new Account(v))
                 keys.push(k)
             })
+
+            // カスタム絵文字の履歴をファイルから読み込み
+            const em_history = await window.accessApi.readEmojiHistory()
+            em_history?.forEach(elm => {
+                const account = acc_map.get(elm.address)
+                if (!account) return // 削除済みのアカウント情報は無視
+                account.emoji_history = elm.emoji_history
+                account.reaction_history = elm.reaction_history
+            })
+
             Account.map = acc_map
             Account.keys = keys
         })()
@@ -115,8 +129,12 @@ class Account {
             src: this.pref.avatar_url,
             name: this.full_address
         })
-        $("#header>h1").text(`${this.pref.username} - ${this.full_address}`)
-            .css("background-color", `#${this.pref.acc_color}`)
+
+        // 背景アイコンとアカウントカラーを設定
+        $("#header>h1>.head_user").css('background-image',
+            `url("resources/${this.platform == 'Mastodon' ? 'ic_mastodon.png' : 'ic_misskey.png'}"`
+        ).text(`${this.pref.username} - ${this.full_address}`)
+        $("#header>h1").css('background-color', `#${this.pref.acc_color}`)
 
         // 投稿先メニューを生成
         this.createPostToMenu()
@@ -236,6 +254,9 @@ class Account {
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("投稿しました.", "done", toast_uuid)
+
+            // 絵文字を使っていたら投稿時に履歴を保存
+            if (this.use_emoji_flg) Account.cacheEmojiHistory()
         }).catch(jqXHR => toast("投稿に失敗しました.", "error", toast_uuid))
     }
 
@@ -409,6 +430,7 @@ class Account {
                 id: arg.id,
                 from_account: this
             }, 'reaction')
+            this.updateReactionHistory(arg.shortcode)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast("リアクションを送信しました.", "done", toast_uuid)
@@ -923,7 +945,21 @@ class Account {
                 }).then(callback)
                 break
             case 'Misskey': // Misskey
-                // 認証解除APIがないのでそのままコールバックを実行
+                // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
+                /*
+                $.ajax({
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/i/revoke-token`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({
+                        "i": this.pref.access_token,
+                        "token": this.pref.access_token
+                    })
+                }).then(data => {
+                    console.log(data)
+                    callback()
+                }).catch(jqXHR => console.log(jqXHR))//*/
                 callback()
                 break
             default:
@@ -932,25 +968,84 @@ class Account {
     }
 
     /**
+     * #StaticMethod
+     * カスタム絵文字の使用履歴をキャッシュしてファイルに保存する
+     */
+    static cacheEmojiHistory() {
+        const json_array = []
+        // 履歴データをJSON化
+        Account.each(elm => json_array.push({
+            "address": elm.full_address,
+            "emoji_history": elm.emoji_history,
+            "reaction_history": elm.reaction_history
+        }))
+        window.accessApi.overwriteEmojiHistory(json_array)
+        // 絵文字使用フラグをもとに戻す
+        this.use_emoji_flg = false
+    }
+
+    /**
+     * #Method
+     * 引数のコードのカスタム絵文字を使用絵文字履歴に追加する
+     * 
+     * @param code 追加するカスタム絵文字
+     */
+    updateEmojiHistory(code) {
+        // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
+        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 9)
+    }
+
+    /**
+     * #Method
+     * 引数のコードのカスタム絵文字を使用リアクション履歴に追加する
+     * 
+     * @param code 追加するカスタム絵文字
+     */
+    updateReactionHistory(code) {
+        // リアクション履歴の更新を試行して、変更があったら履歴ファイルを上書き
+        if (!shiftArray(this.reaction_history, code.trim(), 20)) return
+        Account.cacheEmojiHistory()
+    }
+
+    // Getter: 最近使用したカスタム絵文字を一覧で出力
+    get recent_reaction_html() {
+        let html = ''
+        this.reaction_history.map(code => this.emojis.get(code)).forEach(emoji => html += `
+            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+        `)
+        return html
+    }
+
+    /**
      * #Method
      * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
      */
     createEmojiList() {
         $("#pop_custom_emoji").html(`
-            <div class="emoji_head">
-                <h2>カスタム絵文字一覧</h2>
-                <h3>${this.pref.domain}</h3>
+            <div class="palette_block">
+                <div class="emoji_head">
+                    <h2>カスタム絵文字一覧</h2>
+                    <h3>${this.pref.domain}</h3>
+                </div>
+                <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
+                    placeholder="ショートコードを入力するとサジェストされます"/>
+                <div class="recent_emoji">
+                    <h5>最近使った絵文字</h5>
+                </div>
+                <div class="emoji_list">
+                </div>
+                <button type="button" id="__on_emoji_close" class="close_button">×</button>
             </div>
-            <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
-                placeholder="ショートコードを入力するとサジェストされます"/>
-            <div class="emoji_list">
-            </div>
-            <button type="button" id="__on_emoji_close">×</button>
         `).show("slide", { direction: "left" }, 150)
-        $("#pop_custom_emoji>.emoji_head").css("background-color", `#${this.pref.acc_color}`)
+        // 絵文字履歴を表示する
+        this.emoji_history.map(code => this.emojis.get(code)).forEach(
+            emoji => $("#pop_custom_emoji .recent_emoji").append(`
+                <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `))
+        $("#pop_custom_emoji .emoji_head").css("background-color", `#${this.pref.acc_color}`)
 
         // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji>.emoji_list").append(`
+        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji .emoji_list").append(`
             <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `)))()
     }
@@ -1084,7 +1179,6 @@ class Account {
                         <ul class="pinned_post __context_posts"></ul>
                     </div>
                     <div class="posts_block post_div">
-                        <h4>投稿一覧</h4>
                         <ul class="posts __context_posts"></ul>
                     </div>
                 </div>
@@ -1101,7 +1195,7 @@ class Account {
             </div>
             <div class="account_timeline single_user ff_pop_user">
             </div>
-            <button type="button" id="__on_search_close">×</button>
+            <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
         $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 
@@ -1130,16 +1224,17 @@ class Account {
             })
 
             // ユーザーの投稿を取得
-            detail.getPost(v, null).then(posts => {
-                posts.forEach(p => column.find(".posts").append(p.element))
-                // スクロールローダーを生成
-                Status.createScrollLoader({
-                    list: posts,
-                    target: column.find(".posts"),
-                    asyncLoader: async last_id => detail.getPost(v, last_id),
-                    binder: (post, target) => target.append(post.element)
-                })
-            })
+            detail.getPost(v, null).then(posts => createScrollLoader({
+                // 最新投稿データはスクロールローダーを生成
+                data: posts,
+                target: column.find(".posts"),
+                bind: (data, target) => {
+                    data.forEach(p => target.append(p.element))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop().id
+                },
+                load: async max_id => detail.getPost(v, max_id)
+            }))
             detail.getPinnedPost(v).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす

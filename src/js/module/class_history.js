@@ -63,7 +63,7 @@ class History {
                     </td>
                 </tr></tbody></table>
             </div>
-            <button type="button" id="__on_search_close">×</button>
+            <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
 
         History.bindAsync($("#pop_ex_timeline .post_history ul"), History.post_stack)

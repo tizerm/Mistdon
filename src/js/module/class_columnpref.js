@@ -351,6 +351,7 @@ class GroupPref {
                 <div class="group_option">
                     <select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
                         <option value="default">ノーマル</option>
+                        <option value="normal2">ノーマル2</option>
                         <option value="chat">チャット</option>
                         <option value="list">リスト</option>
                         <option value="media">メディア</option>

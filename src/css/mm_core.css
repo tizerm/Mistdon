@@ -176,7 +176,8 @@ audio { height: 30px; }
 
     > h1 {
         margin: 0px;
-        padding: 2px 32px;
+        padding: 2px 18px;
+        padding-left: 32px;
         text-align: left;
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 18px;
@@ -302,17 +303,6 @@ audio { height: 30px; }
                 }
             }
         }
-        & button {
-            display: block;
-            border-radius: 12px;
-            padding: 6px;
-            text-align: center;
-            width: 100%;
-            border: solid 2px #ffffff;
-            padding: 4px 32px;
-            font-size: 16px;
-            font-weight: bold;
-        }
     }
     /*=== Color Palette ==========================================================================*/
     > #pop_palette {
@@ -324,6 +314,16 @@ audio { height: 30px; }
         width: 140px;
         padding: 6px;
     }
+}
+button.close_button {
+    display: block;
+    border-radius: 12px;
+    padding: 4px;
+    text-align: center;
+    width: 100%;
+    border: solid 2px #ffffff;
+    font-size: 16px;
+    font-weight: bold;
 }
 .__on_select_color, .__on_call_palette {
     position: relative;

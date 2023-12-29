@@ -241,6 +241,7 @@
         /*=== Normal Layout Style ================================================================*/
         > li {
             background-color: rgba(62,62,62,0.92);
+            position: relative;
             border-radius: 12px;
             list-style-type: none;
             margin: 6px;
@@ -254,6 +255,14 @@
                 font-size: 12px;
                 text-align: right;
             }
+            > .visibilityicon {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                width: 36px;
+                height: 36px;
+                opacity: 0.2;
+            }
 
             /*=== User Info ======================================================================*/
             > .user {
@@ -264,6 +273,7 @@
                     border-radius: 12px;
                     width: 48px;
                     height: 48px;
+                    cursor: pointer;
                 }
                 > .username {
                     position: absolute;
@@ -299,17 +309,38 @@
                         }
                     }
                 }
-                > .visibilityicon {
-                    position: absolute;
-                    top: -2px;
-                    right: -2px;
-                    opacity: 0.2;
-                }
                 > .instance_icon {
                     position: absolute;
                     top: 0px;
                     right: 4px;
                     opacity: 0.3;
+                }
+
+                /*=== User Info (Normal2 Layout) =================================================*/
+                &.prof_normal2 {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    margin: -4px -6px 2px;
+                    > .usericon {
+                        border-radius: 12px;
+                        width: 24px;
+                        height: 24px;
+                        display: inline-block;
+                        vertical-align: text-bottom;
+                    }
+                    > .username {
+                        position: static;
+                        font-size: 13px;
+                        font-weight: bold;
+                        display: inline;
+                        > .inline_emoji { height: 18px; }
+                    }
+                    > .userid {
+                        position: static;
+                        display: inline;
+                        font-size: 12px;
+                    }
                 }
             }
 
@@ -371,6 +402,7 @@
                 position: relative;
                 overflow: hidden;
                 margin: 0px;
+                max-height: 240px;
                 &::before {
                     content: "";
                     padding-top: 100%;
@@ -387,14 +419,59 @@
                 .media_preview { border-radius: 8px; }
             }
 
+            /*=== Poll Info ======================================================================*/
+            > .post_poll {
+                margin: 2px;
+                > .options>button.__on_poll_vote {
+                    display: inline-block;
+                    background-color: rgba(62,82,96,0.8);
+                    border: solid 1px #cccccc;
+                    border-radius: 6px;
+                    width: calc(50% - 4px);
+                    margin: 0px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    font-size: 12px;
+                    font-weight: normal;
+                    &:hover     { background-color: rgba(62,96,82,0.8); }
+                    &[disabled] { background-color: rgba(34,34,34,0.8); }
+                }
+                > .poll_info {
+                    text-align: right;
+                    font-size: 11px;
+                    color: #cccccc;
+                }
+            }
+            > .poll_graph_section {
+                > .poll_opt_graph {
+                    margin: 1px;
+                    padding: 0px 12px;
+                    border-radius: 6px;
+                    > .text { font-size: 12px; }
+                    > .rate {
+                        font-size: 11px;
+                        color: #cccccc;
+                    }
+                }
+                > .poll_footer {
+                    text-align: right;
+                    font-size: 11px;
+                    color: #cccccc;
+                }
+            }
+
             /*=== Quote Info =====================================================================*/
             > .post_quote {
                 margin: 2px;
-                border-radius: 8px;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
                 background-color: rgba(255,255,255,0.08);
+                border-left: solid 8px #cccccc;
                 overflow-wrap: break-word;
                 font-size: 11px;
-                padding: 6px 12px;
+                padding: 4px 8px;
+                padding-left: 12px;
                 > .quote_userarea {
                     width: 100%;
                     overflow: hidden;
@@ -420,6 +497,43 @@
                     background-repeat: no-repeat;
                     padding-right: 32px;
                 }
+                > a.card_link {
+                    display: block;
+                    position: relative;
+                    border-radius: 18px;
+                    padding: 0px;
+                    width: 100%;
+                    background-color: #808080;
+                    background-position: center center;
+                    background-size: cover;
+                    &::before {
+                        content: "";
+                        padding-top: 100%;
+                        display: block;
+                    }
+                    > .descriptions {
+                        position: absolute;
+                        bottom: 0px;
+                        left: 0px;
+                        padding: 2px 12px;
+                        border-bottom-left-radius: 18px;
+                        border-bottom-right-radius: 18px;
+                        width: calc(100% - 24px);
+                        background-color: rgba(34,34,34,0.8);
+                        color: #ffffff;
+                        > h6 {
+                            margin: 0px;
+                            padding: 0px;
+                            font-size: 14px;
+                            font-weight: bold;
+                        }
+                        > .desc_text {
+                            font-size: 12px;
+                            font-weight: normal;
+                        }
+                    }
+                    &:hover>.descriptions { background-color: rgba(62,82,96,0.8); }
+                }
                 > .hashtags>a {
                     background-color: rgba(255,255,255,0.1);
                     background-image: url("../resources/ic_tag.png");
@@ -440,29 +554,6 @@
                     background-color: rgba(0,172,255,0.2);
                     padding-right: 8px;
                 }
-                &.auth_details {
-                    margin: -2px -4px 4px;
-                    > a {
-                        position: relative;
-                        top: 6px;
-                        padding: 0px;
-                        margin: 0px;
-                        &:hover>img {
-                            background-color: rgba(255,255,255,0.2);
-                            cursor: pointer;
-                        }
-                    }
-                    > .counter {
-                        width: 64px;
-                        margin: 2px 1px;
-                        padding-left: 8px;
-                        &:hover {
-                            opacity: 0.75;
-                            text-decoration: underline;
-                            cursor: pointer;
-                        }
-                    }
-                }
             }
 
             /*=== Footer Info ====================================================================*/
@@ -472,13 +563,15 @@
                 font-size: 12px;
                 > .created_at {
                     display: block;
-                    background-color: rgba(255,255,255,0.05);
-                    padding: 2px 12px;
-                    border-radius: 6px;
-                    color: #dddddd;
+                    border-top: solid 1px #bbbbbb;
+                    padding: 2px 16px;
+                    margin-bottom: -4px;
+                    color: #bbbbbb;
+                    font-size: 11px;
                     &:hover {
-                        background-color: rgba(255,255,255,0.1);
-                        padding-right: 18px;
+                        padding-right: 24px;
+                        text-decoration: underline;
+                        color: #dddddd;
                         cursor: pointer;
                     }
                 }
@@ -625,6 +718,7 @@
             }
             > .media a.__on_media_expand {
                 width: calc(25% - 6px);
+                max-height: 160px;
                 .media_preview { border-radius: 6px; }
             }
         }
@@ -743,6 +837,7 @@
             > .media a.__on_media_expand {
                 display: block;
                 width: 100%;
+                max-height: 320px;
                 margin: 3px 0px;
             }
             > .post_footer {
@@ -797,6 +892,20 @@
                 }
             }
         }
+        > li>.label_head.label_reblog {
+            background-position: center right;
+            background-repeat: no-repeat;
+            background-size: 32px 32px;
+            padding-right: 42px;
+        }
+
+        /*=== Scroll Loader Layout ===============================================================*/
+        > li.__scroll_loader {
+            background-image: url("../resources/ic_reload.png");
+            background-position: center center;
+            background-repeat: no-repeat;
+            height: 32px;
+        }
     }
     .__context_posts {
         > li:not(.chat_timeline),
@@ -817,6 +926,7 @@
 .label_bookmark  { background-color: #c10000; }
 .label_cw        { background-color: #8c720b; }
 .label_sensitive { background-color: #a10000; }
+.label_private   { background-color: #dfdfdf; color: #333333; }
 .cw_content      { display: none; }
 
 /*=== Profile Column Layout ======================================================================*/
@@ -836,6 +946,32 @@
         height: 214px;
         overflow-y: hidden;
         .user_header { height: 96px; }
+        .detail_info {
+            > .counter {
+                width: 82px;
+                margin: 2px 1px;
+                padding-left: 8px;
+                &:hover {
+                    opacity: 0.75;
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+            &.auth_details {
+                margin: -2px -4px 4px;
+                > a {
+                    position: relative;
+                    top: 6px;
+                    padding: 0px;
+                    margin: 0px;
+                    &:hover>img {
+                        background-color: rgba(255,255,255,0.2);
+                        cursor: pointer;
+                    }
+                }
+                > .counter { width: 64px; }
+            }
+        }
     }
     .profile_detail, .pinned_post { height: calc((100vh - 310px) * 0.2); }
     > .profile_detail {
@@ -917,4 +1053,16 @@
         }
     }
 }
-
+.column_profile>.profile_header, .post_detail_col .short_userinfo {
+    .detail_info>.counter.ff_private {
+        width: 184px;
+        font-size: 14px;
+        padding: 2px 12px;
+        text-align: center;
+        &:hover {
+            opacity: 1.0;
+            text-decoration: none;
+            cursor: not-allowed;
+        }
+    }
+}

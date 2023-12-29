@@ -3,6 +3,7 @@ $(() => (async () => {
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs();
     await window.accessApi.readPrefCols();
+    await window.accessApi.readWindowPref();
     await window.accessApi.readCustomEmojis();
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
@@ -26,11 +27,25 @@ $(() => (async () => {
     // 投稿アイコンと右クリック時のメニュー生成
     $("#pop_postuser>ul").html(Account.createPostAccountList());
     $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
+        // リアクションの場合はリアクション絵文字を表示する
+        //if ($(elm).is("#__menu_reaction")) $(elm).html(Account.createReactionMenuAccountList());
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
         if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
+        // それ以外は全アカウントをリストに表示
         else $(elm).html(Account.createContextMenuAccountList());
     });
     $("#pop>.pop_context>.ui_menu").menu();
+    // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
+    $("#pop_window_timeline").draggable({
+        handle: "h2",
+        stop: (ext, ui) => Preference.storeTempWindowPosition(ui)
+    });
+    $("#pop_window_timeline").resizable({
+        stop: (ext, ui) => Preference.storeTempWindowSize(ui)
+    });
+    // 一時タイムラインウィンドウの保存をするイベントを登録
+    Preference.setTempWindow();
+    window.addEventListener("beforeunload", e => Preference.saveTempWindowPref($("#pop_window_timeline")));
     // 公開範囲ホバー時にツールチップ表示
     $("#header>#head_postarea").tooltip({
         position: {
@@ -43,6 +58,21 @@ $(() => (async () => {
         },
         hide: {
             effect: "slideUp",
+            duration: 80
+        }
+    });
+    $("#pop_expand_action").tooltip({
+        position: {
+            my: "center bottom-8",
+            at: "center top"
+        }
+        ,
+        show: {
+            effect: "fade",
+            duration: 80
+        },
+        hide: {
+            effect: "fade",
             duration: 80
         }
     });

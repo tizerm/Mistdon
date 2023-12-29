@@ -46,7 +46,7 @@ $(() => {
             <div class="help_col">
                 <h2>キーボードショートカット早見表</h2>
                 <div class="help_content"></div>
-                <button type="button" id="__on_help_close">×</button>
+                <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
@@ -188,8 +188,11 @@ $(() => {
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
         // Mastodonの場合前後にスペースを入れる
         if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
-        target.val(target_text.substr(0, cursor_pos) + target_emoji + target_text.substr(cursor_pos, target_text.length))
+        target.val(target_text.substring(0, cursor_pos) + target_emoji + target_text.substring(cursor_pos, target_text.length))
         target.focus()
+
+        // 最近使った絵文字に登録
+        target_account.updateEmojiHistory(target_emoji)
     })
 
     /**
@@ -246,12 +249,13 @@ $(() => {
      * リアクション絵文字一覧の絵文字
      * => リアクションを送信
      */
-    $(document).on("click", ".__on_emoji_reaction", e => Account.get($("#__hdn_reaction_account").val()).sendReaction({
-        id: $("#__hdn_reaction_id").val(),
-        shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
-        // 投稿成功時処理(リプライウィンドウを閉じる)
-        success: () => $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-    }))
+    $(document).on("click", "#pop_extend_column>.reaction_col .__on_emoji_reaction",
+        e => Account.get($("#__hdn_reaction_account").val()).sendReaction({
+            id: $("#__hdn_reaction_id").val(),
+            shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
+            // 投稿成功時処理(リプライウィンドウを閉じる)
+            success: () => $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
+        }))
 
     /**
      * #Event
@@ -375,7 +379,7 @@ $(() => {
      * ユーザーアドレス
      * => リモートのユーザー情報を右ウィンドウに表示
      */
-    $(document).on("click", ".__lnk_userdetail", e => User.getByAddress($(e.target).attr("name"))
+    $(document).on("click", ".__lnk_userdetail, .usericon", e => User.getByAddress($(e.target).attr("name"))
         .then(user => user.createDetailWindow())
         .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error")))
 
@@ -446,6 +450,19 @@ $(() => {
 
     /**
      * #Event
+     * アンケートの投票ボタン
+     * => 押した内容で投票して中間結果を表示する
+     */
+    $(document).on("click", ".__on_poll_vote", e => {
+        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
+            Column.get($(e.target).closest("td"))
+                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus($(e.target).closest("li")).vote($(e.target))
+        else Status.TEMPORARY_CONTEXT_STATUS.vote($(e.target)) // ポップアップの場合は一時保存から取得
+    })
+
+    /**
+     * #Event
      * 投稿日時
      * => 投稿を右ウィンドウに詳細表示する
      */
@@ -472,8 +489,11 @@ $(() => {
     $(document).on("click", "li.short_timeline, li.chat_timeline>.content", e => {
         if ($(e.target).is(".expand_header")) return // CW展開は無視
         const target_li = $(e.target).closest("li")
-        Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus(target_li).createExpandWindow(target_li)
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus(target_li).createExpandWindow(target_li)
+        else // 他の部分は直接リモートの投稿を取る
+            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
 
     /**
@@ -482,6 +502,152 @@ $(() => {
      * => マウスが出たらポップアップを消す
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
+
+    /**
+     * #Event #Mouseenter
+     * 投稿本体に対してホバー(ノーマルレイアウトとチャットレイアウト限定)
+     * => 表示アカウントのアクションバーを表示
+     */
+    $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
+        // メイン画面のタイムラインのみ有効
+        if ($(e.target).closest(".tl_group_box").length == 0) return
+        const target_post = Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+        // 外部インスタンスに対しては使用不可
+        if (target_post.from_timeline?.pref?.external) return
+        const pos = $(e.currentTarget).offset()
+        const height = $(e.currentTarget).innerHeight()
+
+        // プラットフォームによって初期表示を変更
+        if (target_post.from_account.platform == 'Misskey') { // Misskey
+            $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+            $("#pop_expand_action .__short_bookmark").hide()
+            $("#pop_expand_action .__short_quote").show()
+            $("#pop_expand_action .__short_open_reaction").show()
+        } else { // Mastodon
+            $("#pop_expand_action .__short_bookmark").show()
+            $("#pop_expand_action .__short_quote").hide()
+            $("#pop_expand_action .__short_open_reaction").hide()
+        }
+        $("#pop_expand_action>.reactions").hide()
+
+        // 一時データに設定してアクションバーを開く
+        Status.TEMPORARY_ACTION_STATUS = target_post
+        $("#pop_expand_action").css({
+            "top": `${pos.top + height - 2}px`,
+            "left": `${pos.left}px`,
+        }).show()
+    })
+
+    /**
+     * #Event
+     * 簡易アクションバー: リプライ
+     */
+    $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reply',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: ブースト/リノート
+     */
+    $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reblog',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: 引用
+     */
+    $(document).on("click", ".__short_quote", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_quote',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: お気に入り
+     */
+    $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_favorite',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: ブックマーク
+     */
+    $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_bookmark',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: 最近のリアクションを開く
+     */
+    $(document).on("click", ".__short_open_reaction",
+        e => $("#pop_expand_action>.reactions").show("slide", { direction: "up" }, 80))
+
+    /**
+     * #Event
+     * 簡易アクションバー: 外部ブラウザで開く
+     */
+    $(document).on("click", ".__short_browser",
+        e => window.accessApi.openExternalBrowser(Status.TEMPORARY_ACTION_STATUS.uri))
+
+    /**
+     * #Event
+     * 簡易アクションバー: ここから遡る
+     */
+    $(document).on("click", ".__short_prepost",
+        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    /**
+     * #Event
+     * 簡易アクションバー: 直近のリアクション
+     */
+    $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
+        e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
+            id: Status.TEMPORARY_ACTION_STATUS.id,
+            shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
+            success: () => $("#pop_expand_action").hide()
+        }))
+
+    /**
+     * #Event
+     * 簡易アクションバー: 他のリアクションを送る
+     */
+    $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
+        target_mode: '__menu_reaction',
+        target_url: Status.TEMPORARY_ACTION_STATUS.uri
+    }))
+
+    /**
+     * #Event #Mouseleave
+     * 投稿本体からマウスアウト
+     * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
+     */
+    $(document).on("mouseleave", "li.normal_layout, li.chat_timeline>.content", e => {
+        // メイン画面のタイムラインのみ有効
+        if ($(e.target).closest(".tl_group_box").length == 0) return
+        // アクションバーに移動した場合は消さない
+        if ($(e.relatedTarget).closest("#pop_expand_action").length > 0) return
+        $("#pop_expand_action").hide()
+    })
+
+    /**
+     * #Event #Mouseleave
+     * アクションバーからマウスアウト
+     * => アクションバーポップアップを消す
+     */
+    $(document).on("mouseleave", "#pop_expand_action", e => {
+        // 元のウィンドウに移動した場合は消さない
+        if ($(e.relatedTarget).closest("li.normal_layout, li.chat_timeline>.content").length > 0) return
+        $("#pop_expand_action").hide()
+    })
 
     /**
      * #Event
@@ -525,10 +691,10 @@ $(() => {
      * ユーザープロフィール: 投稿数
      * => ユーザーの投稿を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_post", e => {
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
         $(e.target).closest("td").find(".user_bookmark_elm").hide()
-       $(e.target).closest("td").find(".user_post_elm").show()
+        $(e.target).closest("td").find(".user_post_elm").show()
     })
 
     /**
@@ -536,16 +702,16 @@ $(() => {
      * ユーザープロフィール: フォロー数
      * => フォロイー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_follow", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('follows')))
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow", e =>
+        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('follows')))
 
     /**
      * #Event
      * ユーザープロフィール: フォロワー数
      * => フォロワー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .count_follower", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createFFTaglist('followers')))
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower", e =>
+        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('followers')))
 
     /**
      * #Event
@@ -620,12 +786,21 @@ $(() => {
      * => 投稿用のコンテキストメニューを表示
      */
     $(document).on("contextmenu", "ul.__context_posts>li", e => {
+        // タイムライングループでの表示(メイン画面のTL)の場合のフラグを保存
+        const tl_group_flg = $(e.target).closest(".tl_group_box").length > 0
         if ($(e.target).closest("li").is(".short_userinfo")) return // 簡易プロフィールは無視
         if ($(e.target).closest("table").is("#auth_account_table")) // 認証アカウント一覧のときは削除可能にする
             $("#pop_context_menu .__menu_post_del") // 削除クラスを消してnameにアカウントアドレスを付与
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
         else $("#pop_context_menu .__menu_post_del").addClass("ui-state-disabled")
+        if (!tl_group_flg) // メイン画面のTL出ない場合は遡りを禁止
+            $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
+
+        // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
+        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
         $("#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"))
         return false
     })
@@ -680,15 +855,15 @@ $(() => {
      * #Event #Contextmenu
      * 投稿系メニュー: 詳細表示
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_detail", e =>
-        Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.createDetailWindow()))
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_detail",
+        e => Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.createDetailWindow()))
 
     /**
      * #Event #Contextmenu
      * 投稿系メニュー: URLをコピー
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url", e =>
-        navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url",
+        e => navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
             .then(() => toast(`投稿のURLをコピーしました.`, "done")))
 
     /**
@@ -697,6 +872,13 @@ $(() => {
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
         e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: ここから前に遡る
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
 
     /**
      * #Event #Contextmenu
@@ -729,6 +911,16 @@ $(() => {
 
     /**
      * #Event
+     * 一時ウィンドウ: 透過ボックス
+     * => ホバーアウトしたときにウィンドウを透過するクラスを付与する
+     */
+    $(document).on("change", "#__window_opacity", e => {
+        if ($(e.target).prop('checked')) $("#pop_window_timeline").addClass("__opacity_on")
+        else $("#pop_window_timeline").removeClass("__opacity_on")
+    })
+
+    /**
+     * #Event
      * 各種閉じるボタン
      */
     $(document).on("click", "#__on_reply_close", e =>
@@ -737,4 +929,6 @@ $(() => {
         $("#pop_ex_timeline").hide("slide", { direction: "right" }, 150))
     $(document).on("click", "#__on_emoji_close", e =>
         $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
+    $(document).on("click", "#__on_pop_window_close", e =>
+        $("#pop_window_timeline").hide("fade", 150))
 })

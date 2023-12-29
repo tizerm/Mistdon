@@ -245,9 +245,7 @@
                 url: `https://${instance_domain}/api/auth/session/generate`,
                 dataType: "json",
                 headers: { "Content-Type": "application/json" },
-                data: JSON.stringify({
-                    'appSecret': data.secret
-                })
+                data: JSON.stringify({ 'appSecret': data.secret })
             });
         }).then(data => {
             // 無事にレスポンスが返ったらtokenを保存して認証許可ウィンドウを生成

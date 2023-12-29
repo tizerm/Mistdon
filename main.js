@@ -13,8 +13,10 @@ const stateKeeper = require('electron-window-state')
 // アプリ保持用設定データの管理
 var pref_accounts = null
 var pref_columns = null
+var pref_window = null
 var pref_emojis = new Map()
 var cache_history = null
+var cache_emoji_history = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -35,9 +37,8 @@ function readPrefAccs() {
         return pref_accounts
     }
     const content = readFile('app_prefs/auth.json')
-    if (!content) { // ファイルが見つからなかったらnullを返却
-        return null
-    }
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
     console.log('@INF: read app_prefs/auth.json.')
     return pref_accounts
@@ -162,9 +163,8 @@ function readPrefCols() {
         return pref_columns
     }
     const content = readFile('app_prefs/columns.json')
-    if (!content) { // ファイルが見つからなかったらnullを返却
-        return null
-    }
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
     pref_columns = JSON.parse(content)
     console.log('@INF: read app_prefs/columns.json.')
     return pref_columns
@@ -231,7 +231,7 @@ async function writePrefCols(event, json_data) {
                                 break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/v1/notifications`
-                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite'] }
+                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite', 'poll'] }
                                 socket_param = { 'stream': 'user:notification' }
                                 break
                             case 'mention': // メンション
@@ -361,9 +361,8 @@ function readCustomEmojis() {
         return pref_emojis
     }
     const content_map = readDirFile('app_prefs/emojis')
-    if (content_map.size == 0) { // ファイルが見つからなかったらnullを返却
-        return null
-    }
+    if (content_map.size == 0) return null // ファイルが見つからなかったらnullを返却
+
     const emoji_map = new Map()
     // ハッシュキーから拡張子を抜いてドメイン名にする
     content_map.forEach((v, k) => emoji_map.set(k.substring(0, k.lastIndexOf('.')), JSON.parse(v)))
@@ -425,6 +424,82 @@ async function overwriteHistory(event, data) {
     console.log('@INF: finish write app_prefs/history.json')
 
     cache_history = JSON.parse(content)
+}
+
+/**
+ * #IPC
+ * 保存してあるカスタム絵文字の使用履歴を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return カスタム絵文字履歴JSON
+ */
+async function readEmojiHistory() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (cache_emoji_history) {
+        console.log('@INF: use app_prefs/emoji_history.json cache.')
+        return cache_emoji_history
+    }
+    const content = readFile('app_prefs/emoji_history.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        cache_emoji_history = []
+        return cache_emoji_history
+    }
+    cache_emoji_history = JSON.parse(content)
+    console.log('@INF: read app_prefs/emoji_history.json.')
+    return cache_emoji_history
+}
+
+/**
+ * #IPC
+ * カスタム絵文字の使用履歴をJSONファイルとして書き込む
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
+async function overwriteEmojiHistory(event, data) {
+    const content = await overwriteFile('app_prefs/emoji_history.json', data)
+    console.log('@INF: finish write app_prefs/emoji_history.json')
+
+    cache_emoji_history = JSON.parse(content)
+}
+
+/**
+ * #IPC
+ * 保存してあるウィンドウ設定を読み込む
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return ウィンドウ設定JSON
+ */
+async function readWindowPref() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_window) {
+        console.log('@INF: use app_prefs/window_pref.json cache.')
+        return pref_window
+    }
+    const content = readFile('app_prefs/window_pref.json')
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
+    pref_window = JSON.parse(content)
+    console.log('@INF: read app_prefs/window_pref.json.')
+    return pref_window
+}
+
+/**
+ * #IPC
+ * ウィンドウ設定をJSONファイルとして書き込む
+ * 変更がない場合は何もしない
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
+async function writeWindowPref(event, data) {
+    // 変更がなかったらなにもしない
+    if (JSON.stringify(data) == JSON.stringify(pref_window)) return
+
+    const content = await overwriteFile('app_prefs/window_pref.json', data)
+    console.log('@INF: finish write app_prefs/window_pref.json')
+
+    pref_window = JSON.parse(content)
 }
 
 /*====================================================================================================================*/
@@ -530,7 +605,7 @@ async function writeDirFile(filepath, content) {
     fs.writeFileSync(pref_path, content, 'utf8')
     console.log('@INF: file write successed.')
 }
-
+ 
 /**
  * #Utils #JS
  * 配列型JSONをmapに変換する
@@ -612,12 +687,16 @@ app.whenReady().then(() => {
     ipcMain.handle('read-pref-cols', readPrefCols)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-history', readHistory)
+    ipcMain.handle('read-emoji-history', readEmojiHistory)
+    ipcMain.handle('read-window-pref', readWindowPref)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-history', overwriteHistory)
+    ipcMain.on('write-emoji-history', overwriteEmojiHistory)
+    ipcMain.on('write-window-pref', writeWindowPref)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 
@@ -630,7 +709,6 @@ app.whenReady().then(() => {
     })
 })
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+    if (process.platform !== 'darwin') app.quit()
 })
+

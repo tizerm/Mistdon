@@ -1,131 +1,163 @@
 ﻿/*=== Header (Post Article Area) =================================================================*/
 
-#header>#head_postarea {
-    position: relative;
-    margin-top: 4px;
-    > .left_block {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 320px;
-    }
-    > .right_block {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-    }
-    .__lnk_postuser {
-        display: block;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 72px;
-        height: 72px;
-
-        & img {
-            border-radius: 12px;
-            width: 72px;
-            height: 72px;
-            cursor: pointer;
+#header {
+    > h1 {
+        position: relative;
+        padding: 0px;
+        height: 32px;
+        > .head_user {
+            display: block;
+            padding: 2px;
+            padding-left: 48px;
+            background-position: center left 6px;
+            background-repeat: no-repeat;
+            background-size: 32px 32px;
+        }
+        > .head_tips {
+            display: none;
+            position: absolute;
+            font-size: 16px;
+            top: 4px;
+            > .prefix {
+                display: inline-block;
+                border-radius: 8px;
+                padding: 2px 8px;
+                margin-right: 8px;
+                background-color: rgba(255,255,255,0.25);
+            }
         }
     }
-    .visibility_icon {
-        position: absolute;
-        top: 0px;
-        left: 76px;
-    }
-    .cw_block {
-        position: absolute;
-        top: 49px;
-        left: 76px;
-        width: 210px;
-        #on_custom_emoji {
-            display: inline-block;
-            vertical-align: text-bottom;
-            &:hover>img {
-                background-color: #225588;
+    > #head_postarea {
+        position: relative;
+        margin-top: 4px;
+        > .left_block {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 320px;
+        }
+        > .right_block {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+        .__lnk_postuser {
+            display: block;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 72px;
+            height: 72px;
+
+            & img {
+                border-radius: 12px;
+                width: 72px;
+                height: 72px;
                 cursor: pointer;
             }
         }
-        #__txt_content_warning {
-            transform: translate(-2px, -8px);
+        .visibility_icon {
+            position: absolute;
+            top: 0px;
+            left: 76px;
+        }
+        .cw_block {
+            position: absolute;
+            top: 49px;
+            left: 76px;
+            width: 210px;
+            #on_custom_emoji {
+                display: inline-block;
+                vertical-align: text-bottom;
+                &:hover>img {
+                    background-color: #225588;
+                    cursor: pointer;
+                }
+            }
+            #__txt_content_warning {
+                transform: translate(-2px, -8px);
+                font-family: "メイリオ", sans-selif;
+                text-align: left;
+                background-color: #434343;
+                border-radius: 4px;
+                border: solid 1px #888888;
+                color: #ffffff;
+                width: 152px;
+            }
+            #__on_post_to_misskey {
+                border-style: none;
+                background-color: transparent;
+                margin: 0px;
+                padding: 0px;
+                position: absolute;
+                right: 0px;
+                top: 0px;
+                cursor: pointer;
+                & img {
+                    width: 24px;
+                    height: 24px;
+                }
+                &[disabled]>img {
+                    opacity: 0.25;
+                    cursor: not-allowed;
+                }
+            }
+        }
+        #__txt_postarea {
+            position: absolute;
+            top: -2px;
+            right: 154px;
+            padding: 2px;
             font-family: "メイリオ", sans-selif;
             text-align: left;
+            border-radius: 6px;
             background-color: #434343;
-            border-radius: 4px;
             border: solid 1px #888888;
             color: #ffffff;
-            width: 152px;
+            width: calc(100vw - 514px);
+            height: 68px;
         }
-        #__on_post_to_misskey {
-            border-style: none;
-            background-color: transparent;
-            margin: 0px;
-            padding: 0px;
+        .submit_buttons {
             position: absolute;
-            right: 0px;
             top: 0px;
-            cursor: pointer;
-            & img {
-                width: 24px;
-                height: 24px;
-            }
-            &[disabled]>img {
-                opacity: 0.25;
-                cursor: not-allowed;
-            }
-        }
-    }
-    #__txt_postarea {
-        position: absolute;
-        top: -2px;
-        right: 154px;
-        padding: 2px;
-        font-family: "メイリオ", sans-selif;
-        text-align: left;
-        border-radius: 6px;
-        background-color: #434343;
-        border: solid 1px #888888;
-        color: #ffffff;
-        width: calc(100vw - 514px);
-        height: 68px;
-    }
-    .submit_buttons {
-        position: absolute;
-        top: 0px;
-        right: 8px;
+            right: 8px;
 
-        > a:hover>img {
-            border-radius: 8px;
-            background-color: #555555;
-            cursor: pointer;
-        }
-        > #on_submit {
-            position: absolute;
-            top: 0px;
-            right: 72px;
-        }
-        > #on_last_delete {
-            position: absolute;
-            top: 0px;
-            right: 36px;
-        }
-        > #on_last_delete_paste {
-            position: absolute;
-            top: 36px;
-            right: 36px;
-        }
-        > #on_last_copy {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-        }
-        > #on_last_replychain {
-            position: absolute;
-            top: 36px;
-            right: 0px;
+            > a:hover>img {
+                border-radius: 8px;
+                background-color: #555555;
+                cursor: pointer;
+            }
+            > #on_submit {
+                position: absolute;
+                top: 0px;
+                right: 72px;
+            }
+            > #on_last_delete {
+                position: absolute;
+                top: 0px;
+                right: 36px;
+            }
+            > #on_last_delete_paste {
+                position: absolute;
+                top: 36px;
+                right: 36px;
+            }
+            > #on_last_copy {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+            }
+            > #on_last_replychain {
+                position: absolute;
+                top: 36px;
+                right: 0px;
+            }
         }
     }
+}
+@keyframes marquee-anim {
+    0%   { left: 100%; transform: translate(0); }
+    100% { left: 0; transform: translate(-100%, 0); }
 }
 
 /*=== Visibility Icon Block (General Setting) ====================================================*/
@@ -173,7 +205,23 @@
                     border: solid 1px rgba(255,255,255,0.1);
                     background-color: rgba(255,255,255,0.15);
                 }
-                > ul { width: 360px; }
+            }
+        }
+        > ul>li>ul { width: 360px; }
+        & ul.recent_reaction {
+            width: 160px;
+            > li {
+                > div.ui-state-active {
+                    border-style: none;
+                    background-color: transparent;
+                }
+                & img {
+                    display: inline-block;
+                    height: 24px;
+                    width: auto;
+                    vertical-align: text-bottom;
+                    cursor: pointer;
+                }
             }
         }
     }
@@ -271,37 +319,100 @@
         top: 198px;
         left: 64px;
 
-        > .emoji_head {
-            border-top-right-radius: 18px;
-            border-bottom-right-radius: 18px;
-            font-family: Arial, "メイリオ", sans-selif;
-            color: #ffffff;
-            margin: 0px;
-            margin-bottom: 6px;
-            padding: 8px 24px;
-
-            > * {
-                font-size: 18px;
-                padding: 0px;
+        > .palette_block {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 240px);
+            > .emoji_head {
+                border-top-right-radius: 18px;
+                border-bottom-right-radius: 18px;
+                font-family: Arial, "メイリオ", sans-selif;
+                color: #ffffff;
                 margin: 0px;
+                margin-bottom: 6px;
+                padding: 8px 24px;
+                > * {
+                    font-size: 18px;
+                    padding: 0px;
+                    margin: 0px;
+                }
+            }
+            > .recent_emoji {
+                background-color: rgba(62,68,82,0.8);
+                border-radius: 12px;
+                > h5 {
+                    margin: 2px 8px;
+                    padding: 1px 16px;
+                    border-bottom: solid 1px #dddddd;
+                    color: #dddddd;
+                    font-size: 14px;
+                    text-align: right;
+                }
+            }
+            > .emoji_list {
+                background-color: rgba(34,34,34,0.8);
+                overflow-y: auto;
+                flex-grow: 1;
+                &::-webkit-scrollbar { width: 8px; }
             }
         }
-        > .emoji_list {
-            background-color: rgba(34,34,34,0.8);
-            overflow-y: auto;
-            height: calc(100vh - 380px);
-            &::-webkit-scrollbar { width: 8px; }
+    }
+
+    /*=== Custom Emojis Suggester Layout =========================================================*/
+    > #pop_emoji_suggester {
+        display: none;
+        background-color: rgba(34,34,34,0.8);
+        border: solid 1px #cccccc;
+        border-radius: 8px;
+        z-index: 7;
+        position: absolute;
+        top: 198px;
+        left: 64px;
+        width: 360px;
+        padding: 4px;
+        > ul {
+            margin: 0px;
+            padding: 0px;
+            > li {
+                list-style-type: none;
+                > a>img {
+                    display: inline-block;
+                    vertical-align: text-bottom;
+                    height: 24px;
+                    width: auto;
+                }
+                &.__selected_emoji, &:hover {
+                    border: solid 1px #cccccc;
+                    background-color: rgba(62,82,96,0.92);
+                    border-radius: 4px;
+                }
+            }
         }
-        & button {
-            display: block;
-            padding: 6px;
-            text-align: center;
-            width: 100%;
+        > .recent_emoji_list>li {
+            padding-left: 18px;
+            background-position: top +4px left;
+            background-repeat: no-repeat;
+            background-size: 16px 16px;
+            display: inline-block;
+            &:nth-child(1) { background-image: url("../resources/1.png"); }
+            &:nth-child(2) { background-image: url("../resources/2.png"); }
+            &:nth-child(3) { background-image: url("../resources/3.png"); }
+            &:nth-child(4) { background-image: url("../resources/4.png"); }
+            &:nth-child(5) { background-image: url("../resources/5.png"); }
+            &:nth-child(6) { background-image: url("../resources/6.png"); }
+            &:nth-child(7) { background-image: url("../resources/7.png"); }
+            &:nth-child(8) { background-image: url("../resources/8.png"); }
+            &:nth-child(9) { background-image: url("../resources/9.png"); }
+        }
+        > .suggest_emoji_list {
+            height: 128px;
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
+            > li { display: inline; }
         }
     }
 
     /*=== Expand Image Modal Layout ==============================================================*/
-
     > #modal_expand_image {
         z-index: 12;
         display: none;
@@ -354,7 +465,7 @@
     /*=== Post Expand Window Layout ==============================================================*/
     > #pop_expand_post {
         display: none;
-        z-index: 4;
+        z-index: 6;
         position: absolute;
 
         & ul {
@@ -362,6 +473,33 @@
             height: auto;
             > li { border: solid 2px #cccccc; }
         }
+    }
+
+    /*=== Post Default Action Pop Layout =========================================================*/
+    > #pop_expand_action {
+        display: none;
+        z-index: 6;
+        position: absolute;
+        border-radius: 8px;
+        background-color: rgba(62,62,62,0.8);
+        border: solid 1px #bbbbbb;
+        max-width: 320px;
+        padding: 4px;
+
+        & a {
+            > img {
+                display: inline-block;
+                vertical-align: text-bottom;
+                border-radius: 6px;
+                height: 24px;
+                width: auto;
+            }
+            &:hover>img {
+                background-color: rgba(255,255,255,0.2);
+                cursor: pointer;
+            }
+        }
+        > .reactions>.recent { display: inline; }
     }
 
     /*=== Extra Timeline Window Layout ===========================================================*/
@@ -427,6 +565,13 @@
                             top: 50%;
                             left: 50%;
                             transform: translate(-50%, -50%);
+                            display: block;
+                            border-radius: 12px;
+                            padding: 4px;
+                            text-align: center;
+                            border: solid 2px #ffffff;
+                            font-size: 16px;
+                            font-weight: bold;
                         }
                     }
                     &:hover>.delete_modal { display: block; }
@@ -434,6 +579,48 @@
                 &.reaction_history>.col_head { background-color: #408a08; }
                 &.post_history>.col_head     { background-color: #3562cc; }
             }
+        }
+    }
+
+    /*=== Internal Extend Timeline Window Layout =================================================*/
+    > #pop_window_timeline {
+        display: none;
+        z-index: 4;
+        border-radius: 12px;
+        background-color: rgba(34,34,34,0.8);
+        width: 50vw;
+        height: 50vh;
+        color: #fff;
+
+        & a { color: #bbb; }
+        > h2 {
+            position: relative;
+            background-color: #87995f;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            margin: 0px;
+            padding: 4px 12px;
+            font-size: 14px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            > #__on_pop_window_close {
+                position: absolute;
+                top: 4px;
+                right: 8px;
+                border-radius: 12px;
+                font-size: 14px;
+                border: solid 2px #ffffff;
+            }
+        }
+        >.timeline {
+            height: calc(100% - 34px);
+            > ul { height: 100%; }
+        }
+        &.__opacity_on {
+            opacity: 0.2;
+            transition: opacity 0.2s;
+            &:hover { opacity: 1.0; }
         }
     }
 
@@ -463,13 +650,31 @@
             height: calc(100vh - 480px);
         }
         > .reaction_col {
-            & ul {
-                overflow-y: auto;
-                height: 320px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+            > .timeline {
+                flex-basis: 280px;
+                > ul {
+                    overflow-y: auto;
+                    height: 100%;
+                }
+            }
+            > .recent_reaction {
+                background-color: rgba(62,68,82,0.8);
+                border-radius: 12px;
+                > h5 {
+                    margin: 2px 8px;
+                    padding: 1px 16px;
+                    border-bottom: solid 1px #dddddd;
+                    color: #dddddd;
+                    font-size: 14px;
+                    text-align: right;
+                }
             }
             > .reaction_list {
                 overflow-y: auto;
-                height: calc(100vh - 500px);
+                flex-grow: 1;
                 &::-webkit-scrollbar { width: 8px; }
             }
         }
@@ -478,15 +683,19 @@
 
 /*=== Grouping Preferance ========================================================================*/
 
-#pop_custom_emoji>.emoji_list img,
-#pop_extend_column>.reaction_col>.reaction_list img {
+#pop_custom_emoji .emoji_list img,
+#pop_extend_column>.reaction_col>.reaction_list img,
+#pop_custom_emoji .recent_emoji img,
+#pop_extend_column>.reaction_col>.recent_reaction img {
     display: inline-block;
     height: 32px;
     width: auto;
     vertical-align: text-bottom;
 }
-#pop_custom_emoji>.emoji_list a:hover img,
-#pop_extend_column>.reaction_col>.reaction_list a:hover img {
+#pop_custom_emoji .emoji_list a:hover img,
+#pop_extend_column>.reaction_col>.reaction_list a:hover img,
+#pop_custom_emoji .recent_emoji a:hover img,
+#pop_extend_column>.reaction_col>.recent_reaction a:hover img {
     background-color: rgba(255,255,255,0.2);
     cursor: pointer;
 }
@@ -535,18 +744,5 @@
     margin-top: 6px;
     width: calc(100% - 8px);
     height: 108px;
-}
-#pop_extend_column button,
-#pop_ex_timeline button,
-#pop_custom_emoji button {
-    display: block;
-    border-radius: 6px;
-    padding: 6px;
-    text-align: center;
-    width: 100%;
-    border: solid 2px #ffffff;
-    padding: 4px 32px;
-    font-size: 16px;
-    font-weight: bold;
 }
 

@@ -11,7 +11,7 @@ class User {
         this.fields = []
         let host = null
 
-        switch (arg.platform) { // TODO: 暫定
+        switch (arg.platform) {
             case 'Mastodon': // Mastodon
                 // リモートの情報を直に取得する場合引数をそのまま使う
                 if (arg.remote) host = arg.host
@@ -55,6 +55,7 @@ class User {
                 this.count_post = arg.json.notesCount
                 this.count_follow = arg.json.followingCount
                 this.count_follower = arg.json.followersCount
+                this.hide_ff = (arg.json.ffVisibility ?? 'public') != 'public'
 
                 // フィールドをセット
                 if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
@@ -203,11 +204,15 @@ class User {
             </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-                <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-                <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-            </div>
         `
-        html += '</li>'
+        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
+        if (this.hide_ff) html += `
+            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
+        `; else html += `
+            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
+            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+        `
+        html += '</div></li>'
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -279,11 +284,15 @@ class User {
         html += `
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-                <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-                <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-            </div>
         `
-        html += '</li>'
+        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
+        if (this.hide_ff) html += `
+            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
+        `; else html += `
+            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
+            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+        `
+        html += '</div></li>'
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -361,7 +370,7 @@ class User {
         return rest_promise.then(data => {
             return (async () => {
                 const posts = []
-                data.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                data.forEach(p => posts.push(new Status(p, { "__extended_timeline": "profile_post" }, account)))
                 return posts
             })()
         }).catch(jqXHR => {
@@ -433,13 +442,15 @@ class User {
             case 'Favorite_Mastodon': // お気に入り(Mastodon)
                 query_param = { "limit": 40 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: `https://${this.host}/api/v1/favourites`,
-                    dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                })
+                }).then(data => { return {
+                    body: data.body,
+                    link: data.headers.get("link")
+                }})
                 break
             case 'Favorite_Misskey': // お気に入り(Misskey)
                 query_param = {
@@ -453,18 +464,20 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                })
+                }).then(data => { return { body: data }})
                 break
             case 'Bookmark': // ブックマーク(Mastodon)
                 query_param = { "limit": 40 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: `https://${this.host}/api/v1/bookmarks`,
-                    dataType: "json",
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                })
+                }).then(data => { return {
+                    body: data.body,
+                    link: data.headers.get("link")
+                }})
                 break
             case 'Reaction': // リアクション(Misskey)
                 query_param = {
@@ -479,7 +492,7 @@ class User {
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
                     data: JSON.stringify(query_param)
-                })
+                }).then(data => { return { body: data }})
                 break
             default:
                 break
@@ -488,8 +501,15 @@ class User {
         return rest_promise.then(data => {
             return (async () => {
                 const posts = []
-                data.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
-                return posts
+                data.body.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
+                let max_id = null
+                // Headerのlinkからページング処理のmax_idを抽出
+                if (data.link) max_id = data.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
+                else max_id = data.body.pop().id // 特殊ページング以外は普通に投稿IDをmax_idとする
+                return {
+                    datas: posts,
+                    max_id: max_id
+                }
             })()
         }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
@@ -508,32 +528,38 @@ class User {
      * @param max_id 前のページの最後のユーザーのページングID
      */
     getFFUsers(account, type, max_id) {
+        const platform = account?.platform ?? this.platform
         let api_url = null
         let rest_promise = null
         let query_param = null
-        switch (account.platform) {
+        switch (platform) {
             case 'Mastodon': // Mastodon
                 if (type == 'follows') api_url = `https://${this.host}/api/v1/accounts/${this.id}/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/v1/accounts/${this.id}/followers`
                 query_param = { "limit": 80 }
                 if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
+                // あればアクセストークンを設定
+                let header = {}
+                if (account) header = { "Authorization": `Bearer ${account.pref.access_token}` }
+                rest_promise = ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
+                    method: "GET",
                     url: api_url,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    headers: header,
                     data: query_param
                 }).then(data => {
                     return (async () => {
                         const users = []
-                        data.forEach(u => users.push(new User({
+                        data.body.forEach(u => users.push(new User({
                             json: u,
                             host: this.host,
                             remote: false,
                             auth: false,
-                            platform: account.platform
+                            platform: platform
                         })))
-                        return users
+                        return {
+                            body: users,
+                            link: data.headers.get("link")
+                        }
                     })()
                 })
                 break
@@ -541,11 +567,11 @@ class User {
                 if (type == 'follows') api_url = `https://${this.host}/api/users/following`
                 else if (type == 'followers') api_url = `https://${this.host}/api/users/followers`
                 query_param = {
-                    "i": account.pref.access_token,
                     "userId": this.id,
                     "limit": 80
                 }
                 if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                if (account) query_param.i = account.pref.access_token
                 rest_promise = $.ajax({
                     type: "POST",
                     url: api_url,
@@ -560,9 +586,9 @@ class User {
                             host: this.host,
                             remote: false,
                             auth: false,
-                            platform: account.platform
+                            platform: platform
                         })))
-                        return users
+                        return { body: users }
                     })()
                 })
                 break
@@ -570,7 +596,16 @@ class User {
                 break
         }
         // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
+        return rest_promise.then(data => {
+            let max_id = null
+            // Headerのlinkからページング処理のmax_idを抽出
+            if (data.link) max_id = data.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
+            else max_id = data.body[data.body.length - 1].id // 特殊ページング以外は普通に投稿IDをmax_idとする
+            return {
+                datas: data.body,
+                max_id: max_id
+            }
+        }).catch(jqXHR => {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
@@ -594,14 +629,16 @@ class User {
                     </div>
                     <ul class="profile_header __context_user"></ul>
                     <ul class="profile_detail __context_user"></ul>
-                    <div class="pinned_block post_div">
-                        <h4>ピンどめ</h4>
-                        <ul class="pinned_post __context_posts"></ul>
+                    <div class="user_post_elm">
+                        <div class="pinned_block post_div">
+                            <h4>ピンどめ</h4>
+                            <ul class="pinned_post __context_posts"></ul>
+                        </div>
+                        <div class="posts_block post_div">
+                            <ul class="posts __context_posts"></ul>
+                        </div>
                     </div>
-                    <div class="posts_block post_div">
-                        <h4>投稿一覧</h4>
-                        <ul class="posts __context_posts"></ul>
-                    </div>
+                    <div class="user_ff_elm"></div>
                 </td></tr>
             </tbody></table>
         `))
@@ -618,20 +655,38 @@ class User {
             Emojis.replaceDomAsync(column.find(".profile_header .username"), host) // ユーザー名
             Emojis.replaceDomAsync(column.find(".profile_detail .main_content"), host) // プロフィール文
         }
+
+        // ヘッダ部分にツールチップを生成
+        $(`#pop_ex_timeline>.account_timeline .detail_info`).tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
+
         const account = { // accountには最低限の情報だけ入れる
             "platform": this.platform,
             "pref": { "domain": this.host }
         }; (async () => Promise.allSettled([
-            this.getPost(account, null).then(posts => {
-                posts.forEach(p => column.find(".posts").append(p.element))
-                // スクロールローダーを生成
-                Status.createScrollLoader({
-                    list: posts,
-                    target: column.find(".posts"),
-                    asyncLoader: async last_id => this.getPost(account, last_id),
-                    binder: (post, target) => target.append(post.element)
-                })
-            }), this.getPinnedPost(account).then(posts => {
+            this.getPost(account, null).then(posts => createScrollLoader({
+                // 最新投稿データはスクロールローダーを生成
+                data: posts,
+                target: column.find(".posts"),
+                bind: (data, target) => {
+                    data.forEach(p => target.append(p.element))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop().id
+                },
+                load: async max_id => this.getPost(account, max_id)
+            })), this.getPinnedPost(account).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
                     column.find(".pinned_block").remove()
@@ -660,7 +715,7 @@ class User {
     createDetailWindow() {
         $("#pop_ex_timeline").html('<div class="account_timeline single_user"></div>')
         this.createDetailHtml("#pop_ex_timeline>.account_timeline")
-        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close">×</button>')
+        $("#pop_ex_timeline").append('<button type="button" id="__on_search_close" class="close_button">×</button>')
             .show("slide", { direction: "right" }, 150)
     }
 
@@ -686,29 +741,30 @@ class User {
      * @param type お気に入り/ブックマーク/リアクションのどれかを指定
      */
     createBookmarkList(type) {
-        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
-        target.prepend(`
+        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
         `)
-        target.find(".user_post_elm").hide()
-        target.find(".user_ff_elm").hide()
-        target.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
+        target_td.find(".user_post_elm").hide()
+        target_td.find(".user_ff_elm").hide()
+        target_td.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
-        this.getBookmarks(Account.get(this.full_address), type, null).then(data => (async () => {
+        this.getBookmarks(Account.get(this.full_address), type, null).then(body => (async () => {
             // ロード待ち画面を消去
-            target.find(".col_loading").remove()
-            data.forEach(post => target.find(".user_bookmark_elm>.bookmarks").append(post.element))
-            // TODO: Mastodonのローダーが機能しないので一旦保留
-            /*
-            Status.createScrollLoader({
-                list: data,
-                target: target.find(".user_bookmark_elm>.bookmarks"),
-                asyncLoader: async last_id => this.getBookmarks(Account.get(this.full_address), type, last_id),
-                binder: (post, target) => target.append(post.element)
-            })//*/
+            target_td.find(".col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: target_td.find(".user_bookmark_elm>.bookmarks"),
+                bind: (data, target) => {
+                    data.datas.forEach(post => target.append(post.element))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data.max_id
+                },
+                load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
+            })
         })())
     }
 
@@ -719,34 +775,35 @@ class User {
      * @param type フォローを取得するかフォロワーを取得するか指定
      */
     createFFTaglist(type) {
-        const target = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
-        target.prepend(`
+        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
         `)
-        target.find(".user_post_elm").hide()
-        target.find(".user_bookmark_elm").hide()
-        target.find(".user_ff_elm").html(`
+        target_td.find(".user_post_elm").hide()
+        target_td.find(".user_bookmark_elm").hide()
+        target_td.find(".user_ff_elm").html(`
             <ul class="ff_short_profile">
                 <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>
             </ul>
             <ul class="ff_nametags"></ul>
         `).show()
 
-        this.getFFUsers(Account.get(this.full_address), type, null).then(data => (async () => {
+        this.getFFUsers(Account.get(this.full_address), type, null).then(body => (async () => {
             // ロード待ち画面を消去
-            target.find(".col_loading").remove()
-            data.forEach(u => target.find(".user_ff_elm>.ff_nametags").append(u.inline_nametag))
-            // TODO: Mastodonのローダーが機能しないので一旦保留
-            /*
-            Status.createScrollLoader({
-                list: data,
-                target: target.find(".user_ff_elm>.ff_nametags"),
-                asyncLoader: async last_id => this.getFFUsers(Account.get(this.full_address), type, last_id),
-                binder: (u, target) => target.append(u.inline_nametag)
-            })//*/
+            target_td.find(".col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: target_td.find(".user_ff_elm>.ff_nametags"),
+                bind: (data, target) => {
+                    data.datas.forEach(u => target.append(u.inline_nametag))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data.max_id
+                },
+                load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
+            })
         })())
     }
 }

@@ -18,6 +18,7 @@
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mm_ui.js"></script>
     <script type="text/javascript" src="js/mm_help.js"></script>
+    <script type="text/javascript" src="js/mm_utils.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
@@ -31,9 +32,12 @@
     <script type="text/javascript" src="js/module/class_column.js"></script>
     <script type="text/javascript" src="js/module/class_history.js"></script>
     <script type="text/javascript" src="js/module/class_query.js"></script>
+    <script type="text/javascript" src="js/module/class_preference.js"></script>
     <script type="text/javascript" src="js/mm_keybind.js"></script>
+    <script type="text/javascript" src="js/mm_emoji_suggester.js"></script>
     <script type="text/javascript" src="js/mm_main.js"></script>
     <script type="text/javascript" src="js/mm_event.js"></script>
+
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 </head>
 <body>
@@ -59,7 +63,10 @@
     </div>
 </nav>
 <header id="header">
-    <h1>Mistdon - The Integrated Mastodon and Misskey Client</h1>
+    <h1>
+        <span class="head_user">Mistdon - The Integrated Mastodon and Misskey Client</span>
+        <span class="head_tips">TIPS XXX: チップスの表示テスト</span>
+    </h1>
     <div id="head_postarea">
         <div class="left_block">
             <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
@@ -76,13 +83,14 @@
             <div class="cw_block">
                 <a id="on_custom_emoji" title="カスタム絵文字を使用"
                     ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
-                <input type="text" id="__txt_content_warning" class="__ignore_keyborad" placeholder="CWの場合入力"/>
+                <input type="text" id="__txt_content_warning"
+                    class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
                 <button type="button" id="__on_post_to_misskey" title="投稿先(Misskey)"
                     ><img src="resources/ic_public.png" name="__to_normal"/></button>
             </div>
         </div>
         <div class="right_block">
-            <textarea id="__txt_postarea" class="__ignore_keyborad"
+            <textarea id="__txt_postarea" class="__ignore_keyborad __emoji_suggest"
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
             <div class="submit_buttons">
                 <a id="on_submit" title="投稿"><img src="resources/ic_post.png" alt="投稿"/></a>
@@ -118,6 +126,14 @@
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
+    <div id="pop_emoji_suggester">
+    <!-- hidden: カスタム絵文字サジェスター -->
+        <input type="hidden" class="target_account" value=""/>
+        <input type="hidden" class="target_cursor" value=""/>
+        <input type="hidden" class="target_elm_id" value=""/>
+        <ul class="recent_emoji_list"></ul>
+        <ul class="suggest_emoji_list"></ul>
+    </div>
     <div id="pop_context_menu" class="pop_context" name="{post_id}">
         <!-- hidden: 右クリックコンテキストメニュー -->
         <ul class="ui_menu">
@@ -141,6 +157,7 @@
             <li class="__menu_post_detail"><div>詳細表示</div></li>
             <li class="__menu_post_url"><div>URLをコピー</div></li>
             <li class="__menu_post_open_browser"><div>ブラウザで開く</div></li>
+            <li class="__menu_post_open_temporary"><div>ここから前に遡る</div></li>
             <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
     </div>
@@ -167,8 +184,41 @@
         <ul class="__context_posts"></ul>
     <!-- hidden: 投稿拡大ウィンドウ -->
     </div>
+    <div id="pop_expand_action">
+    <!-- hidden: 追加アクションポップ -->
+        <div class="std_action">
+            <a class="__short_reply" title="リプライ"><img src="resources/ic_cnt_rp.png" alt="リプライ"/></a>
+            <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_cnt_rblg.png" alt="ブースト/リノート"/></a>
+            <a class="__short_quote" title="引用"><img src="resources/ic_quote.png" alt="引用"/></a>
+            <a class="__short_fav" title="お気に入り"><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+            <a class="__short_bookmark" title="ブックマーク"><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
+            <a class="__short_open_reaction" title="最近のリアクションを開く"><img src="resources/ic_emoji.png" alt="最近のリアクションを開く"/></a>
+            <a class="__short_browser" title="ブラウザで開く"><img src="resources/ic_window.png" alt="ブラウザで開く"/></a>
+            <a class="__short_prepost" title="ここから遡る"><img src="resources/ic_return.png" alt="ここから遡る"/></a>
+        </div>
+        <div class="reactions">
+            <div class="recent"></div>
+            <a class="__short_other_reaction" title="その他のリアクション"><img src="resources/ic_add32.png" alt="その他のリアクション"/></a>
+        </div>
+    </div>
     <div id="pop_ex_timeline">
-    <!-- hidden: 拡張カラム -->
+    <!-- hidden: 拡張タイムライン(横付け) -->
+    </div>
+    <div id="pop_window_timeline" class="ui-widget-content">
+    <!-- hidden: 拡張タイムライン(ウィンドウ) -->
+        <h2>
+            <span>Window</span>
+            <input type="checkbox" id="__window_opacity"/>
+            <label for="__window_opacity">透過</label>
+            <button type="button" id="__on_pop_window_close">×</button>
+        </h2>
+        <div class="timeline">
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+            <ul class="__context_posts"></ul>
+        </div>
     </div>
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->
