@@ -27,6 +27,8 @@
             }
         }
     }
+
+    /*=== Default Post Area Layout ===============================================================*/
     > #head_postarea {
         position: relative;
         margin-top: 4px;
@@ -82,7 +84,7 @@
                 border-radius: 4px;
                 border: solid 1px #888888;
                 color: #ffffff;
-                width: 152px;
+                width: 120px;
             }
             #__on_post_to_misskey {
                 border-style: none;
@@ -151,6 +153,81 @@
                 position: absolute;
                 top: 36px;
                 right: 0px;
+            }
+        }
+    }
+
+    /*=== Advanced Post Options Layout ===========================================================*/
+    > #post_options {
+        display: none;
+        position: absolute;
+        top: 108px;
+        left: 0px;
+        margin-top: 4px;
+        z-index: 10;
+        border-radius: 8px;
+        background-color: rgba(62,62,62,0.8);
+        border: solid 1px #bbbbbb;
+        > .flex_section {
+            display: flex;
+            width: calc(100vw - 72px);
+            & h5 {
+                border-bottom: solid 1px #dddddd;
+                margin: 4px 0px;
+                padding: 0px 12px;
+                color: #dddddd;
+                font-size: 14px;
+            }
+            > div { padding: 0px 2px; }
+            & ul {
+                margin: 0px;
+                padding: 0px;
+                > li { list-style-type: none; }
+            }
+            > .additional_users {
+                width: 160px;
+                > ul.account_list>li {
+                    display: inline-block;
+                    > label {
+                        padding: 1px;
+                        margin: 2px;
+                        & img {
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 12px;
+                            vertical-align: text-bottom;
+                        }
+                    }
+                }
+            }
+            > .attached_media {
+                flex-grow: 1;
+                > ul.media_list {
+                    > li {
+                        &.__initial_message {
+                            padding: 32px 0px;
+                            background-color: rgba(255,255,255,0.08);
+                            border-radius: 12px;
+                            text-align: center;
+                        }
+                    }
+                }
+            }
+            > .refernced_post {
+                flex-basis: 320px;
+                > ul.refernce_post {
+                    height: auto;
+                    max-height: 144px;
+                    > li {
+                        margin: 2px;
+                        &.__initial_message {
+                            padding: 48px 0px;
+                            background-color: rgba(62,62,62,0.92);
+                            border-radius: 12px;
+                            text-align: center;
+                        }
+                    }
+                }
             }
         }
     }
@@ -229,7 +306,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_postuser {
         display: none;
-        z-index: 10;
+        z-index: 11;
         width: 360px;
         position: absolute;
         top: 108px;
@@ -263,7 +340,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_post_to {
         display: none;
-        z-index: 10;
+        z-index: 11;
         position: absolute;
         top: 108px;
         left: 288px;
@@ -583,15 +660,12 @@
     }
 
     /*=== Internal Extend Timeline Window Layout =================================================*/
-    > #pop_window_timeline {
-        display: none;
+    > .ex_window {
+        position: absolute;
         z-index: 4;
         border-radius: 12px;
         background-color: rgba(34,34,34,0.8);
-        width: 50vw;
-        height: 50vh;
         color: #fff;
-
         & a { color: #bbb; }
         > h2 {
             position: relative;
@@ -613,6 +687,11 @@
                 border: solid 2px #ffffff;
             }
         }
+    }
+    > #pop_window_timeline {
+        display: none;
+        width: 50vw;
+        height: 50vh;
         >.timeline {
             height: calc(100% - 34px);
             > ul { height: 100%; }
@@ -621,6 +700,68 @@
             opacity: 0.2;
             transition: opacity 0.2s;
             &:hover { opacity: 1.0; }
+        }
+    }
+    > #pop_util_window {
+        display: none;
+        width: 50vw;
+        height: 70vh;
+        left: 25vw;
+        top: 274px;
+        >.content {
+            height: calc(100% - 64px);
+            > ul.drive_media_list {
+                height: 100%;
+                overflow-y: auto;
+                margin: 0px;
+                padding: 0px;
+                &::-webkit-scrollbar { width: 8px; }
+                > li {
+                    display: inline-block;
+                    list-style-type: none;
+                    width: 25%;
+                    > label {
+                        display: inline-block;
+                        width: 100%;
+                        padding: 0px;
+                        position: relative;
+                        overflow: hidden;
+                        margin: 0px;
+                        &::before {
+                            content: "";
+                            padding-top: 100%;
+                            display: block;
+                        }
+                        > img {
+                            border-radius: 8px;
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            top: 0px;
+                            left: 0px;
+                            object-fit: cover;
+                            vertical-align: text-bottom;
+                        }
+                        &.warn_sensitive::after {
+                            content: url("../resources/ic_warn.png");
+                            z-index: 1;
+                            position: absolute;
+                            top: 0px;
+                            right: 0px;
+                            background-color: rgba(161,0,0,0.75);
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 16px;
+                        }
+                    }
+                    &.__scroll_loader {
+                        display: block;
+                        background-color: rgba(62,62,62,0.92);
+                        margin: 6px;
+                        padding: 8px 12px;
+                    }
+                }
+            }
         }
     }
 

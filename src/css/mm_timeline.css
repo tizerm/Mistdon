@@ -878,6 +878,7 @@
                     top: 0px;
                     left: 0px;
                     object-fit: cover;
+                    vertical-align: text-bottom;
                 }
                 &.warn_sensitive::after {
                     content: url("../resources/ic_warn.png");

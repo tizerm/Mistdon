@@ -100,27 +100,16 @@
         }));
 
     // ドメイン入力時のイベント
-    $("#txt_mst_instance_domain").on("blur", (e) => {
-        const instance_domain = $("#txt_mst_instance_domain").val();
-        if (!instance_domain) {
-            // 空の場合は表示リセット
-            $("#lbl_mst_instance_name").text("(Instance Name)");
-            return;
-        }
-
-        // ajaxでインスタンス情報を取得
-        $.ajax({
-            type: "GET",
-            url: `https://${instance_domain}/api/v2/instance`,
-            dataType: "json"
-        }).then(data => {
-            // 取得できたらインスタンス情報をセット
-            console.log(data);
-            $("#lbl_mst_instance_name").text(data.title);
-        }).catch(jqXHR => {
-            // 取得失敗時はエラー文字を入れる(v3.x.xは取得できない)
-            $("#lbl_mst_instance_name").text("(不正なインスタンスかv3.x.x以下です)");
-        });
+    $("#txt_instance_domain").on("blur", e => {
+        // 一旦認証ボタンを無効化
+        $("#on_auth_instance").prop("disabled", true)
+        const instance_domain = $(e.target).val();
+        const info_dom = $(e.target).closest("#select_platform").find(".instance_info")
+        Instance.showInstanceName(instance_domain, info_dom).then(instance => {
+            if (!instance) return // インスタンスが確認できなかった場合はなにもしない
+            $(e.target).closest("#select_platform").find(".__hdn_instance_platform").val(instance.platform)
+            $("#on_auth_instance").prop("disabled", false)
+        })
     });
 
     /*================================================================================================================*/

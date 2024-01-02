@@ -26,9 +26,8 @@ $(() => (async () => {
     Account.cacheEmojis();
     // 投稿アイコンと右クリック時のメニュー生成
     $("#pop_postuser>ul").html(Account.createPostAccountList());
+    $("#post_options .additional_users ul").html(Account.createAdditionalPostAccountList());
     $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
-        // リアクションの場合はリアクション絵文字を表示する
-        //if ($(elm).is("#__menu_reaction")) $(elm).html(Account.createReactionMenuAccountList());
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
         if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
         // それ以外は全アカウントをリストに表示
@@ -61,7 +60,7 @@ $(() => (async () => {
             duration: 80
         }
     });
-    $("#pop_expand_action").tooltip({
+    $("#pop_expand_action, #post_options").tooltip({
         position: {
             my: "center bottom-8",
             at: "center top"

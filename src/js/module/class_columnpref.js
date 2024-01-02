@@ -191,36 +191,8 @@ class TimelinePref {
     static async changeExternalHostEvent(target) {
         const domain = target.val()
         const info_dom = target.closest(".lbl_external_instance").find(".instance_info")
-        if (!domain) { // 空の場合はメッセージを初期化
-            info_dom.text("(URLを入力してください)")
-            return
-        }
-        // ロード待ち画面を生成
-        info_dom.html("&nbsp;").css('background-image', 'url("resources/illust/ani_wait.png")')
-
-        // インスタンス情報を取得
-        const instance = await Instance.get(domain)
-
-        info_dom.css('background-image', 'none')
-        if (!instance) { // 不正なインスタンスの場合はエラーメッセージを表示
-            info_dom.text("!不正なインスタンスです!")
-            return
-        }
-
-        // インスタンス名をセット
-        let img = null
-        switch (instance.platform) {
-            case 'Mastodon': // Mastodon
-                img = '<img src="resources/ic_mastodon.png" class="inline_emoji"/>'
-                break
-            case 'Misskey': // Misskey
-                img = '<img src="resources/ic_misskey.png" class="inline_emoji"/>'
-                break
-            default:
-                break
-        }
-        info_dom.html(`${img} ${instance.name}`)
-        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance.platform)
+        const instance = await Instance.showInstanceName(domain, info_dom)
+        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance?.platform)
     }
 
     /**
