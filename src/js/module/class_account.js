@@ -1112,6 +1112,15 @@ class Account {
         return html
     }
 
+    static createAdditionalPostAccountList() {
+        let html = ''
+        Account.map.forEach((v, k) => html += `<li>
+            <input type="checkbox" id="__chk_${k}"  name="${k}" class="__chk_add_account"/>
+            <label for="__chk_${k}" title="${k}"><img src="${v.pref.avatar_url}" class="user_icon"/></label>
+        </li>`)
+        return html
+    }
+
     /**
      * #StaticMethod
      * 投稿アカウントを選択するコンテキストメニューのDOMを返却

@@ -86,5 +86,40 @@ class Instance {
         if (instance) return new Instance(instance)
         else null
     }
+
+    static async showInstanceName(domain, target) {
+        if (!domain) { // 空の場合はメッセージを初期化
+            target.text("(URLを入力してください)")
+            return null
+        }
+        // ロード待ち画面を生成
+        target.html("&nbsp;").css('background-image', 'url("resources/illust/ani_wait.png")')
+
+        // インスタンス情報を取得
+        const instance = await Instance.get(domain)
+
+        target.css('background-image', 'none')
+        if (!instance) { // 不正なインスタンスの場合はエラーメッセージを表示
+            target.text("!不正なインスタンスです!")
+            return null
+        }
+
+        // インスタンス名をセット
+        let img = null
+        switch (instance.platform) {
+            case 'Mastodon': // Mastodon
+                img = '<img src="resources/ic_mastodon.png" class="inline_emoji"/>'
+                break
+            case 'Misskey': // Misskey
+                img = '<img src="resources/ic_misskey.png" class="inline_emoji"/>'
+                break
+            default:
+                break
+        }
+        target.html(`${img} ${instance.name}`)
+
+        // 生成したインスタンスを返却
+        return instance
+    }
 }
 

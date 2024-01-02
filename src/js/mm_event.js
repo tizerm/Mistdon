@@ -198,6 +198,9 @@ $(() => {
     $("#header>#head_postarea #open_post_options").on("click",
         e => $("#header>#post_options").toggle("slide", { direction: "up" }, 80))
 
+    $("#header>#post_options #open_drive").on("click",
+        e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
+
     /**
      * #Event
      * 投稿ボタン

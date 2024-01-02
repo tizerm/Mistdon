@@ -142,7 +142,7 @@
                                 margin: 6px 12px;
                                 > div { margin: 12px 0px; }
                                 .lbl_external_instance {
-                                    >.instance_info {
+                                    > .instance_info {
                                         background-color: rgba(255,255,255,0.08);
                                         background-size: auto 64px;
                                         background-position: center center;

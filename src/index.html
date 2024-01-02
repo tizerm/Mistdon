@@ -23,6 +23,7 @@
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
+    <script type="text/javascript" src="js/module/class_media.js"></script>
 
     <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1) -->
     <script type="text/javascript" src="js/mm_updater_032.js"></script>
@@ -81,8 +82,8 @@
                     <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
             </div>
             <div class="cw_block">
-                <a id="open_post_options" title="投稿設定を開く"
-                    ><img src="resources/ic_return.png" alt="投稿設定を開く"/></a>
+                <a id="open_post_options" title="投稿オプションを開く"
+                    ><img src="resources/ic_return.png" alt="投稿オプションを開く"/></a>
                 <a id="on_custom_emoji" title="カスタム絵文字を使用"
                     ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
                 <input type="text" id="__txt_content_warning"
@@ -110,11 +111,11 @@
     <div id="post_options">
         <div class="flex_section">
             <div class="additional_users">
-                <h4>追加投稿アカウント</h4>
+                <h5>追加投稿アカウント</h5>
                 <ul class="account_list"></ul>
             </div>
             <div class="poll_setting">
-                <h4>アンケート</h4>
+                <h5>アンケート</h5>
                 <ul class="poll_options">
                     <li><input type="text"
                         class="__txt_poll_option __ignore_keyborad" placeholder="回答1"/></li>
@@ -131,16 +132,24 @@
                 </div>
             </div>
             <div class="attached_media">
-                <h4>添付メディア</h4>
-                <ul class="media_list"></ul>
+                <h5>添付メディア</h5>
+                <ul class="media_list">
+                    <li class="__initial_message">添付メディアなし</li>
+                </ul>
                 <div class="sensitive_option">
                     <input type="checkbox" id="__chk_sensitive_media"/>
                     <label for="__chk_sensitive_media">すべてのメディアを閲覧注意にする</label>
+                    <a id="open_drive" title="過去のメディア一覧"
+                        ><img src="resources/ic_return.png" alt="過去のメディア一覧"/></a>
                 </div>
             </div>
-            <div class="refernced_post">
-                <h4>返信/引用元</h4>
-                <ul class="refernce_post timeline"></ul>
+            <div class="refernced_post timeline">
+                <h5>返信/引用元</h5>
+                <input type="hidden" id="__hdn_reply_id" value=""/>
+                <input type="hidden" id="__hdn_quote_id" value=""/>
+                <ul class="refernce_post">
+                    <li class="__initial_message">返信/引用元なし</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -166,7 +175,7 @@
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
     <div id="pop_emoji_suggester">
-    <!-- hidden: カスタム絵文字サジェスター -->
+        <!-- hidden: カスタム絵文字サジェスター -->
         <input type="hidden" class="target_account" value=""/>
         <input type="hidden" class="target_cursor" value=""/>
         <input type="hidden" class="target_elm_id" value=""/>
@@ -220,11 +229,11 @@
         <ul id="expand_thumbnail_list"></ul>
     </div>
     <div id="pop_expand_post" class="timeline">
+        <!-- hidden: 投稿拡大ウィンドウ -->
         <ul class="__context_posts"></ul>
-    <!-- hidden: 投稿拡大ウィンドウ -->
     </div>
     <div id="pop_expand_action">
-    <!-- hidden: 追加アクションポップ -->
+        <!-- hidden: 追加アクションポップ -->
         <div class="std_action">
             <a class="__short_reply" title="リプライ"><img src="resources/ic_cnt_rp.png" alt="リプライ"/></a>
             <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_cnt_rblg.png" alt="ブースト/リノート"/></a>
@@ -243,8 +252,8 @@
     <div id="pop_ex_timeline">
     <!-- hidden: 拡張タイムライン(横付け) -->
     </div>
-    <div id="pop_window_timeline" class="ui-widget-content">
-    <!-- hidden: 拡張タイムライン(ウィンドウ) -->
+    <div id="pop_window_timeline" class="ui-widget-content ex_window">
+        <!-- hidden: 拡張タイムライン(ウィンドウ) -->
         <h2>
             <span>Window</span>
             <input type="checkbox" id="__window_opacity"/>
@@ -258,6 +267,15 @@
             </div>
             <ul class="__context_posts"></ul>
         </div>
+    </div>
+    <div id="pop_util_window" class="ui-widget-content ex_window">
+        <!-- hidden: 汎用ウィンドウ -->
+        <h2>
+            <span>Window</span>
+            <button type="button" id="__on_util_window_close">×</button>
+        </h2>
+        <div class="content"></div>
+        <div class="footer"></div>
     </div>
     <div id="pop_extend_column">
     <!-- hidden: 拡張カラム -->

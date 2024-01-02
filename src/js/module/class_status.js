@@ -1362,6 +1362,7 @@ class Status {
      */
     createQuoteWindow() {
         // リプライウィンドウのDOM生成
+        /*
         const jqelm = $($.parseHTML(`
             <div class="quote_col">
                 <h2>From ${this.from_account.full_address}</h2>
@@ -1396,7 +1397,14 @@ class Status {
         $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         const replyarea = $("#pop_extend_column #__txt_quotearea")
-        replyarea.focus()
+        replyarea.focus()//*/
+
+        // 投稿IDを隠しフォームにセットして投稿オプションをセット
+        Account.get(this.from_account.full_address).setPostAccount()
+        $("#__hdn_quote_id").val(this.id)
+        $("#post_options ul.refernce_post").html(this.element)
+        $("#header>#post_options").show("slide", { direction: "up" }, 80)
+        $("#__txt_postarea").focus()
     }
 
     /**
