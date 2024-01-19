@@ -21,6 +21,9 @@ var cache_emoji_history = null
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
 
+// ハードウェアアクセラレーション無効化
+app.disableHardwareAcceleration()
+
 /*====================================================================================================================*/
 
 /**

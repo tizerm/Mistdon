@@ -33,6 +33,7 @@ class History {
                 "multi_user": false
             }, null)
         }
+        History.HISTORY_LIMIT = 200
     }
 
     /**
@@ -50,6 +51,10 @@ class History {
                             <h3>アクティビティ履歴</h3>
                         </div>
                         <div class="timeline">
+                            <div class="col_loading">
+                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                                <span class="loading_text">Now Loading...</span>
+                            </div>
                             <ul class="__context_posts"></ul>
                         </div>
                     </td>
@@ -58,6 +63,10 @@ class History {
                             <h3>投稿履歴</h3>
                         </div>
                         <div class="timeline">
+                            <div class="col_loading">
+                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                                <span class="loading_text">Now Loading...</span>
+                            </div>
                             <ul class="__context_posts"></ul>
                         </div>
                     </td>
@@ -66,56 +75,74 @@ class History {
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
 
-        History.bindAsync($("#pop_ex_timeline .post_history ul"), History.post_stack)
-        History.bindAsync($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
+        History.preload($("#pop_ex_timeline .post_history ul"), History.post_stack)
+        History.preload($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
     }
 
-    /**
-     * #StaticMethod
-     * 履歴スタックの投稿情報を、非同期でHTMLにバインドする
-     * 
-     * @param ul アペンド対象のul要素jQueryオブジェクト
-     * @param stack 走査するスタック
-     */
-    static async bindAsync(ul, stack) {
+    static async preload(target, stack) {
+        const load_stack = await History.load(target, stack, null)
+        // ロード画面を消去
+        target.prev().remove()
+        // スクロールローダーを生成
+        createScrollLoader({
+            data: load_stack,
+            target: target,
+            bind: (data, target) => {
+                data.forEach(p => target.append(p.element))
+                // loadのっけた最終インデクスを参照
+                return data.pop().max_id
+            },
+            load: async max_id => await History.load(target, stack, max_id)
+        })
+    }
+
+    static async load(target, stack, max_index) {
+        const start = max_index ?? 0
+        const end = start + 20
+        const load_stack = stack.slice(start, end)
+        // ステータス情報を全部取得
+        for (const elm of load_stack) await elm.getStatus()
+        // 最後のデータに最終インデクスをのっける
+        load_stack[load_stack.length - 1].max_id = end
+        // 切り取ったスタックリストを返却(ローダー作成用)
+        return load_stack
+    }
+
+    async getStatus() {
+        if (this.post) return // Statusインスタンスがキャッシュされている場合はなにもしない
+
+        // Statusインスタンスがキャッシュされていない場合はサーバーから取得
         let request_promise = null
-        for (const elm of stack) { // 時間がかかっても上から順番に処理するためforでループする
-            // Statusインスタンスがキャッシュされている場合はそのまま表示
-            if (elm.post) ul.append(elm.element)
-            else { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
-                try {
-                    const account = Account.get(elm.account_address)
-                    switch (account.platform) {
-                        case 'Mastodon': // Mastodon
-                            request_promise = $.ajax({
-                                type: "GET",
-                                url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
-                                dataType: "json",
-                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                            })
-                            break
-                        case 'Misskey': // Misskey
-                            request_promise = $.ajax({
-                                type: "POST",
-                                url: `https://${account.pref.domain}/api/notes/show`,
-                                dataType: "json",
-                                headers: { "Content-Type": "application/json" },
-                                data: JSON.stringify({
-                                    "i": account.pref.access_token,
-                                    "noteId": elm.id
-                                })
-                            })
-                            break
-                        default:
-                            break
-                    }
-                    const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
-                    elm.post = post
-                    ul.append(elm.element)
-                } catch (err) { // エラーはログに出す
-                    console.log(err)
-                }
+        try {
+            const account = Account.get(this.account_address)
+            switch (account.platform) {
+                case 'Mastodon': // Mastodon
+                    request_promise = $.ajax({
+                        type: "GET",
+                        url: `https://${account.pref.domain}/api/v1/statuses/${this.id}`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    request_promise = $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": account.pref.access_token,
+                            "noteId": this.id
+                        })
+                    })
+                    break
+                default:
+                    break
             }
+            const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
+            this.post = post
+        } catch (err) { // エラーはログに出す
+            console.log(err)
         }
     }
 
@@ -182,7 +209,7 @@ class History {
     static pushPost(post) {
         const history = new History(post, null)
         History.post_stack.unshift(history)
-        if (History.post_stack.length > 100) History.post_stack.pop()
+        if (History.post_stack.length > History.HISTORY_LIMIT) History.post_stack.pop()
         History.writeJson()
     }
 
@@ -198,7 +225,7 @@ class History {
         let history = new History(post, type)
         if (renote_id) history.renote_id = renote_id
         History.activity_stack.unshift(history)
-        if (History.activity_stack.length > 100) History.activity_stack.pop()
+        if (History.activity_stack.length > History.HISTORY_LIMIT) History.activity_stack.pop()
         History.writeJson()
     }
 
