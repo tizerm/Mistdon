@@ -129,6 +129,10 @@ class Account {
             src: this.pref.avatar_url,
             name: this.full_address
         })
+        $(`#header>#post_options ul.account_list input.__chk_add_account`)
+            .prop("checked", false).prop("disabled", false)
+        $(`#header>#post_options ul.account_list input.__chk_add_account[value="${this.full_address}"]`)
+            .prop("disabled", true)
 
         // 背景アイコンとアカウントカラーを設定
         $("#header>h1>.head_user").css('background-image',
@@ -161,6 +165,17 @@ class Account {
         const post_to = arg.option_obj.find('#__cmb_post_to').val()
         const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
         const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
+        // TODO: 現状アンケートをつけるとMastodonで422、Misskeyで400が返ってきて投稿できない
+        let poll = null
+        if (arg.option_obj.find('.__txt_poll_expire_date').val()) {
+            // アンケートがある場合はアンケートのオブジェクトを生成
+            const options = []
+            arg.option_obj.find('.__txt_poll_option').each((index, elm) => options.push($(elm).val()))
+            poll = {
+                options: options,
+                expire_sec: arg.option_obj.find('.__txt_poll_expire_date').val()
+            }
+        }
 
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
@@ -174,10 +189,17 @@ class Account {
                     default:
                         break
                 }
-                request_param = {
+                // アンケートがある場合はアンケートを生成
+                if (poll) request_param = {
+                    "status": arg.content,
+                    "visibility": visibility,
+                    "poll[options]": poll.options,
+                    "poll[expires_in]": poll.expire_sec
+                }; else request_param = { // 通常投稿の場合
                     "status": arg.content,
                     "visibility": visibility
                 }
+
                 // CWがある場合はCWテキストも追加
                 if (cw_text) request_param.spoiler_text = cw_text
                 // リプライの場合はリプライ先ツートIDを設定
@@ -211,6 +233,11 @@ class Account {
                 }
                 // CWがある場合はCWテキストも追加
                 if (cw_text) request_param.cw = cw_text
+                 // アンケートがある場合はアンケートを生成
+                if (poll) request_param.poll = {
+                    "choices": poll.options,
+                    "expiredAfter": poll.expire_sec
+                }
                 // リプライの場合はリプライ先ノートIDを設定
                 if (reply_id) request_param.replyId = reply_id
                 // 引用の場合は引用ノートIDを設定
@@ -249,6 +276,12 @@ class Account {
             // 絵文字を使っていたら投稿時に履歴を保存
             if (this.use_emoji_flg) Account.cacheEmojiHistory()
         }).catch(jqXHR => toast("投稿に失敗しました.", "error", toast_uuid))
+
+        if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
+            arg.multi_post = true // 再起実行されないようにフラグを立てる
+            arg.option_obj.find('input.__chk_add_account:checked')
+                .each((index, elm) => Account.get($(elm).val()).post(arg))
+        }
     }
 
     /**
@@ -1102,8 +1135,11 @@ class Account {
     static createAdditionalPostAccountList() {
         let html = ''
         Account.map.forEach((v, k) => html += `<li>
-            <input type="checkbox" id="__chk_${k}"  name="${k}" class="__chk_add_account"/>
-            <label for="__chk_${k}" title="${k}"><img src="${v.pref.avatar_url}" class="user_icon"/></label>
+            <input type="checkbox" id="__chk_${k}" name="__chk_add_account" class="__chk_add_account" value="${k}"/>
+            <label for="__chk_${k}" title="${k}">
+                <img src="${v.pref.avatar_url}" class="user_icon"/>
+                <div class="check_mask"></div>
+            </label>
         </li>`)
         return html
     }

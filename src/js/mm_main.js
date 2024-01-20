@@ -9,7 +9,11 @@ $(() => (async () => {
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
         $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
         $("#header>h1").text('認証されているアカウントがありません。 - Mistdon')
-    } else Account.get(0).setPostAccount();
+    } else { // 投稿ユーザーリストを作って先頭のアカウントをセット
+        $("#pop_postuser>ul").html(Account.createPostAccountList());
+        $("#post_options .additional_users ul").html(Account.createAdditionalPostAccountList());
+        Account.get(0).setPostAccount();
+    }
     if (Column.isEmpty()) { // カラムが未登録(この場合はストップする)
         $("#columns").prepend(`
             <div class="__initial_message">
@@ -24,9 +28,7 @@ $(() => (async () => {
 
     // カスタム絵文字のキャッシュ確認
     Account.cacheEmojis();
-    // 投稿アイコンと右クリック時のメニュー生成
-    $("#pop_postuser>ul").html(Account.createPostAccountList());
-    $("#post_options .additional_users ul").html(Account.createAdditionalPostAccountList());
+    // 右クリック時のメニュー生成
     $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
         if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));

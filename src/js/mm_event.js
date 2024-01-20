@@ -240,6 +240,27 @@ $(() => {
     $("#header>#post_options #open_drive").on("click",
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
+    // TODO: ドラッグドロップの処理がまだわからんち
+    window.addEventListener("dragenter", e => {
+        e.preventDefault()
+        if ($("#modal_drop_files").is(":visible")) return
+        console.log("=> over event.")
+        console.log(e)
+        $("#modal_drop_files").show("fade", 80)
+    })
+
+    window.addEventListener("dragleave", e => {
+        e.preventDefault()
+        console.log("<= out event.")
+        console.log(e)
+    })
+
+    $("#modal_drop_files").get(0).addEventListener("drop", e => {
+        e.preventDefault()
+        console.log("!! drop event.")
+        console.log(e)
+    })
+
     /*=== Column And Group Event =================================================================================*/
 
     /**
