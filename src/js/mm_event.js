@@ -82,53 +82,11 @@ $(() => {
 
     /**
      * #Event
-     * 公開範囲(Visibility)
-     */
-    $(document).on("click", ".__lnk_visibility", e => {
-        // 選択中のオプションにselectedクラスを付与
-        $(e.target).closest(".visibility_icon").find("img").removeClass("selected")
-        $(e.target).closest(".__lnk_visibility").find("img").addClass("selected")
-    })
-
-    /**
-     * #Event
-     * 投稿先アイコン
-     * => 投稿先変更メニューを表示(Misskeyのみ)
-     */
-    $("#header>#head_postarea #__on_post_to_misskey").on("click", e =>
-        $("#pop_post_to").show("slide", { direction: "up" }, 150))
-
-    /**
-     * #Event
-     * 投稿先変更メニュー項目
-     * => 投稿先情報を変更
-     */
-    $(document).on("click", ".__lnk_post_to", e => {
-        const send = $(e.target).closest(".__lnk_post_to").attr('name')
-        $("#__on_post_to_misskey>img").attr('name', send)
-        switch (send) {
-            case '__to_normal': // 通常投稿
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_public.png')
-                break
-            case '__to_local_only': // ローカルのみ
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_local.png')
-                break
-            default: // チャンネル
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_channel.png')
-                break
-        }
-    })
-
-    /**
-     * #Event
      * カスタム絵文字呼び出しボタン
      * => カスタム絵文字一覧を表示
      */
-    $("#header>#head_postarea #on_custom_emoji").on("click", e => {
-        // リプライウィンドウを開いている場合はリプライアカウントに合わせる
-        if ($(".reply_col").is(":visible")) Account.get($("#__hdn_reply_account").val()).createEmojiList()
-        else if ($(".quote_col").is(":visible")) Account.get($("#__hdn_quote_account").val()).createEmojiList()
-        else Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
+    $("#header>#head_postarea #__open_emoji_palette").on("click", e => {
+        Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
         // サジェストテキストボックスにフォーカス
         $("#__txt_emoji_search").focus()
     })
@@ -195,60 +153,37 @@ $(() => {
         target_account.updateEmojiHistory(target_emoji)
     })
 
-    $("#header>#head_postarea #open_post_options").on("click",
-        e => $("#header>#post_options").toggle("slide", { direction: "up" }, 80))
+    // TODO: このへん投稿オプションに関して
+    $("#header>#head_postarea #__open_post_options").on("click",
+        e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
 
-    $("#header>#post_options #open_drive").on("click",
-        e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
+    $("#header>#head_postarea #__txt_postarea").on("focus", e => {
+        if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
+        $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
+
+    $("body").on("click", e => {
+        if ($(e.target).closest("#post_options").length > 0
+            || $(e.target).is("#__txt_postarea")) return // オプションをクリックしたときは無視
+        $("#header>#post_options").hide("slide", { direction: "up" }, 120)
+    })
 
     /**
      * #Event
      * 投稿ボタン
      */
-    $("#header #on_submit").on("click", e =>
+    $("#header #__on_submit").on("click", e =>
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
             content: $("#__txt_postarea").val(),
-            cw_text: $("#__txt_content_warning").val(),
-            visibility_id: $("#header>#head_postarea .visibility_icon .selected").attr("id"),
-            post_to: $("#header>#head_postarea #__on_post_to_misskey>img").attr("name"),
+            option_obj: $("#post_options"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__txt_postarea").val("")
-                $("#__txt_content_warning").val("")
+                $("#__on_reset_option").click()
+                $("#header>#post_options").hide("slide", { direction: "up" }, 120)
                 $("#__on_emoji_close").click()
             }
         }))
-
-    /**
-     * #Event
-     * 投稿ボタン(リプライウィンドウ)
-     */
-    $(document).on("click", "#__on_reply_submit", e => Account.get($("#__hdn_reply_account").val()).post({
-        content: $("#__txt_replyarea").val(),
-        visibility_id: $("#__hdn_reply_visibility").val(), // 投稿元の公開範囲を継承する
-        reply_id: $("#__hdn_reply_id").val(),
-        // 投稿成功時処理(リプライウィンドウを閉じる)
-        success: () => {
-            $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-            $("#__on_emoji_close").click()
-        }
-    }))
-
-    /**
-     * #Event
-     * 投稿ボタン(引用投稿ウィンドウ)
-     */
-    $(document).on("click", "#__on_quote_submit", e => Account.get($("#__hdn_quote_account").val()).post({
-        content: $("#__txt_quotearea").val(),
-        cw_text: $("#__txt_quote_cw").val(),
-        visibility_id: $("#pop_extend_column .visibility_icon .selected").attr("id"),
-        quote_id: $("#__hdn_quote_id").val(),
-        // 投稿成功時処理(引用ウィンドウを閉じる)
-        success: () => {
-            $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-            $("#__on_emoji_close").click()
-        }
-    }))
 
     /**
      * #Event
@@ -295,21 +230,15 @@ $(() => {
      */
     $("#header #on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
-    /**
-     * #Event #Focus
-     * 投稿本文テキストエリア
-     * => ウィンドウの横幅が800pxを切っていた場合テキストエリアを拡張
-     */
-    $("#header #__txt_postarea").on("focus", e => {
-        if (window.innerWidth < 800) $(e.target).css("width", "calc(100vw - 334px)")
+    /*=== Post Option Article Area Event =========================================================================*/
+
+    $("#header>#post_options #__on_reset_option").on("click", e => {
+        $('#header>#post_options input[type="text"]').val("")
+        deleteQuoteInfo()
     })
 
-    /**
-     * #Event #Blur
-     * 投稿本文テキストエリア
-     * => 拡張されたテキストエリアをもとに戻す
-     */
-    $("#header #__txt_postarea").on("blur", e => $(e.target).css("width", "calc(100vw - 514px)"))
+    $("#header>#post_options #open_drive").on("click",
+        e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
     /*=== Column And Group Event =================================================================================*/
 

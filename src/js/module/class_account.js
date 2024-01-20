@@ -136,6 +136,9 @@ class Account {
         ).text(`${this.pref.username} - ${this.full_address}`)
         $("#header>h1").css('background-color', `#${this.pref.acc_color}`)
 
+        // 引用情報を削除
+        deleteQuoteInfo()
+
         // 投稿先メニューを生成
         this.createPostToMenu()
     }
@@ -149,30 +152,26 @@ class Account {
     async post(arg) {
         // 何も書いてなかったら何もしない
         if (!arg.content) return
-        let visibility = null
         let request_param = null
         let request_promise = null
+
+        // 各種投稿オプションパラメータを取得
+        let visibility = arg.option_obj.find('input[name="__opt_visibility"]:checked').val()
+        const cw_text = arg.option_obj.find('#__txt_content_warning').val()
+        const post_to = arg.option_obj.find('#__cmb_post_to').val()
+        const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
+        const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
+
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
         toast("投稿中です...", "progress", toast_uuid)
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
-                // 公開範囲を取得
-                switch (arg.visibility_id) {
-                    case 'visibility_public': // 公開
-                        visibility = "public"
-                        break
-                    case 'visibility_unlisted': // ホーム
-                        visibility = "unlisted"
-                        break
-                    case 'visibility_followers': // フォロ限
+                switch (visibility) { // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
+                    case 'followers': // フォロ限
                         visibility = "private"
                         break
-                    case 'visibility_direct': // DM
-                        visibility = "direct"
-                        break
-                    default: // リプライから来た場合はリプライ先の値が既に入っている
-                        visibility = arg.visibility_id
+                    default:
                         break
                 }
                 request_param = {
@@ -180,9 +179,9 @@ class Account {
                     "visibility": visibility
                 }
                 // CWがある場合はCWテキストも追加
-                if (arg.cw_text) request_param.spoiler_text = arg.cw_text
+                if (cw_text) request_param.spoiler_text = cw_text
                 // リプライの場合はリプライ先ツートIDを設定
-                if (arg.reply_id) request_param.in_reply_to_id = arg.reply_id
+                if (reply_id) request_param.in_reply_to_id = reply_id
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/v1/statuses`,
@@ -195,22 +194,14 @@ class Account {
                 })
                 break
             case 'Misskey': // Misskey
-                // 公開範囲を取得
-                switch (arg.visibility_id) {
-                    case 'visibility_public': // 公開
-                        visibility = "public"
-                        break
-                    case 'visibility_unlisted': // ホーム
+                switch (visibility) { // 公開範囲を設定(Misskeyの場合ホームとダイレクトのパラメータが違う)
+                    case 'unlisted': // ホーム
                         visibility = "home"
                         break
-                    case 'visibility_followers': // フォロ限
-                        visibility = "followers"
-                        break
-                    case 'visibility_direct': // DM
+                    case 'direct': // DM
                         visibility = "specified"
                         break
-                    default: // リプライから来た場合はリプライ先の値が既に入っている
-                        visibility = arg.visibility_id
+                    default:
                         break
                 }
                 request_param = {
@@ -219,22 +210,22 @@ class Account {
                     "visibility": visibility
                 }
                 // CWがある場合はCWテキストも追加
-                if (arg.cw_text) request_param.cw = arg.cw_text
+                if (cw_text) request_param.cw = cw_text
                 // リプライの場合はリプライ先ノートIDを設定
-                if (arg.reply_id) request_param.replyId = arg.reply_id
+                if (reply_id) request_param.replyId = reply_id
                 // 引用の場合は引用ノートIDを設定
-                if (arg.quote_id) request_param.renoteId = arg.quote_id
+                if (quote_id) request_param.renoteId = quote_id
                 // 投稿先を設定
-                switch (arg.post_to) {
-                    case '__to_normal': // 通常投稿
+                switch (post_to) {
+                    case '__default': // 通常投稿
                         request_param.localOnly = false
                         break
-                    case '__to_local_only': // ローカルのみ
+                    case '__local': // ローカルのみ
                         request_param.localOnly = true
                         break
                     default: // チャンネル
                         request_param.localOnly = true
-                        request_param.channelId = arg.post_to
+                        request_param.channelId = post_to
                         break
                 }
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
@@ -1056,28 +1047,24 @@ class Account {
      */
     async createPostToMenu() {
         if (this.platform == 'Mastodon') { // Mastodonの場合は無効化
-            $("#__on_post_to_misskey").prop('disabled', true)
-            $("#__on_post_to_misskey>img").attr({
-                src: "resources/ic_mastodon.png",
-                name: "__to_normal"
-            })
+            $("#__cmb_post_to").prop('disabled', true).html(`
+                <option value="__default">(使用しません)</option>
+            `)
             return
         }
-        let html = ''
+        let html = `
+            <option value="__default">通常投稿</option>
+            <option value="__local">ローカル(連合しない)</option>
+        `
         try {
             const channels = await this.getChannelsCache()
             channels?.forEach(c => html += `
-                <li><a name="${c.id}" class="__lnk_post_to to_channel">${c.name}</a></li>
+                <option value="${c.id}">${c.name}</option>
             `)
         } catch (err) {
             console.log(err)
         }
-        $("#pop_post_to>ul").html(html)
-        $("#__on_post_to_misskey").prop('disabled', false)
-        $("#__on_post_to_misskey>img").attr({
-            src: "resources/ic_public.png",
-            name: "__to_normal"
-        })
+        $("#__cmb_post_to").prop('disabled', false).html(html)
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得

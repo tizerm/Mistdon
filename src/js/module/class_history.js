@@ -148,6 +148,7 @@ class History {
 
     // Getter: 投稿履歴のDOM Elementを生成
     get element() {
+        if (!this.post) return "" // データがとれない場合は空を返却
         // まず投稿本体のjQueryオブジェクトを取得
         const elm = this.post.element
         let button = ''

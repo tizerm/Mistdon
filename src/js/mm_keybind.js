@@ -165,16 +165,17 @@
     $("#header>#head_postarea").keydown(e => {
         if (event.shiftKey && e.keyCode === 13) {
             // Shift+Enterで投稿処理実行
-            $("#header #on_submit").click();
+            $("#header #__on_submit").click();
             return false;
         } else if ((event.ctrlKey || event.metaKey) && e.keyCode === 13) {
             // Ctrl+Enterの場合、投稿後に自動でフォーカスを外す
-            $("#header #on_submit").click();
+            $("#header #__on_submit").click();
             $(e.target).blur();
             return false;
         } else if (e.keyCode === 27) {
             // Escでフォーカスアウト
             $(e.target).blur();
+            $("#header>#post_options").hide("slide", { direction: "up" }, 120);
             return false;
         }
         // Alt+↑↓でアカウントを切り替え

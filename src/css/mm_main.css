@@ -30,130 +30,48 @@
 
     /*=== Default Post Area Layout ===============================================================*/
     > #head_postarea {
-        position: relative;
-        margin-top: 4px;
-        > .left_block {
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 320px;
-        }
-        > .right_block {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-        }
-        .__lnk_postuser {
-            display: block;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 72px;
-            height: 72px;
+        display: flex;
+        margin: 2px 0px;
+        width: calc(100vw - 72px);
 
-            & img {
-                border-radius: 12px;
+        > .post_user {
+            width: 72px;
+            > .__lnk_postuser {
+                display: block;
                 width: 72px;
                 height: 72px;
-                cursor: pointer;
-            }
-        }
-        .visibility_icon {
-            position: absolute;
-            top: 0px;
-            left: 76px;
-        }
-        .cw_block {
-            position: absolute;
-            top: 49px;
-            left: 76px;
-            width: 210px;
-            #on_custom_emoji {
-                display: inline-block;
-                vertical-align: text-bottom;
-                &:hover>img {
-                    background-color: #225588;
+                & img {
+                    border-radius: 12px;
+                    width: 72px;
+                    height: 72px;
                     cursor: pointer;
                 }
             }
-            #__txt_content_warning {
-                transform: translate(-2px, -8px);
+        }
+        > .opt_buttons {
+            width: 36px;
+            padding: 0px 4px;
+        }
+        > .textbox_area {
+            flex-grow: 1;
+            > #__txt_postarea {
+                padding: 2px;
                 font-family: "メイリオ", sans-selif;
                 text-align: left;
+                border-radius: 6px;
                 background-color: #434343;
-                border-radius: 4px;
                 border: solid 1px #888888;
                 color: #ffffff;
-                width: 120px;
-            }
-            #__on_post_to_misskey {
-                border-style: none;
-                background-color: transparent;
-                margin: 0px;
-                padding: 0px;
-                position: absolute;
-                right: 0px;
-                top: 0px;
-                cursor: pointer;
-                & img {
-                    width: 24px;
-                    height: 24px;
-                }
-                &[disabled]>img {
-                    opacity: 0.25;
-                    cursor: not-allowed;
-                }
+                width: calc(100% - 12px);
+                height: 68px;
             }
         }
-        #__txt_postarea {
-            position: absolute;
-            top: -2px;
-            right: 154px;
-            padding: 2px;
-            font-family: "メイリオ", sans-selif;
-            text-align: left;
-            border-radius: 6px;
-            background-color: #434343;
-            border: solid 1px #888888;
-            color: #ffffff;
-            width: calc(100vw - 514px);
-            height: 68px;
+        > .submit_button {
+            width: 72px;
         }
-        .submit_buttons {
-            position: absolute;
-            top: 0px;
-            right: 8px;
-
-            > a:hover>img {
-                border-radius: 8px;
-                background-color: #555555;
-                cursor: pointer;
-            }
-            > #on_submit {
-                position: absolute;
-                top: 0px;
-                right: 72px;
-            }
-            > #on_last_delete {
-                position: absolute;
-                top: 0px;
-                right: 36px;
-            }
-            > #on_last_delete_paste {
-                position: absolute;
-                top: 36px;
-                right: 36px;
-            }
-            > #on_last_copy {
-                position: absolute;
-                top: 0px;
-                right: 0px;
-            }
-            > #on_last_replychain {
-                position: absolute;
-                top: 36px;
-                right: 0px;
-            }
+        > .additional_buttons {
+            display: none;
+            width: 72px;
         }
     }
 
@@ -166,7 +84,7 @@
         margin-top: 4px;
         z-index: 10;
         border-radius: 8px;
-        background-color: rgba(62,62,62,0.8);
+        background-color: rgba(48,48,48,0.85);
         border: solid 1px #bbbbbb;
         > .flex_section {
             display: flex;
@@ -176,6 +94,7 @@
                 margin: 4px 0px;
                 padding: 0px 12px;
                 color: #dddddd;
+                text-align: left;
                 font-size: 14px;
             }
             > div { padding: 0px 2px; }
@@ -184,8 +103,10 @@
                 padding: 0px;
                 > li { list-style-type: none; }
             }
+
             > .additional_users {
-                width: 160px;
+                flex-basis: 152px;
+                text-align: center;
                 > ul.account_list>li {
                     display: inline-block;
                     > label {
@@ -200,8 +121,30 @@
                     }
                 }
             }
+            > .publish_setting {
+                flex-basis: 172px;
+                text-align: center;
+                > .visibility_box {
+                    > label {
+                        padding: 0px;
+                        border-radius: 16px;
+                        cursor: pointer;
+                        > img {
+                            width: 36px;
+                            height: 36px;
+                            vertical-align: text-bottom;
+                        }
+                    }
+                    > input[type="radio"]+label:hover { background-color: #777777; }
+                }
+                #__txt_content_warning, #__cmb_post_to { width: 158px; }
+            }
+            > .poll_setting {
+                flex-basis: 172px;
+                .__txt_poll_option { width: 100%; }
+            }
             > .attached_media {
-                flex-grow: 1;
+                flex-grow: 5;
                 > ul.media_list {
                     > li {
                         &.__initial_message {
@@ -215,6 +158,7 @@
             }
             > .refernced_post {
                 flex-basis: 320px;
+                flex-grow: 1;
                 > ul.refernce_post {
                     height: auto;
                     max-height: 144px;
@@ -235,22 +179,6 @@
 @keyframes marquee-anim {
     0%   { left: 100%; transform: translate(0); }
     100% { left: 0; transform: translate(-100%, 0); }
-}
-
-/*=== Visibility Icon Block (General Setting) ====================================================*/
-
-.visibility_icon>.__lnk_visibility {
-    & img {
-        display: inline-block;
-        border-radius: 8px;
-        width: 48px;
-        height: 48px;
-    }
-    & img.selected { background-color: #3388cc; }
-    &:hover>img {
-        background-color: #225588;
-        cursor: pointer;
-    }
 }
 
 /*=== Popup Window Area ==========================================================================*/

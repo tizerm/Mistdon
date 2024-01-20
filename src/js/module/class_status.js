@@ -1323,87 +1323,34 @@ class Status {
 
     /**
      * #Method
-     * この投稿に対する返信を投稿するための画面を表示
+     * この投稿に対する返信を投稿するための投稿オプションを設定
      */
     createReplyWindow() {
         // 返信先のアカウントが返信元のアカウントと同じ場合は先頭のユーザーIDを表示しない
         const userid = `@${this.user.full_address}` != this.from_account.full_address ? `@${this.user.id} ` : ''
-        // リプライウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="reply_col">
-                <h2>From ${this.from_account.full_address}</h2>
-                <div class="reply_form">
-                    <input type="hidden" id="__hdn_reply_id" value="${this.id}"/>
-                    <input type="hidden" id="__hdn_reply_account" value="${this.from_account.full_address}"/>
-                    <input type="hidden" id="__hdn_reply_visibility" value="${this.visibility}"/>
-                    <textarea id="__txt_replyarea" class="__ignore_keyborad __emoji_suggest"
-                        placeholder="(Ctrl+Enterでも投稿できます)">${userid}</textarea>
-                    <button type="button" id="__on_reply_submit" class="close_button">投稿</button>
-                </div>
-                <div class="timeline">
-                    <ul></ul>
-                </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
-            </div>
-        `))
-        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
+
+        // 投稿IDを隠しフォームにセットして投稿オプションをセット
+        $("#header>#post_options").hide()
+        $("#__on_reset_option").click()
+        Account.get(this.from_account.full_address).setPostAccount()
+        $("#__hdn_reply_id").val(this.id)
+        $("#post_options ul.refernce_post").html(this.element)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
-        const replyarea = $("#pop_extend_column #__txt_replyarea")
-        replyarea.focus()
-        replyarea.get(0).setSelectionRange(500, 500)
+        $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
+
     }
 
     /**
      * #Method
-     * この投稿を引用した投稿するための画面を表示
+     * この投稿を引用した投稿するための投稿オプションを設定
      */
     createQuoteWindow() {
-        // リプライウィンドウのDOM生成
-        /*
-        const jqelm = $($.parseHTML(`
-            <div class="quote_col">
-                <h2>From ${this.from_account.full_address}</h2>
-                <div class="quote_form">
-                    <input type="hidden" id="__hdn_quote_id" value="${this.id}"/>
-                    <input type="hidden" id="__hdn_quote_account" value="${this.from_account.full_address}"/>
-                    <div class="visibility_icon">
-                        <a class="__lnk_visibility" title="公開">
-                            <img src="resources/ic_public.png" alt="公開" id="visibility_public" class="selected"/></a>
-                        <a class="__lnk_visibility" title="未収載/ホーム">
-                            <img src="resources/ic_unlisted.png" alt="未収載/ホーム" id="visibility_unlisted"/></a>
-                        <a class="__lnk_visibility" title="フォロワー限定">
-                            <img src="resources/ic_followers.png" alt="フォロワー限定" id="visibility_followers"/></a>
-                        <a class="__lnk_visibility" title="ダイレクトメッセージ">
-                            <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
-                    </div>
-                    <input type="text" id="__txt_quote_cw"
-                        class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
-                    <textarea id="__txt_quotearea" class="__ignore_keyborad __emoji_suggest"
-                        placeholder="(Ctrl+Enterでも投稿できます)"></textarea>
-                    <button type="button" id="__on_quote_submit" class="close_button">投稿</button>
-                </div>
-                <div class="timeline">
-                    <ul></ul>
-                </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
-            </div>
-        `))
-        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
-        // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
-        const replyarea = $("#pop_extend_column #__txt_quotearea")
-        replyarea.focus()//*/
-
         // 投稿IDを隠しフォームにセットして投稿オプションをセット
+        $("#header>#post_options").hide()
+        $("#__on_reset_option").click()
         Account.get(this.from_account.full_address).setPostAccount()
         $("#__hdn_quote_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
-        $("#header>#post_options").show("slide", { direction: "up" }, 80)
         $("#__txt_postarea").focus()
     }
 
