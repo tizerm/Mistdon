@@ -68,4 +68,10 @@
     $("#on_save_pref").on("click", e => ColumnPref.save());
     // 戻るボタンイベント
     $("#on_close").on("click", e => window.open("index.html", "_self"));
+    // 全体設定ボタンイベント
+    $("#on_general_pref").on("click", e => Preference.openGeneralPrefConfig());
+    // 全体設定-保存して閉じるボタンイベント
+    $(document).on("click", "#__on_pref_save", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
+    // 全体設定-保存せずに閉じるボタンイベント
+    $(document).on("click", "#__on_pref_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
 });

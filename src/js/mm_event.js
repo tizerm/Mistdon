@@ -241,6 +241,7 @@ $(() => {
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
     // TODO: ドラッグドロップの処理がまだわからんち
+    /*
     window.addEventListener("dragenter", e => {
         e.preventDefault()
         if ($("#modal_drop_files").is(":visible")) return
@@ -259,7 +260,7 @@ $(() => {
         e.preventDefault()
         console.log("!! drop event.")
         console.log(e)
-    })
+    })//*/
 
     /*=== Column And Group Event =================================================================================*/
 

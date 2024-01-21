@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <meta
+        http-equiv="X-Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <title>Mistdon General Preference</title>
+</head>
+<body>
+<article id="main">
+    <article id="general_preference">
+        <dl>
+            <dt>個別オプション</dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_auto_expand_post_option"/>
+                        <label for="__chk_gen_auto_expand_post_option">本文フォームにフォーカス時に投稿オプションを自動展開する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="投稿オプションウィンドウを投稿本文のフォームにフォーカスしたときに自動で表示するか設定します。オフにした場合は、投稿アカウントアイコンの右下にあるボタンから投稿オプションを表示します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_additional_button"/>
+                        <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_action_palette"/>
+                        <label for="__chk_gen_use_action_palette">簡易アクションパレットを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="投稿にマウスオーバーしたときに表示されるリプライ/ブースト/リノートなどが手軽に行えるアクションパレットを使用するか設定します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_profile_cw"/>
+                        <label for="__chk_gen_expand_profile_cw">ユーザープロフィールのCWを自動展開する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとユーザーの個別プロフィールを表示したときのCW(Contents Warning)を開いた状態で表示します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_profile_media"/>
+                        <label for="__chk_gen_expand_profile_media">ユーザープロフィールの閲覧注意メディアを自動展開する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとユーザーの個別プロフィールを表示したときの閲覧注意メディアを開いた状態で表示します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_show_tips"/>
+                        <label for="__chk_gen_show_tips">TIPSを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="タイトルヘッダにTIPSを表示します。オンにすると30秒おきにMistdonの簡潔な操作説明のTIPSが流れてきます。"/>
+                    </li>
+                </ul>
+            </dd>
+            <dt>タイムライングループのキャッシュ件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の画面に表示する最大の投稿数です。これを超えると古い順から消えていきます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_tlcache_default" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_tlcache_chat" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>リスト</th>
+                        <td><input type="text" id="__txt_gen_tlcache_list" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>メディア</th>
+                        <td><input type="text" id="__txt_gen_tlcache_media" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen_tlcache_gallery" size="6" maxlength="3"/>件</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>画像サムネイルの高さ制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の画像サムネイルの高さの限界値を設定します。基本的に正方形でトリミングされますが、横幅がこの値を超える場合は高さはここで設定した値になります。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_default" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_chat" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>メディア</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_media" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_gallery" size="6" maxlength="3"/>px</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>チャットレイアウトの高さ制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="チャットレイアウト時に投稿ひとつの高さが高すぎる場合に指定した高さで切り落とします。0以下を指定した場合は切り落とさずにすべて表示します。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_chatmaxheight" size="6" maxlength="2"/>px
+            </dd>
+            <dt>送信履歴の最大保存件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="投稿履歴とアクティビティ履歴の最大保存件数を設定します。これを超えると古い順から履歴から消えていきます。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_history_limit" size="6" maxlength="3"/>件
+            </dd>
+            <dt>キーボードスクロールのスクロール量設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="キーボードの↑↓(ws)を押したときにスクロールする量をpxで指定します。Shift同時押し時のスクロール量も設定できます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>通常スクロール</th>
+                        <td><input type="text" id="__txt_gen_keyscroll_normal" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>シフトスクロール</th>
+                        <td><input type="text" id="__txt_gen_keyscroll_shift" size="6" maxlength="3"/>px</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>通知の表示タイプ
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="投稿や取得などの待機メッセージや、エラー発生時などの通知メッセージをどのように表示するか設定します。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_toast_type1" name="__opt_gen_toast_type" class="__opt_gen_toast_type" value="large_left"/>
+                        <label for="__opt_gen_toast_type1">左上に大きく</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_toast_type2" name="__opt_gen_toast_type" class="__opt_gen_toast_type" value="mini_right"/>
+                        <label for="__opt_gen_toast_type2">右下に小さく</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>背景
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="背景を好きなように変更できます。あまり明るすぎると一部UIが見づらくなる場合がありますのでご了承ください。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_background1" name="__opt_gen_background" class="__opt_gen_background" value="mono_color"/>
+                        <label for="__opt_gen_background1">単色カラー</label>
+                        #<input type="text" id="__txt_gen_background_color" class="__pull_color_palette" size="6"/>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_background2" name="__opt_gen_background" class="__opt_gen_background" value="select_image"/>
+                        <label for="__opt_gen_background2">指定の画像</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_background3" name="__opt_gen_background" class="__opt_gen_background" value="mitlin"/>
+                        <label for="__opt_gen_background3">ミトリン</label>
+                        <select id="__cmb_gen_backmitlin_type">
+                            <option value="ver011">Mitlin v0.1.1</option>
+                            <option value="ver031">Mitlin v0.3.1</option>
+                            <option value="ver041">Mitlin v0.4.1</option>
+                            <option value="ver051">Mitlin v0.5.1</option>
+                            <option value="ver100">Mitlin v1.0.0</option>
+                        </select>
+                    </li>
+                </ul>
+            </dd>
+        </dl>
+    </article>
+</article>
+</body>
+</html>

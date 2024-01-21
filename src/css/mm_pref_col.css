@@ -17,6 +17,64 @@
     }
 }
 
+/*=== Popup Window Area ==========================================================================*/
+
+#pop {
+    /*=== Extend Column (Help Window) ============================================================*/
+    > #pop_extend_column>.pref_col {
+        width: 480px;
+        > h2 {
+            border-top-left-radius: 18px;
+            border-bottom-left-radius: 18px;
+            background-color: #738c83;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-size: 20px;
+            color: #ffffff;
+            margin: 0px;
+            padding: 12px 24px;
+        }
+        > .pref_content {
+            overflow-y: auto;
+            background-color: rgba(34,34,34,0.5);
+            padding: 0px 18px 12px;
+            font-size: 13px;
+            height: calc(100vh - 240px);
+
+            &::-webkit-scrollbar { width: 8px; }
+            & dt {
+                padding: 0px 12px;
+                margin-bottom: 12px;
+                font-size: 16px;
+                font-weight: bold;
+                border-left: solid 12px #aaaaaa;
+                border-bottom: solid 1px #aaaaaa;
+            }
+            & dd { margin-bottom: 24px; }
+            & th, & td {
+                margin: 1px;
+                border-radius: 6px;
+                padding: 4px 12px;
+                background-color: rgba(255,255,255,0.08);
+            }
+            & img.tooltip_help {
+                display: inline-block;
+                width: 18px;
+                height: 18px;
+                vertical-align: text-bottom;
+                cursor: help;
+            }
+            .selector_list {
+                margin: 0px;
+                padding: 0px;
+                > li {
+                    margin: 2px 0px;
+                    list-style-type: none;
+                }
+            }
+        }
+    }
+}
+
 /*=== Column Layout ==============================================================================*/
 
 #columns {
