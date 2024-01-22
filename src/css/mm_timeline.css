@@ -958,18 +958,23 @@
                     cursor: pointer;
                 }
             }
+            > a {
+                position: relative;
+                top: 6px;
+                padding: 0px;
+                margin: 0px;
+                > img {
+                    width: 24px;
+                    height: 24px;
+                    vertical-align: text-bottom;
+                }
+                &:hover>img {
+                    background-color: rgba(255,255,255,0.2);
+                    cursor: pointer;
+                }
+            }
             &.auth_details {
                 margin: -2px -4px 4px;
-                > a {
-                    position: relative;
-                    top: 6px;
-                    padding: 0px;
-                    margin: 0px;
-                    &:hover>img {
-                        background-color: rgba(255,255,255,0.2);
-                        cursor: pointer;
-                    }
-                }
                 > .counter { width: 64px; }
             }
         }
@@ -1065,5 +1070,39 @@
             text-decoration: none;
             cursor: not-allowed;
         }
+    }
+}
+
+/*=== Instance Info Layout =======================================================================*/
+
+.column_instance_info {
+    display: none;
+    width: 360px;
+    position: relative;
+    > .instance_header {
+        height: 214px;
+        overflow-y: hidden;
+        .header_image { height: 96px; }
+        .info {
+            position: relative;
+            > .instance_name {
+                position: absolute;
+                top: 0px;
+                left: 48px;
+                margin: 0px;
+                padding: 0px;
+            }
+            > .instance_link {
+                position: absolute;
+                top: 48px;
+                left: 0px;
+            }
+        }
+    }
+    > .instance_detail {
+        height: calc(100vh - 528px);
+    }
+    > .instance_admin {
+        height: 214px;
     }
 }

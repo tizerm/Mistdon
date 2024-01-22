@@ -178,6 +178,7 @@ class User {
                 <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
         `
         let bookmarks = ''
+        let instance = ''
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
@@ -187,6 +188,10 @@ class User {
                     <a class="__on_show_mastfav" title="お気に入り"
                         ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
                 `
+                instance = `
+                    <a class="__on_show_instance" title="所属インスタンス情報"
+                        ><img src="resources/ic_mastodon.png" alt="所属インスタンス情報"/></a>
+                `
                 break
             case 'Misskey': // Misskey
                 html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
@@ -195,6 +200,10 @@ class User {
                         ><img src="resources/ic_emoji.png" alt="リアクション"/></a>
                     <a class="__on_show_miskfav" title="お気に入り"
                         ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                `
+                instance = `
+                    <a class="__on_show_instance" title="所属インスタンス情報"
+                        ><img src="resources/ic_misskey.png" alt="所属インスタンス情報"/></a>
                 `
                 break
             default:
@@ -222,6 +231,8 @@ class User {
             .css('background-position', 'center center')
         if (this.auth) // 認証プロフィール表示の場合はブックマークアイコンを追加
             jqelm.find('.detail_info').addClass('auth_details').prepend(bookmarks)
+        else // 認証されていないプロフィール表示の場合は所属インスタンスボタンを追加
+            jqelm.find('.detail_info').prepend(instance)
         return jqelm
     }
 
@@ -613,6 +624,10 @@ class User {
         })
     }
 
+    async getInstance() {
+        return await Instance.getDetail(this.host, this.platform)
+    }
+
     /**
      * #Method
      * このユーザーの詳細情報を表示するDOMを対象セレクタに対して生成
@@ -622,24 +637,32 @@ class User {
     createDetailHtml(bind_selector) {
         const jqelm = $($.parseHTML(`
             <table><tbody>
-                <tr><td id="${this.full_address}" class="timeline column_profile">
-                    <div class="col_loading">
-                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                        <span class="loading_text">Now Loading...</span>
-                    </div>
-                    <ul class="profile_header __context_user"></ul>
-                    <ul class="profile_detail __context_user"></ul>
-                    <div class="user_post_elm">
-                        <div class="pinned_block post_div">
-                            <h4>ピンどめ</h4>
-                            <ul class="pinned_post __context_posts"></ul>
+                <tr>
+                    <td class="timeline column_instance_info">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
                         </div>
-                        <div class="posts_block post_div">
-                            <ul class="posts __context_posts"></ul>
+                    </td>
+                    <td id="${this.full_address}" class="timeline column_profile">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
                         </div>
-                    </div>
-                    <div class="user_ff_elm"></div>
-                </td></tr>
+                        <ul class="profile_header __context_user"></ul>
+                        <ul class="profile_detail __context_user"></ul>
+                        <div class="user_post_elm">
+                            <div class="pinned_block post_div">
+                                <h4>ピンどめ</h4>
+                                <ul class="pinned_post __context_posts"></ul>
+                            </div>
+                            <div class="posts_block post_div">
+                                <ul class="posts __context_posts"></ul>
+                            </div>
+                        </div>
+                        <div class="user_ff_elm"></div>
+                    </td>
+                </tr>
             </tbody></table>
         `))
         jqelm.find(".profile_header").html(this.header_element)

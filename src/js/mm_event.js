@@ -242,24 +242,45 @@ $(() => {
 
     // TODO: ドラッグドロップの処理がまだわからんち
     /*
-    window.addEventListener("dragenter", e => {
+    document.addEventListener("dragenter", e => {
         e.preventDefault()
         if ($("#modal_drop_files").is(":visible")) return
-        console.log("=> over event.")
+        console.log("=> enter event.")
         console.log(e)
         $("#modal_drop_files").show("fade", 80)
     })
 
-    window.addEventListener("dragleave", e => {
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => {
+        console.log("=> keep over.")
         e.preventDefault()
-        console.log("<= out event.")
-        console.log(e)
     })
-
-    $("#modal_drop_files").get(0).addEventListener("drop", e => {
-        e.preventDefault()
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("drop", e => {
         console.log("!! drop event.")
-        console.log(e)
+        e.preventDefault()
+
+        console.log(e.dataTransfer)
+
+        if (e.dataTransfer.items) {
+            // DataTransferItemList インターフェイスを使用して、ファイルにアクセスする
+            [...e.dataTransfer.items].forEach((item, i) => {
+                // ドロップしたものがファイルでない場合は拒否する
+                if (item.kind === "file") {
+                const file = item.getAsFile();
+                console.log(`… file[${i}].name = ${file.name}`);
+            }
+        });
+
+        } else {
+
+            // DataTransfer インターフェイスを使用してファイルにアクセスする
+
+            [...e.dataTransfer.files].forEach((file, i) => {
+
+                console.log(`… file[${i}].name = ${file.name}`);
+
+            });
+
+        }
     })//*/
 
     /*=== Column And Group Event =================================================================================*/
@@ -701,6 +722,14 @@ $(() => {
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
+
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__on_show_instance", e => (async () => {
+        $("#pop_ex_timeline .single_user").css("width", "880px")
+        $("#pop_ex_timeline .column_instance_info").show()
+        const user = await User.getByAddress($(e.target).closest("td").attr("id"))
+        const instance = await user.getInstance()
+        instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
+    })())
 
     /**
      * #Event #Delayhover
