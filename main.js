@@ -138,6 +138,9 @@ async function writePrefAccColor(event, json_data) {
     json_data.forEach(pref => {
         let account = pref_accounts.get(pref.key_address)
         account.acc_color = pref.acc_color
+        account.default_local = pref.default_local
+        account.default_channel = pref.default_channel
+        account.post_maxlength = pref.post_maxlength
         // ユーザー情報を更新できる場合は更新
         if (pref.user_id) account.user_id = pref.user_id
         if (pref.username) account.username = pref.username

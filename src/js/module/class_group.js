@@ -34,11 +34,6 @@ class Group {
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
 
-    static DEFAULT_TIMELINE_LIMIT = 200 // タイムラインに表示できる限界量(通常値)
-    static LIST_TIMELINE_LIMIT = 500 // カラムのタイムラインに表示できる限界量(リスト値)
-    static SCROLL = 200         // wsスクロールでスクロールするピクセル量
-    static SHIFT_SCROLL = 800   // シフトwsスクロールでスクロールするピクセル量
-
     /**
      * #Method
      * このカラムのタイムラインプロパティを走査
@@ -180,7 +175,24 @@ class Group {
      */
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
-        const limit = this.pref.tl_layout == 'list' ? Group.LIST_TIMELINE_LIMIT : Group.DEFAULT_TIMELINE_LIMIT
+        let limit = null
+        switch (this.pref.tl_layout) {
+            case 'chat': // チャット
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.chat
+                break
+            case 'list': // リスト
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.list
+                break
+            case 'media': // メディア
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.media
+                break
+            case 'gallery': // ギャラリー
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.gallery
+                break
+            default: // デフォルト(ノーマル)
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.default
+                break
+        }
 
         // 重複している投稿を除外する
         this.addStatus(post, () => {

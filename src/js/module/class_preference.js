@@ -20,10 +20,10 @@ class Preference {
                 "enable_tips"                   : true,     // TIPS表示
                 "tl_cache_limit": {                         // TLキャッシュ件数
                     "default"                   : 100,      // ノーマル
-                    "chat"                      : 100,      // チャット
-                    "list"                      : 100,      // リスト
-                    "media"                     : 100,      // メディア
-                    "gallery"                   : 100       // ギャラリー
+                    "chat"                      : 150,      // チャット
+                    "list"                      : 200,      // リスト
+                    "media"                     : 80,       // メディア
+                    "gallery"                   : 120       // ギャラリー
                 },
                 "media_height_limit": {                     // メディアの高さ制限
                     "default"                   : 240,      // ノーマル
@@ -33,6 +33,10 @@ class Preference {
                 },
                 "chat_height_limit"             : 0,        // チャット高さ制限
                 "history_limit"                 : 200,      // 履歴件数
+                "scroll_speed": {                           // スクロールスピード
+                    "default"                   : 250,      // ノーマル
+                    "shift"                     : 800       // チャット
+                },
                 "notification_layout"           : "large_left", // 通知タイプ
                 "background": {                             // 背景
                     "type"                      : "mitlin", // 背景タイプ

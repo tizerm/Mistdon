@@ -39,6 +39,9 @@ class Account {
     // Getter: 絵文字キャッシュ
     get emojis() { return Emojis.get(this.pref.domain) }
 
+    // 現在投稿対象になっているアカウント
+    CURRENT_ACCOUNT = null
+
     // スタティックマップを初期化(非同期)
     static {
         (async () => {
@@ -125,6 +128,8 @@ class Account {
         // 変わってなかったらなにもしない
         if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') == this.full_address) return
 
+        // アカウントを変えて追加投稿情報を消去
+        Account.CURRENT_ACCOUNT = this
         $("#header>#head_postarea .__lnk_postuser>img").attr({
             src: this.pref.avatar_url,
             name: this.full_address
@@ -163,6 +168,7 @@ class Account {
         let visibility = arg.option_obj.find('input[name="__opt_visibility"]:checked').val()
         const cw_text = arg.option_obj.find('#__txt_content_warning').val()
         const post_to = arg.option_obj.find('#__cmb_post_to').val()
+        const is_local = arg.option_obj.find('#__chk_local_only').prop('checked')
         const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
         const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
         // TODO: 現状アンケートをつけるとMastodonで422、Misskeyで400が返ってきて投稿できない
@@ -243,18 +249,12 @@ class Account {
                 // 引用の場合は引用ノートIDを設定
                 if (quote_id) request_param.renoteId = quote_id
                 // 投稿先を設定
-                switch (post_to) {
-                    case '__default': // 通常投稿
-                        request_param.localOnly = false
-                        break
-                    case '__local': // ローカルのみ
-                        request_param.localOnly = true
-                        break
-                    default: // チャンネル
-                        request_param.localOnly = true
-                        request_param.channelId = post_to
-                        break
-                }
+                if (post_to && post_to != '__default') { // チャンネル
+                    request_param.localOnly = true
+                    request_param.channelId = post_to
+                } else // 通常投稿
+                    request_param.localOnly = is_local
+
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/notes/create`,
@@ -1083,21 +1083,26 @@ class Account {
             $("#__cmb_post_to").prop('disabled', true).html(`
                 <option value="__default">(使用しません)</option>
             `)
+            $("#__chk_local_only").prop('disabled', true)
             return
         }
-        let html = `
-            <option value="__default">通常投稿</option>
-            <option value="__local">ローカル(連合しない)</option>
-        `
         try {
             const channels = await this.getChannelsCache()
-            channels?.forEach(c => html += `
-                <option value="${c.id}">${c.name}</option>
+            let html = '<option value="__default">通常投稿</option>'
+            channels?.forEach(c => html /* デフォルトのチャンネルがある場合は初期選択 */ += `
+                <option value="${c.id}"${this.pref.default_channel == c.id ? ' selected' : ''}>${c.name}</option>
             `)
+            $("#__cmb_post_to").prop('disabled', false).html(html)
         } catch (err) {
             console.log(err)
+            // お気に入りのチャンネルがない場合は無効化
+            $("#__cmb_post_to").prop('disabled', true).html(`
+                <option value="__default">(${err == 'empty' ? 'チャンネルがありません' : '取得できませんでした'})</option>
+            `)
         }
-        $("#__cmb_post_to").prop('disabled', false).html(html)
+
+        // ローカル(連合なし)の初期設定もする
+        $("#__chk_local_only").prop('disabled', false).prop('checked', this.pref.default_local)
     }
 
     // Getter: 認証アカウントを順番に並べたときにこのアカウントの次にあたるアカウントを取得
@@ -1165,29 +1170,56 @@ class Account {
      * #StaticMethod
      * アカウント認証画面のアカウントリストのDOMを返却
      */
-    static createAccountPrefList() {
+    static async createAccountPrefList() {
         let html = ''
-        Account.map.forEach((v, k) => {
-            const cache_flg = v.emojis ? true : false
+        const acitr = Account.map.values()
+        for (const account of acitr) {
+            let misskey_elm = ''
+            if (account.pref.platform == 'Misskey') { // Misskeyの場合の特殊設定
+                misskey_elm /* 連合なし設定 */ += `
+                    <li>
+                        <input type="checkbox" id="dl_${account.full_address}" class="__chk_default_local"/>
+                        <label for="dl_${account.full_address}">ローカル(連合なし)をデフォルトにする</label><br/>
+                    </li>
+                `
+                try {
+                    const channels = await account.getChannels()
+                    misskey_elm /* デフォルトチャンネル設定 */ += `
+                        <li>
+                            デフォルトの投稿先(チャンネル):<br/>
+                            <select class="__cmb_default_channel">
+                                <option value="__default">通常投稿</option>
+                    `
+                    channels?.forEach(ch => misskey_elm += `<option value="${ch.id}">${ch.name}</option>`)
+                    misskey_elm += '</select></li>'
+                } catch (err) {
+                    console.log(err)
+                }
+            }
             html += `
-                <li class="ui-sortable" name="${v.full_address}">
-                    <h3>${v.pref.domain}</h3>
+                <li class="ui-sortable account_box" name="${account.full_address}">
+                    <h3>${account.pref.domain}</h3>
                     <div class="user">
-                        <img src="${v.pref.avatar_url}" class="usericon"/>
-                        <h4 class="username">${v.pref.username}</h4>
-                        <div class="userid">${v.full_address}</div>
+                        <img src="${account.pref.avatar_url}" class="usericon"/>
+                        <h4 class="username">${account.pref.username}</h4>
+                        <div class="userid">${account.full_address}</div>
                     </div>
-                    <div class="option">
-                        アカウントカラー: 
-                        #<input type="text" class="__txt_acc_color __pull_color_palette" value="${v.pref.acc_color}" size="6"/>
-                        <br/>カスタム絵文字キャッシュ: ${cache_flg ? '◯' : '×'}
-                    </div>
+                    <ul class="option">
+                        <li>
+                            アカウントカラー: #<input type="text"
+                            class="__txt_acc_color __pull_color_palette" value="${account.pref.acc_color}" size="6"/>
+                        </li>
+                        ${misskey_elm}
+                        <li>
+                            カスタム絵文字キャッシュ: ${account.emojis ? '◯' : '×'}
+                        </li>
+                    </ul>
                     <div class="foot_button">
                         <button type="button" class="__btn_unauth_acc">認証解除</button>
                     </div>
                 </li>
             `
-        })
+        }
         return html
     }
 

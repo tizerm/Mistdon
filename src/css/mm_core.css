@@ -44,6 +44,13 @@ input[type="radio"], input[type="checkbox"] {
             background-color: #cfcfcf;
             color: #333333;
         }
+        &:has(>img:only-child) {
+            background-color: transparent;
+            padding: 0px;
+            cursor: pointer;
+            > img { vertical-align: text-bottom; }
+            &:hover { background-color: #888888; }
+        }
     }
     &:checked+label{
         background-color: #337a9f;
@@ -51,6 +58,10 @@ input[type="radio"], input[type="checkbox"] {
         &:hover {
             background-color: #afcfef;
             color: #333333;
+        }
+        &:has(>img:only-child) {
+            background-color: #337a9f;
+            &:hover { background-color: #77afef; }
         }
     }
 }

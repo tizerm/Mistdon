@@ -74,10 +74,9 @@
             <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
         </div>
         <div class="opt_buttons">
+            <div id="post_length_graph">&nbsp;</div>
             <button type="button" id="__open_emoji_palette" class="image_button" title="絵文字パレットを開く"
                 ><img src="resources/ic_emoji.png" alt="絵文字パレットを開く"/></button>
-            <button type="button" id="__open_post_options" class="image_button" title="投稿オプションを開く"
-                ><img src="resources/ic_return.png" alt="投稿オプションを開く"/></button>
         </div>
         <div class="textbox_area">
             <textarea id="__txt_postarea" class="__ignore_keyborad __emoji_suggest"
@@ -129,6 +128,10 @@
                         <option value="__default">通常投稿</option>
                         <option value="__local">ローカル(連合しない)</option>
                     </select>
+                    <input type="checkbox" id="__chk_local_only"/>
+                    <label for="__chk_local_only" title="ローカル(連合しない)"><img
+                        src="resources/ic_local.png" alt="ローカル(連合しない)"/>
+                        <span>ローカル<span></label>
                 </div>
                 <div class="reset_box">
                     <button type="button" id="__on_reset_option" >本文以外リセット</button>

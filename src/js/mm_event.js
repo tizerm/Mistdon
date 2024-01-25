@@ -153,6 +153,31 @@ $(() => {
         target_account.updateEmojiHistory(target_emoji)
     })
 
+    $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
+        const length = $(e.target).val().length
+        const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
+        const rate = length / limit // TODO: とりあえず一旦最大500字固定
+        const deg = 360 * rate
+
+        if (length > 0) {
+            if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
+                "border-color": "#21dec8",
+                "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
+            }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
+                "border-color": "#dea521",
+                "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
+            }); else $("#post_length_graph").css({ // 文字数超過でレッド
+                "border-color": "#de3121",
+                "background-image": "none",
+                "background-color": "#de3121"
+            })
+        } else $("#post_length_graph").css({ // 入力されていない場合はグレー
+            "border-color": "#aaaaaa",
+            "background-image": "none",
+            "background-color": "transparent"
+        })
+    })
+
     // TODO: このへん投稿オプションに関して
     $("#header>#head_postarea #__open_post_options").on("click",
         e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
@@ -486,36 +511,37 @@ $(() => {
      * 投稿本体に対してホバー(ノーマルレイアウトとチャットレイアウト限定)
      * => 表示アカウントのアクションバーを表示
      */
-    $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
-        // メイン画面のタイムラインのみ有効
-        if ($(e.target).closest(".tl_group_box").length == 0) return
-        const target_post = Column.get($(e.target).closest("td"))
-            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
-        // 外部インスタンスに対しては使用不可
-        if (target_post.from_timeline?.pref?.external) return
-        const pos = $(e.currentTarget).offset()
-        const height = $(e.currentTarget).innerHeight()
+    if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
+        $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
+            // メイン画面のタイムラインのみ有効
+            if ($(e.target).closest(".tl_group_box").length == 0) return
+            const target_post = Column.get($(e.target).closest("td"))
+                .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+            // 外部インスタンスに対しては使用不可
+            if (target_post.from_timeline?.pref?.external) return
+            const pos = $(e.currentTarget).offset()
+            const height = $(e.currentTarget).innerHeight()
 
-        // プラットフォームによって初期表示を変更
-        if (target_post.from_account.platform == 'Misskey') { // Misskey
-            $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
-            $("#pop_expand_action .__short_bookmark").hide()
-            $("#pop_expand_action .__short_quote").show()
-            $("#pop_expand_action .__short_open_reaction").show()
-        } else { // Mastodon
-            $("#pop_expand_action .__short_bookmark").show()
-            $("#pop_expand_action .__short_quote").hide()
-            $("#pop_expand_action .__short_open_reaction").hide()
-        }
-        $("#pop_expand_action>.reactions").hide()
+            // プラットフォームによって初期表示を変更
+            if (target_post.from_account.platform == 'Misskey') { // Misskey
+                $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+                $("#pop_expand_action .__short_bookmark").hide()
+                $("#pop_expand_action .__short_quote").show()
+                $("#pop_expand_action .__short_open_reaction").show()
+            } else { // Mastodon
+                $("#pop_expand_action .__short_bookmark").show()
+                $("#pop_expand_action .__short_quote").hide()
+                $("#pop_expand_action .__short_open_reaction").hide()
+            }
+            $("#pop_expand_action>.reactions").hide()
 
-        // 一時データに設定してアクションバーを開く
-        Status.TEMPORARY_ACTION_STATUS = target_post
-        $("#pop_expand_action").css({
-            "top": `${pos.top + height - 2}px`,
-            "left": `${pos.left}px`,
-        }).show()
-    })
+            // 一時データに設定してアクションバーを開く
+            Status.TEMPORARY_ACTION_STATUS = target_post
+            $("#pop_expand_action").css({
+                "top": `${pos.top + height - 2}px`,
+                "left": `${pos.left}px`,
+            }).show()
+        })
 
     /**
      * #Event

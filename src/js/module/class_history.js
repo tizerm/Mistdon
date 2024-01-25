@@ -33,7 +33,6 @@ class History {
                 "multi_user": false
             }, null)
         }
-        History.HISTORY_LIMIT = 200
     }
 
     /**
@@ -210,7 +209,7 @@ class History {
     static pushPost(post) {
         const history = new History(post, null)
         History.post_stack.unshift(history)
-        if (History.post_stack.length > History.HISTORY_LIMIT) History.post_stack.pop()
+        if (History.post_stack.length > Preference.GENERAL_PREFERENCE.history_limit) History.post_stack.pop()
         History.writeJson()
     }
 
@@ -226,7 +225,7 @@ class History {
         let history = new History(post, type)
         if (renote_id) history.renote_id = renote_id
         History.activity_stack.unshift(history)
-        if (History.activity_stack.length > History.HISTORY_LIMIT) History.activity_stack.pop()
+        if (History.activity_stack.length > Preference.GENERAL_PREFERENCE.history_limit) History.activity_stack.pop()
         History.writeJson()
     }
 

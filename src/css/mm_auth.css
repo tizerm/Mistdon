@@ -94,8 +94,14 @@ input[type="text"] {
                     }
                 }
                 > .option {
-                    margin: 8px 12px;
-                    font-size: 14px;
+                    margin: 8px 16px;
+                    padding: 0px;
+                    font-size: 13px;
+                    > li {
+                        list-style-type: none;
+                        margin: 0px;
+                        padding: 0px;
+                    }
                 }
                 > .foot_button {
                     text-align: right;

@@ -5,7 +5,7 @@
         if (!await window.accessApi.readPrefAccs()) return;
         
         // アカウント情報をもとにアカウントリストを生成
-        $("#content>#account_list>ul").html(Account.createAccountPrefList());
+        $("#content>#account_list>ul").html(await Account.createAccountPrefList());
         $(".__ui_sortable").sortable({
             axis: "y",
             delay: 100,
@@ -25,7 +25,7 @@
         // アカウントカラー初期設定
         $(".__txt_acc_color").each((index, elm) => {
             const target = $(elm);
-            target.closest("li").find("h3").css("background-color", `#${target.val()}`);
+            target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`);
         });
         
         // アカウントカラー反映ボタン
@@ -37,12 +37,22 @@
             // awaitを使えるようにforでループする
             for (const elm of $("#content>#account_list>ul>li").get()) {
                 const userinfo = await Account.get($(elm).find(".userid").text()).getInfo();
+                let maxlength = 500;
+                try { // サーバーごとの投稿文字数上限を設定
+                    const instance = await userinfo.getInstance();
+                    maxlength = instance.post_maxlength
+                } catch (err) {
+                    console.log(err)
+                }
                 param_json.push({
                     'user_id': userinfo?.user_id ?? null,
                     'username': userinfo?.username ?? null,
                     'avatar_url': userinfo?.avatar_url ?? null,
                     'key_address': $(elm).find(".userid").text(),
-                    'acc_color': $(elm).find(".__txt_acc_color").val()
+                    'post_maxlength': maxlength,
+                    'acc_color': $(elm).find(".__txt_acc_color").val(),
+                    'default_local': $(elm).find(".__chk_default_local").prop("checked") ?? null,
+                    'default_channel': $(elm).find(".__cmb_default_channel").val() ?? null
                 });
             }
             // アカウントカラーをファイルに書き込み

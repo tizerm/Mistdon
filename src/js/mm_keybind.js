@@ -99,15 +99,15 @@
                 // Ctrl+W: 先頭まで移動
                 if (event.ctrlKey || event.metaKey) col.scroll(0);
                 // Shift+W: 通常より多めにスクロールする
-                else if (event.shiftKey) col.scroll(-Group.SHIFT_SCROLL);
-                else col.scroll(-Group.SCROLL);
+                else if (event.shiftKey) col.scroll(-Preference.GENERAL_PREFERENCE.scroll_speed.shift);
+                else col.scroll(-Preference.GENERAL_PREFERENCE.scroll_speed.default);
                 return false;
             case 83:
             case 40: // s, ↓: カーソルのカラムを下にスクロール
                 col = Group.getCursor();
                 // Shift+S: 通常より多めにスクロールする
-                if (event.shiftKey) col.scroll(Group.SHIFT_SCROLL);
-                else col.scroll(Group.SCROLL);
+                if (event.shiftKey) col.scroll(Preference.GENERAL_PREFERENCE.scroll_speed.shift);
+                else col.scroll(Preference.GENERAL_PREFERENCE.scroll_speed.default);
                 return false;
             case 70: // f: カーソルカラムの可変幅表示をトグルする
                 if (event.ctrlKey || event.metaKey) { // Ctrl+F: 検索

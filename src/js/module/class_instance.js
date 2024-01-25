@@ -9,7 +9,7 @@ class Instance {
     constructor(data) {
         this.platform = data.platform
         this.host = data.host
-        console.log(data.json)
+        console.log(data)
         switch (data.platform) {
             case 'Mastodon': // Mastodon
                 this.name = data.json.title
@@ -20,6 +20,13 @@ class Instance {
                 //this.admin_user = data.json.contact_account.acct
                 //this.total_user = data.json.stats.user_count
                 this.version = data.json.version
+
+                // サーバー設定
+                this.post_maxlength = data.json.configuration.statuses.max_characters
+                this.characters_reserved_per_url = data.json.configuration.statuses.characters_reserved_per_url
+                if (data.detail) {
+                    this.description = data.detail.description.content
+                }
                 break
             case 'Misskey': // Misskey
                 this.name = data.json.name
@@ -27,6 +34,9 @@ class Instance {
                 this.about = data.json.description
                 this.header_url = data.json.bannerUrl
                 this.version = data.json.version
+
+                // サーバー設定
+                this.post_maxlength = data.json.maxNoteTextLength
                 break
             default:
                 break
@@ -107,6 +117,8 @@ class Instance {
                     })
                 ]).then(datas => {
                     return {
+                        "platform": 'Mastodon',
+                        "host": host,
                         "json": datas[0],
                         "detail": {
                             "description": datas[1],
