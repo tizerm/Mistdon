@@ -4,11 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta
         http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
+        content="default-src 'self'; img-src * data:; media-src *; connect-src *; script-src 'self'"
     />
     <meta
         http-equiv="X-Content-Security-Policy"
-        content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
+        content="default-src 'self'; img-src * data:; media-src *; connect-src *; script-src 'self'"
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
@@ -157,7 +157,7 @@
             <div class="attached_media">
                 <h5>添付メディア</h5>
                 <ul class="media_list">
-                    <li class="__initial_message">添付メディアなし</li>
+                    <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
                 <div class="sensitive_option">
                     <input type="checkbox" id="__chk_sensitive_media"/>

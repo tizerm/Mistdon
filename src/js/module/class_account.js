@@ -40,7 +40,7 @@ class Account {
     get emojis() { return Emojis.get(this.pref.domain) }
 
     // 現在投稿対象になっているアカウント
-    CURRENT_ACCOUNT = null
+    static CURRENT_ACCOUNT = null
 
     // スタティックマップを初期化(非同期)
     static {
@@ -183,9 +183,23 @@ class Account {
             }
         }
 
+        // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
+        const media_ids = []
+        if (Media.ATTACH_MEDIA.size > 0) {
+            try { // アップロード中のエラーをキャッチ
+                const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
+                for (const elm of thumbnails) { // それぞれ待機実行するのでforを使う
+                    const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
+                    media_ids.push(media_id)
+                }
+            } catch (err) { // アップロードでエラーが発生したら中断
+                return
+            }
+        }
+
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
-        toast("投稿中です...", "progress", toast_uuid)
+        toast(`${this.full_address}から投稿中です...`, "progress", toast_uuid)
         switch (this.pref.platform) {
             case 'Mastodon': // Mastodon
                 switch (visibility) { // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
@@ -210,6 +224,8 @@ class Account {
                 if (cw_text) request_param.spoiler_text = cw_text
                 // リプライの場合はリプライ先ツートIDを設定
                 if (reply_id) request_param.in_reply_to_id = reply_id
+                // 添付メディアがある場合はメディアIDを追加
+                if (media_ids.length > 0) request_param.media_ids = media_ids
                 request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
                     type: "POST",
                     url: `https://${this.pref.domain}/api/v1/statuses`,
@@ -271,11 +287,11 @@ class Account {
             new Status(data, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
-            toast("投稿しました.", "done", toast_uuid)
+            toast(`${this.full_address}から投稿しました.`, "done", toast_uuid)
 
             // 絵文字を使っていたら投稿時に履歴を保存
             if (this.use_emoji_flg) Account.cacheEmojiHistory()
-        }).catch(jqXHR => toast("投稿に失敗しました.", "error", toast_uuid))
+        }).catch(jqXHR => toast(`${this.full_address}からの投稿に失敗しました.`, "error", toast_uuid))
 
         if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
             arg.multi_post = true // 再起実行されないようにフラグを立てる

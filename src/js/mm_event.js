@@ -259,6 +259,7 @@ $(() => {
 
     $("#header>#post_options #__on_reset_option").on("click", e => {
         $('#header>#post_options input[type="text"]').val("")
+        Media.clearAttachMedia()
         deleteQuoteInfo()
     })
 
@@ -266,47 +267,39 @@ $(() => {
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
     // TODO: ドラッグドロップの処理がまだわからんち
-    /*
     document.addEventListener("dragenter", e => {
         e.preventDefault()
-        if ($("#modal_drop_files").is(":visible")) return
+        // 画面内の画像をドラッグした場合は発火しない
+        if (e.fromElement || $("#modal_drop_files").is(":visible")) return
         console.log("=> enter event.")
         console.log(e)
         $("#modal_drop_files").show("fade", 80)
     })
 
-    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => {
-        console.log("=> keep over.")
-        e.preventDefault()
-    })
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
+
     $("#modal_drop_files>.dropbox").get(0).addEventListener("drop", e => {
-        console.log("!! drop event.")
+        // デフォルトイベントを無視してファイルを添付メソッドに渡す
         e.preventDefault()
+        Media.attachMedia([...e.dataTransfer.files])
 
-        console.log(e.dataTransfer)
+        // ドロップ領域を消して投稿オプションを開く
+        $("#modal_drop_files").hide("fade", 80)
+        if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
+            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
 
-        if (e.dataTransfer.items) {
-            // DataTransferItemList インターフェイスを使用して、ファイルにアクセスする
-            [...e.dataTransfer.items].forEach((item, i) => {
-                // ドロップしたものがファイルでない場合は拒否する
-                if (item.kind === "file") {
-                const file = item.getAsFile();
-                console.log(`… file[${i}].name = ${file.name}`);
-            }
-        });
+    $("#__txt_postarea").get(0).addEventListener("paste", e => {
+        // ファイル以外は無視(普通のペースト)
+        if (e.clipboardData.types[0] != 'Files') return true
 
-        } else {
+        // デフォルトイベントを無視してクリップボードをファイル化して添付メソッドに渡す
+        e.preventDefault()
+        Media.attachMedia([e.clipboardData.items[0].getAsFile()])
 
-            // DataTransfer インターフェイスを使用してファイルにアクセスする
-
-            [...e.dataTransfer.files].forEach((file, i) => {
-
-                console.log(`… file[${i}].name = ${file.name}`);
-
-            });
-
-        }
-    })//*/
+        if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
+            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
 
     /*=== Column And Group Event =================================================================================*/
 

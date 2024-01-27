@@ -190,11 +190,23 @@
                 .__txt_poll_option { width: 100%; }
             }
             > .attached_media {
-                flex-grow: 5;
+                flex-grow: 4;
                 > ul.media_list {
+                    margin: 0px 8px;
+                    margin-bottom: 8px;
                     > li {
+                        display: inline-block;
+                        & img {
+                            display: inline-block;
+                            width: 216px;
+                            height: 144px;
+                            border-radius: 12px;
+                            vertical-align: text-bottom;
+                            object-fit: cover;
+                        }
                         &.__initial_message {
-                            padding: 32px 0px;
+                            display: block;
+                            padding: 60px 0px;
                             background-color: rgba(255,255,255,0.08);
                             border-radius: 12px;
                             text-align: center;
@@ -203,15 +215,15 @@
                 }
             }
             > .refernced_post {
-                flex-basis: 320px;
+                flex-basis: 340px;
                 flex-grow: 1;
                 > ul.refernce_post {
                     height: auto;
-                    max-height: 144px;
+                    max-height: 172px;
                     > li {
                         margin: 2px;
                         &.__initial_message {
-                            padding: 48px 0px;
+                            padding: 72px 0px;
                             background-color: rgba(62,62,62,0.92);
                             border-radius: 12px;
                             text-align: center;

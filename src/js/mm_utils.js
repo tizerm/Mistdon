@@ -34,6 +34,34 @@ async function ajax(arg) {
     }
 }
 
+async function sendFileRequest(arg) {
+    try {
+        // dataからmultipart/form-dataを生成
+        const mpfd = new FormData()
+        Object.keys(arg.data).forEach(key => mpfd.append(key, arg.data[key]))
+
+        const response = await fetch(arg.url, {
+            method: "POST",
+            mode: "cors",
+            headers: arg.headers,
+            body: mpfd
+        })
+
+        // ステータスコードがエラーの場合はエラーを投げる
+        if (!response.ok) {
+            response.json().then(data => console.log(data))
+            throw new Error(`HTTP Status: ${response.status}`)
+        }
+
+        return {
+            headers: response.headers,
+            body: await response.json()
+        }
+    } catch (err) {
+        return Promise.reject(err)
+    }
+}
+
 /**
  * #Util
  * 引数の配列の先頭に要素を追加して容量超過した場合は最後の要素を削除する

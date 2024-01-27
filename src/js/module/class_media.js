@@ -33,6 +33,32 @@ class Media {
         }
     }
 
+    // 添付メディア
+    static ATTACH_MEDIA = new Map()
+
+    static async attachMedia(files) {
+        const preview_elm = $('#header>#post_options .attached_media>ul.media_list')
+        // 初期メッセージを削除
+        preview_elm.find(".__initial_message").remove()
+        files.forEach(file => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            // ファイルのURLを生成して画像として埋め込む
+            reader.addEventListener("load", () => preview_elm.append(`
+                <li><img src="${reader.result}" class="__img_attach" name="${file.name}"/></li>
+            `))
+            // 添付メディアマップに追加
+            Media.ATTACH_MEDIA.set(file.name, file)
+        })
+    }
+
+    static clearAttachMedia() {
+        $('#header>#post_options .attached_media>ul.media_list').html(`
+            <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
+        `)
+        Media.ATTACH_MEDIA.clear()
+    }
+
     /**
      * #StaticMethod
      * リモートホストも含めたユーザーアドレスからリモートのユーザー情報を取得する
@@ -100,6 +126,55 @@ class Media {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(jqXHR)
             toast(`${address}の投稿の取得に失敗しました.`, "error")
+            return Promise.reject(jqXHR)
+        })
+    }
+
+    static async uploadMedia(account, filename) {
+        // 先にtoastを表示
+        const toast_uuid = crypto.randomUUID()
+        toast(`${filename}をアップロードしています...`, "progress", toast_uuid)
+
+        let upload_promise = null
+        let query_param = null
+        const target_file = Media.ATTACH_MEDIA.get(filename)
+        switch (account.platform) {
+            case 'Mastodon': // Mastodon
+                query_param = { file: target_file }
+                upload_promise = sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
+                    url: `https://${account.pref.domain}/api/v2/media`,
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: query_param
+                }).then(data => {
+                    console.log(data.body)
+                    return data.body.id
+                })
+                break
+            case 'Misskey': // Misskey
+                query_param = {
+                    name: filename,
+                    isSensitive: false, // TODO: 一旦無効固定
+                    file: target_file
+                }
+                upload_promise = sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
+                    url: `https://${account.pref.domain}/api/drive/files/create`,
+                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    data: query_param
+                }).then(data => {
+                    console.log(data.body)
+                    return null
+                })
+                break
+            default:
+                break
+        }
+        return upload_promise.then(id => {
+            toast(null, "hide", toast_uuid)
+            return id
+        }).catch(jqXHR => {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(jqXHR)
+            toast(`${filename}のアップロードに失敗しました. 投稿を中断します.`, "error", toast_uuid)
             return Promise.reject(jqXHR)
         })
     }

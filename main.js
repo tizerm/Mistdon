@@ -13,6 +13,7 @@ const stateKeeper = require('electron-window-state')
 // アプリ保持用設定データの管理
 var pref_accounts = null
 var pref_columns = null
+var pref_general = null
 var pref_window = null
 var pref_emojis = new Map()
 var cache_history = null
@@ -352,6 +353,46 @@ async function writePrefCols(event, json_data) {
     // キャッシュを更新
     pref_columns = JSON.parse(content)
 }
+
+/*
+function readPrefCols() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_columns) {
+        console.log('@INF: use app_prefs/columns.json cache.')
+        return pref_columns
+    }
+    const content = readFile('app_prefs/columns.json')
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
+    pref_columns = JSON.parse(content)
+    console.log('@INF: read app_prefs/columns.json.')
+    return pref_columns
+}
+
+async function writePrefAccColor(event, json_data) {
+    console.log('@INF: use app_prefs/auth.json cache.')
+    // 返却JSONを走査して色情報をキャッシュに保存
+    const write_json = []
+    json_data.forEach(pref => {
+        let account = pref_accounts.get(pref.key_address)
+        account.acc_color = pref.acc_color
+        account.default_local = pref.default_local
+        account.default_channel = pref.default_channel
+        account.post_maxlength = pref.post_maxlength
+        // ユーザー情報を更新できる場合は更新
+        if (pref.user_id) account.user_id = pref.user_id
+        if (pref.username) account.username = pref.username
+        if (pref.avatar_url) account.avatar_url = pref.avatar_url
+        write_json.push(account)
+    })
+
+    // ファイルに書き込み
+    const content = await overwriteFile('app_prefs/auth.json', write_json)
+
+    // キャッシュを更新
+    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+}
+//*/
 
 /**
  * #IPC
