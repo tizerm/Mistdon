@@ -68,6 +68,7 @@ async function writePrefMstdAccs(event, json_data) {
         'client_secret': json_data.client_secret,
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }
@@ -104,10 +105,11 @@ async function writePrefMskyAccs(event, json_data) {
         'user_id': json_data.user.username,
         'username': json_data.user.name,
         'socket_url': `wss://${json_data.domain}/streaming`,
-        'client_id': null,
+        'client_id': json_data.access_token,
         'client_secret': json_data.app_secret,
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }

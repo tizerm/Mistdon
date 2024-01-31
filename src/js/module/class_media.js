@@ -52,6 +52,25 @@ class Media {
         })
     }
 
+    static async attachDriveMedia() {
+        const medias = []
+        $("#pop_util_window ul.drive_media_list input.__chk_drive_media:checked")
+            .each((index, elm) => medias.push({
+                id: $(elm).val(),
+                url: $(elm).next().find("img").attr("src"),
+                sensitive: false // TODO: 一旦falseで
+            }))
+
+        const preview_elm = $('#header>#post_options .attached_media>ul.media_list')
+        // 初期メッセージを削除
+        preview_elm.find(".__initial_message").remove()
+        medias.forEach(media => preview_elm.append(`
+            <li><img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/></li>
+        `))
+        $("#pop_util_window").hide("fade", 120)
+        $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    }
+
     static clearAttachMedia() {
         $('#header>#post_options .attached_media>ul.media_list').html(`
             <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
@@ -145,25 +164,20 @@ class Media {
                     url: `https://${account.pref.domain}/api/v2/media`,
                     headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                }).then(data => {
-                    console.log(data.body)
-                    return data.body.id
-                })
+                }).then(data => { return data.body.id })
                 break
             case 'Misskey': // Misskey
                 query_param = {
+                    i: account.pref.access_token,
                     name: filename,
                     isSensitive: false, // TODO: 一旦無効固定
                     file: target_file
                 }
                 upload_promise = sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
                     url: `https://${account.pref.domain}/api/drive/files/create`,
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                    //headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                     data: query_param
-                }).then(data => {
-                    console.log(data.body)
-                    return null
-                })
+                }).then(data => { return data.body.id })
                 break
             default:
                 break
@@ -182,10 +196,10 @@ class Media {
     get li_element() {
         // メディアごとにタイルブロックを生成
         let html = `<li>
-            <input type="checkbox" id="__chk_${this.id}"  name="${this.id}" class="__chk_add_media"/>
-            <label for="__chk_${this.id}"${this.sensitive ? ' class="warn_sensitive"' : ''}>
-                <img src="${this.thumbnail}"/>
-            </label>
+            <input type="checkbox" id="__chk_${this.id}"
+                name="__chk_drive_media" class="__chk_drive_media" value="${this.id}"/>
+            <label for="__chk_${this.id}"${this.sensitive ? ' class="warn_sensitive"' : ''}
+                ><img src="${this.thumbnail}"/><div class="check_mask"></div></label>
         </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却

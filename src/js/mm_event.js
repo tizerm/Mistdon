@@ -263,28 +263,35 @@ $(() => {
         deleteQuoteInfo()
     })
 
-    $("#header>#post_options #open_drive").on("click",
+    $("#header>#post_options #__on_open_drive").on("click",
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
+
+    $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
     // TODO: ドラッグドロップの処理がまだわからんち
     document.addEventListener("dragenter", e => {
         e.preventDefault()
         // 画面内の画像をドラッグした場合は発火しない
-        if (e.fromElement || $("#modal_drop_files").is(":visible")) return
-        console.log("=> enter event.")
-        console.log(e)
-        $("#modal_drop_files").show("fade", 80)
+        if (e.dataTransfer.types[0] != 'Files' || $("#modal_drop_files").is(":visible")) return
+        $("#modal_drop_files").show("fade", 120)
     })
 
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
 
-    $("#modal_drop_files>.dropbox").get(0).addEventListener("drop", e => {
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
+        // 再発火の可能性をおさえるため遅めにフェードアウトする
+        e.preventDefault()
+        $("#modal_drop_files").hide("fade", 1000)
+    })
+
+    $("#modal_drop_files").get(0).addEventListener("drop", e => {
         // デフォルトイベントを無視してファイルを添付メソッドに渡す
         e.preventDefault()
+        if (!$(e.target).is("#modal_drop_files>.dropbox")) return // ボックス外で外した場合は無視
         Media.attachMedia([...e.dataTransfer.files])
 
         // ドロップ領域を消して投稿オプションを開く
-        $("#modal_drop_files").hide("fade", 80)
+        $("#modal_drop_files").hide("fade", 120)
         if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
             $("#header>#post_options").show("slide", { direction: "up" }, 120)
     })
@@ -936,4 +943,6 @@ $(() => {
         $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
     $(document).on("click", "#__on_pop_window_close", e =>
         $("#pop_window_timeline").hide("fade", 150))
+    $(document).on("click", "#__on_util_window_close", e =>
+        $("#pop_util_window").hide("fade", 150))
 })

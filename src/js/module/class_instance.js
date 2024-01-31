@@ -43,6 +43,9 @@ class Instance {
         }
     }
 
+    // 認証対象インスタンスを設定
+    static AUTH_INSTANCE = null
+
     /**
      * #StaticMethod
      * ホストドメインからインスタンス情報を格納したこのクラスのオブジェクトを返す
@@ -146,6 +149,184 @@ class Instance {
                 break
         }
         return new Instance(await instance_promise)
+    }
+
+    async authorize() {
+        let permission = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // 権限を設定
+                    permission = ["read", "write", "follow", "push"].join(" ")
+                    // クライアントIDの取得
+                    const client_info = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/v1/apps`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                        data: {
+                            "client_name": "Mistdon",
+                            "redirect_uris": "urn:ietf:wg:oauth:2.0:oob",
+                            "scopes": permission,
+                            "website": "https://github.com/tizerm/Mistdon"
+                        }
+                    })
+
+                    // 認証に成功したらクライアントIDを保存して外部ブラウザで認証画面を開く
+                    this.__auth_client_id = client_info.client_id
+                    this.__auth_client_secret = client_info.client_secret
+                    window.accessApi.openExternalBrowser(`https://${this.host}/oauth/authorize?client_id=${client_info.client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=urn:ietf:wg:oauth:2.0:oob`)
+                    return {
+                        platform: this.platform,
+                        client_id: client_info.client_id,
+                        client_secret: client_info.client_secret
+                    }
+                case 'Misskey': // Misskey
+                    // 権限を設定
+                    permission = ["read:account", "read:notes", "write:notes", "write:blocks",
+                        "read:drive", "write:drive", "read:favorites", "write:favorites",
+                        "read:following", "write:following", "write:mutes", "read:notifications",
+                        "read:reactions", "write:reactions", "write:votes",
+                        "read:channels", "write:channels"]
+                    // サーバーにアプリ登録
+                    const app = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/app/create`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            'name': 'Mistdon',
+                            'description': 'This is Electron base Mastodon and Misskey client.',
+                            'permission': permission
+                        })
+                    })
+
+                    // 正常にアプリ登録できたら認証セッションを開始
+                    this.__auth_app_secret = app.secret
+                    const response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/auth/session/generate`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ 'appSecret': app.secret })
+                    })
+
+                    // responseが返ってきたら認証ウィンドウを生成
+                    this.__auth_app_token = response.token
+                    window.accessApi.openExternalBrowser(response.url)
+                    return {
+                        platform: this.platform,
+                        app_secret: app.secret,
+                        app_token: response.token
+                    }
+                default:
+                    break
+            }
+        } catch (err) { // 認証失敗時
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "認証リクエスト実行中に問題が発生しました。"
+            })
+            return Promise.reject(err)
+        }
+    }
+
+    async saveTokenMastodon(auth_code) {
+        const client_id = this.__auth_client_id
+        const client_secret = this.__auth_client_secret
+
+        try { // OAuth認証
+            const token = await $.ajax({
+                type: "POST",
+                url: `https://${this.host}/oauth/token`,
+                dataType: "json",
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                data: {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                    "grant_type": "authorization_code",
+                    "code": auth_code
+                }
+            })
+
+            // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
+            const user_data = await $.ajax({
+                type: "GET",
+                url: `https://${this.host}/api/v1/accounts/verify_credentials`,
+                dataType: "json",
+                headers: { "Authorization": `Bearer ${token.access_token}` }
+            })
+
+            // アカウント情報の取得に成功した場合はユーザー情報とアクセストークンを保存
+            await window.accessApi.writePrefMstdAccs({
+                'domain': this.host,
+                'user_id': user_data.username,
+                'username': user_data.display_name,
+                "client_id": client_id,
+                "client_secret": client_secret,
+                'access_token': token.access_token,
+                'post_maxlength': this.post_maxlength,
+                'avatar_url': user_data.avatar
+            })
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "アカウントの認証に成功しました！",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            })
+        } catch (err) { // 認証失敗時
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "認証リクエスト実行中に問題が発生しました。"
+            })
+            return Promise.reject(err)
+        }
+    }
+
+    async saveTokenMisskey() {
+        const app_secret = this.__auth_app_secret
+        const app_token = this.__auth_app_token
+
+        try { // アクセストークンの取得
+            const token = await $.ajax({
+                type: "POST",
+                url: `https://${this.host}/api/auth/session/userkey`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    'appSecret': app_secret,
+                    'token': app_token
+                })
+            })
+
+            // responseが返ってきたらアクセストークンをメインプロセスに渡す
+            await window.accessApi.writePrefMskyAccs({
+                'domain': this.host,
+                'user': token.user,
+                'app_secret': app_secret,
+                'app_token': app_token,
+                'access_token': token.accessToken,
+                'post_maxlength': this.post_maxlength
+            })
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "アカウントの認証に成功しました！",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            })
+        } catch (err) { // 認証失敗時
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "認証リクエスト実行中に問題が発生しました。"
+            })
+            return Promise.reject(err)
+        }
     }
 
     // Getter: インスタンスヘッダのDOMを返却

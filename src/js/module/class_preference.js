@@ -17,6 +17,7 @@ class Preference {
                 "enable_action_palette"         : true,     // 簡易アクションパレット
                 "enable_expand_profile_cw"      : false,    // プロフCW展開
                 "enable_expand_profile_media"   : false,    // プロフメディア展開
+                "enable_media_confirm"          : true,     // メディア投稿確認
                 "enable_tips"                   : true,     // TIPS表示
                 "tl_cache_limit": {                         // TLキャッシュ件数
                     "default"                   : 100,      // ノーマル

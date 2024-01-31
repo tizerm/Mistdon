@@ -53,9 +53,11 @@ async function sendFileRequest(arg) {
             throw new Error(`HTTP Status: ${response.status}`)
         }
 
+        // HTTP 202|206が返ってきた場合はまだアップロード中
         return {
             headers: response.headers,
-            body: await response.json()
+            body: await response.json(),
+            progress: response.status == '202' || response.status == '206'
         }
     } catch (err) {
         return Promise.reject(err)

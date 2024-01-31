@@ -121,7 +121,6 @@
                 > ul.account_list>li {
                     display: inline-block;
                     > label {
-                        position: relative;
                         border-radius: 16px;
                         padding: 1px;
                         margin: 2px;
@@ -129,58 +128,27 @@
                             width: 48px;
                             height: 48px;
                             border-radius: 16px;
-                            vertical-align: text-bottom;
                         }
                         > .check_mask {
-                            display: none;
-                            position: absolute;
-                            top: 0px;
-                            left: 0px;
-                            width: 100%;
-                            height: 100%;
                             border-radius: 16px;
-                            background-position: center center;
-                            background-repeat: no-repeat;
                             background-size: 32px 32px;
                         }
-                        &:hover>.check_mask {
-                            display: block;
-                            background-color: rgba(159,58,51,0.6);
-                        }
                     }
-                    > input.__chk_add_account {
-                        &:checked+label {
-                            &::before { content: ""; }
-                            >.check_mask {
-                                display: block;
-                                background-color: rgba(51,122,159,0.6);
-                                background-image: url("../resources/ic_check.png");
-                            }
-                        }
-                        &[disabled]+label>.check_mask {
-                            display: block;
-                            background-color: rgba(119,119,119,0.6);
-                            background-image: url("../resources/ic_check.png");
-                        }
+                    > input.__chk_add_account[disabled]+label>.check_mask {
+                        display: block;
+                        background-color: rgba(119,119,119,0.6);
+                        background-image: url("../resources/ic_check.png");
                     }
                 }
             }
             > .publish_setting {
                 flex-basis: 172px;
                 text-align: center;
-                & label {
+                & input[name="__opt_visibility"]+label {
                     border-radius: 16px;
                     > img {
                         width: 36px;
                         height: 36px;
-                    }
-                    &[for="__chk_local_only"] {
-                        border-radius: 16px;
-                        font-size: 13px;
-                        > img {
-                            width: 24px;
-                            height: 24px;
-                        }
                     }
                 }
                 #__txt_content_warning, #__cmb_post_to { width: 158px; }
@@ -493,9 +461,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: solid 4px #cccccc;
-            width: calc(100vw - 128px);
-            height: calc(100vh - 128px);
+            border: dashed 6px #cccccc;
+            width: calc(100vw - 64px);
+            height: calc(100vh - 64px);
+            &:hover { background-color: rgba(255,255,255,0.1); }
+            > span {
+                display: inline-block;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
         }
     }
 

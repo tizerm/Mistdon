@@ -223,9 +223,6 @@ input[type="text"] {
                 border-radius: 16px;
                 padding: 24px 12px;
             }
-            > .auth_form {
-                display: none;
-            }
         }
     }
 }

@@ -138,6 +138,8 @@ class Account {
             .prop("checked", false).prop("disabled", false)
         $(`#header>#post_options ul.account_list input.__chk_add_account[value="${this.full_address}"]`)
             .prop("disabled", true)
+        // Mastodonの場合はドライブ参照ボタンを無効化
+        $(`#header>#post_options #__on_open_drive`).prop("disabled", this.platform == 'Mastodon')
 
         // 背景アイコンとアカウントカラーを設定
         $("#header>h1>.head_user").css('background-image',
@@ -159,8 +161,8 @@ class Account {
      * @param arg パラメータオブジェクト
      */
     async post(arg) {
-        // 何も書いてなかったら何もしない
-        if (!arg.content) return
+        // 添付メディアがなくて何も書いてなかったら何もしない
+        if (!arg.content && Media.ATTACH_MEDIA.size == 0) return
         let request_param = null
         let request_promise = null
 
@@ -179,21 +181,26 @@ class Account {
             arg.option_obj.find('.__txt_poll_option').each((index, elm) => options.push($(elm).val()))
             poll = {
                 options: options,
-                expire_sec: arg.option_obj.find('.__txt_poll_expire_date').val()
+                expire_sec: arg.option_obj.find('.__txt_poll_exipire_date').val()
             }
         }
 
-        // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
         const media_ids = []
-        if (Media.ATTACH_MEDIA.size > 0) {
-            try { // アップロード中のエラーをキャッチ
-                const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
-                for (const elm of thumbnails) { // それぞれ待機実行するのでforを使う
-                    const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
-                    media_ids.push(media_id)
+        { // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
+            const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
+            if (thumbnails.length > 0) {
+                try { // アップロード中のエラーをキャッチ
+                    for (const elm of thumbnails) {
+                        if ($(elm).is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
+                            media_ids.push($(elm).attr("name"))
+                        else { // アップロード待機ファイルはアップロードする
+                            const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
+                            media_ids.push(media_id)
+                        }
+                    }
+                } catch (err) { // アップロードでエラーが発生したら中断
+                    return
                 }
-            } catch (err) { // アップロードでエラーが発生したら中断
-                return
             }
         }
 
@@ -264,6 +271,8 @@ class Account {
                 if (reply_id) request_param.replyId = reply_id
                 // 引用の場合は引用ノートIDを設定
                 if (quote_id) request_param.renoteId = quote_id
+                // 添付メディアがある場合はメディアIDを追加
+                if (media_ids.length > 0) request_param.mediaIds = media_ids
                 // 投稿先を設定
                 if (post_to && post_to != '__default') { // チャンネル
                     request_param.localOnly = true
@@ -965,45 +974,50 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
      * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
-     * 
-     * @param callback 削除後に実行するコールバック関数
      */
-    unauthorize(callback) {
-        switch (this.pref.platform) {
-            case 'Mastodon': // Mastodon
-                // 認証解除プロセスに成功したらコールバック関数を実行
-                $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/oauth/revoke`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-                    data: {
-                        "client_id": this.pref.client_id,
-                        "client_secret": this.pref.client_secret,
-                        "token": this.pref.access_token
-                    }
-                }).then(callback)
-                break
-            case 'Misskey': // Misskey
-                // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
-                /*
-                $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/i/revoke-token`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": this.pref.access_token,
-                        "token": this.pref.access_token
+    async unauthorize() {
+        let response = null
+        try { // 認証解除プロセスを実行
+            switch (this.pref.platform) {
+                case 'Mastodon': // Mastodon
+                    // 認証解除プロセスに成功したらコールバック関数を実行
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/oauth/revoke`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                        data: {
+                            "client_id": this.pref.client_id,
+                            "client_secret": this.pref.client_secret,
+                            "token": this.pref.access_token
+                        }
                     })
-                }).then(data => {
-                    console.log(data)
-                    callback()
-                }).catch(jqXHR => console.log(jqXHR))//*/
-                callback()
-                break
-            default:
-                break
+                    break
+                case 'Misskey': // Misskey
+                    // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
+                    /*
+                    const token = this.pref.client_id
+                    console.log(token)
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/i/revoke-token`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": this.pref.access_token,
+                            "token": token
+                        })
+                    })//*/
+                    return Promise.resolve("消しただけ")
+                    break
+                default:
+                    break
+            }
+            console.log(response)
+            return Promise.resolve(response)
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
         }
     }
 
@@ -1157,10 +1171,8 @@ class Account {
         let html = ''
         Account.map.forEach((v, k) => html += `<li>
             <input type="checkbox" id="__chk_${k}" name="__chk_add_account" class="__chk_add_account" value="${k}"/>
-            <label for="__chk_${k}" title="${k}">
-                <img src="${v.pref.avatar_url}" class="user_icon"/>
-                <div class="check_mask"></div>
-            </label>
+            <label for="__chk_${k}" title="${k}"><img
+                src="${v.pref.avatar_url}" class="user_icon"/><div class="check_mask"></div></label>
         </li>`)
         return html
     }

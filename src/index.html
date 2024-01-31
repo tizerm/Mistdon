@@ -75,7 +75,7 @@
         </div>
         <div class="opt_buttons">
             <div id="post_length_graph">&nbsp;</div>
-            <button type="button" id="__open_emoji_palette" class="image_button" title="絵文字パレットを開く"
+            <button type="button" id="__open_emoji_palette" title="絵文字パレットを開く"
                 ><img src="resources/ic_emoji.png" alt="絵文字パレットを開く"/></button>
         </div>
         <div class="textbox_area">
@@ -83,7 +83,7 @@
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
         </div>
         <div class="submit_button">
-            <button type="button" id="__on_submit" class="image_button" title="投稿"
+            <button type="button" id="__on_submit" title="投稿"
                 ><img src="resources/ic_post.png" alt="投稿"/></button>
         </div>
         <div class="additional_buttons">
@@ -129,8 +129,8 @@
                         <option value="__local">ローカル(連合しない)</option>
                     </select>
                     <input type="checkbox" id="__chk_local_only"/>
-                    <label for="__chk_local_only" title="ローカル(連合しない)"><img
-                        src="resources/ic_local.png" alt="ローカル(連合しない)"/>
+                    <label for="__chk_local_only" title="ローカル(連合しない)"
+                        class="icon_label_set"><img src="resources/ic_local.png" alt="ローカル(連合しない)"/>
                         <span>ローカル<span></label>
                 </div>
                 <div class="reset_box">
@@ -159,11 +159,15 @@
                 <ul class="media_list">
                     <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
-                <div class="sensitive_option">
+                <div class="media_option">
+                    <!--
                     <input type="checkbox" id="__chk_sensitive_media"/>
                     <label for="__chk_sensitive_media">すべてのメディアを閲覧注意にする</label>
                     <a id="open_drive" title="過去のメディア一覧"
-                        ><img src="resources/ic_return.png" alt="過去のメディア一覧"/></a>
+                    ><img src="resources/ic_return.png" alt="過去のメディア一覧"/></a>-->
+                    <button type="button" id="__on_open_drive"
+                        class="icon_label_set"><img src="resources/ic_return.png" alt="ドライブから添付"/>
+                        <span>ドライブから添付</span></button>
                 </div>
             </div>
             <div class="refernced_post timeline">
