@@ -79,75 +79,71 @@ class Query {
      * @param account 検索処理を実行するアカウント
      */
     async search(account) {
-        let rest_promise = null
-        // 検索文字列を渡して投稿を検索
-        switch (account.platform) {
-            case 'Mastodon': // Mastodon
-                if (this.hashtag) // ハッシュタグ検索
-                    rest_promise = $.ajax({
-                        type: "GET",
-                        url: `https://${account.pref.domain}/api/v1/timelines/tag/${this.hashtag}`,
-                        dataType: "json",
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                        data: { "limit": 30 }
-                    })
-                else // 全文検索
-                    rest_promise = $.ajax({
-                        type: "GET",
-                        url: `https://${account.pref.domain}/api/v2/search`,
-                        dataType: "json",
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                        data: {
-                            "q": this.query,
-                            "type": "statuses",
-                            "limit": 30
-                        }
-                    }).then(data => { return data.statuses })
-                break
-            case 'Misskey': // Misskey
-                if (this.hashtag) // ハッシュタグ検索
-                    rest_promise = $.ajax({
-                        type: "POST",
-                        url: `https://${account.pref.domain}/api/notes/search-by-tag`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": account.pref.access_token,
-                            "reply": false,
-                            "renote": false,
-                            "tag": this.hashtag,
-                            "limit": 30
+        let response = null
+        try { // 検索文字列を渡して投稿を検索
+            switch (account.platform) {
+                case 'Mastodon': // Mastodon
+                    if (this.hashtag) // ハッシュタグ検索
+                        response = await $.ajax({
+                            type: "GET",
+                            url: `https://${account.pref.domain}/api/v1/timelines/tag/${this.hashtag}`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                            data: { "limit": 30 }
                         })
-                    })
-                else // 全文検索
-                    rest_promise = $.ajax({
-                        type: "POST",
-                        url: `https://${account.pref.domain}/api/notes/search`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": account.pref.access_token,
-                            "query": this.query,
-                            "limit": 30
+                    else { // 全文検索
+                        response = await $.ajax({
+                            type: "GET",
+                            url: `https://${account.pref.domain}/api/v2/search`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                            data: {
+                                "q": this.query,
+                                "type": "statuses",
+                                "limit": 30
+                            }
                         })
-                    })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.then(data => {
-            return (async () => {
-                const posts = []
-                data.forEach(p => posts.push(
-                    new Status(p, Query.SEARCH_PREF_TIMELINE, account)))
-                return posts
-            })()
-        }).catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
+                        response = response.statuses
+                    }
+                    break
+                case 'Misskey': // Misskey
+                    if (this.hashtag) // ハッシュタグ検索
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/search-by-tag`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "reply": false,
+                                "renote": false,
+                                "tag": this.hashtag,
+                                "limit": 30
+                            })
+                        })
+                    else // 全文検索
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/search`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "query": this.query,
+                                "limit": 30
+                            })
+                        })
+                    break
+                default:
+                    break
+            }
+            const posts = []
+            response.forEach(p => posts.push(new Status(p, Query.SEARCH_PREF_TIMELINE, account)))
+            return posts
+        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
             toast(`${account.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
+            return Promise.reject(err)
+        }
     }
 }

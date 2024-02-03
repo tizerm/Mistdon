@@ -109,14 +109,12 @@ class History {
 
     async getStatus() {
         if (this.post) return // Statusインスタンスがキャッシュされている場合はなにもしない
-
-        // Statusインスタンスがキャッシュされていない場合はサーバーから取得
-        let request_promise = null
-        try {
+        let response = null
+        try { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
             const account = Account.get(this.account_address)
             switch (account.platform) {
                 case 'Mastodon': // Mastodon
-                    request_promise = $.ajax({
+                    response = await $.ajax({
                         type: "GET",
                         url: `https://${account.pref.domain}/api/v1/statuses/${this.id}`,
                         dataType: "json",
@@ -124,7 +122,7 @@ class History {
                     })
                     break
                 case 'Misskey': // Misskey
-                    request_promise = $.ajax({
+                    response = await $.ajax({
                         type: "POST",
                         url: `https://${account.pref.domain}/api/notes/show`,
                         dataType: "json",
@@ -138,7 +136,7 @@ class History {
                 default:
                     break
             }
-            const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
+            const post = new Status(response, History.HISTORY_PREF_TIMELINE, account)
             this.post = post
         } catch (err) { // エラーはログに出す
             console.log(err)
@@ -261,87 +259,88 @@ class History {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
         toast("取り消しています...", "progress", toast_uuid)
-
-        const account = Account.get(this.account_address)
-        let request_promise = null
-        switch (this.type) {
-            case 'reblog': // ブースト/リノート
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unreblog`,
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/delete`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": this.renote_id
+        try {
+            const account = Account.get(this.account_address)
+            switch (this.type) {
+                case 'reblog': // ブースト/リノート
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unreblog`,
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                             })
-                        })
-                        break
-                    default:
-                        break
-                }
-                break
-            case 'favorite': // お気に入り
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unfavourite`,
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/favorites/delete`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": this.id
+                            break
+                        case 'Misskey': // Misskey
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/delete`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": this.renote_id
+                                })
                             })
-                        })
-                        break
-                    default:
-                        break
-                }
-                break
-            case 'bookmark': // ブックマーク
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unbookmark`,
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                })
-                break
-            case 'reaction': // リアクション
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${account.pref.domain}/api/notes/reactions/delete`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": account.pref.access_token,
-                        "noteId": this.id
+                            break
+                        default:
+                            break
+                    }
+                    break
+                case 'favorite': // お気に入り
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unfavourite`,
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                            })
+                            break
+                        case 'Misskey': // Misskey
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/favorites/delete`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": this.id
+                                })
+                            })
+                            break
+                        default:
+                            break
+                    }
+                    break
+                case 'bookmark': // ブックマーク
+                    await $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unbookmark`,
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                     })
-                })
-                break
-            default:
-                break
-        }
-        return request_promise.then(() => toast("取り消しが完了しました.", "done", toast_uuid)).catch(jqXHR => {
-            // 取り消しに失敗したらリジェクトする
+                    break
+                case 'reaction': // リアクション
+                    await $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/notes/reactions/delete`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": account.pref.access_token,
+                            "noteId": this.id
+                        })
+                    })
+                    break
+                default:
+                    break
+            }
+            // 正常に取り消したらここに到達
+            toast("取り消しが完了しました.", "done", toast_uuid)
+        } catch (err) {
+            console.log(err)
             toast("取り消しに失敗しました.", "error", toast_uuid)
-            return Promise.reject(jqXHR)
-        })
+            return Promise.reject(err)
+        }
     }
 
     /**

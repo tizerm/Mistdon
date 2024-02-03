@@ -53,85 +53,20 @@ class Instance {
      * @param host インスタンスのホストドメイン
      */
     static async get(host) {
-        // ドメインからプラットフォーム判定ができないので成功したやつだけ返す
-        const instance = await Promise.any([
-            $.ajax({ // Mastodon(v4.x.x以上)
-                type: "GET",
-                url: `https://${host}/api/v2/instance`,
-                dataType: "json"
-            }).then(data => {
-                return {
-                    "platform": 'Mastodon',
-                    "host": host,
-                    "json": data
-                }
-            }),
-            $.ajax({ // Misskey
-                type: "POST",
-                url: `https://${host}/api/meta`,
-                dataType: "json",
-                headers: { "Content-Type": "application/json" },
-                data: JSON.stringify({ detail: true })
-            }).then(data => {
-                return {
-                    "platform": 'Misskey',
-                    "host": host,
-                    "json": data
-                }
-            }),
-            $.ajax({ // Mastodon(v3.x.x以下)
-                type: "GET",
-                url: `https://${host}/api/v1/instance`,
-                dataType: "json"
-            }).then(data => {
-                return {
-                    "platform": 'Mastodon',
-                    "host": host,
-                    "json": data
-                }
-            })
-        ]).catch(jqXHR => { // 取得に失敗した場合はnullを返却
-            console.log('!ERR: invalid server.')
-            return null
-        })
-
-        // インスタンス情報が取得できた場合はインスタンスを生成して返却
-        if (instance) return new Instance(instance)
-        else null
-    }
-
-    static async getDetail(host, platform) {
-        let instance_promise = null
-        switch (platform) {
-            case 'Mastodon': // Mastodon
-                instance_promise = Promise.all([
-                    $.ajax({ // インスタンス基本情報
-                        type: "GET",
-                        url: `https://${host}/api/v2/instance`,
-                        dataType: "json"
-                    }), $.ajax({ // 詳しい説明文
-                        type: "GET",
-                        url: `https://${host}/api/v1/instance/extended_description`,
-                        dataType: "json"
-                    }), $.ajax({ // 週間活動情報
-                        type: "GET",
-                        url: `https://${host}/api/v1/instance/activity`,
-                        dataType: "json"
-                    })
-                ]).then(datas => {
+        try { // ドメインからプラットフォーム判定ができないので成功したやつだけ返す
+            const instance = await Promise.any([
+                $.ajax({ // Mastodon(v4.x.x以上)
+                    type: "GET",
+                    url: `https://${host}/api/v2/instance`,
+                    dataType: "json"
+                }).then(data => {
                     return {
                         "platform": 'Mastodon',
                         "host": host,
-                        "json": datas[0],
-                        "detail": {
-                            "description": datas[1],
-                            "activity": datas[2]
-                        }
+                        "json": data
                     }
-                })
-                break
-            case 'Misskey': // Misskey
-                instance_promise = $.ajax({
+                }),
+                $.ajax({ // Misskey
                     type: "POST",
                     url: `https://${host}/api/meta`,
                     dataType: "json",
@@ -143,12 +78,86 @@ class Instance {
                         "host": host,
                         "json": data
                     }
+                }),
+                $.ajax({ // Mastodon(v3.x.x以下)
+                    type: "GET",
+                    url: `https://${host}/api/v1/instance`,
+                    dataType: "json"
+                }).then(data => {
+                    return {
+                        "platform": 'Mastodon',
+                        "host": host,
+                        "json": data
+                    }
                 })
-                break
-            default:
-                break
+            ])
+            // インスタンス情報が取得できた場合はインスタンスを生成して返却
+            return new Instance(instance)
+        } catch (err) { // インスタンスにアクセスできなかった場合はnullを返却
+            console.log(err)
+            return null
         }
-        return new Instance(await instance_promise)
+    }
+
+    static async getDetail(host, platform) {
+        let response = null
+        let instance_param = null
+        try {
+            switch (platform) {
+                case 'Mastodon': // Mastodon
+                    response = await Promise.all([
+                        $.ajax({ // インスタンス基本情報
+                            type: "GET",
+                            url: `https://${host}/api/v2/instance`,
+                            dataType: "json"
+                        }), $.ajax({ // 詳しい説明文
+                            type: "GET",
+                            url: `https://${host}/api/v1/instance/extended_description`,
+                            dataType: "json"
+                        }), $.ajax({ // 週間活動情報
+                            type: "GET",
+                            url: `https://${host}/api/v1/instance/activity`,
+                            dataType: "json"
+                        })
+                    ])
+                    instance_param = {
+                        "platform": 'Mastodon',
+                        "host": host,
+                        "json": response[0],
+                        "detail": {
+                            "description": response[1],
+                            "activity": response[2]
+                        }
+                    }
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${host}/api/meta`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ detail: true })
+                    }).then(data => {
+                        return {
+                            "platform": 'Misskey',
+                            "host": host,
+                            "json": data
+                        }
+                    })
+                    instance_param = {
+                        "platform": 'Misskey',
+                        "host": host,
+                        "json": response
+                    }
+                    break
+                default:
+                    break
+            }
+            return new Instance(instance_param)
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
+        }
     }
 
     async authorize() {

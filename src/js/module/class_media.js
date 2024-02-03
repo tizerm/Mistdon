@@ -87,110 +87,100 @@ class Media {
     static async getRecentMedia(address, max_id) {
         const toast_uuid = crypto.randomUUID()
         toast("対象ユーザーの投稿メディアを取得中です...", "progress", toast_uuid)
-
-        // アカウントをユーザー情報として取得
-        const account = Account.get(address)
-        const user = await account.getInfo()
-
-        let rest_promise = null
+        let response = null
         let query_param = null
-        switch (user.platform) {
-            case 'Mastodon': // Mastodon
-                query_param = {
-                    "limit": 40,
-                    "only_media": true,
-                    "exclude_replies": false,
-                    "exclude_reblogs": true
-                }
-                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${user.host}/api/v1/accounts/${user.id}/statuses`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: query_param
-                }).then(data => {
-                    const medias = []
-                    data.forEach(p => p.media_attachments.forEach(m => medias.push(new Media(account, m))))
-                    toast(null, "hide", toast_uuid)
-                    return medias
-                })
-                break
-            case 'Misskey': // Misskey
-                query_param = {
-                    "i": account.pref.access_token,
-                    "limit": 40
-                }
-                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${user.host}/api/drive/files`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(query_param)
-                }).then(data => {
-                    return (async () => {
-                        const medias = []
-                        data.forEach(m => medias.push(new Media(account, m)))
-                        toast(null, "hide", toast_uuid)
-                        return medias
-                    })()
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
+
+        try {
+            // アカウントをユーザー情報として取得
+            const account = Account.get(address)
+            const user = await account.getInfo()
+            const medias = []
+            switch (user.platform) {
+                case 'Mastodon': // Mastodon
+                    query_param = {
+                        "limit": 40,
+                        "only_media": true,
+                        "exclude_replies": false,
+                        "exclude_reblogs": true
+                    }
+                    if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${user.host}/api/v1/accounts/${user.id}/statuses`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                        data: query_param
+                    })
+                    response.forEach(p => p.media_attachments.forEach(m => medias.push(new Media(account, m))))
+                    break
+                case 'Misskey': // Misskey
+                    query_param = {
+                        "i": account.pref.access_token,
+                        "limit": 40
+                    }
+                    if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${user.host}/api/drive/files`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(query_param)
+                    })
+                    response.forEach(m => medias.push(new Media(account, m)))
+                    break
+                default:
+                    break
+            }
+            toast(null, "hide", toast_uuid)
+            return medias
+        } catch (err) {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
+            console.log(err)
             toast(`${address}の投稿の取得に失敗しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
+            return Promise.reject(err)
+        }
     }
 
     static async uploadMedia(account, filename) {
         // 先にtoastを表示
         const toast_uuid = crypto.randomUUID()
         toast(`${filename}をアップロードしています...`, "progress", toast_uuid)
-
-        let upload_promise = null
+        let response = null
         let query_param = null
-        const target_file = Media.ATTACH_MEDIA.get(filename)
-        switch (account.platform) {
-            case 'Mastodon': // Mastodon
-                query_param = { file: target_file }
-                upload_promise = sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
-                    url: `https://${account.pref.domain}/api/v2/media`,
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: query_param
-                }).then(data => { return data.body.id })
-                break
-            case 'Misskey': // Misskey
-                query_param = {
-                    i: account.pref.access_token,
-                    name: filename,
-                    isSensitive: false, // TODO: 一旦無効固定
-                    file: target_file
-                }
-                upload_promise = sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
-                    url: `https://${account.pref.domain}/api/drive/files/create`,
-                    //headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                    data: query_param
-                }).then(data => { return data.body.id })
-                break
-            default:
-                break
-        }
-        return upload_promise.then(id => {
+        try {
+            const target_file = Media.ATTACH_MEDIA.get(filename)
+            switch (account.platform) {
+                case 'Mastodon': // Mastodon
+                    query_param = { file: target_file }
+                    response = await sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
+                        url: `https://${account.pref.domain}/api/v2/media`,
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                        data: query_param
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    query_param = {
+                        i: account.pref.access_token,
+                        name: filename,
+                        isSensitive: false, // TODO: 一旦無効固定
+                        file: target_file
+                    }
+                    response = await sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
+                        url: `https://${account.pref.domain}/api/drive/files/create`,
+                        data: query_param
+                    })
+                    break
+                default:
+                    break
+            }
+            response = data.body.id
             toast(null, "hide", toast_uuid)
-            return id
-        }).catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
+            return response
+        } catch (err) {
+            console.log(err)
             toast(`${filename}のアップロードに失敗しました. 投稿を中断します.`, "error", toast_uuid)
-            return Promise.reject(jqXHR)
-        })
+            return Promise.reject(err)
+        }
     }
 
     get li_element() {

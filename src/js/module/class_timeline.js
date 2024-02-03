@@ -37,66 +37,54 @@ class Timeline {
      * 
      * @param max_id この投稿よりも前の投稿を取得する起点のID
      */
-    getTimeline(max_id) {
+    async getTimeline(max_id) {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
         if (!this.pref.external && !this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
         let query_param = this.pref.query_param
         query_param.limit = 30
-        let rest_promise = null
-        // プラットフォーム判定
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                // ヘッダにアクセストークンをセット(認証済みの場合)
-                let header = {}
-                if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
-                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: header,
-                    data: query_param
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                // クエリパラメータにアクセストークンをセット(認証済みの場合)
-                if (!this.pref.external) query_param.i = this.target_account.pref.access_token
-                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(query_param)
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
+        let response = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // ヘッダにアクセストークンをセット(認証済みの場合)
+                    let header = {}
+                    if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
+                    if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                    // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+                    response = await $.ajax({
+                        type: "GET",
+                        url: this.pref.rest_url,
+                        dataType: "json",
+                        headers: header,
+                        data: query_param
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    // クエリパラメータにアクセストークンをセット(認証済みの場合)
+                    if (!this.pref.external) query_param.i = this.target_account.pref.access_token
+                    if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                    // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+                    response = await $.ajax({
+                        type: "POST",
+                        url: this.pref.rest_url,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(query_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            // 投稿データをソートマップ可能なオブジェクトにして返却
+            const posts = []
+            response.forEach(p => posts.push(new Status(p, this, this.target_account)))
+            return posts
+        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
             toast(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
+            return Promise.reject(err)
+        }
     }
 
     /**

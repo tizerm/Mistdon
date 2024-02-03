@@ -64,6 +64,10 @@ async function sendFileRequest(arg) {
     }
 }
 
+async function sleep(msec) {
+    return new Promise(resolve => setTimeout(resolve, msec))
+}
+
 /**
  * #Util
  * 引数の配列の先頭に要素を追加して容量超過した場合は最後の要素を削除する

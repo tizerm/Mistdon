@@ -163,8 +163,6 @@ class Account {
     async post(arg) {
         // 添付メディアがなくて何も書いてなかったら何もしない
         if (!arg.content && Media.ATTACH_MEDIA.size == 0) return
-        let request_param = null
-        let request_promise = null
 
         // 各種投稿オプションパラメータを取得
         let visibility = arg.option_obj.find('input[name="__opt_visibility"]:checked').val()
@@ -185,122 +183,123 @@ class Account {
             }
         }
 
-        const media_ids = []
-        { // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
+        try { // 投稿ロジック全体をcatch
+            const media_ids = []
             const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
-            if (thumbnails.length > 0) {
-                try { // アップロード中のエラーをキャッチ
-                    for (const elm of thumbnails) {
-                        if ($(elm).is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
-                            media_ids.push($(elm).attr("name"))
-                        else { // アップロード待機ファイルはアップロードする
-                            const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
-                            media_ids.push(media_id)
-                        }
+            if (thumbnails.length > 0) { // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
+                for (const elm of thumbnails) { // アップロードはひとつずつ順番に行う
+                    if ($(elm).is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
+                        media_ids.push($(elm).attr("name"))
+                    else { // アップロード待機ファイルはアップロードする
+                        const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
+                        media_ids.push(media_id)
                     }
-                } catch (err) { // アップロードでエラーが発生したら中断
-                    return
                 }
             }
-        }
 
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast(`${this.full_address}から投稿中です...`, "progress", toast_uuid)
-        switch (this.pref.platform) {
-            case 'Mastodon': // Mastodon
-                switch (visibility) { // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
-                    case 'followers': // フォロ限
-                        visibility = "private"
-                        break
-                    default:
-                        break
-                }
-                // アンケートがある場合はアンケートを生成
-                if (poll) request_param = {
-                    "status": arg.content,
-                    "visibility": visibility,
-                    "poll[options]": poll.options,
-                    "poll[expires_in]": poll.expire_sec
-                }; else request_param = { // 通常投稿の場合
-                    "status": arg.content,
-                    "visibility": visibility
-                }
+            // 投稿処理に入る前にtoast表示
+            const toast_uuid = crypto.randomUUID()
+            toast(`${this.full_address}から投稿中です...`, "progress", toast_uuid)
+            let request_param = null
+            let response = null
+            switch (this.pref.platform) {
+                case 'Mastodon': // Mastodon
+                    switch (visibility) { // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
+                        case 'followers': // フォロ限
+                            visibility = "private"
+                            break
+                        default:
+                            break
+                    }
+                    // アンケートがある場合はアンケートを生成
+                    if (poll) request_param = {
+                        "status": arg.content,
+                        "visibility": visibility,
+                        "poll[options]": poll.options,
+                        "poll[expires_in]": poll.expire_sec
+                    }; else request_param = { // 通常投稿の場合
+                        "status": arg.content,
+                        "visibility": visibility
+                    }
 
-                // CWがある場合はCWテキストも追加
-                if (cw_text) request_param.spoiler_text = cw_text
-                // リプライの場合はリプライ先ツートIDを設定
-                if (reply_id) request_param.in_reply_to_id = reply_id
-                // 添付メディアがある場合はメディアIDを追加
-                if (media_ids.length > 0) request_param.media_ids = media_ids
-                request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/v1/statuses`,
-                    dataType: "json",
-                    headers: {
-                        "Authorization": `Bearer ${this.pref.access_token}`,
-                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
-                    },
-                    data: request_param
-                })
-                break
-            case 'Misskey': // Misskey
-                switch (visibility) { // 公開範囲を設定(Misskeyの場合ホームとダイレクトのパラメータが違う)
-                    case 'unlisted': // ホーム
-                        visibility = "home"
-                        break
-                    case 'direct': // DM
-                        visibility = "specified"
-                        break
-                    default:
-                        break
-                }
-                request_param = {
-                    "i": this.pref.access_token,
-                    "text": arg.content,
-                    "visibility": visibility
-                }
-                // CWがある場合はCWテキストも追加
-                if (cw_text) request_param.cw = cw_text
-                 // アンケートがある場合はアンケートを生成
-                if (poll) request_param.poll = {
-                    "choices": poll.options,
-                    "expiredAfter": poll.expire_sec
-                }
-                // リプライの場合はリプライ先ノートIDを設定
-                if (reply_id) request_param.replyId = reply_id
-                // 引用の場合は引用ノートIDを設定
-                if (quote_id) request_param.renoteId = quote_id
-                // 添付メディアがある場合はメディアIDを追加
-                if (media_ids.length > 0) request_param.mediaIds = media_ids
-                // 投稿先を設定
-                if (post_to && post_to != '__default') { // チャンネル
-                    request_param.localOnly = true
-                    request_param.channelId = post_to
-                } else // 通常投稿
-                    request_param.localOnly = is_local
+                    // CWがある場合はCWテキストも追加
+                    if (cw_text) request_param.spoiler_text = cw_text
+                    // リプライの場合はリプライ先ツートIDを設定
+                    if (reply_id) request_param.in_reply_to_id = reply_id
+                    // 添付メディアがある場合はメディアIDを追加
+                    if (media_ids.length > 0) request_param.media_ids = media_ids
+                    response = await $.ajax({ // API呼び出し
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/v1/statuses`,
+                        dataType: "json",
+                        headers: {
+                            "Authorization": `Bearer ${this.pref.access_token}`,
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                        },
+                        data: request_param
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    switch (visibility) { // 公開範囲を設定(Misskeyの場合ホームとダイレクトのパラメータが違う)
+                        case 'unlisted': // ホーム
+                            visibility = "home"
+                            break
+                        case 'direct': // DM
+                            visibility = "specified"
+                            break
+                        default:
+                            break
+                    }
+                    request_param = {
+                        "i": this.pref.access_token,
+                        "text": arg.content,
+                        "visibility": visibility
+                    }
+                    // CWがある場合はCWテキストも追加
+                    if (cw_text) request_param.cw = cw_text
+                     // アンケートがある場合はアンケートを生成
+                    if (poll) request_param.poll = {
+                        "choices": poll.options,
+                        "expiredAfter": poll.expire_sec
+                    }
+                    // リプライの場合はリプライ先ノートIDを設定
+                    if (reply_id) request_param.replyId = reply_id
+                    // 引用の場合は引用ノートIDを設定
+                    if (quote_id) request_param.renoteId = quote_id
+                    // 添付メディアがある場合はメディアIDを追加
+                    if (media_ids.length > 0) request_param.mediaIds = media_ids
+                    // 投稿先を設定
+                    if (post_to && post_to != '__default') { // チャンネル
+                        request_param.localOnly = true
+                        request_param.channelId = post_to
+                    } else // 通常投稿
+                        request_param.localOnly = is_local
 
-                request_promise = $.ajax({ // APIに投稿を投げて、正常に終了したら最終投稿に設定
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/notes/create`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(request_param)
-                }).then(data => { return data.createdNote })
-                break
-            default:
-                break
-        }
-        request_promise.then(data => {
+                    response = await $.ajax({ // API呼び出し
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/notes/create`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(request_param)
+                    })
+                    response = response.createdNote
+                    break
+                default:
+                    break
+            }
+
             // 投稿を履歴にスタックする
-            new Status(data, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
+            new Status(response, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             toast(`${this.full_address}から投稿しました.`, "done", toast_uuid)
 
             // 絵文字を使っていたら投稿時に履歴を保存
             if (this.use_emoji_flg) Account.cacheEmojiHistory()
-        }).catch(jqXHR => toast(`${this.full_address}からの投稿に失敗しました.`, "error", toast_uuid))
+        } catch (err) { // 投稿失敗時
+            console.log(err)
+            toast(`${this.full_address}からの投稿に失敗しました.`, "error", toast_uuid)
+        }
 
         if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
             arg.multi_post = true // 再起実行されないようにフラグを立てる
@@ -316,47 +315,52 @@ class Account {
      * @param arg パラメータオブジェクト
      */
     async reaction(arg) {
-        let request_promise = null
-        let target_json = null
+        let response = null
+        let target_post = null
         const toast_uuid = crypto.randomUUID()
         toast("対象の投稿を取得中です...", "progress", toast_uuid)
-        // ターゲットの投稿データを取得
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // 検索から投稿を取得
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v2/search`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
-                    data: {
-                        "q": arg.target_url,
-                        "type": "statuses",
-                        "resolve": true
-                    }
-                }).then(data => { return data.statuses[0] })
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/ap/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": this.pref.access_token,
-                        "uri": arg.target_url
+        try { // ターゲットの投稿データを取得
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // 検索から投稿を取得
+                        type: "GET",
+                        url: `https://${this.pref.domain}/api/v2/search`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${this.pref.access_token}` },
+                        data: {
+                            "q": arg.target_url,
+                            "type": "statuses",
+                            "resolve": true
+                        }
                     })
-                }).then(data => { return data.object })
-                break
-            default:
-                break
+                    response = response.statuses[0]
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/ap/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": this.pref.access_token,
+                            "uri": arg.target_url
+                        })
+                    })
+                    response = response.object
+                    break
+                default:
+                    break
+            }
+            // 取得できなかったらなにもしない
+            if (!response) throw new Error('response is empty.')
+            // 取得できた場合はtarget_jsonからStatusインスタンスを生成
+            target_post = new Status(response, History.HISTORY_PREF_TIMELINE, this)
+        } catch (err) {
+            console.log(err)
+            toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
+            return
         }
-        // データが取得されるのを待ってtarget_jsonに代入
-        target_json = await request_promise
-            .catch(jqXHR => toast("投稿の取得でエラーが発生しました.", "error", toast_uuid))
-        // 投稿を取得できなかったらなにもしない
-        if (!target_json) return
-        // 取得できた場合はtarget_jsonからStatusインスタンスを生成
-        const target_post = new Status(target_json, History.HISTORY_PREF_TIMELINE, this)
+
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 switch (arg.target_mode) {
@@ -376,7 +380,7 @@ class Account {
                         }).catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_favorite': // お気に入り
-                        request_promise = $.ajax({
+                        $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/favourite`,
                             dataType: "json",
@@ -387,7 +391,7 @@ class Account {
                         }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
                         break
                     case '__menu_bookmark': // ブックマーク
-                        request_promise = $.ajax({
+                        $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/v1/statuses/${target_post.id}/bookmark`,
                             dataType: "json",
@@ -408,7 +412,7 @@ class Account {
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_reblog': // リノート
-                        request_promise = $.ajax({
+                        $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/create`,
                             dataType: "json",
@@ -427,7 +431,7 @@ class Account {
                         toast(null, "hide", toast_uuid)
                         break
                     case '__menu_favorite': // お気に入り
-                        request_promise = $.ajax({
+                        $.ajax({
                             type: "POST",
                             url: `https://${this.pref.domain}/api/notes/favorites/create`,
                             dataType: "json",
@@ -493,51 +497,53 @@ class Account {
      * @param arg パラメータオブジェクト
      */
     async userAction(arg) {
-        let request_promise = null
-        let target_json = null
+        let response = null
+        let target_user_id = null
         const toast_uuid = crypto.randomUUID()
         toast("対象ユーザーを取得中です...", "progress", toast_uuid)
-        // ターゲットのユーザーデータを取得
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // 検索から投稿を取得
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v2/search`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` },
-                    data: {
-                        "q": arg.target_user,
-                        "type": "accounts",
-                        "resolve": true
-                    }
-                }).then(data => { return data.accounts[0] })
-                    .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid))
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/users/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": this.pref.access_token,
-                        "username": arg.target_user.substring(1, arg.target_user.lastIndexOf('@')),
-                        "host": arg.target_user.substring(arg.target_user.lastIndexOf('@') + 1)
+        try { // ターゲットのユーザーデータを取得
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // 検索から投稿を取得
+                        type: "GET",
+                        url: `https://${this.pref.domain}/api/v2/search`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${this.pref.access_token}` },
+                        data: {
+                            "q": arg.target_user,
+                            "type": "accounts",
+                            "resolve": true
+                        }
                     })
-                }).then(data => { return data })
-                    .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid))
-                break
-            default:
-                break
+                    response = response.accounts[0]
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/users/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": this.pref.access_token,
+                            "username": arg.target_user.substring(1, arg.target_user.lastIndexOf('@')),
+                            "host": arg.target_user.substring(arg.target_user.lastIndexOf('@') + 1)
+                        })
+                    })
+                    break
+                default:
+                    break
+            }
+            // 取得できなかったらなにもしない
+            if (!response) throw new Error('response is empty.')
+            target_user_id = response.id
+        } catch (err) {
+            console.log(err)
+            toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid)
+            return
         }
-        // データが取得されるのを待ってtarget_jsonに代入
-        target_json = await request_promise
-        // ユーザーを取得できなかったらなにもしない
-        if (!target_json) return
-        const target_id = target_json.id
+
         // 一旦toastを消去
         toast(null, "hide", toast_uuid)
-
         // ダイアログを出すためモードから先に判定
         switch (arg.target_mode) {
             case '__menu_follow': // フォロー
@@ -550,7 +556,7 @@ class Account {
                             case 'Mastodon': // Mastodon
                                 $.ajax({
                                     type: "POST",
-                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/follow`,
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/follow`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                                 }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
@@ -564,7 +570,7 @@ class Account {
                                     headers: { "Content-Type": "application/json" },
                                     data: JSON.stringify({
                                         "i": this.pref.access_token,
-                                        "userId": target_id
+                                        "userId": target_user_id
                                     })
                                 }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
                                     .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
@@ -585,7 +591,7 @@ class Account {
                             case 'Mastodon': // Mastodon
                                 $.ajax({
                                     type: "POST",
-                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/mute`,
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/mute`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                                 }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
@@ -599,7 +605,7 @@ class Account {
                                     headers: { "Content-Type": "application/json" },
                                     data: JSON.stringify({
                                         "i": this.pref.access_token,
-                                        "userId": target_id
+                                        "userId": target_user_id
                                     })
                                 }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
                                     .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
@@ -621,7 +627,7 @@ class Account {
                             case 'Mastodon': // Mastodon
                                 $.ajax({
                                     type: "POST",
-                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_id}/block`,
+                                    url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/block`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                                 }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
@@ -635,7 +641,7 @@ class Account {
                                     headers: { "Content-Type": "application/json" },
                                     data: JSON.stringify({
                                         "i": this.pref.access_token,
-                                        "userId": target_id
+                                        "userId": target_user_id
                                     })
                                 }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
                                     .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
@@ -764,72 +770,62 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントのサーバーの持っているカスタム絵文字を取得する
      */
-    getCustomEmojis() {
-        let rest_promise = null
-        switch (this.pref.platform) {
-            case 'Mastodon': // Mastodon
-                // カスタム絵文字を取得して整形するプロセスをpromiseとして返却
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v1/custom_emojis`,
-                    dataType: "json"
-                }).then(data => {
-                    return (async () => {
-                        // 絵文字一覧データをメインプロセスにわたす形に整形する
-                        const emojis = []
-                        data.forEach(e => emojis.push({
-                            "name": e.shortcode,
-                            "shortcode": `:${e.shortcode}:`,
-                            "url": e.url
-                        }))
-                        return {
-                            "host": this.pref.domain,
-                            "emojis": emojis
-                        }
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                // v11以下と最新で絵文字を取得するエンドポイントが違うので動いたやつで取得
-                rest_promise = Promise.any([
-                    $.ajax({ // 最新バージョン(v2023.9.3)
-                        type: "POST",
-                        url: `https://${this.pref.domain}/api/emojis`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ })
-                    }).then(data => { return data.emojis }),
-                    $.ajax({ // v11以下(Misskey.devなど)
-                        type: "POST",
-                        url: `https://${this.pref.domain}/api/meta`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ detail: false })
-                    }).then(data => { // emojis entityがあればそのまま返却、なければ新版なのでreject
-                        if (data.emojis) return data.emojis
-                        else return Promise.reject('not exist emojis in /api/meta.')
+    async getCustomEmojis() {
+        let response = null
+        let emojis = []
+        try {
+            switch (this.pref.platform) {
+                case 'Mastodon': // Mastodon
+                    // カスタム絵文字を取得して整形するプロセスをpromiseとして返却
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${this.pref.domain}/api/v1/custom_emojis`,
+                        dataType: "json"
                     })
-                ]).then(data => {
-                    return (async () => {
-                        // 絵文字一覧データをメインプロセスにわたす形に整形する
-                        const emojis = []
-                        data.forEach(e => emojis.push({
-                            "name": e.aliases[0],
-                            "shortcode": `:${e.name}:`,
-                            "url": e.url
-                        }))
-                        return {
-                            "host": this.pref.domain,
-                            "emojis": emojis
-                        }
-                    })()
-                })
-                break
-            default:
-                break
+                    response.forEach(e => emojis.push({
+                        "name": e.shortcode,
+                        "shortcode": `:${e.shortcode}:`,
+                        "url": e.url
+                    }))
+                    break
+                case 'Misskey': // Misskey
+                    // v11以下と最新で絵文字を取得するエンドポイントが違うので動いたやつで取得
+                    response = await Promise.any([
+                        $.ajax({ // 最新バージョン(v2023.9.3)
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/emojis`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ })
+                        }).then(data => { return data.emojis }),
+                        $.ajax({ // v11以下(Misskey.devなど)
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/meta`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ detail: false })
+                        }).then(data => { // emojis entityがあればそのまま返却、なければ新版なのでreject
+                            if (data.emojis) return data.emojis
+                            else return Promise.reject('not exist emojis in /api/meta.')
+                        })
+                    ])
+                    response.forEach(e => emojis.push({
+                        "name": e.aliases[0],
+                        "shortcode": `:${e.name}:`,
+                        "url": e.url
+                    }))
+                    break
+                default:
+                    break
+            }
+            return {
+                "host": this.pref.domain,
+                "emojis": emojis
+            }
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
         }
-        // Promiseを返却(実質非同期)
-        return rest_promise
     }
 
     /**
@@ -837,122 +833,118 @@ class Account {
      * このアカウントの最新情報を取得する
      */
     async getInfo() {
-        let rest_promise = null
-        switch (this.pref.platform) {
-            case 'Mastodon': // Mastodon
-                // 認証アカウントの情報を取得
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v1/accounts/verify_credentials`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                })
-                break
-            case 'Misskey': // Misskey
-                // 認証アカウントの情報を取得
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/i`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "i": this.pref.access_token })
-                })
-                break
-            default:
-                break
-        }
-        // Promiseを返却(実質非同期)
-        return rest_promise.then(data => { return new User({
-            json: data,
-            host: this.pref.domain,
-            remote: true,
-            auth: true,
-            platform: this.pref.platform
-        })}).catch(jqXHR => { // 失敗したらnullを返す
+        let response = null
+        try {
+            switch (this.pref.platform) {
+                case 'Mastodon': // Mastodon
+                    // 認証アカウントの情報を取得
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${this.pref.domain}/api/v1/accounts/verify_credentials`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    // 認証アカウントの情報を取得
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/i`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "i": this.pref.access_token })
+                    })
+                    break
+                default:
+                    break
+            }
+            return new User({ // Userクラスにして返却
+                json: response,
+                host: this.pref.domain,
+                remote: true,
+                auth: true,
+                platform: this.pref.platform
+            })
+        } catch (err) { // 失敗したらnullを返す
+            console.log(err)
             toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
             return null
-        })
+        }
     }
 
     /**
      * #Method #Ajax #jQuery
      * このアカウントが作成したリストの一覧を取得する
      */
-    getLists() {
-        let rest_promise = null
-        switch (this.pref.platform) {
-            case 'Mastodon': // Mastodon
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: `https://${this.pref.domain}/api/v1/lists`,
-                    dataType: "json",
-                    headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                }).then(data => {
+    async getLists() {
+        let response = null
+        let lists = []
+        try {
+            switch (this.pref.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${this.pref.domain}/api/v1/lists`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${this.pref.access_token}` }
+                    })
                     // リストを持っていない場合はreject
-                    if (data.length == 0) return Promise.reject('empty')
-                    return (async () => {
-                        // リスト一覧を整形
-                        const lists = []
-                        data.forEach(l => lists.push({
-                            "listname": l.title,
-                            "id": l.id
-                        }))
-                        return lists
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.pref.domain}/api/users/lists/list`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "i": this.pref.access_token })
-                }).then(data => {
+                    if (response.length == 0) return Promise.reject('empty')
+                    response.forEach(l => lists.push({
+                        "listname": l.title,
+                        "id": l.id
+                    }))
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.pref.domain}/api/users/lists/list`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "i": this.pref.access_token })
+                    })
                     // リストを持っていない場合はreject
-                    if (data.length == 0) return Promise.reject('empty')
-                    return (async () => {
-                        // リスト一覧を整形
-                        const lists = []
-                        data.forEach(l => lists.push({
-                            "listname": l.name,
-                            "id": l.id
-                        }))
-                        return lists
-                    })()
-                })
-                break
-            default:
-                break
+                    if (response.length == 0) return Promise.reject('empty')
+                    response.forEach(l => lists.push({
+                        "listname": l.name,
+                        "id": l.id
+                    }))
+                    break
+                default:
+                    break
+            }
+            return lists
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
         }
-        // Promiseを返却(実質非同期)
-        return rest_promise
     }
 
     /**
      * #Method #Ajax #jQuery
      * このアカウントがお気に入りに追加しているチャンネル一覧を取得する(Misskey専用)
      */
-    getChannels() {
-        return $.ajax({
-            type: "POST",
-            url: `https://${this.pref.domain}/api/channels/my-favorites`,
-            dataType: "json",
-            headers: { "Content-Type": "application/json" },
-            data: JSON.stringify({ "i": this.pref.access_token })
-        }).then(data => {
+    async getChannels() {
+        try {
+            const response = await $.ajax({
+                type: "POST",
+                url: `https://${this.pref.domain}/api/channels/my-favorites`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({ "i": this.pref.access_token })
+            })
             // チャンネルをお気に入りしていない場合はreject
-            if (data.length == 0) return Promise.reject('empty')
-            return (async () => {
-                // リスト一覧を整形
-                const channels = []
-                data.forEach(c => channels.push({
-                    "name": c.name,
-                    "id": c.id
-                }))
-                return channels
-            })()
-        })
+            if (response.length == 0) return Promise.reject('empty')
+            const channels = []
+            response.forEach(c => channels.push({
+                "name": c.name,
+                "id": c.id
+            }))
+            return channels
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
+        }
     }
 
     /**

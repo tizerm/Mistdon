@@ -344,35 +344,39 @@ class Status {
             id = spl_url[spl_url.length - 1]
             domain = spl_url[spl_url.length - 3]
         }
-        let request_promise = null
-        switch (platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "GET",
-                    url: `https://${domain}/api/v1/statuses/${id}`,
-                    dataType: "json",
-                })
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "POST",
-                    url: `https://${domain}/api/notes/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "noteId": id })
-                })
-                break
-            default:
-                toast("詳細表示のできない投稿です.", "error", toast_uuid)
-                return
-        }
-        return request_promise.then(data => {
+
+        let response = null
+        try { // リモートの投稿を直接取得
+            switch (platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${domain}/api/v1/statuses/${id}`,
+                        dataType: "json",
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "noteId": id })
+                    })
+                    break
+                default:
+                    toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                    return
+            }
             toast(null, "hide", toast_uuid)
-            return new Status(data, null, { // accountには最低限の情報だけ入れる
+            return new Status(response, null, { // accountには最低限の情報だけ入れる
                 "platform": platform,
                 "pref": { "domain": domain }
             })
-        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        } catch (err) {
+            console.log(err)
+            toast("投稿の取得に失敗しました.", "error", toast_uuid)
+        }
     }
 
     /**
@@ -382,34 +386,37 @@ class Status {
      * @param arg パラメータオブジェクト
      */
     static async getTreePost(arg) {
-        let request_promise = null
-        switch (arg.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "GET",
-                    url: `https://${arg.domain}/api/v1/statuses/${arg.id}`,
-                    dataType: "json",
-                })
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "POST",
-                    url: `https://${arg.domain}/api/notes/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "noteId": arg.id })
-                })
-                break
-            default:
-                toast("詳細表示のできない投稿です.", "error", toast_uuid)
-                return
-        }
-        return request_promise.then(data => {
-            return new Status(data, null, { // accountには最低限の情報だけ入れる
+        let response = null
+        try { // リモートの投稿を直接取得
+            switch (arg.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // リモートの投稿を直接取得
+                        type: "GET",
+                        url: `https://${arg.domain}/api/v1/statuses/${arg.id}`,
+                        dataType: "json",
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({ // リモートの投稿を直接取得
+                        type: "POST",
+                        url: `https://${arg.domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "noteId": arg.id })
+                    })
+                    break
+                default:
+                    toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                    return
+            }
+            return new Status(response, null, { // accountには最低限の情報だけ入れる
                 "platform": arg.platform,
                 "pref": { "domain": arg.domain }
             })
-        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        } catch (err) {
+            console.log(err)
+            toast("投稿の取得に失敗しました.", "error", toast_uuid)
+        }
     }
 
     /**
@@ -419,80 +426,81 @@ class Status {
      */
     async getThread() {
         const domain = this.from_account.pref.domain
-        let main_promise = null
         const parent_promises = []
         const child_promises = []
-        switch (this.from_account.platform) {
-            case 'Mastodon': // Mastodon
-                main_promise = $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
-                    type: "GET",
-                    url: `https://${domain}/api/v1/statuses/${this.id}/context`,
-                    dataType: "json"
-                }).then(data => {
+        let response = null
+        try {
+            switch (this.from_account.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
+                        type: "GET",
+                        url: `https://${domain}/api/v1/statuses/${this.id}/context`,
+                        dataType: "json"
+                    })
                     // ツリー元のツートを取得(逆順)
-                    data.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
+                    response.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
                         id: ids.id,
                         platform: this.from_account.platform,
                         domain: domain
                     })))
                     // チェインしているツートを取得
-                    data.descendants.forEach(ids => child_promises.push(Status.getTreePost({
+                    response.descendants.forEach(ids => child_promises.push(Status.getTreePost({
                         id: ids.id,
                         platform: this.from_account.platform,
                         domain: domain
                     })))
-                    return 'resolve'
-                })
-                break
-            case 'Misskey': // Misskey
-                const recurseChain = async (post) => { // 再帰参照できるチェインノート取得関数
-                    const recurse_promise = []
-                    return $.ajax({ // チェインしているノートを取得
-                        type: "POST",
-                        url: `https://${domain}/api/notes/children`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ "noteId": post.id })
-                    }).then(data => {
-                        if (data.length == 0) return 'resolve' // 終端まで取得したら終了
-                        data.forEach(post => {
-                            const ins_post = new Status(post, null, { // accountには最低限の情報だけ入れる
-                                "platform": 'Misskey',
-                                "pref": { "domain": domain }
+                    break
+                case 'Misskey': // Misskey
+                    const recurseChain = async (post) => { // 再帰参照できるチェインノート取得関数
+                        const recurse_promise = []
+                        return $.ajax({ // チェインしているノートを取得
+                            type: "POST",
+                            url: `https://${domain}/api/notes/children`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ "noteId": post.id })
+                        }).then(data => {
+                            if (data.length == 0) return 'resolve' // 終端まで取得したら終了
+                            data.forEach(post => {
+                                const ins_post = new Status(post, null, { // accountには最低限の情報だけ入れる
+                                    "platform": 'Misskey',
+                                    "pref": { "domain": domain }
+                                })
+                                child_promises.push((async () => { return ins_post })())
+                                // 取得したノートを起点に再帰的に取得処理を呼ぶ
+                                recurse_promise.push(recurseChain(ins_post))
                             })
-                            child_promises.push((async () => { return ins_post })())
-                            // 取得したノートを起点に再帰的に取得処理を呼ぶ
-                            recurse_promise.push(recurseChain(ins_post))
+                            return Promise.all(recurse_promise)
                         })
-                        return Promise.all(recurse_promise)
-                    })
-                }
-                main_promise = Promise.all([
-                    $.ajax({ // ツリー元のノートを取得
-                        type: "POST",
-                        url: `https://${domain}/api/notes/conversation`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ "noteId": this.id })
-                    }).then(data => {
-                        data.forEach(post => parent_promises.push((async () => {
-                            return new Status(post, null, { // accountには最低限の情報だけ入れる
-                                "platform": this.from_account.platform,
-                                "pref": { "domain": domain }
-                            })
-                        })()))
-                    }), recurseChain(this)]).then(datas => { return 'resolve' })
-                break
-            default:
-                break
-        }
-        // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
-        main_promise.then(() => {
+                    }
+                    await Promise.all([
+                        $.ajax({ // ツリー元のノートを取得
+                            type: "POST",
+                            url: `https://${domain}/api/notes/conversation`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ "noteId": this.id })
+                        }).then(data => {
+                            data.forEach(post => parent_promises.push((async () => {
+                                return new Status(post, null, { // accountには最低限の情報だけ入れる
+                                    "platform": this.from_account.platform,
+                                    "pref": { "domain": domain }
+                                })
+                            })()))
+                        }), recurseChain(this)])
+                    break
+                default:
+                    break
+            }
+            // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
             Promise.all(parent_promises).then(parents => parents
                 .forEach(post => $("#pop_extend_column .timeline>ul").prepend(post.element)))
             Promise.all(child_promises).then(children => children
                 .forEach(post => $("#pop_extend_column .timeline>ul").append(post.element)))
-        }).catch(jqXHR => toast("スレッドの取得に失敗しました.", "error"))
+        } catch (err) {
+            console.log(err)
+            toast("スレッドの取得に失敗しました.", "error")
+        }
     }
 
     /**
@@ -1152,38 +1160,36 @@ class Status {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
         toast(`${target_elm.text()} に投票しています...`, "progress", toast_uuid)
-
         const index = target_elm.index()
-        let request_promise = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
-                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
-                    data: { "choices": [index] }
-                })
-                break
-            case 'Misskey': // Misskey
-                const request_param = {
-                    "i": this.from_account.pref.access_token,
-                    "noteId": this.status_id,
-                    "choice": index
-                }
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(request_param)
-                })
-                break
-            default:
-                break
-        }
+        let response = null
         try { // 投票リクエストを送信
-            let response = await request_promise
-            if (!response) // Misskeyの場合投票結果がresponseに返ってこないので投稿データから取得
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
+                        headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
+                        data: { "choices": [index] }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    const request_param = {
+                        "i": this.from_account.pref.access_token,
+                        "noteId": this.status_id,
+                        "choice": index
+                    }
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(request_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            if (!response) { // Misskeyの場合投票結果がresponseに返ってこないので投稿データから取得
                 response = await $.ajax({
                     type: "POST",
                     url: `https://${this.from_account.pref.domain}/api/notes/show`,
@@ -1193,7 +1199,9 @@ class Status {
                         "i": this.from_account.pref.access_token,
                         "noteId": this.id
                     })
-                }).then(data => { return data.poll })
+                })
+                response = response.poll
+            }
             toast(`${target_elm.text()} に投票しました. 中間結果を表示します.`, "done", toast_uuid)
 
             // 最新の投票データをステータスに書き込む
@@ -1253,38 +1261,43 @@ class Status {
      * 
      * @param callback 削除処理実行後に実行するコールバック関数
      */
-    delete(callback) {
+    async delete(callback) {
         // 先にtoast表示
         const toast_uuid = crypto.randomUUID()
         toast("投稿を削除しています...", "progress", toast_uuid)
 
-        let request_promise = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
-                    type: "DELETE",
-                    url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
-                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
-                })
-                break
-            case 'Misskey': // Misskey
-                const request_param = {
-                    "i": this.from_account.pref.access_token,
-                    "noteId": this.status_id
-                }
-                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/notes/delete`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(request_param)
-                })
-                break
-            default:
-                break
+        let response = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信
+                        type: "DELETE",
+                        url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
+                        headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    const request_param = {
+                        "i": this.from_account.pref.access_token,
+                        "noteId": this.status_id
+                    }
+                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/notes/delete`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(request_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            // 削除処理に成功したらコールバックを実行
+            callback(this, toast_uuid)
+        } catch (err) {
+            console.log(err)
+            toast("投稿の削除に失敗しました.", "error", toast_uuid)
         }
-        request_promise.then(() => callback(this, toast_uuid))
-            .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
     }
 
     /**
