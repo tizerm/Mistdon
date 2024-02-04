@@ -197,13 +197,15 @@ class Group {
         // 重複している投稿を除外する
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            if (ul.find("li").length >= limit) this.removeStatus(ul.find("li:last-child"))
+            let remove_flg = false
+            if (ul.find("li").length >= limit) remove_flg = true
             ul.prepend(post.timeline_element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                 .text(++this.unread)
             this.counter++
+            if (remove_flg) this.removeStatus(ul.find("li:last-child"))
         })
 
         // 通知が来た場合は通知ウィンドウに追加

@@ -182,6 +182,7 @@ class Account {
                 expire_sec: arg.option_obj.find('.__txt_poll_exipire_date').val()
             }
         }
+        const toast_uuid = crypto.randomUUID()
 
         try { // 投稿ロジック全体をcatch
             const media_ids = []
@@ -198,7 +199,6 @@ class Account {
             }
 
             // 投稿処理に入る前にtoast表示
-            const toast_uuid = crypto.randomUUID()
             toast(`${this.full_address}から投稿中です...`, "progress", toast_uuid)
             let request_param = null
             let response = null
@@ -1258,12 +1258,21 @@ class Account {
                 <ul class="profile_header"></ul>
                 <ul class="profile_detail"></ul>
                 <div class="user_post_elm">
-                    <div class="pinned_block post_div">
-                        <h4>ピンどめ</h4>
-                        <ul class="pinned_post __context_posts"></ul>
+                    <div class="tab">
+                        <a class="__tab_profile_posts">全投稿</a>
+                        <a class="__tab_profile_medias">メディア</a>
                     </div>
-                    <div class="posts_block post_div">
-                        <ul class="posts __context_posts"></ul>
+                    <div class="post_uls">
+                        <div class="pinned_block post_div">
+                            <h4>ピンどめ</h4>
+                            <ul class="pinned_post __context_posts"></ul>
+                        </div>
+                        <div class="posts_block post_div">
+                            <ul class="posts __context_posts"></ul>
+                        </div>
+                    </div>
+                    <div class="media_uls">
+                        <ul class="media_post __context_posts"></ul>
                     </div>
                 </div>
                 <div class="user_bookmark_elm"></div>
@@ -1308,7 +1317,7 @@ class Account {
             })
 
             // ユーザーの投稿を取得
-            detail.getPost(v, null).then(posts => createScrollLoader({
+            detail.getPost(v, false, null).then(posts => createScrollLoader({
                 // 最新投稿データはスクロールローダーを生成
                 data: posts,
                 target: column.find(".posts"),
@@ -1317,7 +1326,7 @@ class Account {
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
-                load: async max_id => detail.getPost(v, max_id)
+                load: async max_id => detail.getPost(v, false, max_id)
             }))
             detail.getPinnedPost(v).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))

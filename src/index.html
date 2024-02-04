@@ -141,14 +141,16 @@
                 <h5>アンケート</h5>
                 <ul class="poll_options">
                     <li><input type="text"
-                        class="__txt_poll_option __ignore_keyborad" placeholder="回答1"/></li>
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
                     <li><input type="text"
-                        class="__txt_poll_option __ignore_keyborad" placeholder="回答2"/></li>
-                    <li><input type="text"
-                        class="__txt_poll_option __ignore_keyborad" placeholder="回答3"/></li>
-                    <li><input type="text"
-                        class="__txt_poll_option __ignore_keyborad" placeholder="回答4"/></li>
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
                 </ul>
+                <button type="button" id="__on_poll_add_item"
+                    class="icon_label_set"><img src="resources/ic_add32.png" alt="追加"/>
+                    <span>追加</span></button>
+                <button type="button" id="__on_poll_remove_item"
+                    class="icon_label_set"><img src="resources/ic_rem32.png" alt="削除"/>
+                    <span>削除</span></button>
                 <div class="poll_expire">
                     期限: <input type="text"
                         class="__txt_poll_expire_date __ignore_keyborad" placeholder="回答1"/>
@@ -160,11 +162,6 @@
                     <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
                 <div class="media_option">
-                    <!--
-                    <input type="checkbox" id="__chk_sensitive_media"/>
-                    <label for="__chk_sensitive_media">すべてのメディアを閲覧注意にする</label>
-                    <a id="open_drive" title="過去のメディア一覧"
-                    ><img src="resources/ic_return.png" alt="過去のメディア一覧"/></a>-->
                     <button type="button" id="__on_open_drive"
                         class="icon_label_set"><img src="resources/ic_return.png" alt="ドライブから添付"/>
                         <span>ドライブから添付</span></button>

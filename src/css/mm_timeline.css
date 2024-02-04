@@ -998,6 +998,24 @@
             }
         }
     }
+    > .user_post_elm {
+        >.tab {
+            margin-top: 4px;
+            text-align: center;
+            > a {
+                display: inline-block;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                background-color: rgba(62,62,62,0.92);
+                padding: 4px;
+                width: calc(50% - 28px);
+                font-size: 13px;
+                cursor: pointer;
+                &:hover { background-color: rgba(62,82,96,0.92); }
+            }
+        }
+        > .media_uls { display: none; }
+    }
     .post_div {
         position: relative;
         > h4 {

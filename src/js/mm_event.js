@@ -266,6 +266,12 @@ $(() => {
     $("#header>#post_options #__on_open_drive").on("click",
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
+    $("#header>#post_options #__on_poll_add_item").on("click", e => $("#header>#post_options .poll_options")
+        .append('<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>'))
+
+    $("#header>#post_options #__on_poll_remove_item").on("click",
+        e => $("#header>#post_options .poll_options>li:last-child").remove())
+
     $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
     // TODO: ドラッグドロップの処理がまだわからんち
@@ -756,6 +762,19 @@ $(() => {
         const instance = await user.getInstance()
         instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
     })())
+
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_posts", e => {
+        $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".post_uls").show()
+    })
+
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_medias", e => {
+        if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
+            // メディアタイムラインを未取得の場合は取得する
+            User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createMediaGallery())
+        $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".media_uls").show()
+    })
 
     /**
      * #Event #Delayhover

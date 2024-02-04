@@ -596,9 +596,7 @@ class ColumnPref {
         $(`#${target_col.id}>.col_tl_groups>.tl_group:last-child .__txt_group_height`).val("")
         let total = 0
         for (let gp_elm of $(`#${target_col.id}>.col_tl_groups>.tl_group`).get()) {
-            console.log($(gp_elm).find('.__txt_group_height'))
             let height = $(gp_elm).find('.__txt_group_height').val()
-            console.log(height)
             if (!height) break
             else total += Number(height)
             if (total >= 99) {
@@ -637,9 +635,7 @@ class ColumnPref {
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
             let total = 0
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
-                console.log($(gp_elm).find('.__txt_group_height'))
                 let height = $(gp_elm).find('.__txt_group_height').val()
-                console.log(height)
                 if (!height) { // 最後のグループの場合
                     height = 100 - total
                     $(gp_elm).find('.__txt_group_height').val(height)

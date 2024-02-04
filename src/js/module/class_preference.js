@@ -10,40 +10,40 @@ class Preference {
     // スタティックマップを初期化(非同期)
     static {
         (async () => { // 全体設定の読み込み処理
-            //const win_pref = await window.accessApi.readWindowPref()
-            //if (!win_pref) return // ファイルがないときはなにもしない
-            Preference.GENERAL_PREFERENCE = { // 全体設定の初期値
-                "enable_last_edit_button"       : true,     // 直前編集ボタン
-                "enable_action_palette"         : true,     // 簡易アクションパレット
-                "enable_expand_profile_cw"      : false,    // プロフCW展開
-                "enable_expand_profile_media"   : false,    // プロフメディア展開
-                "enable_media_confirm"          : true,     // メディア投稿確認
-                "enable_tips"                   : true,     // TIPS表示
-                "tl_cache_limit": {                         // TLキャッシュ件数
-                    "default"                   : 100,      // ノーマル
-                    "chat"                      : 150,      // チャット
-                    "list"                      : 200,      // リスト
-                    "media"                     : 80,       // メディア
-                    "gallery"                   : 120       // ギャラリー
-                },
-                "media_height_limit": {                     // メディアの高さ制限
-                    "default"                   : 240,      // ノーマル
-                    "chat"                      : 160,      // チャット
-                    "media"                     : 320,      // メディア
-                    "gallery"                   : 240       // ギャラリー
-                },
-                "chat_height_limit"             : 0,        // チャット高さ制限
-                "history_limit"                 : 200,      // 履歴件数
-                "scroll_speed": {                           // スクロールスピード
-                    "default"                   : 250,      // ノーマル
-                    "shift"                     : 800       // チャット
-                },
-                "notification_layout"           : "large_left", // 通知タイプ
-                "background": {                             // 背景
-                    "type"                      : "mitlin", // 背景タイプ
-                    "color"                     : "222222"  // 背景色
+            const general_pref = await window.accessApi.readGeneralPref()
+            if (!general_pref) // ファイルが読み込めなかった場合は初期設定を使用
+                Preference.GENERAL_PREFERENCE = { // 全体設定の初期値
+                    "enable_last_edit_button"       : true,     // 直前編集ボタン
+                    "enable_action_palette"         : true,     // 簡易アクションパレット
+                    "enable_expand_profile_cw"      : false,    // プロフCW展開
+                    "enable_expand_profile_media"   : false,    // プロフメディア展開
+                    "enable_media_confirm"          : true,     // メディア投稿確認
+                    "enable_tips"                   : true,     // TIPS表示
+                    "tl_cache_limit": {                         // TLキャッシュ件数
+                        "default"                   : 100,      // ノーマル
+                        "chat"                      : 150,      // チャット
+                        "list"                      : 200,      // リスト
+                        "media"                     : 80,       // メディア
+                        "gallery"                   : 120       // ギャラリー
+                    },
+                    "media_height_limit": {                     // メディアの高さ制限
+                        "default"                   : 240,      // ノーマル
+                        "chat"                      : 160,      // チャット
+                        "media"                     : 320,      // メディア
+                        "gallery"                   : 240       // ギャラリー
+                    },
+                    "chat_height_limit"             : 0,        // チャット高さ制限
+                    "history_limit"                 : 200,      // 履歴件数
+                    "scroll_speed": {                           // スクロールスピード
+                        "default"                   : 250,      // ノーマル
+                        "shift"                     : 800       // チャット
+                    },
+                    "background": {                             // 背景
+                        "type"                      : "mitlin", // 背景タイプ
+                        "color"                     : "222222"  // 背景色
+                    }
                 }
-            }
+            else Preference.GENERAL_PREFERENCE = general_pref
         })(); (async () => { // ウィンドウ設定の読み込み処理
             const win_pref = await window.accessApi.readWindowPref()
             if (!win_pref) return // ファイルがないときはなにもしない
@@ -102,6 +102,7 @@ class Preference {
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_expand_profile_cw").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_cw)
         $("#__chk_gen_expand_profile_media").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_media)
+        $("#__chk_gen_show_media_confirm").prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
 
         // 件数キャッシュ
@@ -121,6 +122,53 @@ class Preference {
         $("#__txt_gen_chatmaxheight").val(Preference.GENERAL_PREFERENCE.chat_height_limit)
         // 履歴件数
         $("#__txt_gen_history_limit").val(Preference.GENERAL_PREFERENCE.history_limit)
+        // キーボードスクロール設定
+        $("#__txt_gen_keyscroll_normal").val(Preference.GENERAL_PREFERENCE.scroll_speed.default)
+        $("#__txt_gen_keyscroll_shift").val(Preference.GENERAL_PREFERENCE.scroll_speed.shift)
+    }
+
+    static async saveGeneralPreference() {
+        const save_pref = {
+            "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
+            "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
+            "enable_expand_profile_cw"      : $("#__chk_gen_expand_profile_cw").prop("checked"),
+            "enable_expand_profile_media"   : $("#__chk_gen_expand_profile_media").prop("checked"),
+            "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
+            "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
+            "tl_cache_limit": {             // TLキャッシュ件数
+                "default"                   : $("#__txt_gen_tlcache_default").val(),
+                "chat"                      : $("#__txt_gen_tlcache_chat").val(),
+                "list"                      : $("#__txt_gen_tlcache_list").val(),
+                "media"                     : $("#__txt_gen_tlcache_media").val(),
+                "gallery"                   : $("#__txt_gen_tlcache_gallery").val(),
+            },
+            "media_height_limit": {         // メディアの高さ制限
+                "default"                   : $("#__txt_gen_imageheight_limit_default").val(),
+                "chat"                      : $("#__txt_gen_imageheight_limit_chat").val(),
+                "media"                     : $("#__txt_gen_imageheight_limit_media").val(),
+                "gallery"                   : $("#__txt_gen_imageheight_limit_gallery").val(),
+            },
+            "chat_height_limit"             : $("#__txt_gen_chatmaxheight").val(),
+            "history_limit"                 : $("#__txt_gen_history_limit").val(),
+            "scroll_speed": {               // スクロールスピード
+                "default"                   : $("#__txt_gen_keyscroll_normal").val(),
+                "shift"                     : $("#__txt_gen_keyscroll_shift").val(),
+            },
+            "background": {                 // 背景
+                "type"                      : "mitlin", // 背景タイプ
+                "color"                     : "222222"  // 背景色
+            }
+        }
+
+        // 設定ファイルを保存
+        await window.accessApi.writeGeneralPref(save_pref)
+        dialog({
+            type: 'alert',
+            title: "全体設定",
+            text: "全体設定を保存しました。",
+            // サブウィンドウを閉じる
+            accept: () => $("#pop_extend_column").hide()
+        })
     }
 
     /**

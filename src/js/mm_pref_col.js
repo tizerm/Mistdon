@@ -71,7 +71,7 @@
     // 全体設定ボタンイベント
     $("#on_general_pref").on("click", e => Preference.openGeneralPrefConfig());
     // 全体設定-保存して閉じるボタンイベント
-    $(document).on("click", "#__on_pref_save", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
+    $(document).on("click", "#__on_pref_save", e => Preference.saveGeneralPreference());
     // 全体設定-保存せずに閉じるボタンイベント
     $(document).on("click", "#__on_pref_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
 });

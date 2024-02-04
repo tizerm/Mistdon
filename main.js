@@ -34,7 +34,7 @@ app.disableHardwareAcceleration()
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefAccs() {
+async function readPrefAccs() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_accounts) {
         console.log('@INF: use app_prefs/auth.json cache.')
@@ -165,7 +165,7 @@ async function writePrefAccColor(event, json_data) {
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefCols() {
+async function readPrefCols() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_columns) {
         console.log('@INF: use app_prefs/columns.json cache.')
@@ -356,45 +356,27 @@ async function writePrefCols(event, json_data) {
     pref_columns = JSON.parse(content)
 }
 
-/*
-function readPrefCols() {
+async function readGeneralPref() {
     // 変数キャッシュがある場合はキャッシュを使用
-    if (pref_columns) {
-        console.log('@INF: use app_prefs/columns.json cache.')
-        return pref_columns
+    if (pref_general) {
+        console.log('@INF: use app_prefs/general_pref.json cache.')
+        return pref_general
     }
-    const content = readFile('app_prefs/columns.json')
+    const content = readFile('app_prefs/general_pref.json')
     if (!content) return null // ファイルが見つからなかったらnullを返却
 
-    pref_columns = JSON.parse(content)
-    console.log('@INF: read app_prefs/columns.json.')
-    return pref_columns
+    pref_general = JSON.parse(content)
+    console.log('@INF: read app_prefs/general_pref.json.')
+    return pref_general
 }
 
-async function writePrefAccColor(event, json_data) {
-    console.log('@INF: use app_prefs/auth.json cache.')
-    // 返却JSONを走査して色情報をキャッシュに保存
-    const write_json = []
-    json_data.forEach(pref => {
-        let account = pref_accounts.get(pref.key_address)
-        account.acc_color = pref.acc_color
-        account.default_local = pref.default_local
-        account.default_channel = pref.default_channel
-        account.post_maxlength = pref.post_maxlength
-        // ユーザー情報を更新できる場合は更新
-        if (pref.user_id) account.user_id = pref.user_id
-        if (pref.username) account.username = pref.username
-        if (pref.avatar_url) account.avatar_url = pref.avatar_url
-        write_json.push(account)
-    })
-
-    // ファイルに書き込み
-    const content = await overwriteFile('app_prefs/auth.json', write_json)
-
+async function writeGeneralPref(event, json_data) {
+    // 絵文字キャッシュデータを書き込み
+    const content = await overwriteFile('app_prefs/general_pref.json', json_data)
+    console.log('@INF: write app_prefs/general_pref.json.')
     // キャッシュを更新
-    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    pref_general = JSON.parse(content)
 }
-//*/
 
 /**
  * #IPC
@@ -403,7 +385,7 @@ async function writePrefAccColor(event, json_data) {
  * 
  * @return カスタム絵文字キャッシュ情報(マップで返却)
  */
-function readCustomEmojis() {
+async function readCustomEmojis() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_emojis.size > 0) {
         console.log('@INF: use app_prefs/emojis/ cache.')
@@ -734,6 +716,7 @@ app.whenReady().then(() => {
     // IPC通信で呼び出すメソッド定義
     ipcMain.handle('read-pref-accs', readPrefAccs)
     ipcMain.handle('read-pref-cols', readPrefCols)
+    ipcMain.handle('read-general-pref', readGeneralPref)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
@@ -742,6 +725,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
+    ipcMain.on('write-general-pref', writeGeneralPref)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)

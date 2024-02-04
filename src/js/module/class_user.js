@@ -341,7 +341,7 @@ class User {
      * @param account リモートホストの情報を入れた最小限のアカウントオブジェクト
      * @param max_id 前のページの最後の投稿のページングID
      */
-    async getPost(account, max_id) {
+    async getPost(account, media_flg, max_id) {
         let response = null
         let query_param = null
         try {
@@ -349,6 +349,7 @@ class User {
                 case 'Mastodon': // Mastodon
                     query_param = {
                         "limit": 40,
+                        "only_media": media_flg,
                         "exclude_replies": true
                     }
                     if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
@@ -368,6 +369,7 @@ class User {
                         "userId": this.id,
                         "includeReplies": false,
                         "limit": 40,
+                        "withFiles": media_flg,
                         "includeMyRenotes": false
                     }
                     if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
@@ -520,11 +522,12 @@ class User {
                 max_id: next_id
             }
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            // もうデータがない場合は専用メッセージを出す
-            if (err.message == 'empty') toast(`これ以上データがありません.`, "error")
-
+            if (err.message == 'empty') { // もうデータがない場合は専用メッセージを出す
+                toast(`これ以上データがありません.`, "error")
+                return Promise.reject(err)
+            }
             console.log(err)
-            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
+            toast('取得に失敗しました.', "error")
             return Promise.reject(err)
         }
     }
@@ -642,12 +645,21 @@ class User {
                         <ul class="profile_header __context_user"></ul>
                         <ul class="profile_detail __context_user"></ul>
                         <div class="user_post_elm">
-                            <div class="pinned_block post_div">
-                                <h4>ピンどめ</h4>
-                                <ul class="pinned_post __context_posts"></ul>
+                            <div class="tab">
+                                <a class="__tab_profile_posts">全投稿</a>
+                                <a class="__tab_profile_medias">メディア</a>
                             </div>
-                            <div class="posts_block post_div">
-                                <ul class="posts __context_posts"></ul>
+                            <div class="post_uls">
+                                <div class="pinned_block post_div">
+                                    <h4>ピンどめ</h4>
+                                    <ul class="pinned_post __context_posts"></ul>
+                                </div>
+                                <div class="posts_block post_div">
+                                    <ul class="posts __context_posts"></ul>
+                                </div>
+                            </div>
+                            <div class="media_uls">
+                                <ul class="media_post __context_posts"></ul>
                             </div>
                         </div>
                         <div class="user_ff_elm"></div>
@@ -689,7 +701,7 @@ class User {
             "platform": this.platform,
             "pref": { "domain": this.host }
         }; (async () => Promise.allSettled([
-            this.getPost(account, null).then(posts => createScrollLoader({
+            this.getPost(account, false, null).then(posts => createScrollLoader({
                 // 最新投稿データはスクロールローダーを生成
                 data: posts,
                 target: column.find(".posts"),
@@ -698,7 +710,7 @@ class User {
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
-                load: async max_id => this.getPost(account, max_id)
+                load: async max_id => this.getPost(account, false, max_id)
             })), this.getPinnedPost(account).then(posts => {
                 if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
                 else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
@@ -753,7 +765,7 @@ class User {
      * 
      * @param type お気に入り/ブックマーク/リアクションのどれかを指定
      */
-    createBookmarkList(type) {
+    async createBookmarkList(type) {
         const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
@@ -765,20 +777,19 @@ class User {
         target_td.find(".user_ff_elm").hide()
         target_td.find(".user_bookmark_elm").html('<ul class="bookmarks __context_posts"></ul>').show()
 
-        this.getBookmarks(Account.get(this.full_address), type, null).then(body => (async () => {
-            // ロード待ち画面を消去
-            target_td.find(".col_loading").remove()
-            createScrollLoader({ // スクロールローダーを生成
-                data: body,
-                target: target_td.find(".user_bookmark_elm>.bookmarks"),
-                bind: (data, target) => {
-                    data.datas.forEach(post => target.append(post.element))
-                    // Headerを経由して取得されたmax_idを返却
-                    return data.max_id
-                },
-                load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
-            })
-        })())
+        // ブックマークデータを取得してローダーを生成
+        const response = await this.getBookmarks(Account.get(this.full_address), type, null)
+        target_td.find(".col_loading").remove()
+        createScrollLoader({ // スクロールローダーを生成
+            data: response,
+            target: target_td.find(".user_bookmark_elm>.bookmarks"),
+            bind: (data, target) => {
+                data.datas.forEach(post => target.append(post.element))
+                // Headerを経由して取得されたmax_idを返却
+                return data.max_id
+            },
+            load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
+        })
     }
 
     /**
@@ -787,7 +798,7 @@ class User {
      * 
      * @param type フォローを取得するかフォロワーを取得するか指定
      */
-    createFFTaglist(type) {
+    async createFFTaglist(type) {
         const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
@@ -804,20 +815,47 @@ class User {
             <ul class="ff_nametags"></ul>
         `).show()
 
-        this.getFFUsers(Account.get(this.full_address), type, null).then(body => (async () => {
-            // ロード待ち画面を消去
-            target_td.find(".col_loading").remove()
-            createScrollLoader({ // スクロールローダーを生成
-                data: body,
-                target: target_td.find(".user_ff_elm>.ff_nametags"),
-                bind: (data, target) => {
-                    data.datas.forEach(u => target.append(u.inline_nametag))
-                    // Headerを経由して取得されたmax_idを返却
-                    return data.max_id
-                },
-                load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
-            })
-        })())
+        // ユーザーデータを取得してローダーを生成
+        const response = await this.getFFUsers(Account.get(this.full_address), type, null)
+        target_td.find(".col_loading").remove()
+        createScrollLoader({ // スクロールローダーを生成
+            data: response,
+            target: target_td.find(".user_ff_elm>.ff_nametags"),
+            bind: (data, target) => {
+                data.datas.forEach(u => target.append(u.inline_nametag))
+                // Headerを経由して取得されたmax_idを返却
+                return data.max_id
+            },
+            load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
+        })
+    }
+
+    async createMediaGallery() {
+        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        target_td.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
+
+        const account = { // accountには最低限の情報だけ入れる
+            "platform": this.platform,
+            "pref": { "domain": this.host }
+        }
+        // メディア投稿データを取得してローダーを生成
+        const response = await this.getPost(account, true, null)
+        target_td.find(".col_loading").remove()
+        createScrollLoader({ // スクロールローダーを生成
+            data: response,
+            target: target_td.find(".media_post"),
+            bind: (data, target) => {
+                data.forEach(p => target.append(p.gallery_elm))
+                // max_idとして取得データの最終IDを指定
+                return data.pop().id
+            },
+            load: async max_id => this.getPost(account, true, max_id)
+        })
     }
 }
 
