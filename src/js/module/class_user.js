@@ -506,6 +506,9 @@ class User {
                 default:
                     break
             }
+            // 残りのデータがない場合はreject
+            if (response.body.length == 0) throw new Error('empty')
+
             const posts = []
             response.body.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
             let next_id = null
@@ -517,6 +520,9 @@ class User {
                 max_id: next_id
             }
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            // もうデータがない場合は専用メッセージを出す
+            if (err.message == 'empty') toast(`これ以上データがありません.`, "error")
+
             console.log(err)
             toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
             return Promise.reject(err)

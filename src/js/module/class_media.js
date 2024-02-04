@@ -157,6 +157,20 @@ class Media {
                         headers: { "Authorization": `Bearer ${account.pref.access_token}` },
                         data: query_param
                     })
+
+                    // 非同期アップロードの場合は処理待ちする
+                    if (response.progress) {
+                        const media_id = response.body.id
+                        do {
+                            console.log('upload progress...')
+                            await sleep(5000) // 5秒待機
+                            response = await ajax({ // ステータスコードを取得できるメソッドを使用
+                                method: "GET",
+                                url: `https://${account.pref.domain}/api/v1/media/${media_id}`,
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                            })
+                        } while (response.status == '206') // HTTP 206が返ってくる間ループ
+                    }
                     break
                 case 'Misskey': // Misskey
                     query_param = {
@@ -173,7 +187,7 @@ class Media {
                 default:
                     break
             }
-            response = data.body.id
+            response = response.body.id
             toast(null, "hide", toast_uuid)
             return response
         } catch (err) {
