@@ -325,9 +325,7 @@ class Status {
             toast("詳細表示のできない投稿です.", "error")
             return
         }
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("投稿の取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("投稿の取得中です...")
         // URLパターンからプラットフォームを判定
         const spl_url = url.split('/')
         let platform = null
@@ -365,17 +363,17 @@ class Status {
                     })
                     break
                 default:
-                    toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                    notification.error("詳細表示のできない投稿です.")
                     return
             }
-            toast(null, "hide", toast_uuid)
+            notification.done()
             return new Status(response, null, { // accountには最低限の情報だけ入れる
                 "platform": platform,
                 "pref": { "domain": domain }
             })
         } catch (err) {
             console.log(err)
-            toast("投稿の取得に失敗しました.", "error", toast_uuid)
+            notification.error("投稿の取得に失敗しました.")
         }
     }
 
@@ -406,7 +404,7 @@ class Status {
                     })
                     break
                 default:
-                    toast("詳細表示のできない投稿です.", "error", toast_uuid)
+                    Notification.error("詳細表示のできない投稿です.")
                     return
             }
             return new Status(response, null, { // accountには最低限の情報だけ入れる
@@ -415,7 +413,7 @@ class Status {
             })
         } catch (err) {
             console.log(err)
-            toast("投稿の取得に失敗しました.", "error", toast_uuid)
+            Notification.error("投稿の取得に失敗しました.")
         }
     }
 
@@ -499,7 +497,7 @@ class Status {
                 .forEach(post => $("#pop_extend_column .timeline>ul").append(post.element)))
         } catch (err) {
             console.log(err)
-            toast("スレッドの取得に失敗しました.", "error")
+            Notification.error("スレッドの取得に失敗しました.")
         }
     }
 
@@ -1157,9 +1155,7 @@ class Status {
      * @param target_elm 票を入れるボタンのjQueryオブジェクト
      */
     async vote(target_elm) {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast(`${target_elm.text()} に投票しています...`, "progress", toast_uuid)
+        const notification = Notification.progress(`${target_elm.text()} に投票しています...`)
         const index = target_elm.index()
         let response = null
         try { // 投票リクエストを送信
@@ -1202,7 +1198,7 @@ class Status {
                 })
                 response = response.poll
             }
-            toast(`${target_elm.text()} に投票しました. 中間結果を表示します.`, "done", toast_uuid)
+            notification.done(`${target_elm.text()} に投票しました. 中間結果を表示します.`)
 
             // 最新の投票データをステータスに書き込む
             this.poll_options = Status.asArrayPoll(response, this.platform)
@@ -1214,11 +1210,11 @@ class Status {
             if (err.status == 422 // Mastodonの場合、期限切れは422が返ってくる
                || err.responseJSON.error?.code == 'ALREADY_EXPIRED' // Misskeyの場合
                 ) { // 投票期限の切れたアンケートに投票した場合
-                toast("既に投票を終了しているアンケートです.", "error", toast_uuid)
+                notification.error("既に投票を終了しているアンケートです.")
                 return
             }
             // それ以外は失敗メッセージを出す
-            toast("投票に失敗しました.", "error", toast_uuid)
+            notification.error("投票に失敗しました.")
             console.log(err)
         }
     }
@@ -1262,10 +1258,7 @@ class Status {
      * @param callback 削除処理実行後に実行するコールバック関数
      */
     async delete(callback) {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("投稿を削除しています...", "progress", toast_uuid)
-
+        const notification = Notification.progress("投稿を削除しています...")
         let response = null
         try {
             switch (this.platform) {
@@ -1293,10 +1286,11 @@ class Status {
                     break
             }
             // 削除処理に成功したらコールバックを実行
+            notification.done("投稿の削除が完了しました.")
             callback(this, toast_uuid)
         } catch (err) {
             console.log(err)
-            toast("投稿の削除に失敗しました.", "error", toast_uuid)
+            notification.error("投稿の削除に失敗しました.")
         }
     }
 

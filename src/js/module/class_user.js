@@ -82,8 +82,7 @@ class User {
      * @param address ユーザーアカウントのフルアドレス
      */
     static async getByAddress(address) {
-        const toast_uuid = crypto.randomUUID()
-        toast("対象ユーザーのリモートIDを取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("対象ユーザーのリモートIDを取得中です...")
         const user_id = address.substring(1, address.lastIndexOf('@'))
         const host = address.substring(address.lastIndexOf('@') + 1)
 
@@ -112,15 +111,15 @@ class User {
                 id: data.id
             }})
         ]).then(info => {
-            // 一旦toastを消去
-            toast(null, "hide", toast_uuid)
+            notification.done()
             return User.get({
                 id: info.id,
                 platform: info.platform,
                 host: host
             })
-        }).catch(jqXHR => toast(`ユーザーIDの取得でエラーが発生しました. 
-            サポート外のプラットフォームの可能性があります.`, "error", toast_uuid))
+        }).catch(jqXHR => notification.error(`ユーザーIDの取得でエラーが発生しました. 
+            サポート外のプラットフォームの可能性があります.`))
+
     }
 
     /**
@@ -390,7 +389,7 @@ class User {
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${this.full_address}の投稿の取得に失敗しました.`, "error")
+            Notification.info(`${this.full_address}の投稿の取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
@@ -428,7 +427,7 @@ class User {
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${this.full_address}の投稿の取得に失敗しました.`, "error")
+            Notification.info(`${this.full_address}の投稿の取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
@@ -523,11 +522,11 @@ class User {
             }
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             if (err.message == 'empty') { // もうデータがない場合は専用メッセージを出す
-                toast(`これ以上データがありません.`, "error")
+                Notification.info("これ以上データがありません.")
                 return Promise.reject(err)
             }
             console.log(err)
-            toast('取得に失敗しました.', "error")
+            Notification.error('取得に失敗しました.')
             return Promise.reject(err)
         }
     }
@@ -612,7 +611,7 @@ class User {
             }
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${this.full_address}のFFの取得に失敗しました.`, "error")
+            Notification.error(`${this.full_address}のFFの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }

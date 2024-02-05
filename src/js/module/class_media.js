@@ -85,8 +85,7 @@ class Media {
      * @param address ユーザーアカウントのフルアドレス
      */
     static async getRecentMedia(address, max_id) {
-        const toast_uuid = crypto.randomUUID()
-        toast("対象ユーザーの投稿メディアを取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("対象ユーザーの投稿メディアを取得中です...")
         let response = null
         let query_param = null
 
@@ -131,27 +130,25 @@ class Media {
                 default:
                     break
             }
-            toast(null, "hide", toast_uuid)
+            notification.done()
             return medias
         } catch (err) {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${address}の投稿の取得に失敗しました.`, "error")
+            notification.error(`${address}のメディアの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
 
-    static async uploadMedia(account, filename) {
-        // 先にtoastを表示
-        const toast_uuid = crypto.randomUUID()
-        toast(`${filename}をアップロードしています...`, "progress", toast_uuid)
+    static async uploadMedia(account, file) {
+        const notification = Notification.progress(`${filename}をアップロードしています...`)
         let response = null
         let query_param = null
+        const filename = file.name
         try {
-            const target_file = Media.ATTACH_MEDIA.get(filename)
             switch (account.platform) {
                 case 'Mastodon': // Mastodon
-                    query_param = { file: target_file }
+                    query_param = { file: file }
                     response = await sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
                         url: `https://${account.pref.domain}/api/v2/media`,
                         headers: { "Authorization": `Bearer ${account.pref.access_token}` },
@@ -177,7 +174,7 @@ class Media {
                         i: account.pref.access_token,
                         name: filename,
                         isSensitive: false, // TODO: 一旦無効固定
-                        file: target_file
+                        file: file
                     }
                     response = await sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
                         url: `https://${account.pref.domain}/api/drive/files/create`,
@@ -188,11 +185,11 @@ class Media {
                     break
             }
             response = response.body.id
-            toast(null, "hide", toast_uuid)
+            notification.done()
             return response
         } catch (err) {
             console.log(err)
-            toast(`${filename}のアップロードに失敗しました. 投稿を中断します.`, "error", toast_uuid)
+            notification.error(`${filename}のアップロードに失敗しました. 投稿を中断します.`)
             return Promise.reject(err)
         }
     }

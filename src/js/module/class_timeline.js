@@ -82,7 +82,7 @@ class Timeline {
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`, "error")
+            Notification.error(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
@@ -154,7 +154,7 @@ class Timeline {
             send_param: send_param,
             messageFunc: message_callback,
             openFunc: () => {},
-            closeFunc: () => toast(`${this.host}との接続が切断されました。`, "error"),
+            closeFunc: () => Notification.info(`${this.host}との接続が切断されました。`),
             reconnect: true
         })
     }
@@ -179,7 +179,7 @@ class Timeline {
         })
         // エラーハンドラ
         this.socket.addEventListener("error", (event) => {
-            toast(`${this.host}で接続エラーが発生しました、再接続してください。`, "error")
+            Notification.error(`${this.host}で接続エラーが発生しました、再接続してください。`)
             // エラーで切れた場合は再接続しない
             this.reconnect = false
             console.log(event)

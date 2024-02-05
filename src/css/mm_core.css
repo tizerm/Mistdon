@@ -210,7 +210,11 @@ audio { height: 30px; }
             list-style-type: none;
             margin: 16px 0px;
             padding: 0px;
-
+            > a>img {
+                width: 48px;
+                height: 48px;
+                object-fit: cover;
+            }
             > a:hover>img {
                 border-radius: 12px;
                 background-color: rgba(255,255,255,0.15);

@@ -244,7 +244,7 @@ class History {
         } else { // 投稿履歴
             History.post_stack[index].post.delete((post, uuid) => {
                 History.post_stack.splice(index, 1)
-                toast("対象の投稿を削除しました.", "done", uuid)
+                Notification.info("対象の投稿を削除しました.")
                 History.writeJson()
                 target.closest("li").remove()
             })
@@ -256,9 +256,7 @@ class History {
      * このアクティビティ履歴に対してアクティビティを取り消す
      */
     async undo() {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("取り消しています...", "progress", toast_uuid)
+        const notification = Notification.progress("取り消しています...")
         try {
             const account = Account.get(this.account_address)
             switch (this.type) {
@@ -334,11 +332,10 @@ class History {
                 default:
                     break
             }
-            // 正常に取り消したらここに到達
-            toast("取り消しが完了しました.", "done", toast_uuid)
+            notification.done("取り消しが完了しました.")
         } catch (err) {
             console.log(err)
-            toast("取り消しに失敗しました.", "error", toast_uuid)
+            notification.error("取り消しに失敗しました.")
             return Promise.reject(err)
         }
     }
@@ -363,7 +360,7 @@ class History {
         }
         // 削除する場合
         if (del_flg) pop.post.delete((post, uuid) => {
-            toast("直前の投稿を削除しました.", "done", uuid)
+            Notification.info("直前の投稿を削除しました.")
             presentCallback(History.post_stack.shift())
             History.writeJson()
         }) // 参照だけする場合

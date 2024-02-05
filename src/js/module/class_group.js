@@ -281,6 +281,12 @@ class Group {
     removeStatus(jqelm) {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
+
+        // TODO: debug
+        console.log(key)
+        console.log(post)
+        console.log(this)
+
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除

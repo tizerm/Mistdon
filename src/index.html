@@ -19,6 +19,7 @@
     <script type="text/javascript" src="js/mm_ui.js"></script>
     <script type="text/javascript" src="js/mm_help.js"></script>
     <script type="text/javascript" src="js/mm_utils.js"></script>
+    <script type="text/javascript" src="js/module/class_notification.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
@@ -45,6 +46,7 @@
 <body>
 <nav id="navi">
     <ul id="top_navi">
+        <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
@@ -134,7 +136,9 @@
                         <span>ローカル<span></label>
                 </div>
                 <div class="reset_box">
-                    <button type="button" id="__on_reset_option" >本文以外リセット</button>
+                    <button type="button" id="__on_reset_option"
+                        class="icon_label_set"><img src="resources/ic_reload.png" alt="本文以外リセット"/>
+                        <span>本文以外リセット</span></button>
                 </div>
             </div>
             <div class="poll_setting">
@@ -182,6 +186,10 @@
     <div id="pop_postuser" class="pop_context">
         <!-- hidden: ユーザー一覧 -->
         <ul class="ui_menu"></ul>
+    </div>
+    <div id="pop_notification">
+    <!-- hidden: 通知 -->
+        <ul></ul>
     </div>
     <div id="pop_toast">
     <!-- hidden: トースト -->

@@ -182,24 +182,26 @@ class Account {
                 expire_sec: arg.option_obj.find('.__txt_poll_exipire_date').val()
             }
         }
-        const toast_uuid = crypto.randomUUID()
 
+        let notification = null
         try { // 投稿ロジック全体をcatch
             const media_ids = []
             const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
             if (thumbnails.length > 0) { // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
+                // 非同期実行のことも考えてファイルマップをローカルにうつす
+                const files_map = Media.ATTACH_MEDIA
                 for (const elm of thumbnails) { // アップロードはひとつずつ順番に行う
                     if ($(elm).is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
                         media_ids.push($(elm).attr("name"))
                     else { // アップロード待機ファイルはアップロードする
-                        const media_id = await Media.uploadMedia(this, $(elm).attr("name"))
+                        const media_id = await Media.uploadMedia(this, files_map.get($(elm).attr("name")))
                         media_ids.push(media_id)
                     }
                 }
             }
 
             // 投稿処理に入る前にtoast表示
-            toast(`${this.full_address}から投稿中です...`, "progress", toast_uuid)
+            notification = Notification.progress(`${this.full_address}から投稿中です...`)
             let request_param = null
             let response = null
             switch (this.pref.platform) {
@@ -292,13 +294,13 @@ class Account {
             new Status(response, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
-            toast(`${this.full_address}から投稿しました.`, "done", toast_uuid)
+            notification.done(`${this.full_address}から投稿しました.`)
 
             // 絵文字を使っていたら投稿時に履歴を保存
             if (this.use_emoji_flg) Account.cacheEmojiHistory()
         } catch (err) { // 投稿失敗時
             console.log(err)
-            toast(`${this.full_address}からの投稿に失敗しました.`, "error", toast_uuid)
+            notification.error(`${this.full_address}からの投稿に失敗しました.`)
         }
 
         if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
@@ -317,8 +319,7 @@ class Account {
     async reaction(arg) {
         let response = null
         let target_post = null
-        const toast_uuid = crypto.randomUUID()
-        toast("対象の投稿を取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("対象の投稿を取得中です...")
         try { // ターゲットの投稿データを取得
             switch (this.platform) {
                 case 'Mastodon': // Mastodon
@@ -357,7 +358,7 @@ class Account {
             target_post = new Status(response, History.HISTORY_PREF_TIMELINE, this)
         } catch (err) {
             console.log(err)
-            toast("投稿の取得でエラーが発生しました.", "error", toast_uuid)
+            notification.error("投稿の取得でエラーが発生しました.")
             return
         }
 
@@ -366,7 +367,7 @@ class Account {
                 switch (arg.target_mode) {
                     case '__menu_reply': // リプライ
                         target_post.createReplyWindow()
-                        toast(null, "hide", toast_uuid)
+                        notification.done()
                         break
                     case '__menu_reblog': // ブースト
                         $.ajax({
@@ -376,8 +377,8 @@ class Account {
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                         }).then(data => {
                             History.pushActivity(target_post, 'reblog')
-                            toast("投稿をブーストしました.", "done", toast_uuid)
-                        }).catch(jqXHR => toast("ブーストに失敗しました.", "error", toast_uuid))
+                            notification.done("投稿をブーストしました.")
+                        }).catch(jqXHR => notification.error("ブーストに失敗しました."))
                         break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
@@ -387,8 +388,8 @@ class Account {
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                         }).then(data => {
                             History.pushActivity(target_post, 'favorite')
-                            toast("投稿をお気に入りしました.", "done", toast_uuid)
-                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                            notification.done("投稿をお気に入りしました.")
+                        }).catch(jqXHR => notification.error("お気に入りに失敗しました."))
                         break
                     case '__menu_bookmark': // ブックマーク
                         $.ajax({
@@ -398,8 +399,8 @@ class Account {
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` }
                         }).then(data => {
                             History.pushActivity(target_post, 'bookmark')
-                            toast("投稿をブックマークしました.", "done", toast_uuid)
-                        }).catch(jqXHR => toast("ブックマークに失敗しました.", "error", toast_uuid))
+                            notification.done("投稿をブックマークしました.")
+                        }).catch(jqXHR => notification.error("ブックマークに失敗しました."))
                         break
                     default:
                         break
@@ -409,7 +410,7 @@ class Account {
                 switch (arg.target_mode) {
                     case '__menu_reply': // リプライ
                         target_post.createReplyWindow()
-                        toast(null, "hide", toast_uuid)
+                        notification.done()
                         break
                     case '__menu_reblog': // リノート
                         $.ajax({
@@ -423,12 +424,12 @@ class Account {
                             })
                         }).then(data => {
                             History.pushActivity(target_post, 'reblog', data.createdNote.id)
-                            toast("投稿をリノートしました.", "done", toast_uuid)
-                        }).catch(jqXHR => toast("リノートに失敗しました.", "error", toast_uuid))
+                            notification.done("投稿をリノートしました.")
+                        }).catch(jqXHR => notification.error("リノートに失敗しました."))
                         break
                     case '__menu_quote': // 引用
                         target_post.createQuoteWindow()
-                        toast(null, "hide", toast_uuid)
+                        notification.done()
                         break
                     case '__menu_favorite': // お気に入り
                         $.ajax({
@@ -442,12 +443,12 @@ class Account {
                             })
                         }).then(data => {
                             History.pushActivity(target_post, 'favorite')
-                            toast("投稿をお気に入りしました.", "done", toast_uuid)
-                        }).catch(jqXHR => toast("お気に入りに失敗しました.", "error", toast_uuid))
+                            notification.done("投稿をお気に入りしました.")
+                        }).catch(jqXHR => notification.error("お気に入りに失敗しました."))
                         break
                     case '__menu_reaction': // リアクション
                         target_post.createReactionWindow()
-                        toast(null, "hide", toast_uuid)
+                        notification.done()
                         break
                     default:
                         break
@@ -465,8 +466,7 @@ class Account {
      * @param arg パラメータオブジェクト
      */
     async sendReaction(arg) {
-        const toast_uuid = crypto.randomUUID()
-        toast("リアクションを送信しています...", "progress", toast_uuid)
+        const notification = Notification.progress("リアクションを送信しています...")
         $.ajax({
             type: "POST",
             url: `https://${this.pref.domain}/api/notes/reactions/create`,
@@ -486,8 +486,8 @@ class Account {
             this.updateReactionHistory(arg.shortcode)
             // 投稿成功時(コールバック関数実行)
             arg.success()
-            toast("リアクションを送信しました.", "done", toast_uuid)
-        }).catch(jqXHR => toast("リアクションに失敗しました.", "error", toast_uuid))
+            notification.done("リアクションを送信しました.")
+        }).catch(jqXHR => notification.error("リアクションに失敗しました."))
     }
 
     /**
@@ -499,8 +499,7 @@ class Account {
     async userAction(arg) {
         let response = null
         let target_user_id = null
-        const toast_uuid = crypto.randomUUID()
-        toast("対象ユーザーを取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("対象ユーザーを取得中です...")
         try { // ターゲットのユーザーデータを取得
             switch (this.platform) {
                 case 'Mastodon': // Mastodon
@@ -538,12 +537,12 @@ class Account {
             target_user_id = response.id
         } catch (err) {
             console.log(err)
-            toast("ユーザーの取得でエラーが発生しました.", "error", toast_uuid)
+            notification.error("ユーザーの取得でエラーが発生しました.")
             return
         }
 
         // 一旦toastを消去
-        toast(null, "hide", toast_uuid)
+        notification.done()
         // ダイアログを出すためモードから先に判定
         switch (arg.target_mode) {
             case '__menu_follow': // フォロー
@@ -559,8 +558,8 @@ class Account {
                                     url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/follow`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                                }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をフォローしました.`))
+                                    .catch(jqXHR => notification.error("フォローに失敗しました."))
                                 break
                             case 'Misskey': // Misskey
                                 $.ajax({
@@ -572,8 +571,8 @@ class Account {
                                         "i": this.pref.access_token,
                                         "userId": target_user_id
                                     })
-                                }).then(data => toast(`${arg.target_user}をフォローしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("フォローに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をフォローしました.`))
+                                    .catch(jqXHR => notification.error("フォローに失敗しました."))
                                 break
                             default:
                                 break
@@ -594,8 +593,8 @@ class Account {
                                     url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/mute`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                                }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をミュートしました.`))
+                                    .catch(jqXHR => notification.error("ミュートに失敗しました."))
                                 break
                             case 'Misskey': // Misskey
                                 $.ajax({
@@ -607,8 +606,8 @@ class Account {
                                         "i": this.pref.access_token,
                                         "userId": target_user_id
                                     })
-                                }).then(data => toast(`${arg.target_user}をミュートしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("ミュートに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をミュートしました.`))
+                                    .catch(jqXHR => notification.error("ミュートに失敗しました."))
                                 break
                             default:
                                 break
@@ -630,8 +629,8 @@ class Account {
                                     url: `https://${this.pref.domain}/api/v1/accounts/${target_user_id}/block`,
                                     dataType: "json",
                                     headers: { "Authorization": `Bearer ${this.pref.access_token}` }
-                                }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をブロックしました.`))
+                                    .catch(jqXHR => notification.error("ブロックに失敗しました."))
                                 break
                             case 'Misskey': // Misskey
                                 $.ajax({
@@ -643,8 +642,8 @@ class Account {
                                         "i": this.pref.access_token,
                                         "userId": target_user_id
                                     })
-                                }).then(data => toast(`${arg.target_user}をブロックしました.`, "done", toast_uuid))
-                                    .catch(jqXHR => toast("ブロックに失敗しました.", "error", toast_uuid))
+                                }).then(data => notification.done(`${arg.target_user}をブロックしました.`))
+                                    .catch(jqXHR => notification.error("ブロックに失敗しました."))
                                 break
                             default:
                                 break
@@ -707,7 +706,7 @@ class Account {
         })
         // エラーハンドラ
         this.socket.addEventListener("error", (event) => {
-            toast(`${this.full_address}で接続エラーが発生しました、再接続してください。`, "error")
+            Notification.error(`${this.full_address}で接続エラーが発生しました、再接続してください。`)
             // エラーで切れた場合は再接続しない
             this.reconnect = false
             // エラーで接続が切れたことをタイムライングループに通知する
@@ -742,17 +741,15 @@ class Account {
             }
             if (cache_flg) return // キャッシュが取れてる場合はなにもしない
         }
-        const toast_uuid = crypto.randomUUID()
-        toast("カスタム絵文字のキャッシュを更新します...",
-            "progress", toast_uuid)
+        const notification = Notification.progress("カスタム絵文字のキャッシュを更新します...")
         // サーバーのカスタム絵文字一覧を取得してファイルに書き込む
         const write_promises = []
         Account.map.forEach((v, k) => write_promises.push(v.getCustomEmojis()
             .then(data => { return window.accessApi.writeCustomEmojis(data) })
             .catch(jqXHR => { // カスタム絵文字の取得に失敗した場合は空のキャッシュデータを作成
                 console.log(jqXHR)
-                toast(`${v.pref.domain}のカスタム絵文字の取得に失敗しました。
-                    空のキャッシュデータを作成します。`, "error")
+                Notification.error(`${v.pref.domain}のカスタム絵文字の取得に失敗しました。
+                    空のキャッシュデータを作成します。`)
                 return window.accessApi.writeCustomEmojis({
                     "host": v.pref.domain,
                     "emojis": []
@@ -761,7 +758,7 @@ class Account {
         ))
         // すべて書き込み終わったら通知toastを出してキャッシュを更新
         Promise.all(write_promises).then(() => {
-            toast("カスタム絵文字のキャッシュが完了しました.", "done", toast_uuid)
+            notification.done("カスタム絵文字のキャッシュが完了しました.")
             Emojis.readCache()
         })
     }
@@ -867,7 +864,7 @@ class Account {
             })
         } catch (err) { // 失敗したらnullを返す
             console.log(err)
-            toast(`${this.full_address}の最新情報の取得に失敗しました.`, "error")
+            Notification.error(`${this.full_address}の最新情報の取得に失敗しました.`)
             return null
         }
     }

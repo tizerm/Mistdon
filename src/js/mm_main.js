@@ -95,7 +95,7 @@ $(() => (async () => {
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({
         openFunc: () => {},
-        closeFunc: () => toast(`${account.full_address}との接続が切断されました。`, "error"),
+        closeFunc: () => Notification.info(`${account.full_address}との接続が一時的に切断されました.`),
         reconnect: true
     }));
     Column.tooltip(); // カラムにツールチップを設定

@@ -287,7 +287,7 @@ $(() => {
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
         // 再発火の可能性をおさえるため遅めにフェードアウトする
         e.preventDefault()
-        $("#modal_drop_files").hide("fade", 1000)
+        $("#modal_drop_files").hide("fade", 800)
     })
 
     $("#modal_drop_files").get(0).addEventListener("drop", e => {

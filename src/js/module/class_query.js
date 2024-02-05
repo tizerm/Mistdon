@@ -142,7 +142,7 @@ class Query {
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            toast(`${account.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
+            Notification.error(`${account.pref.domain}での投稿の検索でエラーが発生しました.`)
             return Promise.reject(err)
         }
     }

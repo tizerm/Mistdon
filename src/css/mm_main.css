@@ -291,14 +291,34 @@
             }
         }
     }
-    /*=== Post Account Select Menu ===============================================================*/
-    > #pop_post_to {
-        display: none;
+    /*=== Notifications Layout ===================================================================*/
+    > #pop_notification {
         z-index: 11;
         position: absolute;
-        top: 108px;
-        left: 288px;
+        top: 32px;
+        left: 72px;
 
+        > ul {
+            margin: 0px;
+            padding: 0px;
+            > li {
+                list-style-type: none;
+                margin: 2px 0px;
+                > span {
+                    display: inline-block;
+                    border-radius: 12px;
+                    border: solid 2px #aaaaaa;
+                    padding: 4px 24px;
+                    background-color: rgba(34,34,34,0.8);
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+                > .done  { background-color: rgba(62,82,96,0.8) }
+                > .error { background-color: rgba(96,82,62,0.8) }
+            }
+        }
+
+        /*
         > a {
             display: inline-block;
             border-radius: 12px;
@@ -338,7 +358,7 @@
         & a {
             cursor: pointer;
             border: solid 2px #aaaaaa;
-        }
+        }//*/
     }
 
     /*=== Custom Emojis Palette Layout ===========================================================*/
