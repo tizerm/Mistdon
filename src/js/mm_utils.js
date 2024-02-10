@@ -72,6 +72,11 @@ async function sleep(msec) {
     return new Promise(resolve => setTimeout(resolve, msec))
 }
 
+function floor(num, scale) {
+    const pow = Math.pow(10, scale)
+    return Math.trunc(num * pow) / pow
+}
+
 /**
  * #Util
  * 引数の配列の先頭に要素を追加して容量超過した場合は最後の要素を削除する

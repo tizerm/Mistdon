@@ -142,6 +142,8 @@ class Emojis {
         let text = arg.text
         if (!text) return ""
 
+        //const auth = Account.getByDomain(host)
+
         // 文章中に存在するショートコードを抽出
         const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+:', 'g'))
         if (!shortcodes) return text // 絵文字がない場合はそのまま返却

@@ -262,7 +262,7 @@ class Group {
             this.ppm_que.push(ppm)
             if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
             // pph(post per hour)を計算
-            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
+            const pph = floor(this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length), 1)
             const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
 
             // バインド

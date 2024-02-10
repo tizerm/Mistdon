@@ -286,7 +286,7 @@ class Status {
                 poll.options.forEach(elm => poll_options.push({
                     text: elm.title,
                     count: elm.votes_count,
-                    rate: total_vote > 0 ? Math.round((elm.votes_count / total_vote) * 1000) / 10 : 0
+                    rate: total_vote > 0 ? floor((elm.votes_count / total_vote) * 100, 1) : 0
                 }))
                 break
             case 'Misskey': // Misskey
@@ -294,7 +294,7 @@ class Status {
                 poll.choices.forEach(elm => poll_options.push({
                     text: elm.text,
                     count: elm.votes,
-                    rate: total_vote > 0 ? Math.round((elm.votes / total_vote) * 1000) / 10 : 0
+                    rate: total_vote > 0 ? floor((elm.votes / total_vote) * 100, 1) : 0
                 }))
                 break
             default:
@@ -1526,7 +1526,8 @@ class Status {
                 break;
         }
 
-        // 通知を返却
+        // 画面側にも通知を出して通知オブジェクトを返却
+        Notification.info(title)
         return {
             title: title,
             // HTMLとして解析して中身の文章だけを取り出す

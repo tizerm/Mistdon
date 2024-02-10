@@ -950,6 +950,15 @@ $(() => {
         else $("#pop_window_timeline").removeClass("__opacity_on")
     })
 
+    let resize_timer = 0
+    window.addEventListener("resize", () => {
+        // プロフィール画面が表示されていなかったらなにもしない
+        if (!$("#pop_ex_timeline").is(":visible")) return
+        clearTimeout(resize_timer)
+        resize_timer = setTimeout(() => $("#pop_ex_timeline>.account_timeline td.column_profile")
+            .each((index, elm) => User.setHeight($(elm), $(elm).find(".pinned_block").length > 0)), 250)
+    })
+
     /**
      * #Event
      * 各種閉じるボタン

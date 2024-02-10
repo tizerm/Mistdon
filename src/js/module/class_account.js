@@ -83,6 +83,10 @@ class Account {
         else return Account.map.get(arg)
     }
 
+    static getByDomain(host) {
+        return [...Account.map.values()].find(account => account.pref.domain == host) ?? null
+    }
+
     /**
      * #StaticMethod
      * アカウントプロパティを走査
@@ -1245,93 +1249,21 @@ class Account {
      * アカウントのプロフィール一覧を生成するDOMを返却
      */
     static createProfileTimeline() {
-        let html = ''
-        Account.map.forEach((v, k) => html /* アカウント分のカラムを生成 */ += `
-            <td id="${k}" class="timeline column_profile">
-                <div class="col_loading">
-                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                    <span class="loading_text">Now Loading...</span>
-                </div>
-                <ul class="profile_header"></ul>
-                <ul class="profile_detail"></ul>
-                <div class="user_post_elm">
-                    <div class="tab">
-                        <a class="__tab_profile_posts">全投稿</a>
-                        <a class="__tab_profile_medias">メディア</a>
-                    </div>
-                    <div class="post_uls">
-                        <div class="pinned_block post_div">
-                            <h4>ピンどめ</h4>
-                            <ul class="pinned_post __context_posts"></ul>
-                        </div>
-                        <div class="posts_block post_div">
-                            <ul class="posts __context_posts"></ul>
-                        </div>
-                    </div>
-                    <div class="media_uls">
-                        <ul class="media_post __context_posts"></ul>
-                    </div>
-                </div>
-                <div class="user_bookmark_elm"></div>
-                <div class="user_ff_elm"></div>
-            </td>
-        `)
         // 先に表示フレームだけ生成
+        const template_html = [...Account.map.keys()]
+            .map(address => User.createDetailHtml(address)).reduce((rs, el) => rs + el, '')
         $("#pop_ex_timeline").html(`
             <div class="account_timeline auth_user">
                 <table id="auth_account_table"><tbody>
-                    <tr>${html}</tr>
+                    <tr>${template_html}</tr>
                 </tbody></table>
             </div>
             <div class="account_timeline single_user ff_pop_user">
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
-        $("#pop_ex_timeline .user_ff_elm").hide() // ff欄は最初は非表示
 
-        Account.map.forEach((v, k) => v.getInfo().then(detail => {
-            const column = $(`#pop_ex_timeline>.account_timeline td[id="${k}"]`)
-
-            // ロード待ち画面を消してユーザー情報のプロフィール部分を生成
-            column.find(".col_loading").remove()
-            column.find(".profile_header").html(detail.header_element)
-            column.find(".profile_detail").html(detail.profile_element)
-
-            // ヘッダ部分にツールチップを生成
-            $(`#pop_ex_timeline>.account_timeline td[id="${k}"] .auth_details`).tooltip({
-                position: {
-                    my: "center top",
-                    at: "center bottom"
-                },
-                show: {
-                    effect: "slideDown",
-                    duration: 80
-                },
-                hide: {
-                    effect: "slideUp",
-                    duration: 80
-                }
-            })
-
-            // ユーザーの投稿を取得
-            detail.getPost(v, false, null).then(posts => createScrollLoader({
-                // 最新投稿データはスクロールローダーを生成
-                data: posts,
-                target: column.find(".posts"),
-                bind: (data, target) => {
-                    data.forEach(p => target.append(p.element))
-                    // max_idとして取得データの最終IDを指定
-                    return data.pop().id
-                },
-                load: async max_id => detail.getPost(v, false, max_id)
-            }))
-            detail.getPinnedPost(v).then(posts => {
-                if (posts.length > 0) posts.forEach(p => column.find(".pinned_post").append(p.element))
-                else { // ピンどめ投稿がない場合はピンどめDOM自体を削除して投稿の幅をのばす
-                    column.find(".pinned_block").remove()
-                    column.find(".posts").css('height', 'calc((100vh - 310px) * 0.8)')
-                }
-            })
-        }))
+        // それぞれのアカウントのユーザー情報を取得してバインド
+        Account.each(account => account.getInfo().then(user => user.bindDetail()))
     }
 }

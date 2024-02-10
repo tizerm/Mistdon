@@ -16,16 +16,35 @@ class Instance {
                 this.description = data.json.description
                 this.about = data.json.short_description
                 this.header_url = data.json.thumbnail.url
-                // TODO: 管理人のアカウントについては一旦考えないことにする
-                //this.admin_user = data.json.contact_account.acct
-                //this.total_user = data.json.stats.user_count
                 this.version = data.json.version
-
                 // サーバー設定
                 this.post_maxlength = data.json.configuration.statuses.max_characters
                 this.characters_reserved_per_url = data.json.configuration.statuses.characters_reserved_per_url
-                if (data.detail) {
+
+                if (data.detail) { // インスタンス詳細情報
+                    // 説明文を長い方に変更
                     this.description = data.detail.description.content
+
+                    this.admin_user = new User({ // 管理人のUserオブジェクトを生成
+                        json: data.json.contact.account,
+                        host: this.host,
+                        remote: true,
+                        auth: false,
+                        platform: data.platform
+                    })
+
+                    // サーバー統計
+                    const activity_month = data.detail.activity?.slice(1, 4) ?? null
+                    this.user_count = data.detail.stats.stats.user_count
+                    if (activity_month) { // 月間統計が取得できる場合
+                        this.active_avg = activity_month.reduce((rs, el) => rs + Number(el.logins), 0) / activity_month.length
+                        this.monthly_status_count = activity_month.reduce((rs, el) => rs + Number(el.statuses), 0)
+                    } else { // 月間統計が取得できない場合
+                        this.active_avg = data.json.usage.users.active_month
+                        this.monthly_status_count = null
+                    }
+                    this.status_rate = (this.monthly_status_count ?? 0) / this.active_avg
+                    this.active_rate = (this.active_avg / this.user_count) * 100
                 }
                 break
             case 'Misskey': // Misskey
@@ -34,9 +53,18 @@ class Instance {
                 this.about = data.json.description
                 this.header_url = data.json.bannerUrl
                 this.version = data.json.version
-
                 // サーバー設定
                 this.post_maxlength = data.json.maxNoteTextLength
+
+                if (data.detail) { // インスタンス詳細情報
+                    // サーバー統計
+                    const active_month = data.detail.active.read ?? data.detail.active.local.count
+                    this.user_count = data.detail.users.local.total[0]
+                    this.active_avg = active_month.reduce((rs, el) => rs + el, 0) / active_month.length
+                    this.monthly_status_count = data.detail.notes.local.inc.reduce((rs, el) => rs + el, 0)
+                    this.status_rate = this.monthly_status_count / this.active_avg
+                    this.active_rate = (this.active_avg / this.user_count) * 100
+                }
                 break
             default:
                 break
@@ -71,7 +99,7 @@ class Instance {
                     url: `https://${host}/api/meta`,
                     dataType: "json",
                     headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ detail: true })
+                    data: JSON.stringify({ 'detail': true })
                 }).then(data => {
                     return {
                         "platform": 'Misskey',
@@ -105,7 +133,7 @@ class Instance {
         try {
             switch (platform) {
                 case 'Mastodon': // Mastodon
-                    response = await Promise.all([
+                    response = await Promise.allSettled([
                         $.ajax({ // インスタンス基本情報
                             type: "GET",
                             url: `https://${host}/api/v2/instance`,
@@ -118,36 +146,73 @@ class Instance {
                             type: "GET",
                             url: `https://${host}/api/v1/instance/activity`,
                             dataType: "json"
+                        }), $.ajax({ // 一部v2APIで取得できない情報を使用
+                            type: "GET",
+                            url: `https://${host}/api/v1/instance`,
+                            dataType: "json"
                         })
                     ])
+                    // 基本情報が取得できなかったらやめ
+                    if (response[0].status != 'fulfilled') throw new Error('get info failed')
                     instance_param = {
                         "platform": 'Mastodon',
                         "host": host,
-                        "json": response[0],
+                        "json": response[0].value,
                         "detail": {
-                            "description": response[1],
-                            "activity": response[2]
+                            "description": response[1].status == 'fulfilled' ? response[1].value : null,
+                            "activity": response[2].status == 'fulfilled' ? response[2].value : null,
+                            "stats": response[3].status == 'fulfilled' ? response[3].value : null
                         }
                     }
                     break
                 case 'Misskey': // Misskey
-                    response = await $.ajax({
-                        type: "POST",
-                        url: `https://${host}/api/meta`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ detail: true })
-                    }).then(data => {
-                        return {
-                            "platform": 'Misskey',
-                            "host": host,
-                            "json": data
-                        }
-                    })
+                    response = await Promise.allSettled([
+                        $.ajax({ // インスタンス基本情報
+                            type: "POST",
+                            url: `https://${host}/api/meta`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ 'detail': true })
+                        }), $.ajax({ // ユーザー総数
+                            type: "POST",
+                            url: `https://${host}/api/charts/users`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                'span': 'day',
+                                'limit': 1
+                            })
+                        }), $.ajax({ // アクティブユーザー数統計
+                            type: "POST",
+                            url: `https://${host}/api/charts/active-users`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                'span': 'day',
+                                'limit': 30
+                            })
+                        }), $.ajax({ // ノート数統計
+                            type: "POST",
+                            url: `https://${host}/api/charts/notes`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                'span': 'day',
+                                'limit': 30
+                            })
+                        })
+                    ])
+                    // 基本情報が取得できなかったらやめ
+                    if (response[0].status != 'fulfilled') throw new Error('get info failed')
                     instance_param = {
                         "platform": 'Misskey',
                         "host": host,
-                        "json": response
+                        "json": response[0].value,
+                        "detail": {
+                            "users": response[1].status == 'fulfilled' ? response[1].value : null,
+                            "active": response[2].status == 'fulfilled' ? response[2].value : null,
+                            "notes": response[3].status == 'fulfilled' ? response[3].value : null
+                        }
                     }
                     break
                 default:
@@ -348,7 +413,6 @@ class Instance {
                 </div>
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        //target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         html /* ユーザーアカウント情報 */ += '<div class="info">'
         switch (this.platform) {
             case 'Mastodon': // Mastodon
@@ -360,15 +424,26 @@ class Instance {
             default:
                 break
         }
+        const monthly_status_count_label = this.monthly_status_count ? `${this.monthly_status_count} (${floor(this.status_rate, 1)}up/m)` : '(取得不可)'
         html += `
                 <h4 class="instance_name">${this.name}</h4>
                 <a href="https://${this.host}/" class="instance_link __lnk_external">https://${this.host}/</a>
             </div>
-            <div class="detail_info">
-                <span class="count_user counter label_usercount" title="総人口">${this.count_post}</span>
-                <span class="count_active counter label_activecount" title="アクティブユーザー数">${this.count_post}</span>
-            </div></li>
-        `
+            <ul class="detail_info">
+                <li class="total_users">
+                    <h6>総ユーザー数</h6>
+                    <span>${this.user_count}</span>
+                </li>
+                <li class="monthly_users">
+                    <h6>月間ログイン平均</h6>
+                    <span>${floor(this.active_avg, 1)} (${floor(this.active_rate, 1)}%)</span>
+                </li>
+                <li class="monthly_status">
+                    <h6>月間投稿数</h6>
+                    <span>${monthly_status_count_label}</span>
+                </li>
+            </ul>
+        </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -399,10 +474,17 @@ class Instance {
         $(bind_selector).html(`
             <ul class="instance_header"></ul>
             <ul class="instance_detail"></ul>
-            <ul class="instance_admin"></ul>
+            <ul class="instance_admin">
+                <li class="admin_header">Administrator</li>
+            </ul>
         `).find(".col_loading").remove()
         $(bind_selector).find(".instance_header").html(this.header_element)
         $(bind_selector).find(".instance_detail").html(this.description_element)
+        if (this.admin_user) $(bind_selector).find(".instance_admin").append(this.admin_user.short_elm)
+        else { // 管理人情報が取得できない場合は管理人情報を消して高さを変える
+            $(bind_selector).find(".instance_admin").remove()
+            $(bind_selector).find(".instance_detail").css('height', 'calc(100vh - 406px)')
+        }
     }
 
     static async showInstanceName(domain, target) {

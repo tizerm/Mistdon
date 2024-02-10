@@ -141,10 +141,10 @@ class Media {
     }
 
     static async uploadMedia(account, file) {
+        const filename = file.name
         const notification = Notification.progress(`${filename}をアップロードしています...`)
         let response = null
         let query_param = null
-        const filename = file.name
         try {
             switch (account.platform) {
                 case 'Mastodon': // Mastodon
