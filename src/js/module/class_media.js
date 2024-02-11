@@ -43,12 +43,19 @@ class Media {
         files.forEach(file => {
             const reader = new FileReader()
             reader.readAsDataURL(file)
+            // ファイルの識別はUUIDで
+            const uuid = crypto.randomUUID()
             // ファイルのURLを生成して画像として埋め込む
             reader.addEventListener("load", () => preview_elm.append(`
-                <li><img src="${reader.result}" class="__img_attach" name="${file.name}"/></li>
+                <li>
+                    <input type="checkbox" id="__chk_attach_${uuid}"
+                        name="__chk_attach_sensitive" class="__chk_attach_sensitive"/>
+                    <label for="__chk_attach_${uuid}"><img src="${reader.result}" class="__img_attach" name="${uuid}"/
+                        ><div class="check_mask"></div></label>\
+                </li>
             `))
             // 添付メディアマップに追加
-            Media.ATTACH_MEDIA.set(file.name, file)
+            Media.ATTACH_MEDIA.set(uuid, file)
         })
     }
 
@@ -75,7 +82,8 @@ class Media {
         $('#header>#post_options .attached_media>ul.media_list').html(`
             <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
         `)
-        Media.ATTACH_MEDIA.clear()
+        // アドレス参照を変えるためclearでなく新規で作る
+        Media.ATTACH_MEDIA = new Map()
     }
 
     /**
@@ -140,7 +148,7 @@ class Media {
         }
     }
 
-    static async uploadMedia(account, file) {
+    static async uploadMedia(account, file, sensitive) {
         const filename = file.name
         const notification = Notification.progress(`${filename}をアップロードしています...`)
         let response = null
@@ -173,7 +181,7 @@ class Media {
                     query_param = {
                         i: account.pref.access_token,
                         name: filename,
-                        isSensitive: false, // TODO: 一旦無効固定
+                        isSensitive: sensitive,
                         file: file
                     }
                     response = await sendFileRequest({ // ファイルのアップロードが必要なのでmultipart/form-dataで送信a
@@ -197,9 +205,9 @@ class Media {
     get li_element() {
         // メディアごとにタイルブロックを生成
         let html = `<li>
-            <input type="checkbox" id="__chk_${this.id}"
+            <input type="checkbox" id="__chk_drive_${this.id}"
                 name="__chk_drive_media" class="__chk_drive_media" value="${this.id}"/>
-            <label for="__chk_${this.id}"${this.sensitive ? ' class="warn_sensitive"' : ''}
+            <label for="__chk_drive_${this.id}"${this.sensitive ? ' class="warn_sensitive"' : ''}
                 ><img src="${this.thumbnail}"/><div class="check_mask"></div></label>
         </li>`
 

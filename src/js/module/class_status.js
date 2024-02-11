@@ -1257,7 +1257,7 @@ class Status {
      * 
      * @param callback 削除処理実行後に実行するコールバック関数
      */
-    async delete(callback) {
+    async delete() {
         const notification = Notification.progress("投稿を削除しています...")
         let response = null
         try {
@@ -1270,24 +1270,21 @@ class Status {
                     })
                     break
                 case 'Misskey': // Misskey
-                    const request_param = {
-                        "i": this.from_account.pref.access_token,
-                        "noteId": this.status_id
-                    }
-                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信
+                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信6
                         type: "POST",
                         url: `https://${this.from_account.pref.domain}/api/notes/delete`,
                         dataType: "json",
                         headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify(request_param)
+                        data: JSON.stringify({
+                            "i": this.from_account.pref.access_token,
+                            "noteId": this.status_id
+                        })
                     })
                     break
                 default:
                     break
             }
-            // 削除処理に成功したらコールバックを実行
             notification.done("投稿の削除が完了しました.")
-            callback(this, toast_uuid)
         } catch (err) {
             console.log(err)
             notification.error("投稿の削除に失敗しました.")
@@ -1342,6 +1339,7 @@ class Status {
         Account.get(this.from_account.full_address).setPostAccount()
         $("#__hdn_reply_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
 
@@ -1358,6 +1356,7 @@ class Status {
         Account.get(this.from_account.full_address).setPostAccount()
         $("#__hdn_quote_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         $("#__txt_postarea").focus()
     }
 

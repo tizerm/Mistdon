@@ -175,30 +175,46 @@ class Account {
         const is_local = arg.option_obj.find('#__chk_local_only').prop('checked')
         const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
         const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
-        // TODO: 現状アンケートをつけるとMastodonで422、Misskeyで400が返ってきて投稿できない
+        // 一個以上センシティブ設定があったらセンシティブ扱い
+        const sensitive = arg.option_obj.find('.attached_media>ul.media_list input[type="checkbox"]:checked').length > 0
         let poll = null
-        if (arg.option_obj.find('.__txt_poll_expire_date').val()) {
+        if ($(arg.option_obj.find('.__txt_poll_option').get(0)).val()) {
             // アンケートがある場合はアンケートのオブジェクトを生成
             const options = []
             arg.option_obj.find('.__txt_poll_option').each((index, elm) => options.push($(elm).val()))
+            let expire_sec = Number(arg.option_obj.find('#__txt_poll_expire_time').val() || '0')
+            switch (arg.option_obj.find('#__cmb_expire_unit').val()) {
+                case 'min': // 分
+                    expire_sec *= 60
+                    break
+                case 'hour': // 時間
+                    expire_sec *= 3600
+                    break
+                case 'day': // 日
+                    expire_sec *= 86400
+                default:
+                    break
+            }
             poll = {
                 options: options,
-                expire_sec: arg.option_obj.find('.__txt_poll_exipire_date').val()
+                expire_sec: expire_sec > 0 ? expire_sec : null
             }
         }
 
         let notification = null
         try { // 投稿ロジック全体をcatch
             const media_ids = []
-            const thumbnails = arg.option_obj.find('.media_list>li>img.__img_attach').get()
+            const thumbnails = arg.option_obj.find('.media_list>li:not(.__initial_message)').get()
             if (thumbnails.length > 0) { // 添付ファイルが存在する場合は先に添付ファイルをアップロードする
                 // 非同期実行のことも考えてファイルマップをローカルにうつす
                 const files_map = Media.ATTACH_MEDIA
                 for (const elm of thumbnails) { // アップロードはひとつずつ順番に行う
-                    if ($(elm).is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
+                    const image = $(elm).find("img.__img_attach")
+                    if (image.is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
                         media_ids.push($(elm).attr("name"))
                     else { // アップロード待機ファイルはアップロードする
-                        const media_id = await Media.uploadMedia(this, files_map.get($(elm).attr("name")))
+                        const media_id = await Media.uploadMedia(
+                            this, files_map.get(image.attr("name")), $(elm).find('input[type="checkbox"]').prop("checked"))
                         media_ids.push(media_id)
                     }
                 }
@@ -210,28 +226,22 @@ class Account {
             let response = null
             switch (this.pref.platform) {
                 case 'Mastodon': // Mastodon
-                    switch (visibility) { // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
-                        case 'followers': // フォロ限
-                            visibility = "private"
-                            break
-                        default:
-                            break
-                    }
-                    // アンケートがある場合はアンケートを生成
-                    if (poll) request_param = {
+                    // 公開範囲を設定(Mastodonの場合フォロ限だけパラメータが違う)
+                    if (visibility == 'followers') visibility = "private"
+                    request_param = { // 通常投稿の場合
                         "status": arg.content,
                         "visibility": visibility,
-                        "poll[options]": poll.options,
-                        "poll[expires_in]": poll.expire_sec
-                    }; else request_param = { // 通常投稿の場合
-                        "status": arg.content,
-                        "visibility": visibility
+                        "sensitive": sensitive
                     }
-
                     // CWがある場合はCWテキストも追加
                     if (cw_text) request_param.spoiler_text = cw_text
                     // リプライの場合はリプライ先ツートIDを設定
                     if (reply_id) request_param.in_reply_to_id = reply_id
+                    // アンケートがある場合はアンケートを生成
+                    if (poll) request_param.poll = {
+                        "options": poll.options,
+                        "expires_in": poll.expire_sec
+                    }
                     // 添付メディアがある場合はメディアIDを追加
                     if (media_ids.length > 0) request_param.media_ids = media_ids
                     response = await $.ajax({ // API呼び出し
@@ -676,7 +686,7 @@ class Account {
             title: "投稿削除",
             text: `投稿を削除しますか？<br/><br/>${post.content_text}`,
             // OKボタンで投稿を削除
-            accept: () => post.delete((post, uuid) => toast("投稿を削除しました.", "done", uuid))
+            accept: () => post.delete()
         })
     }
 

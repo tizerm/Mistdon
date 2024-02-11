@@ -233,21 +233,22 @@ class History {
      * 
      * @param target 削除対象の投稿のjQueryオブジェクト
      */
-    static delete(target) {
+    static async delete(target) {
         const index = target.closest("li").index()
-        if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
-            History.activity_stack[index].undo().then(() => {
+        try {
+            if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
+                await History.activity_stack[index].undo()
+
                 History.activity_stack.splice(index, 1)
-                History.writeJson()
-                target.closest("li").remove()
-            })
-        } else { // 投稿履歴
-            History.post_stack[index].post.delete((post, uuid) => {
+            } else { // 投稿履歴
+                await History.post_stack[index].post.delete()
+
                 History.post_stack.splice(index, 1)
-                Notification.info("対象の投稿を削除しました.")
-                History.writeJson()
-                target.closest("li").remove()
-            })
+            }
+            History.writeJson()
+            target.closest("li").remove()
+        } catch (err) {
+            console.log(err)
         }
     }
 
@@ -351,20 +352,19 @@ class History {
     static popIf(presentCallback, del_flg) {
         const pop = History.post_stack[0]
         if (!pop) { // なにもなかったらそのままおしまい
-            toast("直前の投稿がありません.", "error")
+            Notification.error("直前の投稿がありません.")
             return
         }
         if (!pop.post) { // データ取得前の場合はメッセージを出す
-            toast("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.", "error")
+            Notification.error("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.")
             return
         }
         // 削除する場合
-        if (del_flg) pop.post.delete((post, uuid) => {
-            Notification.info("直前の投稿を削除しました.")
+        if (del_flg) pop.post.delete().then(() => {
             presentCallback(History.post_stack.shift())
             History.writeJson()
-        }) // 参照だけする場合
-        else presentCallback(pop)
+        })
+        else presentCallback(pop) // 参照だけする場合
     }
 
     /**

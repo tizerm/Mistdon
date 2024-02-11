@@ -1119,6 +1119,10 @@
                 margin: 0px;
                 padding: 0px;
                 font-size: 24px;
+                width: calc(100% - 60px);
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
             }
             > .instance_link {
                 display: block;

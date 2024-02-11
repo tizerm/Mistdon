@@ -151,7 +151,7 @@ input[type="checkbox"]+label:has(>.check_mask) {
 }
 input[type="checkbox"]:checked+label:has(>.check_mask) {
     &::before { content: ""; }
-    >.check_mask {
+    > .check_mask {
         display: block;
         background-color: rgba(51,122,159,0.6);
         background-image: url("../resources/ic_check.png");

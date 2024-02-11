@@ -107,12 +107,34 @@
                 color: #dddddd;
                 text-align: left;
                 font-size: 14px;
+                > button>img {
+                    width: 18px;
+                    height: 18px;
+                }
             }
             > div { padding: 0px 2px; }
             & ul {
                 margin: 0px;
                 padding: 0px;
                 > li { list-style-type: none; }
+            }
+            > .option_close {
+                position: relative;
+                border-radius: 12px;
+                > button>img {
+                    width: 24px;
+                    height: 24px;
+                }
+                > h5 {
+                    position: absolute;
+                    top: 24px;
+                    left: 24px;
+                    transform: rotate(90deg);
+                    transform-origin: left top;
+                    white-space: nowrap;
+                    border-style: none;
+                    color: #ffffff;
+                }
             }
 
             > .additional_users {
@@ -140,6 +162,10 @@
                         background-image: url("../resources/ic_check.png");
                     }
                 }
+                + .option_close {
+                    background-color: #514285;
+                    display: none;
+                }
             }
             > .publish_setting {
                 flex-basis: 172px;
@@ -154,16 +180,27 @@
                 #__txt_content_warning, #__cmb_post_to { width: 158px; }
             }
             > .poll_setting {
-                flex-basis: 172px;
+                display: none;
+                flex-basis: 156px;
                 .__txt_poll_option { width: 100%; }
+                #__txt_poll_expire_time { width: 82px; }
+                + .option_close { background-color: #428571; }
             }
             > .attached_media {
                 flex-grow: 4;
                 > ul.media_list {
                     margin: 0px 8px;
-                    margin-bottom: 8px;
+                    margin-bottom: 4px;
                     > li {
                         display: inline-block;
+                        & label {
+                            padding: 0px;
+                            border-radius: 12px;
+                            > .check_mask {
+                                border-radius: 12px;
+                                background-color: rgba(51,122,159,0.5);
+                            }
+                        }
                         & img {
                             display: inline-block;
                             width: 216px;
@@ -174,30 +211,37 @@
                         }
                         &.__initial_message {
                             display: block;
-                            padding: 60px 0px;
+                            padding: 56px 0px;
                             background-color: rgba(255,255,255,0.08);
                             border-radius: 12px;
                             text-align: center;
+                        }
+                        & input[type="checkbox"]:checked+label>.check_mask {
+                            background-color: rgba(159,58,51,0.5);
+                            background-image: url("../resources/ic_nsfw.png");
+                            background-size: 96px 96px;
                         }
                     }
                 }
             }
             > .refernced_post {
+                display: none;
                 flex-basis: 340px;
                 flex-grow: 1;
                 > ul.refernce_post {
                     height: auto;
-                    max-height: 172px;
+                    max-height: 168px;
                     > li {
                         margin: 2px;
                         &.__initial_message {
-                            padding: 72px 0px;
+                            padding: 68px 0px;
                             background-color: rgba(62,62,62,0.92);
                             border-radius: 12px;
                             text-align: center;
                         }
                     }
                 }
+                + .option_close { background-color: #854257; }
             }
         }
     }

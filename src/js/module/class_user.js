@@ -442,7 +442,13 @@ class User {
                     break
             }
             const posts = []
-            response.forEach(p => posts.push(new Status(p, { "__extended_timeline": "profile_post" }, account)))
+            response.forEach(p => posts.push(new Status(p, {
+                "__extended_timeline": "profile_post",
+                "pref": {
+                    "expand_cw": Preference.GENERAL_PREFERENCE.enable_expand_profile_cw,
+                    "expand_media": Preference.GENERAL_PREFERENCE.enable_expand_profile_media
+                }
+            }, account)))
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
@@ -472,11 +478,23 @@ class User {
                         headers: header,
                         data: { "pinned": true }
                     })
-                    response.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                    response.forEach(p => posts.push(new Status(p, {
+                        "parent_column": null,
+                        "pref": {
+                            "expand_cw": Preference.GENERAL_PREFERENCE.enable_expand_profile_cw,
+                            "expand_media": Preference.GENERAL_PREFERENCE.enable_expand_profile_media
+                        }
+                    }, account)))
                     break
                 case 'Misskey': // Misskey
                     // 既に入ってるピンどめ投稿を整形
-                    this.pinneds.forEach(p => posts.push(new Status(p, { "parent_column": null }, account)))
+                    this.pinneds.forEach(p => posts.push(new Status(p, {
+                        "parent_column": null,
+                        "pref": {
+                            "expand_cw": Preference.GENERAL_PREFERENCE.enable_expand_profile_cw,
+                            "expand_media": Preference.GENERAL_PREFERENCE.enable_expand_profile_media
+                        }
+                    }, account)))
                     break
                 default:
                     break
@@ -568,7 +586,13 @@ class User {
             if (response.body.length == 0) throw new Error('empty')
 
             const posts = []
-            response.body.forEach(p => posts.push(new Status(p.note ?? p, { "parent_column": null }, account)))
+            response.body.forEach(p => posts.push(new Status(p.note ?? p, {
+                "parent_column": null,
+                "pref": {
+                    "expand_cw": Preference.GENERAL_PREFERENCE.enable_expand_profile_cw,
+                    "expand_media": Preference.GENERAL_PREFERENCE.enable_expand_profile_media
+                }
+            }, account)))
             let next_id = null
             // Headerのlinkからページング処理のnext_idを抽出
             if (response.link) next_id = response.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id

@@ -257,10 +257,30 @@ $(() => {
 
     /*=== Post Option Article Area Event =========================================================================*/
 
+    $("#header>#post_options .__on_option_close").on("click",
+        e => $(e.target).closest(".closeable_block").hide().next().show())
+
+    $("#header>#post_options .__on_option_open").on("click",
+        e => $(e.target).closest(".option_close").hide().prev().show())
+
+    $(document).on("dblclick", "#header>#post_options ul.account_list input.__chk_add_account+label",
+        e => Account.get($(e.target).closest("li").find("input.__chk_add_account").val()).setPostAccount())
+
     $("#header>#post_options #__on_reset_option").on("click", e => {
         $('#header>#post_options input[type="text"]').val("")
+        $('#header>#post_options input[type="number"]').val("")
+        $("#post_options .poll_setting .__on_option_close").click()
+        $("#post_options .refernced_post .__on_option_close").click()
         Media.clearAttachMedia()
         deleteQuoteInfo()
+    })
+
+    $("#header>#post_options #__on_set_sensitive").on("click", e => {
+        const target_ul = $('#header>#post_options .attached_media>ul.media_list')
+        if (target_ul.find('input[type="checkbox"]:not(:checked)').length > 0)
+            // 未チェックの項目が1つでもある場合は全部センシティブにする
+            target_ul.find('input[type="checkbox"]').prop("checked", true)
+        else target_ul.find('input[type="checkbox"]').prop("checked", false)
     })
 
     $("#header>#post_options #__on_open_drive").on("click",

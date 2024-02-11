@@ -101,9 +101,17 @@
     </div>
     <div id="post_options">
         <div class="flex_section">
-            <div class="additional_users">
-                <h5>追加投稿アカウント</h5>
+            <div class="additional_users closeable_block">
+                <h5>投稿アカウント
+                    <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                        ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button>
+                </h5>
                 <ul class="account_list"></ul>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>投稿アカウント</h5>
             </div>
             <div class="publish_setting">
                 <h5>CW/公開/投稿先</h5>
@@ -141,8 +149,10 @@
                         <span>本文以外リセット</span></button>
                 </div>
             </div>
-            <div class="poll_setting">
-                <h5>アンケート</h5>
+            <div class="poll_setting closeable_block">
+                <h5>アンケート
+                <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                    ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button></h5>
                 <ul class="poll_options">
                     <li><input type="text"
                         class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
@@ -156,9 +166,18 @@
                     class="icon_label_set"><img src="resources/ic_rem32.png" alt="削除"/>
                     <span>削除</span></button>
                 <div class="poll_expire">
-                    期限: <input type="text"
-                        class="__txt_poll_expire_date __ignore_keyborad" placeholder="回答1"/>
+                    <input type="number" id="__txt_poll_expire_time" class="__ignore_keyborad" placeholder="投票期限"/>
+                    <select id="__cmb_expire_unit">
+                        <option value="min">分</option>
+                        <option value="hour">時間</option>
+                        <option value="day">日</option>
+                    </select>
                 </div>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>アンケート</h5>
             </div>
             <div class="attached_media">
                 <h5>添付メディア</h5>
@@ -166,18 +185,28 @@
                     <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
                 <div class="media_option">
+                    <button type="button" id="__on_set_sensitive"
+                        class="icon_label_set"><img src="resources/ic_warn.png" alt="すべて閲覧注意にする"/>
+                        <span>すべて閲覧注意にする</span></button>
                     <button type="button" id="__on_open_drive"
                         class="icon_label_set"><img src="resources/ic_return.png" alt="ドライブから添付"/>
                         <span>ドライブから添付</span></button>
                 </div>
             </div>
-            <div class="refernced_post timeline">
-                <h5>返信/引用元</h5>
+            <div class="refernced_post timeline closeable_block">
+                <h5>返信/引用元
+                <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                    ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button></h5>
                 <input type="hidden" id="__hdn_reply_id" value=""/>
                 <input type="hidden" id="__hdn_quote_id" value=""/>
                 <ul class="refernce_post">
                     <li class="__initial_message">返信/引用元なし</li>
                 </ul>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>返信/引用元</h5>
             </div>
         </div>
     </div>
