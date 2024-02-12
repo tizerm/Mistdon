@@ -221,6 +221,12 @@
                             background-image: url("../resources/ic_nsfw.png");
                             background-size: 96px 96px;
                         }
+                        &.ui-sortable-placeholder {
+                            background-color: rgba(168,72,96,0.8);
+                            border-radius: 16px;
+                            width: 216px;
+                            height: 132px;
+                        }
                     }
                 }
             }

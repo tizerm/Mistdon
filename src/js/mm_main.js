@@ -3,6 +3,7 @@ $(() => (async () => {
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs();
     await window.accessApi.readPrefCols();
+    await window.accessApi.readGeneralPref();
     await window.accessApi.readWindowPref();
     await window.accessApi.readCustomEmojis();
 
@@ -36,6 +37,17 @@ $(() => (async () => {
         else $(elm).html(Account.createContextMenuAccountList());
     });
     $("#pop>.pop_context>.ui_menu").menu();
+    // 添付メディアリストをSortableにする
+    $(".__ui_media_sortable").sortable({
+        axis: "x",
+        delay: 100,
+        distance: 48,
+        placeholder: "ui-sortable-placeholder",
+        cancel: ".__initial_message",
+        revert: 50,
+        opacity: 0.75,
+        tolerance: "pointer"
+    });
     // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
     $("#pop_window_timeline").draggable({
         handle: "h2",

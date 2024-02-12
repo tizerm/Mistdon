@@ -153,7 +153,7 @@ class Instance {
                         })
                     ])
                     // 基本情報が取得できなかったらやめ
-                    if (response[0].status != 'fulfilled') throw new Error('get info failed')
+                    if (response[0].status != 'fulfilled') throw new Error('unsupported')
                     instance_param = {
                         "platform": 'Mastodon',
                         "host": host,
@@ -203,7 +203,7 @@ class Instance {
                         })
                     ])
                     // 基本情報が取得できなかったらやめ
-                    if (response[0].status != 'fulfilled') throw new Error('get info failed')
+                    if (response[0].status != 'fulfilled') throw new Error('unsupported')
                     instance_param = {
                         "platform": 'Misskey',
                         "host": host,

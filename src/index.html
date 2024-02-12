@@ -81,7 +81,7 @@
                 ><img src="resources/ic_emoji.png" alt="絵文字パレットを開く"/></button>
         </div>
         <div class="textbox_area">
-            <textarea id="__txt_postarea" class="__ignore_keyborad __emoji_suggest"
+            <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
         </div>
         <div class="submit_button">
@@ -99,7 +99,7 @@
                 ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
         </div>
     </div>
-    <div id="post_options">
+    <div id="post_options" class="__ignore_close_option">
         <div class="flex_section">
             <div class="additional_users closeable_block">
                 <h5>投稿アカウント
@@ -181,7 +181,7 @@
             </div>
             <div class="attached_media">
                 <h5>添付メディア</h5>
-                <ul class="media_list">
+                <ul class="media_list __ui_media_sortable">
                     <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
                 <div class="media_option">
@@ -229,7 +229,7 @@
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
-    <div id="pop_emoji_suggester">
+    <div id="pop_emoji_suggester" class="__ignore_close_option">
         <!-- hidden: カスタム絵文字サジェスター -->
         <input type="hidden" class="target_account" value=""/>
         <input type="hidden" class="target_cursor" value=""/>

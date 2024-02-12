@@ -182,14 +182,14 @@ $(() => {
     $("#header>#head_postarea #__open_post_options").on("click",
         e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
 
-    $("#header>#head_postarea #__txt_postarea").on("focus", e => {
+    $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
         if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
         $("#header>#post_options").show("slide", { direction: "up" }, 120)
     })
 
     $("body").on("click", e => {
-        if ($(e.target).closest("#post_options").length > 0
-            || $(e.target).is("#__txt_postarea")) return // オプションをクリックしたときは無視
+        // 投稿オプションを閉じない場所をクリックした場合はなにもしない
+        if ($(e.target).closest(".__ignore_close_option").length > 0 || !$("#header>#post_options").is(":visible")) return
         $("#header>#post_options").hide("slide", { direction: "up" }, 120)
     })
 
@@ -778,9 +778,17 @@ $(() => {
     $(document).on("click", "#pop_ex_timeline>.account_timeline .__on_show_instance", e => (async () => {
         $("#pop_ex_timeline .single_user").css("width", "880px")
         $("#pop_ex_timeline .column_instance_info").show()
-        const user = await User.getByAddress($(e.target).closest("td").attr("id"))
-        const instance = await user.getInstance()
-        instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
+        try {
+            const user = await User.getByAddress($(e.target).closest("td").attr("id"))
+            const instance = await user.getInstance()
+            instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
+        } catch (err) {
+            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>img')
+                .attr('src', 'resources/illust/il_error.png')
+            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>.loading_text')
+                .text(`インスタンスの情報の取得に失敗しました……。
+                    接続できなかったかサポート外のプラットフォーム、インスタンスの場合があります。`)
+        }
     })())
 
     $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_posts", e => {

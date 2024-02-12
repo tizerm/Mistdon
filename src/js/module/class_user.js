@@ -698,7 +698,11 @@ class User {
     }
 
     async getInstance() {
-        return await Instance.getDetail(this.host, this.platform)
+        try {
+            return await Instance.getDetail(this.host, this.platform)
+        } catch (err) {
+            return Promise.reject('unsupported')
+        }
     }
 
     /**

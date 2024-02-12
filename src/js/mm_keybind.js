@@ -175,7 +175,7 @@
         } else if (e.keyCode === 27) {
             // Escでフォーカスアウト
             $(e.target).blur();
-            $("#header>#post_options").hide("slide", { direction: "up" }, 120);
+            $("#header>h1").click(); // どっか適当なところをクリック
             return false;
         }
         // Alt+↑↓でアカウントを切り替え
