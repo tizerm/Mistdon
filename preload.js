@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('accessApi', {
     readWindowPref: () => ipcRenderer.invoke('read-window-pref'),
     writePrefMstdAccs: (json_data) => ipcRenderer.send('write-pref-mstd-accs', json_data),
     writePrefMskyAccs: (json_data) => ipcRenderer.send('write-pref-msky-accs', json_data),
+    writePrefBskyAccs: (json_data) => ipcRenderer.send('write-pref-bsky-accs', json_data),
     writePrefAccColor: (json_data) => ipcRenderer.send('write-pref-acc-color', json_data),
     writePrefCols: (json_data) => ipcRenderer.send('write-pref-cols', json_data),
     writeGeneralPref: (json_data) => ipcRenderer.send('write-general-pref', json_data),

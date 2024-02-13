@@ -43,7 +43,10 @@ async function readPrefAccs() {
     const content = readFile('app_prefs/auth.json')
     if (!content) return null // ファイルが見つからなかったらnullを返却
 
-    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    pref_accounts = jsonToMap(JSON.parse(content), elm => {
+        if (elm.platform == 'Bluesky') return `@${elm.user_id}`
+        else return `@${elm.user_id}@${elm.domain}`
+    })
     console.log('@INF: read app_prefs/auth.json.')
     return pref_accounts
 }
@@ -123,6 +126,35 @@ async function writePrefMskyAccs(event, json_data) {
         pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
     } else {
         pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
+    }
+}
+
+async function writePrefBskyAccs(event, json_data) {
+    // JSONを生成(あとでキャッシュに入れるので)
+    const write_json = {
+        'domain': json_data.domain,
+        'platform': 'Bluesky',
+        'user_id': json_data.user,
+        'username': json_data.user,
+        'socket_url': null,
+        'client_id': json_data.did,
+        'client_secret': json_data.refresh_token,
+        'access_token': json_data.access_token,
+        'avatar_url': null,
+        'post_maxlength': json_data.post_maxlength,
+        // アカウントカラーは初期値グレー
+        'acc_color': '808080'
+    }
+
+    // ファイルに書き込み
+    const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+    // キャッシュを更新
+    if (!pref_accounts) {
+        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+        pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    } else {
+        pref_accounts.set(`@${json_data.user_id}`, write_json)
     }
 }
 
@@ -693,7 +725,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            devTools: false,
+            //devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -701,7 +733,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    win.setMenuBarVisibility(false)
+    //win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)
@@ -723,6 +755,7 @@ app.whenReady().then(() => {
     ipcMain.handle('read-window-pref', readWindowPref)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
+    ipcMain.on('write-pref-bsky-accs', writePrefBskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-general-pref', writeGeneralPref)

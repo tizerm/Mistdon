@@ -17,6 +17,10 @@ class Account {
 
         this.emoji_history = []
         this.reaction_history = []
+
+        if (this.pref.platform == 'Bluesky') { // Bluesky専用処理
+            this.full_address = `@${pref.user_id}`
+        }
     }
 
     // Getter: プラットフォーム
@@ -300,6 +304,28 @@ class Account {
                     })
                     response = response.createdNote
                     break
+                case 'Bluesky': // Bluesky(alpha)
+                    request_param = {
+                        "repo": this.pref.user_id,
+                        "collection": 'app.bsky.feed.post',
+                        "record": {
+                            "text": arg.content,
+                            "createdAt": new Date()
+                        }
+                    }
+                    response = await $.ajax({ // API呼び出し
+                        type: "POST",
+                        url: `https://${this.pref.domain}/xrpc/com.atproto.repo.createRecord`,
+                        dataType: "json",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${this.pref.access_token}`,
+                        },
+                        data: JSON.stringify(request_param)
+                    })
+                    arg.success()
+                    notification.done(`Blueskyから投稿しました.`)
+                    return // Blueskyは後続処理を行わない
                 default:
                     break
             }

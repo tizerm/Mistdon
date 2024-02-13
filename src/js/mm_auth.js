@@ -129,4 +129,10 @@
     // Misskeyの登録ボタンを押したときのイベント
     $("#on_msk_auth_token").on("click", e => Instance.AUTH_INSTANCE.saveTokenMisskey());
 
+    // Bluesky認証イベント
+    $("#on_auth_bluesky").on("click", e => Instance.authBsky(
+        $("#__txt_bsky_handle").val(),
+        $("#__txt_bsky_pass").val()
+    ));
+
 });
