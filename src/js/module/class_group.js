@@ -34,11 +34,6 @@ class Group {
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
 
-    static DEFAULT_TIMELINE_LIMIT = 200 // タイムラインに表示できる限界量(通常値)
-    static LIST_TIMELINE_LIMIT = 500 // カラムのタイムラインに表示できる限界量(リスト値)
-    static SCROLL = 200         // wsスクロールでスクロールするピクセル量
-    static SHIFT_SCROLL = 800   // シフトwsスクロールでスクロールするピクセル量
-
     /**
      * #Method
      * このカラムのタイムラインプロパティを走査
@@ -180,18 +175,37 @@ class Group {
      */
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
-        const limit = this.pref.tl_layout == 'list' ? Group.LIST_TIMELINE_LIMIT : Group.DEFAULT_TIMELINE_LIMIT
+        let limit = null
+        switch (this.pref.tl_layout) {
+            case 'chat': // チャット
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.chat
+                break
+            case 'list': // リスト
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.list
+                break
+            case 'media': // メディア
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.media
+                break
+            case 'gallery': // ギャラリー
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.gallery
+                break
+            default: // デフォルト(ノーマル)
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.default
+                break
+        }
 
         // 重複している投稿を除外する
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            if (ul.find("li").length >= limit) this.removeStatus(ul.find("li:last-child"))
+            let remove_flg = false
+            if (ul.find("li").length >= limit) remove_flg = true
             ul.prepend(post.timeline_element)
             ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
             // 未読カウンターを上げる
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                 .text(++this.unread)
             this.counter++
+            if (remove_flg) this.removeStatus(ul.find("li:last-child"))
         })
 
         // 通知が来た場合は通知ウィンドウに追加
@@ -248,7 +262,7 @@ class Group {
             this.ppm_que.push(ppm)
             if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
             // pph(post per hour)を計算
-            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
+            const pph = floor(this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length), 1)
             const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
 
             // バインド
@@ -267,6 +281,12 @@ class Group {
     removeStatus(jqelm) {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
+
+        // TODO: debug
+        console.log(key)
+        console.log(post)
+        console.log(this)
+
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除

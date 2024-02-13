@@ -50,6 +50,10 @@ class History {
                             <h3>アクティビティ履歴</h3>
                         </div>
                         <div class="timeline">
+                            <div class="col_loading">
+                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                                <span class="loading_text">Now Loading...</span>
+                            </div>
                             <ul class="__context_posts"></ul>
                         </div>
                     </td>
@@ -58,6 +62,10 @@ class History {
                             <h3>投稿履歴</h3>
                         </div>
                         <div class="timeline">
+                            <div class="col_loading">
+                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                                <span class="loading_text">Now Loading...</span>
+                            </div>
                             <ul class="__context_posts"></ul>
                         </div>
                     </td>
@@ -66,61 +74,78 @@ class History {
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
 
-        History.bindAsync($("#pop_ex_timeline .post_history ul"), History.post_stack)
-        History.bindAsync($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
+        History.preload($("#pop_ex_timeline .post_history ul"), History.post_stack)
+        History.preload($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
     }
 
-    /**
-     * #StaticMethod
-     * 履歴スタックの投稿情報を、非同期でHTMLにバインドする
-     * 
-     * @param ul アペンド対象のul要素jQueryオブジェクト
-     * @param stack 走査するスタック
-     */
-    static async bindAsync(ul, stack) {
-        let request_promise = null
-        for (const elm of stack) { // 時間がかかっても上から順番に処理するためforでループする
-            // Statusインスタンスがキャッシュされている場合はそのまま表示
-            if (elm.post) ul.append(elm.element)
-            else { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
-                try {
-                    const account = Account.get(elm.account_address)
-                    switch (account.platform) {
-                        case 'Mastodon': // Mastodon
-                            request_promise = $.ajax({
-                                type: "GET",
-                                url: `https://${account.pref.domain}/api/v1/statuses/${elm.id}`,
-                                dataType: "json",
-                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                            })
-                            break
-                        case 'Misskey': // Misskey
-                            request_promise = $.ajax({
-                                type: "POST",
-                                url: `https://${account.pref.domain}/api/notes/show`,
-                                dataType: "json",
-                                headers: { "Content-Type": "application/json" },
-                                data: JSON.stringify({
-                                    "i": account.pref.access_token,
-                                    "noteId": elm.id
-                                })
-                            })
-                            break
-                        default:
-                            break
-                    }
-                    const post = new Status(await request_promise, History.HISTORY_PREF_TIMELINE, account)
-                    elm.post = post
-                    ul.append(elm.element)
-                } catch (err) { // エラーはログに出す
-                    console.log(err)
-                }
+    static async preload(target, stack) {
+        const load_stack = await History.load(target, stack, null)
+        // ロード画面を消去
+        target.prev().remove()
+        // スクロールローダーを生成
+        createScrollLoader({
+            data: load_stack,
+            target: target,
+            bind: (data, target) => {
+                data.forEach(p => target.append(p.element))
+                // loadのっけた最終インデクスを参照
+                return data.pop().max_id
+            },
+            load: async max_id => await History.load(target, stack, max_id)
+        })
+    }
+
+    static async load(target, stack, max_index) {
+        const start = max_index ?? 0
+        const end = start + 20
+        const load_stack = stack.slice(start, end)
+        // ステータス情報を全部取得
+        for (const elm of load_stack) await elm.getStatus()
+        // 最後のデータに最終インデクスをのっける
+        load_stack[load_stack.length - 1].max_id = end
+        // 切り取ったスタックリストを返却(ローダー作成用)
+        return load_stack
+    }
+
+    async getStatus() {
+        if (this.post) return // Statusインスタンスがキャッシュされている場合はなにもしない
+        let response = null
+        try { // Statusインスタンスがキャッシュされていない場合はサーバーから取得
+            const account = Account.get(this.account_address)
+            switch (account.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${account.pref.domain}/api/v1/statuses/${this.id}`,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": account.pref.access_token,
+                            "noteId": this.id
+                        })
+                    })
+                    break
+                default:
+                    break
             }
+            const post = new Status(response, History.HISTORY_PREF_TIMELINE, account)
+            this.post = post
+        } catch (err) { // エラーはログに出す
+            console.log(err)
         }
     }
 
     // Getter: 投稿履歴のDOM Elementを生成
     get element() {
+        if (!this.post) return "" // データがとれない場合は空を返却
         // まず投稿本体のjQueryオブジェクトを取得
         const elm = this.post.element
         let button = ''
@@ -182,7 +207,7 @@ class History {
     static pushPost(post) {
         const history = new History(post, null)
         History.post_stack.unshift(history)
-        if (History.post_stack.length > 100) History.post_stack.pop()
+        if (History.post_stack.length > Preference.GENERAL_PREFERENCE.history_limit) History.post_stack.pop()
         History.writeJson()
     }
 
@@ -198,7 +223,7 @@ class History {
         let history = new History(post, type)
         if (renote_id) history.renote_id = renote_id
         History.activity_stack.unshift(history)
-        if (History.activity_stack.length > 100) History.activity_stack.pop()
+        if (History.activity_stack.length > Preference.GENERAL_PREFERENCE.history_limit) History.activity_stack.pop()
         History.writeJson()
     }
 
@@ -208,21 +233,22 @@ class History {
      * 
      * @param target 削除対象の投稿のjQueryオブジェクト
      */
-    static delete(target) {
+    static async delete(target) {
         const index = target.closest("li").index()
-        if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
-            History.activity_stack[index].undo().then(() => {
+        try {
+            if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
+                await History.activity_stack[index].undo()
+
                 History.activity_stack.splice(index, 1)
-                History.writeJson()
-                target.closest("li").remove()
-            })
-        } else { // 投稿履歴
-            History.post_stack[index].post.delete((post, uuid) => {
+            } else { // 投稿履歴
+                await History.post_stack[index].post.delete()
+
                 History.post_stack.splice(index, 1)
-                toast("対象の投稿を削除しました.", "done", uuid)
-                History.writeJson()
-                target.closest("li").remove()
-            })
+            }
+            History.writeJson()
+            target.closest("li").remove()
+        } catch (err) {
+            console.log(err)
         }
     }
 
@@ -231,90 +257,88 @@ class History {
      * このアクティビティ履歴に対してアクティビティを取り消す
      */
     async undo() {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("取り消しています...", "progress", toast_uuid)
-
-        const account = Account.get(this.account_address)
-        let request_promise = null
-        switch (this.type) {
-            case 'reblog': // ブースト/リノート
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unreblog`,
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/delete`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": this.renote_id
+        const notification = Notification.progress("取り消しています...")
+        try {
+            const account = Account.get(this.account_address)
+            switch (this.type) {
+                case 'reblog': // ブースト/リノート
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unreblog`,
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                             })
-                        })
-                        break
-                    default:
-                        break
-                }
-                break
-            case 'favorite': // お気に入り
-                switch (account.platform) {
-                    case 'Mastodon': // Mastodon
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unfavourite`,
-                            headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                        })
-                        break
-                    case 'Misskey': // Misskey
-                        request_promise = $.ajax({
-                            type: "POST",
-                            url: `https://${account.pref.domain}/api/notes/favorites/delete`,
-                            dataType: "json",
-                            headers: { "Content-Type": "application/json" },
-                            data: JSON.stringify({
-                                "i": account.pref.access_token,
-                                "noteId": this.id
+                            break
+                        case 'Misskey': // Misskey
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/delete`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": this.renote_id
+                                })
                             })
-                        })
-                        break
-                    default:
-                        break
-                }
-                break
-            case 'bookmark': // ブックマーク
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unbookmark`,
-                    headers: { "Authorization": `Bearer ${account.pref.access_token}` }
-                })
-                break
-            case 'reaction': // リアクション
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${account.pref.domain}/api/notes/reactions/delete`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({
-                        "i": account.pref.access_token,
-                        "noteId": this.id
+                            break
+                        default:
+                            break
+                    }
+                    break
+                case 'favorite': // お気に入り
+                    switch (account.platform) {
+                        case 'Mastodon': // Mastodon
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unfavourite`,
+                                headers: { "Authorization": `Bearer ${account.pref.access_token}` }
+                            })
+                            break
+                        case 'Misskey': // Misskey
+                            await $.ajax({
+                                type: "POST",
+                                url: `https://${account.pref.domain}/api/notes/favorites/delete`,
+                                dataType: "json",
+                                headers: { "Content-Type": "application/json" },
+                                data: JSON.stringify({
+                                    "i": account.pref.access_token,
+                                    "noteId": this.id
+                                })
+                            })
+                            break
+                        default:
+                            break
+                    }
+                    break
+                case 'bookmark': // ブックマーク
+                    await $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/v1/statuses/${this.id}/unbookmark`,
+                        headers: { "Authorization": `Bearer ${account.pref.access_token}` }
                     })
-                })
-                break
-            default:
-                break
+                    break
+                case 'reaction': // リアクション
+                    await $.ajax({
+                        type: "POST",
+                        url: `https://${account.pref.domain}/api/notes/reactions/delete`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": account.pref.access_token,
+                            "noteId": this.id
+                        })
+                    })
+                    break
+                default:
+                    break
+            }
+            notification.done("取り消しが完了しました.")
+        } catch (err) {
+            console.log(err)
+            notification.error("取り消しに失敗しました.")
+            return Promise.reject(err)
         }
-        return request_promise.then(() => toast("取り消しが完了しました.", "done", toast_uuid)).catch(jqXHR => {
-            // 取り消しに失敗したらリジェクトする
-            toast("取り消しに失敗しました.", "error", toast_uuid)
-            return Promise.reject(jqXHR)
-        })
     }
 
     /**
@@ -328,20 +352,19 @@ class History {
     static popIf(presentCallback, del_flg) {
         const pop = History.post_stack[0]
         if (!pop) { // なにもなかったらそのままおしまい
-            toast("直前の投稿がありません.", "error")
+            Notification.error("直前の投稿がありません.")
             return
         }
         if (!pop.post) { // データ取得前の場合はメッセージを出す
-            toast("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.", "error")
+            Notification.error("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.")
             return
         }
         // 削除する場合
-        if (del_flg) pop.post.delete((post, uuid) => {
-            toast("直前の投稿を削除しました.", "done", uuid)
+        if (del_flg) pop.post.delete().then(() => {
             presentCallback(History.post_stack.shift())
             History.writeJson()
-        }) // 参照だけする場合
-        else presentCallback(pop)
+        })
+        else presentCallback(pop) // 参照だけする場合
     }
 
     /**

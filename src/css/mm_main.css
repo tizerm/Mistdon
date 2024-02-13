@@ -27,130 +27,227 @@
             }
         }
     }
-    > #head_postarea {
-        position: relative;
-        margin-top: 4px;
-        > .left_block {
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 320px;
-        }
-        > .right_block {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-        }
-        .__lnk_postuser {
-            display: block;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 72px;
-            height: 72px;
 
-            & img {
-                border-radius: 12px;
+    /*=== Default Post Area Layout ===============================================================*/
+    > #head_postarea {
+        display: flex;
+        margin: 2px 0px;
+        width: calc(100vw - 72px);
+
+        > .post_user {
+            width: 72px;
+            > .__lnk_postuser {
+                display: block;
                 width: 72px;
                 height: 72px;
-                cursor: pointer;
-            }
-        }
-        .visibility_icon {
-            position: absolute;
-            top: 0px;
-            left: 76px;
-        }
-        .cw_block {
-            position: absolute;
-            top: 49px;
-            left: 76px;
-            width: 210px;
-            #on_custom_emoji {
-                display: inline-block;
-                vertical-align: text-bottom;
-                &:hover>img {
-                    background-color: #225588;
+                & img {
+                    border-radius: 12px;
+                    width: 72px;
+                    height: 72px;
                     cursor: pointer;
                 }
             }
-            #__txt_content_warning {
-                transform: translate(-2px, -8px);
+        }
+        > .opt_buttons {
+            width: 36px;
+            padding: 0px 4px;
+            & img {
+                width: 36px;
+                height: 36px;
+            }
+            #post_length_graph {
+                border-radius: 50%;
+                border: solid 3px #aaaaaa;
+                width: 30px;
+                height: 30px;
+                font-size: 1px;
+            }
+        }
+        > .textbox_area {
+            flex-grow: 1;
+            > #__txt_postarea {
+                padding: 2px;
                 font-family: "メイリオ", sans-selif;
                 text-align: left;
+                border-radius: 6px;
                 background-color: #434343;
-                border-radius: 4px;
                 border: solid 1px #888888;
                 color: #ffffff;
-                width: 152px;
+                width: calc(100% - 12px);
+                height: 68px;
             }
-            #__on_post_to_misskey {
-                border-style: none;
-                background-color: transparent;
+        }
+        > .submit_button {
+            width: 72px;
+        }
+        > .additional_buttons {
+            display: none;
+            width: 72px;
+        }
+    }
+
+    /*=== Advanced Post Options Layout ===========================================================*/
+    > #post_options {
+        display: none;
+        position: absolute;
+        top: 108px;
+        left: 0px;
+        margin-top: 4px;
+        z-index: 10;
+        border-radius: 8px;
+        background-color: rgba(48,48,48,0.85);
+        border: solid 1px #bbbbbb;
+        > .flex_section {
+            display: flex;
+            width: calc(100vw - 72px);
+            & h5 {
+                border-bottom: solid 1px #dddddd;
+                margin: 4px 0px;
+                padding: 0px 12px;
+                color: #dddddd;
+                text-align: left;
+                font-size: 14px;
+                > button>img {
+                    width: 18px;
+                    height: 18px;
+                }
+            }
+            > div { padding: 0px 2px; }
+            & ul {
                 margin: 0px;
                 padding: 0px;
-                position: absolute;
-                right: 0px;
-                top: 0px;
-                cursor: pointer;
-                & img {
+                > li { list-style-type: none; }
+            }
+            > .option_close {
+                position: relative;
+                border-radius: 12px;
+                > button>img {
                     width: 24px;
                     height: 24px;
                 }
-                &[disabled]>img {
-                    opacity: 0.25;
-                    cursor: not-allowed;
+                > h5 {
+                    position: absolute;
+                    top: 24px;
+                    left: 24px;
+                    transform: rotate(90deg);
+                    transform-origin: left top;
+                    white-space: nowrap;
+                    border-style: none;
+                    color: #ffffff;
                 }
             }
-        }
-        #__txt_postarea {
-            position: absolute;
-            top: -2px;
-            right: 154px;
-            padding: 2px;
-            font-family: "メイリオ", sans-selif;
-            text-align: left;
-            border-radius: 6px;
-            background-color: #434343;
-            border: solid 1px #888888;
-            color: #ffffff;
-            width: calc(100vw - 514px);
-            height: 68px;
-        }
-        .submit_buttons {
-            position: absolute;
-            top: 0px;
-            right: 8px;
 
-            > a:hover>img {
-                border-radius: 8px;
-                background-color: #555555;
-                cursor: pointer;
+            > .additional_users {
+                flex-basis: 172px;
+                text-align: center;
+                > ul.account_list>li {
+                    display: inline-block;
+                    > label {
+                        border-radius: 16px;
+                        padding: 1px;
+                        margin: 2px;
+                        > img {
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 16px;
+                        }
+                        > .check_mask {
+                            border-radius: 16px;
+                            background-size: 32px 32px;
+                        }
+                    }
+                    > input.__chk_add_account[disabled]+label>.check_mask {
+                        display: block;
+                        background-color: rgba(119,119,119,0.6);
+                        background-image: url("../resources/ic_check.png");
+                    }
+                }
+                + .option_close {
+                    background-color: #514285;
+                    display: none;
+                }
             }
-            > #on_submit {
-                position: absolute;
-                top: 0px;
-                right: 72px;
+            > .publish_setting {
+                flex-basis: 172px;
+                text-align: center;
+                & input[name="__opt_visibility"]+label {
+                    border-radius: 16px;
+                    > img {
+                        width: 36px;
+                        height: 36px;
+                    }
+                }
+                #__txt_content_warning, #__cmb_post_to { width: 158px; }
             }
-            > #on_last_delete {
-                position: absolute;
-                top: 0px;
-                right: 36px;
+            > .poll_setting {
+                display: none;
+                flex-basis: 156px;
+                .__txt_poll_option { width: 100%; }
+                #__txt_poll_expire_time { width: 82px; }
+                + .option_close { background-color: #428571; }
             }
-            > #on_last_delete_paste {
-                position: absolute;
-                top: 36px;
-                right: 36px;
+            > .attached_media {
+                flex-grow: 4;
+                > ul.media_list {
+                    margin: 0px 8px;
+                    margin-bottom: 4px;
+                    > li {
+                        display: inline-block;
+                        & label {
+                            padding: 0px;
+                            border-radius: 12px;
+                            > .check_mask {
+                                border-radius: 12px;
+                                background-color: rgba(51,122,159,0.5);
+                            }
+                        }
+                        & img {
+                            display: inline-block;
+                            width: 216px;
+                            height: 144px;
+                            border-radius: 12px;
+                            vertical-align: text-bottom;
+                            object-fit: cover;
+                        }
+                        &.__initial_message {
+                            display: block;
+                            padding: 56px 0px;
+                            background-color: rgba(255,255,255,0.08);
+                            border-radius: 12px;
+                            text-align: center;
+                        }
+                        & input[type="checkbox"]:checked+label>.check_mask {
+                            background-color: rgba(159,58,51,0.5);
+                            background-image: url("../resources/ic_nsfw.png");
+                            background-size: 96px 96px;
+                        }
+                        &.ui-sortable-placeholder {
+                            background-color: rgba(168,72,96,0.8);
+                            border-radius: 16px;
+                            width: 216px;
+                            height: 132px;
+                        }
+                    }
+                }
             }
-            > #on_last_copy {
-                position: absolute;
-                top: 0px;
-                right: 0px;
-            }
-            > #on_last_replychain {
-                position: absolute;
-                top: 36px;
-                right: 0px;
+            > .refernced_post {
+                display: none;
+                flex-basis: 340px;
+                flex-grow: 1;
+                > ul.refernce_post {
+                    height: auto;
+                    max-height: 168px;
+                    > li {
+                        margin: 2px;
+                        &.__initial_message {
+                            padding: 68px 0px;
+                            background-color: rgba(62,62,62,0.92);
+                            border-radius: 12px;
+                            text-align: center;
+                        }
+                    }
+                }
+                + .option_close { background-color: #854257; }
             }
         }
     }
@@ -158,22 +255,6 @@
 @keyframes marquee-anim {
     0%   { left: 100%; transform: translate(0); }
     100% { left: 0; transform: translate(-100%, 0); }
-}
-
-/*=== Visibility Icon Block (General Setting) ====================================================*/
-
-.visibility_icon>.__lnk_visibility {
-    & img {
-        display: inline-block;
-        border-radius: 8px;
-        width: 48px;
-        height: 48px;
-    }
-    & img.selected { background-color: #3388cc; }
-    &:hover>img {
-        background-color: #225588;
-        cursor: pointer;
-    }
 }
 
 /*=== Popup Window Area ==========================================================================*/
@@ -229,7 +310,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_postuser {
         display: none;
-        z-index: 10;
+        z-index: 11;
         width: 360px;
         position: absolute;
         top: 108px;
@@ -260,53 +341,31 @@
             }
         }
     }
-    /*=== Post Account Select Menu ===============================================================*/
-    > #pop_post_to {
-        display: none;
-        z-index: 10;
+    /*=== Notifications Layout ===================================================================*/
+    > #pop_notification {
+        z-index: 11;
         position: absolute;
-        top: 108px;
-        left: 288px;
+        top: 32px;
+        left: 72px;
 
-        > a {
-            display: inline-block;
-            border-radius: 12px;
-            background-color: rgba(34,34,34,0.92);
-            background-position: top 4px center;
-            background-repeat: no-repeat;
-            width: 64px;
-            height: 24px;
-            padding-top: 52px;
-            font-size: 12px;
-            text-align: center;
-            &:hover         { background-color: rgba(62,82,96,0.92); }
-            &.to_normal     { background-image: url("../resources/ic_public.png"); }
-            &.to_local_only { background-image: url("../resources/ic_local.png"); }
-        }
-        > ul.channel_menu {
-            margin: 4px 0px;
+        > ul {
+            margin: 0px;
             padding: 0px;
             > li {
                 list-style-type: none;
-                > a.to_channel {
+                margin: 4px 0px;
+                > span {
                     display: inline-block;
-                    border-radius: 8px;
-                    background-color: rgba(34,34,34,0.92);
-                    background-position: center left 4px;
-                    background-repeat: no-repeat;
-                    background-size: 32px 32px;
-                    background-image: url("../resources/ic_channel.png");
-                    margin: 2px 0px;
-                    padding: 4px 18px;
-                    padding-left: 48px;
-                    font-size: 13px;
-                    &:hover { background-color: rgba(62,82,96,0.92); }
+                    border-radius: 12px;
+                    border: solid 2px #aaaaaa;
+                    padding: 4px 24px;
+                    background-color: rgba(34,34,34,0.8);
+                    font-size: 16px;
+                    font-weight: bold;
                 }
+                > .done  { background-color: rgba(62,82,96,0.8) }
+                > .error { background-color: rgba(96,82,62,0.8) }
             }
-        }
-        & a {
-            cursor: pointer;
-            border: solid 2px #aaaaaa;
         }
     }
 
@@ -364,7 +423,7 @@
         background-color: rgba(34,34,34,0.8);
         border: solid 1px #cccccc;
         border-radius: 8px;
-        z-index: 7;
+        z-index: 11;
         position: absolute;
         top: 198px;
         left: 64px;
@@ -412,9 +471,8 @@
         }
     }
 
-    /*=== Expand Image Modal Layout ==============================================================*/
-    > #modal_expand_image {
-        z-index: 12;
+    /*=== Drop Files Modal Layout ================================================================*/
+    > .pop_modal {
         display: none;
         background-color: rgba(34,34,34,0.75);
         position: fixed;
@@ -423,7 +481,31 @@
         text-align: center;
         width: 100vw;
         height: 100vh;
+    }
+    > #modal_drop_files {
+        z-index: 20;
+        > .dropbox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: dashed 6px #cccccc;
+            width: calc(100vw - 64px);
+            height: calc(100vh - 64px);
+            &:hover { background-color: rgba(255,255,255,0.1); }
+            > span {
+                display: inline-block;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+    }
 
+    /*=== Expand Image Modal Layout ==============================================================*/
+    > #modal_expand_image {
+        z-index: 12;
         > ul {
             margin: 0px;
             padding: 0px;
@@ -548,33 +630,36 @@
                         text-align: center;
                     }
                 }
-                > .timeline li {
+                > .timeline {
                     position: relative;
-                    > .delete_modal {
-                        display: none;
-                        border-radius: 12px;
-                        position: absolute;
-                        top: 0px;
-                        left: 0px;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(255,255,255,0.25);
-                        > button {
-                            width: 50%;
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            display: block;
+                    & li {
+                        position: relative;
+                        > .delete_modal {
+                            display: none;
                             border-radius: 12px;
-                            padding: 4px;
-                            text-align: center;
-                            border: solid 2px #ffffff;
-                            font-size: 16px;
-                            font-weight: bold;
+                            position: absolute;
+                            top: 0px;
+                            left: 0px;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(255,255,255,0.25);
+                            > button {
+                                width: 50%;
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                display: block;
+                                border-radius: 12px;
+                                padding: 4px;
+                                text-align: center;
+                                border: solid 2px #ffffff;
+                                font-size: 16px;
+                                font-weight: bold;
+                            }
                         }
+                        &:hover>.delete_modal { display: block; }
                     }
-                    &:hover>.delete_modal { display: block; }
                 }
                 &.reaction_history>.col_head { background-color: #408a08; }
                 &.post_history>.col_head     { background-color: #3562cc; }
@@ -583,15 +668,12 @@
     }
 
     /*=== Internal Extend Timeline Window Layout =================================================*/
-    > #pop_window_timeline {
-        display: none;
+    > .ex_window {
+        position: absolute;
         z-index: 4;
         border-radius: 12px;
         background-color: rgba(34,34,34,0.8);
-        width: 50vw;
-        height: 50vh;
         color: #fff;
-
         & a { color: #bbb; }
         > h2 {
             position: relative;
@@ -613,6 +695,11 @@
                 border: solid 2px #ffffff;
             }
         }
+    }
+    > #pop_window_timeline {
+        display: none;
+        width: 50vw;
+        height: 50vh;
         >.timeline {
             height: calc(100% - 34px);
             > ul { height: 100%; }
@@ -621,6 +708,68 @@
             opacity: 0.2;
             transition: opacity 0.2s;
             &:hover { opacity: 1.0; }
+        }
+    }
+    > #pop_util_window {
+        display: none;
+        width: 50vw;
+        height: 70vh;
+        left: 25vw;
+        top: 274px;
+        >.content {
+            height: calc(100% - 64px);
+            > ul.drive_media_list {
+                height: 100%;
+                overflow-y: auto;
+                margin: 0px;
+                padding: 0px;
+                &::-webkit-scrollbar { width: 8px; }
+                > li {
+                    display: inline-block;
+                    list-style-type: none;
+                    width: 25%;
+                    > label {
+                        display: inline-block;
+                        width: 100%;
+                        padding: 0px;
+                        position: relative;
+                        overflow: hidden;
+                        margin: 0px;
+                        &::before {
+                            content: "";
+                            padding-top: 100%;
+                            display: block;
+                        }
+                        > img {
+                            border-radius: 8px;
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            top: 0px;
+                            left: 0px;
+                            object-fit: cover;
+                            vertical-align: text-bottom;
+                        }
+                        &.warn_sensitive::after {
+                            content: url("../resources/ic_warn.png");
+                            z-index: 1;
+                            position: absolute;
+                            top: 0px;
+                            right: 0px;
+                            background-color: rgba(161,0,0,0.75);
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 16px;
+                        }
+                    }
+                    &.__scroll_loader {
+                        display: block;
+                        background-color: rgba(62,62,62,0.92);
+                        margin: 6px;
+                        padding: 8px 12px;
+                    }
+                }
+            }
         }
     }
 

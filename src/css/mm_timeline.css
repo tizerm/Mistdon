@@ -495,6 +495,7 @@
                     margin: 2px;
                     background-position: center right;
                     background-repeat: no-repeat;
+                    background-size: 24px 24px;
                     padding-right: 32px;
                 }
                 > a.card_link {
@@ -878,6 +879,7 @@
                     top: 0px;
                     left: 0px;
                     object-fit: cover;
+                    vertical-align: text-bottom;
                 }
                 &.warn_sensitive::after {
                     content: url("../resources/ic_warn.png");
@@ -943,7 +945,7 @@
     width: 420px;
     position: relative;
     > .profile_header {
-        height: 214px;
+        height: 216px;
         overflow-y: hidden;
         .user_header { height: 96px; }
         .detail_info {
@@ -957,23 +959,31 @@
                     cursor: pointer;
                 }
             }
+            > a {
+                position: relative;
+                top: 6px;
+                padding: 0px;
+                margin: 0px;
+                > img {
+                    width: 24px;
+                    height: 24px;
+                    vertical-align: text-bottom;
+                }
+                &:hover>img {
+                    background-color: rgba(255,255,255,0.2);
+                    cursor: pointer;
+                }
+            }
             &.auth_details {
                 margin: -2px -4px 4px;
-                > a {
-                    position: relative;
-                    top: 6px;
-                    padding: 0px;
-                    margin: 0px;
-                    &:hover>img {
-                        background-color: rgba(255,255,255,0.2);
-                        cursor: pointer;
-                    }
-                }
                 > .counter { width: 64px; }
             }
         }
     }
-    .profile_detail, .pinned_post { height: calc((100vh - 310px) * 0.2); }
+    .profile_detail, .pinned_post {
+        height: auto;
+        max-height: calc((100vh - 340px) * 0.2);
+    }
     > .profile_detail {
         .prof_field {
             width: 100%;
@@ -990,6 +1000,24 @@
                 text-overflow: ellipsis;
             }
         }
+    }
+    > .user_post_elm {
+        >.tab {
+            margin-top: 4px;
+            text-align: center;
+            > a {
+                display: inline-block;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                background-color: rgba(62,62,62,0.92);
+                padding: 3px;
+                width: calc(50% - 28px);
+                font-size: 13px;
+                cursor: pointer;
+                &:hover { background-color: rgba(62,82,96,0.92); }
+            }
+        }
+        > .media_uls { display: none; }
     }
     .post_div {
         position: relative;
@@ -1017,7 +1045,8 @@
         > ul>li { background-color: rgba(82,66,62,0.92); }
     }
     .posts_block>h4 { background-color: #3b5778; }
-    .posts { height: calc((100vh - 310px) * 0.6); }
+    .posts, .media_post { height: calc((100vh - 310px) * 0.6); }
+    > .user_bookmark_elm, > .user_ff_elm { display: none; }
 
     .ff_short_profile {
         height: 212px;
@@ -1064,5 +1093,109 @@
             text-decoration: none;
             cursor: not-allowed;
         }
+    }
+}
+
+/*=== Instance Info Layout =======================================================================*/
+
+.column_instance_info {
+    display: none;
+    width: 360px;
+    position: relative;
+    > .instance_header {
+        height: 312px;
+        overflow-y: hidden;
+        .header_image { height: 96px; }
+        .info {
+            position: relative;
+            > .instance_icon {
+                width: 36px;
+                width: 36px;
+            }
+            > .instance_name {
+                position: absolute;
+                top: 2px;
+                left: 48px;
+                margin: 0px;
+                padding: 0px;
+                font-size: 24px;
+                width: calc(100% - 60px);
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            > .instance_link {
+                display: block;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+                padding: 4px 12px;
+                font-size: 14px;
+                border-left: solid 12px #aaaaaa;
+                background-color: rgba(255,255,255,0.08);
+            }
+        }
+        & ul.detail_info {
+            margin: 6px 0px;
+            text-align: left;
+            background-color: transparent;
+            height: auto;
+            > li {
+                margin: 4px 0px;
+                padding: 0px;
+                border-radius: 16px;
+                > h6 {
+                    display: inline-block;
+                    margin: 0px;
+                    padding: 4px 16px;
+                    background-color: rgba(255,255,255,0.15);
+                    border-radius: 16px;
+                    font-size: 16px;
+                }
+                > span {
+                    padding: 2px 12px;
+                    font-size: 16px;
+                }
+                &.total_users    { background-color: #4461a6; }
+                &.monthly_users  { background-color: #bf4747; }
+                &.monthly_status { background-color: #62913f; }
+            }
+        }
+    }
+
+    /*=== Instance Description Layout (Invoke default layout) ====================================*/
+    > .instance_detail {
+        height: calc(100vh - 646px);
+        & h1, & h2, & h3, & h4, & h5, & h6 {
+            border-radius: 0px !important;
+            border-left: solid 12px #aaaaaa !important;
+            margin: 6px -12px !important;
+            padding: 4px 16px !important;
+            background-color: transparent !important;
+            font-size: 18px !important;
+        }
+        & ul {
+            background-color: transparent !important;
+            margin: 8px 0px !important;
+            padding: 0px !important;
+            height: auto !important;
+            > li {
+                background-color: rgba(255,255,255,0.08) !important;
+                margin: 4px 0px !important;
+                padding: 4px 12px !important;
+            }
+        }
+    }
+    > .instance_admin {
+        height: 238px;
+        overflow-y: hidden;
+        > li.admin_header {
+            font-size: 14px;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px;
+            background-color: #4461a6;
+        }
+        > li.short_userinfo>.detail_info>.counter { width: 16%; }
     }
 }

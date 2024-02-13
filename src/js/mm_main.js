@@ -3,13 +3,18 @@ $(() => (async () => {
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs();
     await window.accessApi.readPrefCols();
+    await window.accessApi.readGeneralPref();
     await window.accessApi.readWindowPref();
     await window.accessApi.readCustomEmojis();
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
         $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
         $("#header>h1").text('認証されているアカウントがありません。 - Mistdon')
-    } else Account.get(0).setPostAccount();
+    } else { // 投稿ユーザーリストを作って先頭のアカウントをセット
+        $("#pop_postuser>ul").html(Account.createPostAccountList());
+        $("#post_options .additional_users ul").html(Account.createAdditionalPostAccountList());
+        Account.get(0).setPostAccount();
+    }
     if (Column.isEmpty()) { // カラムが未登録(この場合はストップする)
         $("#columns").prepend(`
             <div class="__initial_message">
@@ -24,17 +29,25 @@ $(() => (async () => {
 
     // カスタム絵文字のキャッシュ確認
     Account.cacheEmojis();
-    // 投稿アイコンと右クリック時のメニュー生成
-    $("#pop_postuser>ul").html(Account.createPostAccountList());
+    // 右クリック時のメニュー生成
     $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
-        // リアクションの場合はリアクション絵文字を表示する
-        //if ($(elm).is("#__menu_reaction")) $(elm).html(Account.createReactionMenuAccountList());
         // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
         if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
         // それ以外は全アカウントをリストに表示
         else $(elm).html(Account.createContextMenuAccountList());
     });
     $("#pop>.pop_context>.ui_menu").menu();
+    // 添付メディアリストをSortableにする
+    $(".__ui_media_sortable").sortable({
+        axis: "x",
+        delay: 100,
+        distance: 48,
+        placeholder: "ui-sortable-placeholder",
+        cancel: ".__initial_message",
+        revert: 50,
+        opacity: 0.75,
+        tolerance: "pointer"
+    });
     // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
     $("#pop_window_timeline").draggable({
         handle: "h2",
@@ -61,7 +74,7 @@ $(() => (async () => {
             duration: 80
         }
     });
-    $("#pop_expand_action").tooltip({
+    $("#pop_expand_action, #post_options").tooltip({
         position: {
             my: "center bottom-8",
             at: "center top"
@@ -94,7 +107,7 @@ $(() => (async () => {
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({
         openFunc: () => {},
-        closeFunc: () => toast(`${account.full_address}との接続が切断されました。`, "error"),
+        closeFunc: () => Notification.info(`${account.full_address}との接続が一時的に切断されました.`),
         reconnect: true
     }));
     Column.tooltip(); // カラムにツールチップを設定

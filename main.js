@@ -13,6 +13,7 @@ const stateKeeper = require('electron-window-state')
 // アプリ保持用設定データの管理
 var pref_accounts = null
 var pref_columns = null
+var pref_general = null
 var pref_window = null
 var pref_emojis = new Map()
 var cache_history = null
@@ -20,6 +21,9 @@ var cache_emoji_history = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
+
+// ハードウェアアクセラレーション無効化
+app.disableHardwareAcceleration()
 
 /*====================================================================================================================*/
 
@@ -30,7 +34,7 @@ const is_mac = process.platform === 'darwin'
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefAccs() {
+async function readPrefAccs() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_accounts) {
         console.log('@INF: use app_prefs/auth.json cache.')
@@ -39,7 +43,10 @@ function readPrefAccs() {
     const content = readFile('app_prefs/auth.json')
     if (!content) return null // ファイルが見つからなかったらnullを返却
 
-    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    pref_accounts = jsonToMap(JSON.parse(content), elm => {
+        if (elm.platform == 'Bluesky') return `@${elm.user_id}`
+        else return `@${elm.user_id}@${elm.domain}`
+    })
     console.log('@INF: read app_prefs/auth.json.')
     return pref_accounts
 }
@@ -64,6 +71,7 @@ async function writePrefMstdAccs(event, json_data) {
         'client_secret': json_data.client_secret,
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }
@@ -100,10 +108,11 @@ async function writePrefMskyAccs(event, json_data) {
         'user_id': json_data.user.username,
         'username': json_data.user.name,
         'socket_url': `wss://${json_data.domain}/streaming`,
-        'client_id': null,
+        'client_id': json_data.access_token,
         'client_secret': json_data.app_secret,
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }
@@ -117,6 +126,35 @@ async function writePrefMskyAccs(event, json_data) {
         pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
     } else {
         pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
+    }
+}
+
+async function writePrefBskyAccs(event, json_data) {
+    // JSONを生成(あとでキャッシュに入れるので)
+    const write_json = {
+        'domain': json_data.domain,
+        'platform': 'Bluesky',
+        'user_id': json_data.user,
+        'username': json_data.user,
+        'socket_url': null,
+        'client_id': json_data.did,
+        'client_secret': json_data.refresh_token,
+        'access_token': json_data.access_token,
+        'avatar_url': null,
+        'post_maxlength': json_data.post_maxlength,
+        // アカウントカラーは初期値グレー
+        'acc_color': '808080'
+    }
+
+    // ファイルに書き込み
+    const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+    // キャッシュを更新
+    if (!pref_accounts) {
+        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+        pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    } else {
+        pref_accounts.set(`@${json_data.user_id}`, write_json)
     }
 }
 
@@ -135,6 +173,9 @@ async function writePrefAccColor(event, json_data) {
     json_data.forEach(pref => {
         let account = pref_accounts.get(pref.key_address)
         account.acc_color = pref.acc_color
+        account.default_local = pref.default_local
+        account.default_channel = pref.default_channel
+        account.post_maxlength = pref.post_maxlength
         // ユーザー情報を更新できる場合は更新
         if (pref.user_id) account.user_id = pref.user_id
         if (pref.username) account.username = pref.username
@@ -156,7 +197,7 @@ async function writePrefAccColor(event, json_data) {
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefCols() {
+async function readPrefCols() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_columns) {
         console.log('@INF: use app_prefs/columns.json cache.')
@@ -347,6 +388,28 @@ async function writePrefCols(event, json_data) {
     pref_columns = JSON.parse(content)
 }
 
+async function readGeneralPref() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_general) {
+        console.log('@INF: use app_prefs/general_pref.json cache.')
+        return pref_general
+    }
+    const content = readFile('app_prefs/general_pref.json')
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
+    pref_general = JSON.parse(content)
+    console.log('@INF: read app_prefs/general_pref.json.')
+    return pref_general
+}
+
+async function writeGeneralPref(event, json_data) {
+    // 絵文字キャッシュデータを書き込み
+    const content = await overwriteFile('app_prefs/general_pref.json', json_data)
+    console.log('@INF: write app_prefs/general_pref.json.')
+    // キャッシュを更新
+    pref_general = JSON.parse(content)
+}
+
 /**
  * #IPC
  * 保存してあるカスタム絵文字のキャッシュを読み込む
@@ -354,7 +417,7 @@ async function writePrefCols(event, json_data) {
  * 
  * @return カスタム絵文字キャッシュ情報(マップで返却)
  */
-function readCustomEmojis() {
+async function readCustomEmojis() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_emojis.size > 0) {
         console.log('@INF: use app_prefs/emojis/ cache.')
@@ -662,7 +725,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            devTools: false,
+            //devTools: false,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -670,7 +733,7 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    win.setMenuBarVisibility(false)
+    //win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
 
     windowState.manage(win)
@@ -685,14 +748,17 @@ app.whenReady().then(() => {
     // IPC通信で呼び出すメソッド定義
     ipcMain.handle('read-pref-accs', readPrefAccs)
     ipcMain.handle('read-pref-cols', readPrefCols)
+    ipcMain.handle('read-general-pref', readGeneralPref)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.handle('read-window-pref', readWindowPref)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
+    ipcMain.on('write-pref-bsky-accs', writePrefBskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
+    ipcMain.on('write-general-pref', writeGeneralPref)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)

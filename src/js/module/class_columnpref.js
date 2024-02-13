@@ -191,36 +191,8 @@ class TimelinePref {
     static async changeExternalHostEvent(target) {
         const domain = target.val()
         const info_dom = target.closest(".lbl_external_instance").find(".instance_info")
-        if (!domain) { // 空の場合はメッセージを初期化
-            info_dom.text("(URLを入力してください)")
-            return
-        }
-        // ロード待ち画面を生成
-        info_dom.html("&nbsp;").css('background-image', 'url("resources/illust/ani_wait.png")')
-
-        // インスタンス情報を取得
-        const instance = await Instance.get(domain)
-
-        info_dom.css('background-image', 'none')
-        if (!instance) { // 不正なインスタンスの場合はエラーメッセージを表示
-            info_dom.text("!不正なインスタンスです!")
-            return
-        }
-
-        // インスタンス名をセット
-        let img = null
-        switch (instance.platform) {
-            case 'Mastodon': // Mastodon
-                img = '<img src="resources/ic_mastodon.png" class="inline_emoji"/>'
-                break
-            case 'Misskey': // Misskey
-                img = '<img src="resources/ic_misskey.png" class="inline_emoji"/>'
-                break
-            default:
-                break
-        }
-        info_dom.html(`${img} ${instance.name}`)
-        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance.platform)
+        const instance = await Instance.showInstanceName(domain, info_dom)
+        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance?.platform)
     }
 
     /**
@@ -624,9 +596,7 @@ class ColumnPref {
         $(`#${target_col.id}>.col_tl_groups>.tl_group:last-child .__txt_group_height`).val("")
         let total = 0
         for (let gp_elm of $(`#${target_col.id}>.col_tl_groups>.tl_group`).get()) {
-            console.log($(gp_elm).find('.__txt_group_height'))
             let height = $(gp_elm).find('.__txt_group_height').val()
-            console.log(height)
             if (!height) break
             else total += Number(height)
             if (total >= 99) {
@@ -665,9 +635,7 @@ class ColumnPref {
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
             let total = 0
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
-                console.log($(gp_elm).find('.__txt_group_height'))
                 let height = $(gp_elm).find('.__txt_group_height').val()
-                console.log(height)
                 if (!height) { // 最後のグループの場合
                     height = 100 - total
                     $(gp_elm).find('.__txt_group_height').val(height)

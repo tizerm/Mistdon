@@ -33,8 +33,8 @@
     });
 
     // TIPSタイマーセット
-    const timer_interval = 30000
-    if ($("#header>h1>.head_tips").length > 0) {
+    if ($("#header>h1>.head_tips").length > 0 && Preference.GENERAL_PREFERENCE.enable_tips) {
+        const timer_interval = 30000
         setTipsTimer(timer_interval);
 
         // スクロールアニメーションが終わったら再帰的にタイマーセットしてもとに戻す

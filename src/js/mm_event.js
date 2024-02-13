@@ -82,53 +82,11 @@ $(() => {
 
     /**
      * #Event
-     * 公開範囲(Visibility)
-     */
-    $(document).on("click", ".__lnk_visibility", e => {
-        // 選択中のオプションにselectedクラスを付与
-        $(e.target).closest(".visibility_icon").find("img").removeClass("selected")
-        $(e.target).closest(".__lnk_visibility").find("img").addClass("selected")
-    })
-
-    /**
-     * #Event
-     * 投稿先アイコン
-     * => 投稿先変更メニューを表示(Misskeyのみ)
-     */
-    $("#header>#head_postarea #__on_post_to_misskey").on("click", e =>
-        $("#pop_post_to").show("slide", { direction: "up" }, 150))
-
-    /**
-     * #Event
-     * 投稿先変更メニュー項目
-     * => 投稿先情報を変更
-     */
-    $(document).on("click", ".__lnk_post_to", e => {
-        const send = $(e.target).closest(".__lnk_post_to").attr('name')
-        $("#__on_post_to_misskey>img").attr('name', send)
-        switch (send) {
-            case '__to_normal': // 通常投稿
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_public.png')
-                break
-            case '__to_local_only': // ローカルのみ
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_local.png')
-                break
-            default: // チャンネル
-                $("#__on_post_to_misskey>img").attr('src', 'resources/ic_channel.png')
-                break
-        }
-    })
-
-    /**
-     * #Event
      * カスタム絵文字呼び出しボタン
      * => カスタム絵文字一覧を表示
      */
-    $("#header>#head_postarea #on_custom_emoji").on("click", e => {
-        // リプライウィンドウを開いている場合はリプライアカウントに合わせる
-        if ($(".reply_col").is(":visible")) Account.get($("#__hdn_reply_account").val()).createEmojiList()
-        else if ($(".quote_col").is(":visible")) Account.get($("#__hdn_quote_account").val()).createEmojiList()
-        else Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
+    $("#header>#head_postarea #__open_emoji_palette").on("click", e => {
+        Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
         // サジェストテキストボックスにフォーカス
         $("#__txt_emoji_search").focus()
     })
@@ -195,54 +153,62 @@ $(() => {
         target_account.updateEmojiHistory(target_emoji)
     })
 
+    $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
+        const length = $(e.target).val().length
+        const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
+        const rate = length / limit // TODO: とりあえず一旦最大500字固定
+        const deg = 360 * rate
+
+        if (length > 0) {
+            if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
+                "border-color": "#21dec8",
+                "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
+            }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
+                "border-color": "#dea521",
+                "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
+            }); else $("#post_length_graph").css({ // 文字数超過でレッド
+                "border-color": "#de3121",
+                "background-image": "none",
+                "background-color": "#de3121"
+            })
+        } else $("#post_length_graph").css({ // 入力されていない場合はグレー
+            "border-color": "#aaaaaa",
+            "background-image": "none",
+            "background-color": "transparent"
+        })
+    })
+
+    // TODO: このへん投稿オプションに関して
+    $("#header>#head_postarea #__open_post_options").on("click",
+        e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
+
+    $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
+        if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
+        $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
+
+    $("body").on("click", e => {
+        // 投稿オプションを閉じない場所をクリックした場合はなにもしない
+        if ($(e.target).closest(".__ignore_close_option").length > 0 || !$("#header>#post_options").is(":visible")) return
+        $("#header>#post_options").hide("slide", { direction: "up" }, 120)
+    })
+
     /**
      * #Event
      * 投稿ボタン
      */
-    $("#header #on_submit").on("click", e =>
+    $("#header #__on_submit").on("click", e =>
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
             content: $("#__txt_postarea").val(),
-            cw_text: $("#__txt_content_warning").val(),
-            visibility_id: $("#header>#head_postarea .visibility_icon .selected").attr("id"),
-            post_to: $("#header>#head_postarea #__on_post_to_misskey>img").attr("name"),
+            option_obj: $("#post_options"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__txt_postarea").val("")
-                $("#__txt_content_warning").val("")
+                $("#__on_reset_option").click()
+                $("#header>#post_options").hide("slide", { direction: "up" }, 120)
                 $("#__on_emoji_close").click()
             }
         }))
-
-    /**
-     * #Event
-     * 投稿ボタン(リプライウィンドウ)
-     */
-    $(document).on("click", "#__on_reply_submit", e => Account.get($("#__hdn_reply_account").val()).post({
-        content: $("#__txt_replyarea").val(),
-        visibility_id: $("#__hdn_reply_visibility").val(), // 投稿元の公開範囲を継承する
-        reply_id: $("#__hdn_reply_id").val(),
-        // 投稿成功時処理(リプライウィンドウを閉じる)
-        success: () => {
-            $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-            $("#__on_emoji_close").click()
-        }
-    }))
-
-    /**
-     * #Event
-     * 投稿ボタン(引用投稿ウィンドウ)
-     */
-    $(document).on("click", "#__on_quote_submit", e => Account.get($("#__hdn_quote_account").val()).post({
-        content: $("#__txt_quotearea").val(),
-        cw_text: $("#__txt_quote_cw").val(),
-        visibility_id: $("#pop_extend_column .visibility_icon .selected").attr("id"),
-        quote_id: $("#__hdn_quote_id").val(),
-        // 投稿成功時処理(引用ウィンドウを閉じる)
-        success: () => {
-            $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
-            $("#__on_emoji_close").click()
-        }
-    }))
 
     /**
      * #Event
@@ -289,21 +255,84 @@ $(() => {
      */
     $("#header #on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
-    /**
-     * #Event #Focus
-     * 投稿本文テキストエリア
-     * => ウィンドウの横幅が800pxを切っていた場合テキストエリアを拡張
-     */
-    $("#header #__txt_postarea").on("focus", e => {
-        if (window.innerWidth < 800) $(e.target).css("width", "calc(100vw - 334px)")
+    /*=== Post Option Article Area Event =========================================================================*/
+
+    $("#header>#post_options .__on_option_close").on("click",
+        e => $(e.target).closest(".closeable_block").hide().next().show())
+
+    $("#header>#post_options .__on_option_open").on("click",
+        e => $(e.target).closest(".option_close").hide().prev().show())
+
+    $(document).on("dblclick", "#header>#post_options ul.account_list input.__chk_add_account+label",
+        e => Account.get($(e.target).closest("li").find("input.__chk_add_account").val()).setPostAccount())
+
+    $("#header>#post_options #__on_reset_option").on("click", e => {
+        $('#header>#post_options input[type="text"]').val("")
+        $('#header>#post_options input[type="number"]').val("")
+        $("#post_options .poll_setting .__on_option_close").click()
+        $("#post_options .refernced_post .__on_option_close").click()
+        Media.clearAttachMedia()
+        deleteQuoteInfo()
     })
 
-    /**
-     * #Event #Blur
-     * 投稿本文テキストエリア
-     * => 拡張されたテキストエリアをもとに戻す
-     */
-    $("#header #__txt_postarea").on("blur", e => $(e.target).css("width", "calc(100vw - 514px)"))
+    $("#header>#post_options #__on_set_sensitive").on("click", e => {
+        const target_ul = $('#header>#post_options .attached_media>ul.media_list')
+        if (target_ul.find('input[type="checkbox"]:not(:checked)').length > 0)
+            // 未チェックの項目が1つでもある場合は全部センシティブにする
+            target_ul.find('input[type="checkbox"]').prop("checked", true)
+        else target_ul.find('input[type="checkbox"]').prop("checked", false)
+    })
+
+    $("#header>#post_options #__on_open_drive").on("click",
+        e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
+
+    $("#header>#post_options #__on_poll_add_item").on("click", e => $("#header>#post_options .poll_options")
+        .append('<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>'))
+
+    $("#header>#post_options #__on_poll_remove_item").on("click",
+        e => $("#header>#post_options .poll_options>li:last-child").remove())
+
+    $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
+
+    // TODO: ドラッグドロップの処理がまだわからんち
+    document.addEventListener("dragenter", e => {
+        e.preventDefault()
+        // 画面内の画像をドラッグした場合は発火しない
+        if (e.dataTransfer.types[0] != 'Files' || $("#modal_drop_files").is(":visible")) return
+        $("#modal_drop_files").show("fade", 120)
+    })
+
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
+
+    $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
+        // 再発火の可能性をおさえるため遅めにフェードアウトする
+        e.preventDefault()
+        $("#modal_drop_files").hide("fade", 800)
+    })
+
+    $("#modal_drop_files").get(0).addEventListener("drop", e => {
+        // デフォルトイベントを無視してファイルを添付メソッドに渡す
+        e.preventDefault()
+        if (!$(e.target).is("#modal_drop_files>.dropbox")) return // ボックス外で外した場合は無視
+        Media.attachMedia([...e.dataTransfer.files])
+
+        // ドロップ領域を消して投稿オプションを開く
+        $("#modal_drop_files").hide("fade", 120)
+        if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
+            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
+
+    $("#__txt_postarea").get(0).addEventListener("paste", e => {
+        // ファイル以外は無視(普通のペースト)
+        if (e.clipboardData.types[0] != 'Files') return true
+
+        // デフォルトイベントを無視してクリップボードをファイル化して添付メソッドに渡す
+        e.preventDefault()
+        Media.attachMedia([e.clipboardData.items[0].getAsFile()])
+
+        if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
+            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+    })
 
     /*=== Column And Group Event =================================================================================*/
 
@@ -508,36 +537,37 @@ $(() => {
      * 投稿本体に対してホバー(ノーマルレイアウトとチャットレイアウト限定)
      * => 表示アカウントのアクションバーを表示
      */
-    $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
-        // メイン画面のタイムラインのみ有効
-        if ($(e.target).closest(".tl_group_box").length == 0) return
-        const target_post = Column.get($(e.target).closest("td"))
-            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
-        // 外部インスタンスに対しては使用不可
-        if (target_post.from_timeline?.pref?.external) return
-        const pos = $(e.currentTarget).offset()
-        const height = $(e.currentTarget).innerHeight()
+    if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
+        $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
+            // メイン画面のタイムラインのみ有効
+            if ($(e.target).closest(".tl_group_box").length == 0) return
+            const target_post = Column.get($(e.target).closest("td"))
+                .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+            // 外部インスタンスに対しては使用不可
+            if (target_post.from_timeline?.pref?.external) return
+            const pos = $(e.currentTarget).offset()
+            const height = $(e.currentTarget).innerHeight()
 
-        // プラットフォームによって初期表示を変更
-        if (target_post.from_account.platform == 'Misskey') { // Misskey
-            $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
-            $("#pop_expand_action .__short_bookmark").hide()
-            $("#pop_expand_action .__short_quote").show()
-            $("#pop_expand_action .__short_open_reaction").show()
-        } else { // Mastodon
-            $("#pop_expand_action .__short_bookmark").show()
-            $("#pop_expand_action .__short_quote").hide()
-            $("#pop_expand_action .__short_open_reaction").hide()
-        }
-        $("#pop_expand_action>.reactions").hide()
+            // プラットフォームによって初期表示を変更
+            if (target_post.from_account.platform == 'Misskey') { // Misskey
+                $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+                $("#pop_expand_action .__short_bookmark").hide()
+                $("#pop_expand_action .__short_quote").show()
+                $("#pop_expand_action .__short_open_reaction").show()
+            } else { // Mastodon
+                $("#pop_expand_action .__short_bookmark").show()
+                $("#pop_expand_action .__short_quote").hide()
+                $("#pop_expand_action .__short_open_reaction").hide()
+            }
+            $("#pop_expand_action>.reactions").hide()
 
-        // 一時データに設定してアクションバーを開く
-        Status.TEMPORARY_ACTION_STATUS = target_post
-        $("#pop_expand_action").css({
-            "top": `${pos.top + height - 2}px`,
-            "left": `${pos.left}px`,
-        }).show()
-    })
+            // 一時データに設定してアクションバーを開く
+            Status.TEMPORARY_ACTION_STATUS = target_post
+            $("#pop_expand_action").css({
+                "top": `${pos.top + height - 2}px`,
+                "left": `${pos.left}px`,
+            }).show()
+        })
 
     /**
      * #Event
@@ -745,6 +775,35 @@ $(() => {
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
 
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__on_show_instance", e => (async () => {
+        $("#pop_ex_timeline .single_user").css("width", "880px")
+        $("#pop_ex_timeline .column_instance_info").show()
+        try {
+            const user = await User.getByAddress($(e.target).closest("td").attr("id"))
+            const instance = await user.getInstance()
+            instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
+        } catch (err) {
+            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>img')
+                .attr('src', 'resources/illust/il_error.png')
+            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>.loading_text')
+                .text(`インスタンスの情報の取得に失敗しました……。
+                    接続できなかったかサポート外のプラットフォーム、インスタンスの場合があります。`)
+        }
+    })())
+
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_posts", e => {
+        $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".post_uls").show()
+    })
+
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_medias", e => {
+        if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
+            // メディアタイムラインを未取得の場合は取得する
+            User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createMediaGallery())
+        $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".media_uls").show()
+    })
+
     /**
      * #Event #Delayhover
      * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー
@@ -919,6 +978,15 @@ $(() => {
         else $("#pop_window_timeline").removeClass("__opacity_on")
     })
 
+    let resize_timer = 0
+    window.addEventListener("resize", () => {
+        // プロフィール画面が表示されていなかったらなにもしない
+        if (!$("#pop_ex_timeline").is(":visible")) return
+        clearTimeout(resize_timer)
+        resize_timer = setTimeout(() => $("#pop_ex_timeline>.account_timeline td.column_profile")
+            .each((index, elm) => User.setHeight($(elm), $(elm).find(".pinned_block").length > 0)), 250)
+    })
+
     /**
      * #Event
      * 各種閉じるボタン
@@ -931,4 +999,6 @@ $(() => {
         $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
     $(document).on("click", "#__on_pop_window_close", e =>
         $("#pop_window_timeline").hide("fade", 150))
+    $(document).on("click", "#__on_util_window_close", e =>
+        $("#pop_util_window").hide("fade", 150))
 })
