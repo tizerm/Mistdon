@@ -211,7 +211,7 @@ class Account {
                 for (const elm of thumbnails) { // アップロードはひとつずつ順番に行う
                     const image = $(elm).find("img.__img_attach")
                     if (image.is(".media_from_drive")) // ドライブから参照した画像はそのまま属性からIDを取得
-                        media_ids.push($(elm).attr("name"))
+                        media_ids.push(image.attr("name"))
                     else { // アップロード待機ファイルはアップロードする
                         const media_id = await Media.uploadMedia(
                             this, files_map.get(image.attr("name")), $(elm).find('input[type="checkbox"]').prop("checked"))
