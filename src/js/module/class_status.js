@@ -785,10 +785,22 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
-            jqelm.find('.content>.main_content').hide()  // CWを非表示にする
-        if (this.sensitive && !this.from_timeline?.pref?.expand_media)
-            jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        if (this.profile_post_flg || this.detail_flg) { // プロフィールと詳細表示は投稿時刻で色分けする
+            let time_color = null
+            const diff_msec = Date.now() - this.sort_date.getTime()
+            if      (diff_msec < 86400000)    time_color = "label_24h"
+            else if (diff_msec < 259200000)   time_color = "label_72h"
+            else if (diff_msec < 604800000)   time_color = "label_1w"
+            else if (diff_msec < 2592000000)  time_color = "label_1m"
+            else if (diff_msec < 15552000000) time_color = "label_hfy"
+            else if (diff_msec < 31536000000) time_color = "label_1y"
+            else time_color = "label_none"
+            jqelm.find('.post_footer>.created_at').addClass(`from_address ${time_color}`)
+        }
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+            jqelm.find('.content>.main_content').hide()
+        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.media>.media_content').hide()
 
         return jqelm
     }

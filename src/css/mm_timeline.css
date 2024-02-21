@@ -591,6 +591,17 @@
                         &.Misskey  { background-image: url("../resources/ic_misskey.png"); }
                     }
                 }
+                > .from_address.created_at {
+                    color: #ffffff;
+                    padding-right: 16px;
+                    border-top: none;
+                    &.label_24h { background-color: #852a2a; }
+                    &.label_72h { background-color: #855c2a; }
+                    &.label_1w  { background-color: #2a8564; }
+                    &.label_1m  { background-color: #2a6185; }
+                    &.label_hfy { background-color: #2a3985; }
+                    &.label_1y  { background-color: #472a85; }
+                }
             }
         }
         > li.self_post,
