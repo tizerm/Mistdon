@@ -305,6 +305,7 @@ class GroupPref {
      * このカラムの設定DOMを生成してテーブルにアペンドする
      */
     create() {
+        const uuid = crypto.randomUUID()
         // カラム本体を空の状態でjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
             <div id="${this.id}" class="tl_group timeline ui-sortable">
@@ -321,6 +322,8 @@ class GroupPref {
                     </div>
                 </div>
                 <div class="group_option">
+                    <button type="button" class="__open_multi_tl_layout" title="マルチタイムラインレイアウトを編集"
+                        ><img src="resources/ic_return.png" alt="マルチタイムラインレイアウトを編集"/></button>
                     <select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
                         <option value="default">ノーマル</option>
                         <option value="normal2">ノーマル2</option>
@@ -328,9 +331,92 @@ class GroupPref {
                         <option value="list">リスト</option>
                         <option value="media">メディア</option>
                         <option value="gallery">ギャラリー</option>
+                        <option value="anonymous">アノニマス</option>
+                        <option value="multi">マルチ</option>
                     </select>
                     色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
                 </div>
+                <table class="tl_layout_options">
+                    <thead><tr>
+                        <th>通常</th>
+                        <th>ブースト<br/>リノート</th>
+                        <th>メディア</th>
+                        <th>通知</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td>
+                            <input type="radio" id="tll_def_${uuid}_1" name="tll_def_${uuid}"
+                                class="__opt_tll_default" value="default" checked/>
+                            <label for="tll_def_${uuid}_1">ノーマル</label>
+                            <input type="radio" id="tll_def_${uuid}_2" name="tll_def_${uuid}"
+                                class="__opt_tll_default" value="normal2"/>
+                            <label for="tll_def_${uuid}_2">ノーマル2</label>
+                            <input type="radio" id="tll_def_${uuid}_3" name="tll_def_${uuid}"
+                                class="__opt_tll_default" value="chat"/>
+                            <label for="tll_def_${uuid}_3">チャット</label>
+                            <input type="radio" id="tll_def_${uuid}_4" name="tll_def_${uuid}"
+                                class="__opt_tll_default" value="list"/>
+                            <label for="tll_def_${uuid}_4">リスト</label>
+                            <input type="radio" id="tll_def_${uuid}_5" name="tll_def_${uuid}"
+                                class="__opt_tll_default" value="anonymous"/>
+                            <label for="tll_def_${uuid}_5">アノニマス</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="tll_btrn_${uuid}_1" name="tll_btrn_${uuid}"
+                                class="__opt_tll_btrn" value="default" checked/>
+                            <label for="tll_btrn_${uuid}_1">ノーマル</label>
+                            <input type="radio" id="tll_btrn_${uuid}_2" name="tll_btrn_${uuid}"
+                                class="__opt_tll_btrn" value="normal2"/>
+                            <label for="tll_btrn_${uuid}_2">ノーマル2</label>
+                            <input type="radio" id="tll_btrn_${uuid}_3" name="tll_btrn_${uuid}"
+                                class="__opt_tll_btrn" value="chat"/>
+                            <label for="tll_btrn_${uuid}_3">チャット</label>
+                            <input type="radio" id="tll_btrn_${uuid}_4" name="tll_btrn_${uuid}"
+                                class="__opt_tll_btrn" value="list"/>
+                            <label for="tll_btrn_${uuid}_4">リスト</label>
+                            <input type="radio" id="tll_btrn_${uuid}_5" name="tll_btrn_${uuid}"
+                                class="__opt_tll_btrn" value="anonymous"/>
+                            <label for="tll_btrn_${uuid}_5">アノニマス</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="tll_media_${uuid}_1" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="default" checked/>
+                            <label for="tll_media_${uuid}_1">ノーマル</label>
+                            <input type="radio" id="tll_media_${uuid}_2" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="normal2"/>
+                            <label for="tll_media_${uuid}_2">ノーマル2</label>
+                            <input type="radio" id="tll_media_${uuid}_3" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="chat"/>
+                            <label for="tll_media_${uuid}_3">チャット</label>
+                            <input type="radio" id="tll_media_${uuid}_4" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="list"/>
+                            <label for="tll_media_${uuid}_4">リスト</label>
+                            <input type="radio" id="tll_media_${uuid}_5" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="media"/>
+                            <label for="tll_media_${uuid}_5">メディア</label>
+                            <input type="radio" id="tll_media_${uuid}_6" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="gallery"/>
+                            <label for="tll_media_${uuid}_6">ギャラリー</label>
+                            <input type="radio" id="tll_media_${uuid}_7" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="anonymous"/>
+                            <label for="tll_media_${uuid}_7">アノニマス</label>
+                            <input type="radio" id="tll_media_${uuid}_8" name="tll_media_${uuid}"
+                                class="__opt_tll_media" value="ignore"/>
+                            <label for="tll_media_${uuid}_8">無視</label>
+                        </td>
+                        <td>
+                            <input type="radio" id="tll_notif_${uuid}_1" name="tll_notif_${uuid}"
+                                class="__opt_tll_notif" value="default" checked/>
+                            <label for="tll_notif_${uuid}_1">ノーマル</label>
+                            <input type="radio" id="tll_notif_${uuid}_2" name="tll_notif_${uuid}"
+                                class="__opt_tll_notif" value="normal2"/>
+                            <label for="tll_notif_${uuid}_2">ノーマル2</label>
+                            <input type="radio" id="tll_notif_${uuid}_4" name="tll_notif_${uuid}"
+                                class="__opt_tll_notif" value="list"/>
+                            <label for="tll_notif_${uuid}_4">リスト</label>
+                        </td>
+                    </tr></tbody>
+                </table>
                 <ul class="__ui_tl_sortable"></ul>
             </div>
         `))
@@ -346,6 +432,12 @@ class GroupPref {
         }
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
+        if (this.pref?.tl_layout == 'multi') { // タイムラインレイアウト: マルチ
+            jqelm.find(`input.__opt_tll_default[value="${this.pref.multi_layout_option.default}"]`).prop("checked", true)
+            jqelm.find(`input.__opt_tll_btrn[value="${this.pref.multi_layout_option.reblog}"]`).prop("checked", true)
+            jqelm.find(`input.__opt_tll_media[value="${this.pref.multi_layout_option.media}"]`).prop("checked", true)
+            jqelm.find(`input.__opt_tll_notif[value="${this.pref.multi_layout_option.notification}"]`).prop("checked", true)
+        }
         // タイムラインの設定値をDOMと共に生成
         this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create()))
 
@@ -711,7 +803,7 @@ class ColumnPref {
      */
     static normalize() {
         // DOM要素から不正な空データを除外する
-        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 // タイムラインが存在しないグループは削除
                 if ($(gp_elm).find("ul>li").length == 0) $(gp_elm).remove()
@@ -730,7 +822,7 @@ class ColumnPref {
         ColumnPref.normalize()
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
-        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
             const group_list = []
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 const tl_list = []
@@ -753,6 +845,14 @@ class ColumnPref {
                         'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
                     })
                 })
+                let multi_layout = null
+                // タイムラインレイアウトがマルチの場合はマルチレイアウト設定を保存
+                if ($(gp_elm).find(".__cmb_tl_layout").val() == 'multi') multi_layout = {
+                    'default': $(gp_elm).find('input.__opt_tll_default:checked').val(),
+                    'reblog': $(gp_elm).find('input.__opt_tll_btrn:checked').val(),
+                    'media': $(gp_elm).find('input.__opt_tll_media:checked').val(),
+                    'notification': $(gp_elm).find('input.__opt_tll_notif:checked').val()
+                }
                 group_list.push({ // タイムライングループプリファレンス
                     // デフォルトグループ名は「Group XX」
                     'label_head': $(gp_elm).find(".__txt_group_head").val() || `Group ${gp_index + 1}`,
@@ -760,7 +860,8 @@ class ColumnPref {
                     // デフォルトグループカラーは#777777(グレー)
                     'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
                     'gp_height': $(gp_elm).find(".__txt_group_height").val(),
-                    'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val()
+                    'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val(),
+                    'multi_layout_option': multi_layout
                 })
             })
             col_list.push({ // カラムプリファレンス

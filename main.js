@@ -524,6 +524,7 @@ async function writePrefCols(event, json_data) {
                 'multi_user': multi_account_flg,
                 'multi_timeline': tl_list.length > 1,
                 'tl_layout': gp.tl_layout,
+                'multi_layout_option': gp.multi_layout_option,
                 'gp_color': gp.gp_color,
                 // 最後のグループだけは高さを自動決定するためnullにする
                 'gp_height': index < col.groups.length - 1 ? gp.gp_height : null,
@@ -986,7 +987,7 @@ const createWindow = () => {
     win.loadFile('src/index.html')
 
     // 認証サーバー起動
-    bootServer(win)
+    //bootServer(win)
 
     windowState.manage(win)
 }

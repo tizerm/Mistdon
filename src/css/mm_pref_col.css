@@ -115,6 +115,7 @@
             > .col_tl_groups {
                 height: calc(100vh - 284px);
                 > .tl_group {
+                    position: relative;
                     > .group_head {
                         background-color: #505050;
                         background-image: url("../resources/ic_sort_move.png");
@@ -160,6 +161,25 @@
                         text-align: center;
 
                         > select.__cmb_tl_layout { width: 96px; }
+                    }
+                    > table.tl_layout_options {
+                        display: none;
+                        background-color: rgba(34,34,34,0.92);
+                        border-radius: 6px;
+                        z-index: 1;
+                        position: absolute;
+                        top: 60px;
+                        left: 0px;
+                        width: 100%;
+                        font-size: 11px;
+                        & td { vertical-align: top; }
+                        & label {
+                            display: block;
+                            margin: 2px 0px;
+                            padding: 2px 4px;
+                            font-size: 11px;
+                            text-align: center;
+                        }
                     }
                     > ul {
                         margin: 0px;

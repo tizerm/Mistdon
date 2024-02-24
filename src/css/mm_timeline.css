@@ -919,6 +919,17 @@
             padding-right: 42px;
         }
 
+        /*=== Anonymous Layout Style =============================================================*/
+        > li.anonymous_layout {
+            background-color: transparent;
+            border-radius: 0px;
+            margin: 8px 6px;
+            padding: 0px;
+            border-bottom: solid 1px #bbbbbb;
+            > .content>.main_content { margin: 0px 8px; }
+
+        }
+
         /*=== Scroll Loader Layout ===============================================================*/
         > li.__scroll_loader {
             background-image: url("../resources/ic_reload.png");

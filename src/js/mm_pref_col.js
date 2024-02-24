@@ -50,6 +50,9 @@
     // グループカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_color",
         e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`));
+    // マルチタイムラインレイアウト表示
+    $(document).on("click", ".__open_multi_tl_layout",
+        e => $(e.target).closest(".tl_group").find(".tl_layout_options").toggle("slide", { direction: "up" }, 120));
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`));
