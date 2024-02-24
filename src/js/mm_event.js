@@ -538,7 +538,7 @@ $(() => {
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
-        $(document).on("mouseenter", "li.normal_layout, li.chat_timeline>.content", e => {
+        $(document).on("mouseenter", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
             // メイン画面のタイムラインのみ有効
             if ($(e.target).closest(".tl_group_box").length == 0) return
             const target_post = Column.get($(e.target).closest("td"))
@@ -560,6 +560,7 @@ $(() => {
                 $("#pop_expand_action .__short_open_reaction").hide()
             }
             $("#pop_expand_action>.reactions").hide()
+            $("#pop_expand_action>.impressions").hide()
 
             // 一時データに設定してアクションバーを開く
             Status.TEMPORARY_ACTION_STATUS = target_post
@@ -568,6 +569,9 @@ $(() => {
                 "left": `${pos.left}px`,
             }).show()
         })
+
+    $(document).on("click", ".__on_datelink", e =>
+        Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
     /**
      * #Event
@@ -635,6 +639,14 @@ $(() => {
     $(document).on("click", ".__short_prepost",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
 
+    $(document).on("click", ".__short_impression",
+        e => Status.getStatus(Status.TEMPORARY_ACTION_STATUS.uri).then(post => {
+            $("#pop_expand_action>.impressions>.impress_reply").text(post.count_reply)
+            $("#pop_expand_action>.impressions>.impress_reblog").text(post.count_reblog)
+            $("#pop_expand_action>.impressions>.impress_fav").text(post.count_fav)
+            $("#pop_expand_action>.impressions").show("slide", { direction: "up" }, 80)
+        }))
+
     /**
      * #Event
      * 簡易アクションバー: 直近のリアクション
@@ -660,7 +672,7 @@ $(() => {
      * 投稿本体からマウスアウト
      * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
      */
-    $(document).on("mouseleave", "li.normal_layout, li.chat_timeline>.content", e => {
+    $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
         // メイン画面のタイムラインのみ有効
         if ($(e.target).closest(".tl_group_box").length == 0) return
         // アクションバーに移動した場合は消さない
@@ -814,7 +826,7 @@ $(() => {
         enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
             .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
         leaveFunc: e => {},
-        delay: 500
+        delay: 700
     })
 
     /**

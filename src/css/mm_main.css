@@ -345,8 +345,8 @@
     > #pop_notification {
         z-index: 11;
         position: absolute;
-        top: 32px;
-        left: 72px;
+        top: 108px;
+        left: 64px;
 
         > ul {
             margin: 0px;
@@ -356,15 +356,18 @@
                 margin: 4px 0px;
                 > span {
                     display: inline-block;
-                    border-radius: 12px;
-                    border: solid 2px #aaaaaa;
-                    padding: 4px 24px;
+                    border-top-right-radius: 16px;
+                    border-bottom-right-radius: 16px;
+                    border: solid 1px #aaaaaa;
+                    border-left-style: none;
+                    padding: 6px 24px;
+                    padding-left: 36px;
                     background-color: rgba(34,34,34,0.8);
                     font-size: 16px;
                     font-weight: bold;
                 }
-                > .done  { background-color: rgba(62,82,96,0.8) }
-                > .error { background-color: rgba(96,82,62,0.8) }
+                > .done  { background-color: rgba(34,60,72,0.8); }
+                > .error { background-color: rgba(72,42,34,0.8); }
             }
         }
     }
@@ -582,6 +585,34 @@
             }
         }
         > .reactions>.recent { display: inline; }
+        > .impressions {
+            margin-top: 2px;
+            > span {
+                display: inline-block;
+                border-radius: 8px;
+                background-position: center left 2px;
+                background-repeat: no-repeat;
+                background-size: 24px 24px;
+                padding: 2px;
+                padding-left: 32px;
+                padding-right: 16px;
+                font-family: Arial, "メイリオ", sans-selif;
+                font-size: 14px;
+                font-weight: bold;
+                &.impress_reply {
+                    background-color: #cc355d;
+                    background-image: url("../resources/ic_cnt_rp.png");
+                }
+                &.impress_reblog {
+                    background-color: #408a08;
+                    background-image: url("../resources/ic_cnt_rblg.png");
+                }
+                &.impress_fav {
+                    background-color: #a8880a;
+                    background-image: url("../resources/ic_cnt_fav.png");
+                }
+            }
+        }
     }
 
     /*=== Extra Timeline Window Layout ===========================================================*/

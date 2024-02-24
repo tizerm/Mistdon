@@ -75,7 +75,7 @@ class Notification {
         // アイコンを変更
         Notification.progressIcon()
         // 1.2secでトーストを削除
-        setTimeout(() => target_elm.hide("fade", 400, () => target_elm.remove()), 1200)
+        setTimeout(() => target_elm.hide("fade", 400, () => target_elm.remove()), 1600)
     }
 
     push() {

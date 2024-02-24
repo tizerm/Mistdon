@@ -8,7 +8,9 @@ const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
+const http = require('http')
 const stateKeeper = require('electron-window-state')
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 // アプリ保持用設定データの管理
 var pref_accounts = null
@@ -18,6 +20,7 @@ var pref_window = null
 var pref_emojis = new Map()
 var cache_history = null
 var cache_emoji_history = null
+var oauth_session = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -158,6 +161,195 @@ async function writePrefAccColor(event, json_data) {
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
 }
 
+async function openOAuthSession(event, json_data) {
+    const host = json_data.host
+    let permission = null
+    let redirect_url = null
+    let client_id = null
+    switch (json_data.platform) {
+        case 'Mastodon': // Mastodon
+            // 権限とリダイレクトURLを設定
+            permission = ["read", "write", "follow", "push"].join(" ")
+            redirect_url = 'http://127.0.0.1:3100/oauth/mastodon'
+
+            const client_info = await ajax({ // クライアントIDの取得
+                method: "POST",
+                url: `https://${host}/api/v1/apps`,
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                data: {
+                    "client_name": "Mistdon",
+                    "redirect_uris": redirect_url,
+                    "scopes": permission,
+                    "website": "https://github.com/tizerm/Mistdon"
+                }
+            })
+            client_id = client_info.body.client_id
+
+            // クライアントIDを取得できたらサーバーから参照する情報をキャッシュ
+            oauth_session = {
+                'domain': host,
+                'client_id': client_id,
+                'client_secret': client_info.body.client_secret,
+                'redirect_url': redirect_url,
+                'post_maxlength': json_data.post_maxlength
+            }
+            // OAuth認証画面を開く
+            openExternalBrowser(null, `https://${this.host}/oauth/authorize?client_id=${client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
+            break
+        case 'Misskey': // Misskey
+            // 権限とリダイレクトURLを設定
+            permission = ["read:account", "write:notes", "write:blocks",
+                "read:drive", "write:drive", "read:favorites", "write:favorites",
+                "read:following", "write:following", "write:mutes", "read:notifications",
+                "read:reactions", "write:reactions", "write:votes",
+                "read:channels", "write:channels"].join(" ")
+            redirect_url = 'http://127.0.0.1:3100/oauth/misskey'
+            client_id = 'http://127.0.0.1:3100/app/misskey'
+
+            const endpoints = await ajax({ // OAuthエンドポイントを取得
+                method: "GET",
+                url: `https://${host}/.well-known/oauth-authorization-server`
+            })
+            // code_verifierとcode_challengeとstateを生成
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~"
+            const code_verifier = new Array(128).fill(0).map(() => chars[Math.floor(chars.length * Math.random())]).join("")
+            const code_challenge = crypto.createHash("sha256").update(code_verifier, "ascii").digest("base64url")
+            const state = crypto.randomUUID()
+
+            // サーバーから参照する情報をキャッシュ
+            oauth_session = {
+                'domain': host,
+                'client_id': client_id,
+                'code_verifier': code_verifier,
+                'code_challenge': code_challenge,
+                'scope': permission,
+                'redirect_url': redirect_url,
+                'token_endpoint': endpoints.body.token_endpoint,
+                'state': state,
+                'post_maxlength': json_data.post_maxlength
+            }
+            // OAuth認証画面を開く
+            openExternalBrowser(null, `${endpoints.body.authorization_endpoint}?client_id=${client_id}&response_type=code&redirect_uri=${redirect_url}&scope=${encodeURIComponent(permission)}&code_challenge=${code_challenge}&code_challenge_method=S256&state=${state}`)
+            break
+        default:
+            break
+    }
+    console.log('@INF: OAuth Session stored.')
+}
+
+async function authorizeMastodon(auth_code) {
+    try {
+        const token = await ajax({ // OAuth認証を開始
+            method: "POST",
+            url: `https://${oauth_session.domain}/oauth/token`,
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            data: {
+                "client_id": oauth_session.client_id,
+                "client_secret": oauth_session.client_secret,
+                "redirect_uri": oauth_session.redirect_url,
+                "grant_type": "authorization_code",
+                "code": auth_code
+            }
+        })
+        const access_token = token.body.access_token
+
+        // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
+        const user_data = await ajax({
+            method: "GET",
+            url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
+            headers: { 'Authorization': `Bearer ${access_token}` }
+        })
+
+        // JSONを生成(あとでキャッシュに入れるので)
+        const write_json = {
+            'domain': oauth_session.domain,
+            'platform': 'Mastodon',
+            'user_id': user_data.body.username,
+            'username': user_data.body.display_name,
+            'socket_url': `wss://${oauth_session.domain}/api/v1/streaming`,
+            'client_id': oauth_session.client_id,
+            'client_secret': oauth_session.client_secret,
+            'access_token': access_token,
+            'avatar_url': user_data.body.avatar,
+            'post_maxlength': oauth_session.post_maxlength,
+            // アカウントカラーは初期値グレー
+            'acc_color': '808080'
+        }
+        // ファイルに書き込み
+        const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+        // キャッシュを更新
+        if (!pref_accounts) {
+            // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        } else {
+            pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
+        }
+    } catch (err) { // 認証失敗時
+        console.log(err)
+        return Promise.reject(err)
+    }
+}
+
+async function authorizeMisskey(param) {
+    try { // 最初にstateの照合をする
+        if (param.get("state") != oauth_session.state) throw new Error('invalid state.')
+        const token = await ajax({ // OAuth認証を開始
+            method: "POST",
+            url: oauth_session.token_endpoint,
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            data: {
+                "grant_type": "authorization_code",
+                "client_id": oauth_session.client_id,
+                "redirect_uri": oauth_session.redirect_url,
+                "scope": oauth_session.scope,
+                "code_verifier": oauth_session.code_verifier,
+                "code": param.get("code")
+            }
+        })
+        const access_token = token.body.access_token
+
+        console.log(token.body)
+        throw new Error('auth test dayo.')
+
+        // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
+/*        const user_data = await ajax({
+            method: "GET",
+            url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
+            headers: { 'Authorization': `Bearer ${token.body.access_token}` }
+        })//*/
+
+        // JSONを生成(あとでキャッシュに入れるので)
+        const write_json = {
+            'domain': oauth_session.domain,
+            'platform': 'Misskey',
+            'user_id': user_data.body.username,
+            'username': user_data.body.display_name,
+            'socket_url': `wss://${oauth_session.domain}/streaming`,
+            'client_id': oauth_session.client_id,
+            'client_secret': oauth_session.code_verifier,
+            'access_token': access_token,
+            'avatar_url': user_data.body.avatar,
+            'post_maxlength': oauth_session.post_maxlength,
+            // アカウントカラーは初期値グレー
+            'acc_color': '808080'
+        }
+        // ファイルに書き込み
+        const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+        // キャッシュを更新
+        if (!pref_accounts) {
+            // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        } else {
+            pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
+        }
+    } catch (err) { // 認証失敗時
+        console.log(err)
+        return Promise.reject(err)
+    }
+}
+
 /**
  * #IPC
  * 保存してあるカラム設定情報を読み込む
@@ -252,7 +444,7 @@ async function writePrefCols(event, json_data) {
                                 break
                         }
                         socket_url = `wss://${host}/api/v1/streaming`
-                        break;
+                        break
                     case 'Misskey': // Misskey
                         // タイムラインタイプによって設定値を変える
                         switch (tl.timeline_type) {
@@ -651,6 +843,52 @@ function jsonToMap(json_data, key_func) {
     return map;
 }
 
+function readResource(filepath) {
+    let content = null
+    try {
+        content = fs.readFileSync(filepath, 'utf8')
+    } catch(err) {
+        console.log('!ERR: file read failed.')
+    }
+    return content
+}
+
+async function ajax(arg) {
+    try {
+        let response = null
+        let url = arg.url
+        let param = {
+            method: arg.method,
+            headers: arg.headers
+        }
+        if (arg.data) { // Request Parameterが存在する場合
+            if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
+                const query_param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
+                url += `?${query_param.substring(1)}`
+            } else { // POSTはパラメータをURLSearchParamsにセットする
+                const post_params = new URLSearchParams()
+                Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
+                param.body = post_params
+            }
+        }
+
+        // fetchでHTTP Requestを送信
+        response = await fetch(url, param)
+
+        // ステータスコードがエラーの場合はエラーを投げる
+        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
+
+        // responseをjsonとheaderとHTTP Statusに分けて返却
+        return {
+            headers: response.headers,
+            status: response.status,
+            body: await response.json()
+        }
+    } catch (err) {
+        return Promise.reject(err)
+    }
+}
+
 /*====================================================================================================================*/
 
 /**
@@ -678,6 +916,49 @@ function notification(event, arg) {
 
 /*====================================================================================================================*/
 
+const bootServer = (win) => {
+    // サーバー設定
+    const server = http.createServer((request, response) => (async () => {
+        // リクエストURLを取得
+        const url = request.url
+        console.log(url)
+        if (url.match(new RegExp('^/oauth/', 'g'))) { // OAuth認証リダイレクトの場合
+            try { // GETパラメータを取得
+                const param = url.substring(url.indexOf('?') + 1).split('&')
+                    .reduce((map, p) => map.set(...p.split('=')), new Map())
+                if (param.size == 0) throw new Error('400')
+
+                // サーバーサイドのOAuth認証処理を実行
+                if (url.match(new RegExp('/mastodon', 'g'))) // Mastodon
+                    await authorizeMastodon(param.get('code'))
+                else if (url.match(new RegExp('/misskey', 'g'))) // Misskey
+                    await authorizeMisskey(param)
+
+                // 認証処理が成功した場合は成功画面を返却してElectronの画面を再読み込み
+                const content = readResource('src/server/accept.html')
+                response.writeHead(200, { "Content-Type": "text/html" })
+                response.end(content, "utf-8")
+                win.loadFile('src/auth.html')
+            } catch (err) { // 認証中にエラーが発生したらエラー画面
+                console.log(`!Server Error: ${err}`)
+                response.writeHead(500, { "Content-Type": "text/html" })
+                response.end("<h2>認証に失敗しました...</h2>", "utf-8")
+            }
+        } else if (url.match(new RegExp('^/app/misskey', 'g'))) { // Misskey認証用のappページ
+            const content = readResource('src/server/misskey_oauth.html')
+            response.writeHead(200, { "Content-Type": "text/html" })
+            response.end(content, "utf-8")
+        } else {
+            response.writeHead(200, { "Content-Type": "text/html" })
+            response.end('test', "utf-8")
+        }
+    })())
+
+    // サーバー起動
+    server.listen(3100)
+    console.log('OAuth Server boot success. http://127.0.0.1:3100/')
+}
+
 /**
  * #Main #Electron
  * メインウィンドウ生成処理
@@ -703,6 +984,9 @@ const createWindow = () => {
     // 最初に表示するページを指定
     //win.setMenuBarVisibility(false)
     win.loadFile('src/index.html')
+
+    // 認証サーバー起動
+    bootServer(win)
 
     windowState.manage(win)
 }
@@ -730,6 +1014,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)
     ipcMain.on('write-window-pref', writeWindowPref)
+    ipcMain.on('open-oauth', openOAuthSession)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 

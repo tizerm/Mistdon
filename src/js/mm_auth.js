@@ -105,6 +105,7 @@
             if (!instance) return // インスタンスが確認できなかった場合はなにもしない
             $(e.target).closest("#select_platform").find(".__hdn_instance_platform").val(instance.platform)
             $("#on_auth_instance").prop("disabled", false)
+            $("#on_auth_instance_oauth").prop("disabled", false)
             Instance.AUTH_INSTANCE = instance
         })
     });
@@ -122,6 +123,7 @@
                 break
         }
     }));
+    $("#on_auth_instance_oauth").on("click", e => Instance.AUTH_INSTANCE.openOAuth());
 
     // Mastodonの登録ボタンを押したときのイベント
     $("#on_mst_auth_token").on("click", e => Instance.AUTH_INSTANCE.saveTokenMastodon($("#txt_mst_auth_code").val()));

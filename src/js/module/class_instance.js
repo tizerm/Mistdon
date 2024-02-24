@@ -403,6 +403,95 @@ class Instance {
         }
     }
 
+    async openOAuth() {
+        window.accessApi.openOAuthSession({ // メインプロセスのOAuthセッションを呼び出す
+            'host': this.host,
+            'platform': this.platform,
+            'post_maxlength': this.post_maxlength
+        })
+        /*
+        let permission = null
+        let redirect_url = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // 権限とリダイレクトURLを設定
+                    permission = ["read", "write", "follow", "push"].join(" ")
+                    redirect_url = 'http://127.0.0.1:3100/oauth/mastodon'
+                    // クライアントIDの取得
+                    const client_info = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/v1/apps`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                        data: {
+                            "client_name": "Mistdon",
+                            "redirect_uris": redirect_url,
+                            "scopes": permission,
+                            "website": "https://github.com/tizerm/Mistdon"
+                        }
+                    })
+
+                    // クライアントIDを取得できたら認証画面を開く
+                    this.__auth_client_id = client_info.client_id
+                    this.__auth_client_secret = client_info.client_secret
+                    window.accessApi.storeOAuthSession({ // OAuthセッションをサーバーにストア
+                        'domain': this.host,
+                        'client_id': client_info.client_id,
+                        'client_secret': client_info.client_secret,
+                        'redirect_url': redirect_url,
+                        'post_maxlength': this.post_maxlength
+                    })
+                    window.accessApi.openExternalBrowser(`https://${this.host}/oauth/authorize?client_id=${client_info.client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
+                    break
+                case 'Misskey': // Misskey
+                    // 権限とリダイレクトURLを設定
+                    permission = ["read:account", "read:notes", "write:notes", "write:blocks",
+                        "read:drive", "write:drive", "read:favorites", "write:favorites",
+                        "read:following", "write:following", "write:mutes", "read:notifications",
+                        "read:reactions", "write:reactions", "write:votes",
+                        "read:channels", "write:channels"]
+                    redirect_url = 'http://127.0.0.1:3100/oauth/misskey'
+                    // サーバーにアプリ登録
+                    const app = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/app/create`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            'name': 'Mistdon',
+                            'description': 'This is Electron base Mastodon and Misskey client.',
+                            'permission': permission
+                        })
+                    })
+
+                    // 正常にアプリ登録できたら認証セッションを開始
+                    this.__auth_app_secret = app.secret
+                    const response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/auth/session/generate`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ 'appSecret': app.secret })
+                    })
+
+                    // responseが返ってきたら認証ウィンドウを生成
+                    this.__auth_app_token = response.token
+                    window.accessApi.openExternalBrowser(response.url)
+                    break
+                default:
+                    break
+            }
+        } catch (err) { // 認証失敗時
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "認証リクエスト実行中に問題が発生しました。"
+            })
+            return Promise.reject(err)
+        }//*/
+    }
+
     // Getter: インスタンスヘッダのDOMを返却
     get header_element() {
         let target_emojis = null
