@@ -230,7 +230,7 @@
         font-size: 14px;
     }
     & ul {
-        background-color: rgba(255,255,255,0.05);
+        background-color: rgba(34,34,34,0.683);
         margin: 0px;
         padding: 0px;
         height: calc(100vh - 224px);
@@ -240,7 +240,7 @@
 
         /*=== Normal Layout Style ================================================================*/
         > li {
-            background-color: rgba(62,62,62,0.92);
+            background-color: rgba(56,56,56,0.683);
             position: relative;
             border-radius: 12px;
             list-style-type: none;
@@ -472,7 +472,7 @@
                 margin: 2px;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
-                background-color: rgba(255,255,255,0.08);
+                background-color: rgba(76,76,76,0.683);
                 border-left: solid 8px #cccccc;
                 overflow-wrap: break-word;
                 font-size: 11px;
@@ -611,14 +611,14 @@
             }
         }
         > li.self_post,
-        > li.chat_timeline.self_post>.content { background-color: rgba(62,68,82,0.92); }
+        > li.chat_timeline.self_post>.content { background-color: rgba(62,68,82,0.683); }
         > li.rebloged_post,
-        > li.chat_timeline.rebloged_post>.content { background-color: rgba(62,76,66,0.92); }
-        > li.favorited_post { background-color: rgba(76,76,62,0.92); }
+        > li.chat_timeline.rebloged_post>.content { background-color: rgba(62,76,66,0.683); }
+        > li.favorited_post { background-color: rgba(76,76,62,0.683); }
 
         /*=== Short User Infomation Style ========================================================*/
         > li.short_userinfo {
-            background-color: rgba(62,82,96,0.92);
+            background-color: rgba(62,82,96,0.683);
             > .user_header { height: 64px; }
             .main_content {
                 overflow: hidden;
@@ -682,7 +682,7 @@
             > .content {
                 position: relative;
                 left: 34px;
-                background-color: rgba(62,62,62,0.92);
+                background-color: rgba(56,56,56,0.683);
                 margin: 0px;
                 padding: 8px 12px;
                 border-radius: 8px;
@@ -938,6 +938,11 @@
             height: 32px;
         }
     }
+    &.tl_group_box ul {
+        border-left: solid 4px #cccccc;
+        border-bottom: solid 4px #cccccc;
+        border-bottom-left-radius: 12px;
+    }
     .__context_posts {
         > li:not(.chat_timeline),
         > li.chat_timeline>.content {
@@ -1071,7 +1076,7 @@
                 opacity: 1.0;
             }
         }
-        > ul>li { background-color: rgba(82,66,62,0.92); }
+        > ul>li { background-color: rgba(82,66,62,0.683); }
     }
     .posts_block>h4 { background-color: #3b5778; }
     .posts, .media_post { height: calc((100vh - 310px) * 0.6); }

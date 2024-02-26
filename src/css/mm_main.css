@@ -31,6 +31,8 @@
     /*=== Default Post Area Layout ===============================================================*/
     > #head_postarea {
         display: flex;
+        background-color: rgba(34,34,34,0.717);
+        border-radius: 12px;
         margin: 2px 0px;
         width: calc(100vw - 72px);
 

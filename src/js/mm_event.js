@@ -565,7 +565,7 @@ $(() => {
             // 一時データに設定してアクションバーを開く
             Status.TEMPORARY_ACTION_STATUS = target_post
             $("#pop_expand_action").css({
-                "top": `${pos.top + height - 2}px`,
+                "top": `${pos.top + height - 4}px`,
                 "left": `${pos.left}px`,
             }).show()
         })

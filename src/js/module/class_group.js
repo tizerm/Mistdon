@@ -83,16 +83,23 @@ class Group {
             </td>
         `))
 
+        let box_color = null
         if (this.parent_column.pref.multi_group) {
-            // 複数のタイムライングループを持つカラムの場合は色とタイムラインの高さを設定
-            jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
+            // 複数のタイムライングループを持つカラムの場合はタイムラインの高さを設定
             jqelm.closest(".tl_group_box").css("height", `${this.height}%`)
-            jqelm.find("ul").css("height", 'calc(100% - 20px)')
+            jqelm.find("ul").css("height", 'calc(100% - 26px)')
+            box_color = this.pref.gp_color
         } else { // 単一タイムライングループの場合はヘッダを非表示
-            jqelm.find(".group_head").css("background-color", `#${this.parent_column.pref.col_color}`)
             jqelm.find(".ic_group_cursor").hide()
             jqelm.find(".group_head>h4").hide()
+            box_color = this.parent_column.pref.col_color
         }
+        // カラー設定
+        jqelm.find(".group_head").css("background-color", `#${box_color}`)
+        jqelm.find("ul").css({
+            "border-left-color": `#${box_color}`,
+            "border-bottom-color": `#${box_color}`
+        })
 
         return jqelm
     }
