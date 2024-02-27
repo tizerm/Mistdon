@@ -117,6 +117,8 @@ class Timeline {
                         this.parent_group.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
                     // 削除された投稿を検知
                     else if (data.event == "delete") this.removeStatus(data.payload)
+                    else if (data.event == "status.update") // 更新された投稿を検知
+                        this.updateStatus(new Status(JSON.parse(data.payload), this, this.target_account))
                 }
                 // 購読パラメータの設定
                 this.pref.socket_param.type = "subscribe"
@@ -204,8 +206,16 @@ class Timeline {
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
+
         // タイムラインに存在する投稿だけ削除対象とする
-        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key))
+        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
+    }
+
+    updateStatus(post) {
+        const status_key = this.status_key_map.get(post.id)
+
+        // タイムラインに存在する投稿だけ修正対象とする
+        if (status_key) this.parent_group.updateStatus(this.parent_group.getStatusElement(status_key), post)
     }
 
     /**

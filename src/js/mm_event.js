@@ -570,9 +570,6 @@ $(() => {
             }).show()
         })
 
-    $(document).on("click", ".__on_datelink", e =>
-        Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
-
     /**
      * #Event
      * 簡易アクションバー: リプライ

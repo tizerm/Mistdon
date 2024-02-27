@@ -52,7 +52,7 @@
                     return false;
                 }
                 break;
-            case 73: // Ctrl+I: 直前の投稿につなげる
+            case 84: // Ctrl+I: 直前の投稿につなげる
                 if (event.ctrlKey || event.metaKey) {
                     $("#header #on_last_replychain").click();
                     return false;

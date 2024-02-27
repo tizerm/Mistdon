@@ -43,7 +43,6 @@ class User {
                     label: f.name,
                     text: f.value
                 }))
-                console.log(arg.json)
                 break
             case 'Misskey': // Misskey
                 // リモートの情報を直に取得する場合引数をそのまま使う
@@ -69,6 +68,9 @@ class User {
                 this.count_post = arg.json.notesCount
                 this.count_follow = arg.json.followingCount
                 this.count_follower = arg.json.followersCount
+                /*
+                 * TODO: 非表示設定がfollowersVisibilityとfollowingVisibilityに分離したのでこのままだと表示ができない
+                 */
                 this.hide_ff = (arg.json.ffVisibility ?? 'public') != 'public'
 
                 // フィールドをセット

@@ -212,7 +212,7 @@ class Group {
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                 .text(++this.unread)
             this.counter++
-            if (remove_flg) this.removeStatus(ul.find("li:last-child"))
+            if (remove_flg) this.removeStatus(ul.find("li:last-child"), false)
         })
 
         // 通知が来た場合は通知ウィンドウに追加
@@ -285,7 +285,7 @@ class Group {
      * 
      * @param jqelm 消去対象の投稿のjQueryオブジェクト
      */
-    removeStatus(jqelm) {
+    removeStatus(jqelm, delay) {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
 
@@ -297,7 +297,20 @@ class Group {
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
-        jqelm.parent().find(`li[id="${key}"]`).remove()
+        const del_elm = jqelm.parent().find(`li[id="${key}"]`)
+        if (delay) // 遅延削除する場合は一旦時間をかけてフェードさせてから削除する
+            del_elm.hide("fade", 2500, () => del_elm.remove())
+        // 遅延削除しない場合は即座にelementを削除
+        else del_elm.remove()
+    }
+
+    updateStatus(jqelm, post) {
+        const key = jqelm.attr("id")
+        // ステータスデータを置き換える
+        post.from_timeline.status_key_map.set(post.status_id, post)
+        this.status_map.set(post.status_key, post)
+        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
+        post.update(jqelm.parent().find(`li[id="${key}"]`))
     }
 
     /**
