@@ -473,6 +473,62 @@ class Account {
         }
     }
 
+    async renote(url, option) {
+        let response = null
+        let target_post = null
+        const notification = Notification.progress("対象の投稿を取得中です...")
+        try { // ターゲットの投稿データを取得
+            response = await $.ajax({
+                type: "POST",
+                url: `https://${this.pref.domain}/api/ap/show`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    "i": this.pref.access_token,
+                    "uri": url
+                })
+            })
+            response = response.object
+            // 取得できなかったらなにもしない
+            if (!response) throw new Error('response is empty.')
+            // 取得できた場合はtarget_jsonからStatusインスタンスを生成
+            target_post = new Status(response, History.HISTORY_PREF_TIMELINE, this)
+        } catch (err) {
+            console.log(err)
+            notification.error("投稿の取得でエラーが発生しました.")
+            return
+        }
+
+        // リノートパラメータを設定
+        let request_param = {
+            "i": this.pref.access_token,
+            "renoteId": target_post.id
+        }
+        switch (option) {
+            case 'local': // ローカルへリノート
+                request_param.localOnly = true
+                break
+            case 'home': // ホームへリノート
+                request_param.visibility = "home"
+                break
+            default: // チャンネルへリノート
+                request_param.localOnly = true
+                request_param.channelId = option
+                break
+        }
+
+        $.ajax({
+            type: "POST",
+            url: `https://${this.pref.domain}/api/notes/create`,
+            dataType: "json",
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify(request_param)
+        }).then(data => {
+            History.pushActivity(target_post, 'reblog', data.createdNote.id)
+            notification.done("投稿をリノートしました.")
+        }).catch(jqXHR => notification.error("リノートに失敗しました."))
+    }
+
     /**
      * #Method #Ajax #jQuery
      * このアカウントからリアクションを送信する(Misskey専用機能)
@@ -747,8 +803,9 @@ class Account {
     static async cacheEmojis() {
         { // キャッシュが取れていないアカウントがある場合は自動的にキャッシュを取得
             let cache_flg = true
-            for (const elm of Account.map) {
-                if (!elm[1].emojis) {
+            const acitr = Account.map.values()
+            for (const account of acitr) {
+                if (!account.emojis) {
                     cache_flg = false
                     break
                 }
@@ -1121,19 +1178,25 @@ class Account {
         }
         try {
             const channels = await this.getChannelsCache()
-            let html = '<option value="__default">通常投稿</option>'
+            let html = '<option value="__default">通常タイムラインへ投稿</option>'
             channels?.forEach(c => html /* デフォルトのチャンネルがある場合は初期選択 */ += `
                 <option value="${c.id}"${this.pref.default_channel == c.id ? ' selected' : ''}>${c.name}</option>
             `)
+
+            // チャンネル情報を取得している最中に別のアカウントに変わっていたら何もしない
+            if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') != this.full_address) return
+            // チャンネルコンボボックスを生成
             $("#__cmb_post_to").prop('disabled', false).html(html)
         } catch (err) {
             console.log(err)
+
+            // チャンネル情報を取得している最中に別のアカウントに変わっていたら何もしない
+            if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') != this.full_address) return
             // お気に入りのチャンネルがない場合は無効化
             $("#__cmb_post_to").prop('disabled', true).html(`
                 <option value="__default">(${err == 'empty' ? 'チャンネルがありません' : '取得できませんでした'})</option>
             `)
         }
-
         // ローカル(連合なし)の初期設定もする
         $("#__chk_local_only").prop('disabled', false).prop('checked', this.pref.default_local)
     }
@@ -1194,6 +1257,36 @@ class Account {
                 html = `<li class="ui-state-disabled"><div>(${platform}のアカウントがありません)</div></li>`
         } else // プラットフォーム指定がない場合は普通にすべてのアカウントを表示
             Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.pref.username} - ${k}</div></li>`)
+        return html
+    }
+
+    static async createContextLimitedRenoteList() {
+        let html = ''
+        const acitr = Account.map.values()
+        for (const account of acitr) {
+            // Misskey以外は無視
+            if (account.platform != 'Misskey') continue
+            let channel_html = ''
+            try {
+                const channels = await account.getChannels()
+                channel_html += '<ul class="__renote_send_channel">'
+                channels?.forEach(ch => channel_html += `<li name="${ch.id}"><div>${ch.name}</div></li>`)
+                channel_html += '</ul>'
+            } catch (err) {
+                console.log(err)
+            }
+            html += `<li>
+                <div>${account.pref.username} - ${account.full_address}</div>
+                <ul class="__limited_renote_send" name="${account.full_address}">
+                    <li class="__renote_send_local"><div>ローカルへリノート</div></li>
+                    <li class="__renote_send_home"><div>ホームへリノート</div></li>
+                    <li class="${channel_html ? 'channel_menu' : 'ui-state-disabled'}">
+                        <div>チャンネルへリノート</div>
+                        ${channel_html}
+                    </li>
+                </ul>
+            </li>`
+        }
         return html
     }
 
@@ -1268,8 +1361,7 @@ class Account {
                     <tr>${template_html}</tr>
                 </tbody></table>
             </div>
-            <div class="account_timeline single_user ff_pop_user">
-            </div>
+            <div class="account_timeline single_user ff_pop_user"></div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
 

@@ -1419,9 +1419,7 @@ class Status {
         // メインコンテンツを書き換える
         jqelm.find('.main_content').hide("fade", 1500,
             () => jqelm.find('.main_content').html(this.emojis.replace(this.content)).show("fade", 1500))
-
-        // メディアコンテンツを書き換える
-        if (this.medias.length > 0) {
+        if (this.medias.length > 0) { // メディアコンテンツを書き換える
             const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
             jqelm.find('.media_content').hide("fade", 1500, () => {
                 let html = ''

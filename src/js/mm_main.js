@@ -29,14 +29,19 @@ $(() => (async () => {
 
     // カスタム絵文字のキャッシュ確認
     Account.cacheEmojis();
-    // 右クリック時のメニュー生成
-    $("#pop>.pop_context>.ui_menu>li ul").each((index, elm) => {
-        // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
-        if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
-        // それ以外は全アカウントをリストに表示
-        else $(elm).html(Account.createContextMenuAccountList());
-    });
-    $("#pop>.pop_context>.ui_menu").menu();
+
+    (async () => { // 右クリック時のメニュー生成(時間かかるのでこのセクションだけ非同期実行)
+        $("#pop>.pop_context>.ui_menu>li ul.account_menu").each((index, elm) => {
+            // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
+            if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")));
+            // それ以外は全アカウントをリストに表示
+            else $(elm).html(Account.createContextMenuAccountList());
+        });
+        const limited_renote_html = await Account.createContextLimitedRenoteList();
+        $("#pop>.pop_context>.ui_menu>li ul.limited_renote_menu").html(limited_renote_html);
+        $("#pop>.pop_context>.ui_menu").menu();
+    })();
+
     // 添付メディアリストをSortableにする
     $(".__ui_media_sortable").sortable({
         axis: "x",

@@ -724,6 +724,7 @@ class User {
                     ${User.createDetailHtml(this.full_address)}
                 </tr></tbody></table>
             </div>
+            <div class="account_timeline single_user ff_pop_user"></div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `)
         this.bindDetail()
@@ -738,7 +739,12 @@ class User {
      */
     createDetailPop(target) {
         const pos = target.closest("td").offset()
-        this.createDetailHtml("#pop_ex_timeline>.ff_pop_user")
+        $("#pop_ex_timeline>.ff_pop_user").html(`
+            <table><tbody><tr>
+                ${User.createDetailHtml(this.full_address)}
+            </tr></tbody></table>
+        `)
+        this.bindDetail()
         $("#pop_ex_timeline>.ff_pop_user").css({
             'left': `${pos.left - 138}px`,
             'top': `${pos.top - 48}px`,
@@ -746,7 +752,7 @@ class User {
     }
 
     async bindDetail() {
-        const target_elm = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        const target_elm = $(`#pop_ex_timeline td[id="${this.full_address}"]`)
         // ヘッダとプロフィール詳細を表示
         target_elm.find(".profile_header").html(this.header_element)
         target_elm.find(".profile_detail").html(this.profile_element)

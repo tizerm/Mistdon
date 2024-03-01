@@ -134,7 +134,7 @@
                         class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
                 </div>
                 <div class="misskey_to_box">
-                    <select id="__cmb_post_to">
+                    <select id="__cmb_post_to" title="投稿先チャンネル">
                         <option value="__default">通常投稿</option>
                         <option value="__local">ローカル(連合しない)</option>
                     </select>
@@ -241,21 +241,24 @@
         <!-- hidden: 右クリックコンテキストメニュー -->
         <ul class="ui_menu">
             <li><div>リプライ/ツリー</div>
-                <ul id="__menu_reply"></ul>
+                <ul id="__menu_reply" class="account_menu"></ul>
             </li>
             <li><div>ブースト/リノート</div>
-                <ul id="__menu_reblog"></ul>
+                <ul id="__menu_reblog" class="account_menu"></ul>
             </li>
             <li><div>引用(Misskey)</div>
-                <ul id="__menu_quote" name="Misskey"></ul>
+                <ul id="__menu_quote" class="account_menu" name="Misskey"></ul>
+            </li>
+            <li><div>範囲指定リノート(Misskey)</div>
+                <ul id="__menu_limited_renote" class="limited_renote_menu" name="Misskey"></ul>
             </li>
             <li><div>お気に入り</div>
-                <ul id="__menu_favorite"></ul>
+                <ul id="__menu_favorite" class="account_menu"></ul>
             <li><div>リアクション(Misskey)</div>
-                <ul id="__menu_reaction" name="Misskey"></ul>
+                <ul id="__menu_reaction" class="account_menu" name="Misskey"></ul>
             </li>
             <li><div>ブックマーク(Mastodon)</div>
-                <ul id="__menu_bookmark" name="Mastodon"></ul>
+                <ul id="__menu_bookmark" class="account_menu" name="Mastodon"></ul>
             </li>
             <li class="__menu_post_detail"><div>詳細表示</div></li>
             <li class="__menu_post_url"><div>URLをコピー</div></li>

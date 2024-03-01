@@ -819,7 +819,7 @@ $(() => {
      * => 上部に簡易プロフィールを表示
      */
     delayHoverEvent({
-        selector: "#pop_ex_timeline>.auth_user .ff_nametags>li",
+        selector: "#pop_ex_timeline>.account_timeline .ff_nametags>li",
         enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
             .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
         leaveFunc: e => {},
@@ -831,7 +831,7 @@ $(() => {
      * ユーザープロフィール: フォロー/フォロワーのネームタグ
      * => フルプロフィールの簡易ポップアップを表示
      */
-    $(document).on("click", "#pop_ex_timeline>.auth_user .ff_nametags>li", e =>
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .ff_nametags>li", e =>
         User.getByAddress($(e.target).closest("li").attr("name")).then(user => user.createDetailPop($(e.target))))
 
     /**
@@ -910,13 +910,24 @@ $(() => {
      * 投稿系メニュー: アカウント項目
      * => 投稿に対して指定したアカウントからアクションを実行
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu>li ul>li", e => {
+    $(document).on("click", "#pop_context_menu>.ui_menu>li ul.account_menu>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"))
         $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
         target_account.reaction({
             target_mode: $(e.target).closest("ul").attr("id"),
             target_url: $("#pop_context_menu").attr("name")
         })
+    })
+
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
+        const clicked_elm = $(e.target).closest("li")
+        let option = null
+        if (clicked_elm.is(".__renote_send_local")) option = 'local'
+        else if (clicked_elm.is(".__renote_send_home")) option = 'home'
+        else option = clicked_elm.attr("name")
+        target_account.renote($("#pop_context_menu").attr("name"), option)
     })
 
     /**
