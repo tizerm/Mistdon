@@ -1055,9 +1055,6 @@ class Account {
                     break
                 case 'Misskey': // Misskey
                     // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
-                    /*
-                    const token = this.pref.client_id
-                    console.log(token)
                     response = await $.ajax({
                         type: "POST",
                         url: `https://${this.pref.domain}/api/i/revoke-token`,
@@ -1065,10 +1062,9 @@ class Account {
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify({
                             "i": this.pref.access_token,
-                            "token": token
+                            "token": this.pref.access_token
                         })
-                    })//*/
-                    return Promise.resolve("消しただけ")
+                    })
                     break
                 default:
                     break
@@ -1302,7 +1298,8 @@ class Account {
             if (account.pref.platform == 'Misskey') { // Misskeyの場合の特殊設定
                 misskey_elm /* 連合なし設定 */ += `
                     <li>
-                        <input type="checkbox" id="dl_${account.full_address}" class="__chk_default_local"/>
+                        <input type="checkbox" id="dl_${account.full_address}"
+                            class="__chk_default_local"${account.pref.default_local ? ' checked' : ''}/>
                         <label for="dl_${account.full_address}">ローカル(連合なし)をデフォルトにする</label><br/>
                     </li>
                 `
@@ -1314,7 +1311,8 @@ class Account {
                             <select class="__cmb_default_channel">
                                 <option value="__default">通常投稿</option>
                     `
-                    channels?.forEach(ch => misskey_elm += `<option value="${ch.id}">${ch.name}</option>`)
+                    channels?.forEach(ch => misskey_elm += `<option
+                        value="${ch.id}"${ch.id == account.pref.default_channel ? ' selected' : ''}>${ch.name}</option>`)
                     misskey_elm += '</select></li>'
                 } catch (err) {
                     console.log(err)

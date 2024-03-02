@@ -129,8 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# テスト実行で生成した設定ファイルはアップしたら終わるので除外
-prefs/
+# OpenSSLのセキュリティ設定は除外
+ssl/
 
 # イラスト素材は除外
 src/resources/illust

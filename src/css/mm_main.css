@@ -233,6 +233,17 @@
                             width: 216px;
                             height: 132px;
                         }
+                        &.warn_sensitive::after {
+                            content: url("../resources/ic_warn.png");
+                            z-index: 1;
+                            position: absolute;
+                            top: 0px;
+                            right: 0px;
+                            background-color: rgba(161,0,0,0.75);
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 16px;
+                        }
                     }
                 }
             }

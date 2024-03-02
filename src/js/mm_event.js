@@ -516,7 +516,7 @@ $(() => {
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li.short_timeline, li.chat_timeline>.content", e => {
-        if ($(e.target).is(".expand_header")) return // CW展開は無視
+        if ($(e.target).closest(".expand_header").length > 0) return // CW展開は無視
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))

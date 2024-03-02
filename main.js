@@ -170,7 +170,7 @@ async function openOAuthSession(event, json_data) {
         case 'Mastodon': // Mastodon
             // 権限とリダイレクトURLを設定
             permission = ["read", "write", "follow", "push"].join(" ")
-            redirect_url = 'http://127.0.0.1:3100/oauth/mastodon'
+            redirect_url = 'http://localhost:3100/oauth/mastodon'
 
             const client_info = await ajax({ // クライアントIDの取得
                 method: "POST",
@@ -194,7 +194,7 @@ async function openOAuthSession(event, json_data) {
                 'post_maxlength': json_data.post_maxlength
             }
             // OAuth認証画面を開く
-            openExternalBrowser(null, `https://${this.host}/oauth/authorize?client_id=${client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
+            openExternalBrowser(null, `https://${host}/oauth/authorize?client_id=${client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
             break
         case 'Misskey': // Misskey
             // 権限とリダイレクトURLを設定
@@ -202,34 +202,21 @@ async function openOAuthSession(event, json_data) {
                 "read:drive", "write:drive", "read:favorites", "write:favorites",
                 "read:following", "write:following", "write:mutes", "read:notifications",
                 "read:reactions", "write:reactions", "write:votes",
-                "read:channels", "write:channels"].join(" ")
-            redirect_url = 'http://127.0.0.1:3100/oauth/misskey'
-            client_id = 'http://127.0.0.1:3100/app/misskey'
-
-            const endpoints = await ajax({ // OAuthエンドポイントを取得
-                method: "GET",
-                url: `https://${host}/.well-known/oauth-authorization-server`
-            })
-            // code_verifierとcode_challengeとstateを生成
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~"
-            const code_verifier = new Array(128).fill(0).map(() => chars[Math.floor(chars.length * Math.random())]).join("")
-            const code_challenge = crypto.createHash("sha256").update(code_verifier, "ascii").digest("base64url")
-            const state = crypto.randomUUID()
+                "read:channels", "write:channels"].join(",")
+            redirect_url = 'http://localhost:3100/oauth/misskey'
+            const session_id = crypto.randomUUID()
 
             // サーバーから参照する情報をキャッシュ
             oauth_session = {
                 'domain': host,
-                'client_id': client_id,
-                'code_verifier': code_verifier,
-                'code_challenge': code_challenge,
                 'scope': permission,
                 'redirect_url': redirect_url,
-                'token_endpoint': endpoints.body.token_endpoint,
-                'state': state,
+                'session_id': session_id,
                 'post_maxlength': json_data.post_maxlength
             }
-            // OAuth認証画面を開く
-            openExternalBrowser(null, `${endpoints.body.authorization_endpoint}?client_id=${client_id}&response_type=code&redirect_uri=${redirect_url}&scope=${encodeURIComponent(permission)}&code_challenge=${code_challenge}&code_challenge_method=S256&state=${state}`)
+
+            // MiAuth認証画面を開く
+            openExternalBrowser(null, `https://${host}/miauth/${session_id}?name=Mistdon&callback=${encodeURIComponent(redirect_url)}&permission=${encodeURIComponent(permission)}`)
             break
         default:
             break
@@ -283,7 +270,7 @@ async function authorizeMastodon(auth_code) {
             // キャッシュがない場合はファイルを読み込んでキャッシュを生成
             pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
         } else {
-            pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
+            pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
         }
     } catch (err) { // 認証失敗時
         console.log(err)
@@ -291,45 +278,26 @@ async function authorizeMastodon(auth_code) {
     }
 }
 
-async function authorizeMisskey(param) {
-    try { // 最初にstateの照合をする
-        if (param.get("state") != oauth_session.state) throw new Error('invalid state.')
-        const token = await ajax({ // OAuth認証を開始
+async function authorizeMisskey(session) {
+    try {
+        const token = await ajax({ // Token取得APIをリクエスト
             method: "POST",
-            url: oauth_session.token_endpoint,
-            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-            data: {
-                "grant_type": "authorization_code",
-                "client_id": oauth_session.client_id,
-                "redirect_uri": oauth_session.redirect_url,
-                "scope": oauth_session.scope,
-                "code_verifier": oauth_session.code_verifier,
-                "code": param.get("code")
-            }
+            url: `https://${oauth_session.domain}/api/miauth/${session}/check`
         })
-        const access_token = token.body.access_token
-
-        console.log(token.body)
-        throw new Error('auth test dayo.')
-
-        // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
-/*        const user_data = await ajax({
-            method: "GET",
-            url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
-            headers: { 'Authorization': `Bearer ${token.body.access_token}` }
-        })//*/
+        const access_token = token.body.token
+        const user_data = token.body.user
 
         // JSONを生成(あとでキャッシュに入れるので)
         const write_json = {
             'domain': oauth_session.domain,
             'platform': 'Misskey',
-            'user_id': user_data.body.username,
-            'username': user_data.body.display_name,
+            'user_id': user_data.username,
+            'username': user_data.name,
             'socket_url': `wss://${oauth_session.domain}/streaming`,
-            'client_id': oauth_session.client_id,
-            'client_secret': oauth_session.code_verifier,
+            'client_id': 'MiAuth',
+            'client_secret': 'MiAuth',
             'access_token': access_token,
-            'avatar_url': user_data.body.avatar,
+            'avatar_url': user_data.avatarUrl,
             'post_maxlength': oauth_session.post_maxlength,
             // アカウントカラーは初期値グレー
             'acc_color': '808080'
@@ -342,7 +310,7 @@ async function authorizeMisskey(param) {
             // キャッシュがない場合はファイルを読み込んでキャッシュを生成
             pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
         } else {
-            pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
+            pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
         }
     } catch (err) { // 認証失敗時
         console.log(err)
@@ -933,7 +901,7 @@ const bootServer = (win) => {
                 if (url.match(new RegExp('/mastodon', 'g'))) // Mastodon
                     await authorizeMastodon(param.get('code'))
                 else if (url.match(new RegExp('/misskey', 'g'))) // Misskey
-                    await authorizeMisskey(param)
+                    await authorizeMisskey(param.get('session'))
 
                 // 認証処理が成功した場合は成功画面を返却してElectronの画面を再読み込み
                 const content = readResource('src/server/accept.html')
@@ -945,10 +913,6 @@ const bootServer = (win) => {
                 response.writeHead(500, { "Content-Type": "text/html" })
                 response.end("<h2>認証に失敗しました...</h2>", "utf-8")
             }
-        } else if (url.match(new RegExp('^/app/misskey', 'g'))) { // Misskey認証用のappページ
-            const content = readResource('src/server/misskey_oauth.html')
-            response.writeHead(200, { "Content-Type": "text/html" })
-            response.end(content, "utf-8")
         } else {
             response.writeHead(200, { "Content-Type": "text/html" })
             response.end('test', "utf-8")
@@ -957,7 +921,7 @@ const bootServer = (win) => {
 
     // サーバー起動
     server.listen(3100)
-    console.log('OAuth Server boot success. http://127.0.0.1:3100/')
+    console.log('OAuth Server boot success. http://localhost:3100/')
 }
 
 /**
@@ -987,7 +951,7 @@ const createWindow = () => {
     win.loadFile('src/index.html')
 
     // 認証サーバー起動
-    //bootServer(win)
+    bootServer(win)
 
     windowState.manage(win)
 }

@@ -1413,29 +1413,47 @@ class Status {
     }
 
     update(jqelm) {
-        // TODO: リストとギャラリーは一旦非対応
-        if (jqelm.is('.short_timeline') || jqelm.is('.gallery_timeline') || jqelm.is('.media_timeline')) return
+        // ギャラリーは非対応
+        if (jqelm.is('.gallery_timeline')) return
 
         // メインコンテンツを書き換える
-        jqelm.find('.main_content').hide("fade", 1500,
+        if (jqelm.is('.short_timeline') || jqelm.is('.media_timeline')) // リストとメディアは1行で書き換え
+            jqelm.find('.main_content').hide("fade", 1500,
+                () => jqelm.find('.main_content').html(this.emojis.replace(this.content_text)).show("fade", 1500))
+        else jqelm.find('.main_content').hide("fade", 1500,
             () => jqelm.find('.main_content').html(this.emojis.replace(this.content)).show("fade", 1500))
+
         if (this.medias.length > 0) { // メディアコンテンツを書き換える
-            const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
-            jqelm.find('.media_content').hide("fade", 1500, () => {
-                let html = ''
-                // アスペクト比をリンクオプションとして設定
-                this.medias.forEach(media => {
-                    if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                        <audio controls src="${media.url}" preload="none"></audio>
-                    `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                        <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                            class="__on_media_expand ${img_class}">
-                            <img src="${media.thumbnail}" class="media_preview"/>
-                        </a>
-                    `
+            if (jqelm.is('.short_timeline')) // リストレイアウトのときは最初の一枚だけ書き換え
+                jqelm.find('.list_media').hide("fade", 1500, () => jqelm.find('.list_media').html(`
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                        <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
+                    </a>
+                `).show("fade", 1500))
+            else { // それ以外は各レイアウトに合わせて書き換え
+                let img_class = 'img_grid_single'
+                if (jqelm.is('.media_timeline')) { // メディアタイムライン
+                    if (this.medias.length > 4) img_class = 'img_grid_16'
+                    else if (this.medias.length > 1) img_class = 'img_grid_4'
+                } else if (jqelm.is('.chat_timeline')) // チャットタイムライン
+                    img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
+                else img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
+                jqelm.find('.media_content').hide("fade", 1500, () => {
+                    let html = ''
+                    // アスペクト比をリンクオプションとして設定
+                    this.medias.forEach(media => {
+                        if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
+                            <audio controls src="${media.url}" preload="none"></audio>
+                        `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
+                            <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                                class="__on_media_expand ${img_class}">
+                                <img src="${media.thumbnail}" class="media_preview"/>
+                            </a>
+                        `
+                    })
+                    jqelm.find('.media_content').html(html).show("fade", 1500)
                 })
-                jqelm.find('.media_content').html(html).show("fade", 1500)
-            })
+            }
         }
     }
 
