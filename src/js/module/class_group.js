@@ -358,13 +358,14 @@ class Group {
      * @param to スクロールする量(0をセットで先頭まで移動)
      */
     scroll(to) {
+        const to_num = Number(to) // 全体設定からだと文字列として扱われるのでパース
         const target = $(`#${this.id}>ul`)
         // 引数が0の場合は先頭までスクロール
-        if (to == 0) {
+        if (to_num == 0) {
             target.scrollTop(0)
             return
         }
-        let pos = target.scrollTop() + to
+        const pos = target.scrollTop() + to_num
         target.scrollTop(pos > 0 ? pos : 0)
     }
 

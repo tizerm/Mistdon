@@ -1,5 +1,4 @@
-﻿// HTMLロード時にイベントをバインド
-$(() => {
+﻿$(() => {
     /*=== Navigation Event =======================================================================================*/
 
     /**
@@ -987,6 +986,13 @@ $(() => {
      * 検索ウィンドウ: 検索処理実行
      */
     $(document).on("click", "#__on_search", e => Query.onSearchTimeline())
+
+    $(document).on("keydown", "#__txt_search_query", e => {
+        if (e.keyCode === 13) { // Enterで検索処理実行
+            $("#__on_search").click()
+            return false
+        }
+    })
 
     /**
      * #Event
