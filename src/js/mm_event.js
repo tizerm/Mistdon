@@ -19,6 +19,8 @@
      */
     $("#navi .navi_show_profile").on("click", e => Account.createProfileTimeline())
 
+    $("#navi .navi_clips").on("click", e => Clip.createClipWindow())
+
     /**
      * #Event
      * 絵文字キャッシュクリアボタン
@@ -992,6 +994,11 @@
             $("#__on_search").click()
             return false
         }
+    })
+
+    $(document).on("click", "#pop_ex_timeline>.clip_timeline ul.clip_list>li", e => {
+        const target_li = $(e.target).closest("li")
+        Clip.loadClip(target_li.attr("name"), target_li.attr("id"))
     })
 
     /**

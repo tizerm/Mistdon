@@ -697,6 +697,20 @@
                 &.post_history>.col_head     { background-color: #3562cc; }
             }
         }
+
+        /*=== Clip Timeline Layout ===============================================================*/
+        > .clip_timeline {
+            & ul.clip_list {
+                height: 320px;
+                > li>.content>.main_content {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+            }
+            .clip_description { height: 120px; }
+            & ul.clip_ul { height: calc(100vh - 580px); }
+        }
     }
 
     /*=== Internal Extend Timeline Window Layout =================================================*/
@@ -822,18 +836,12 @@
             }
             > .quote_col .visibility_icon { text-align: center; }
         }
-        > .reply_col ul {
-            overflow-y: auto;
-            height: calc(100vh - 320px);
-        }
-        > .quote_col ul {
-            overflow-y: auto;
-            height: calc(100vh - 480px);
-        }
         > .reaction_col {
             display: flex;
             flex-direction: column;
             height: calc(100vh - 64px);
+            opacity: 0.95;
+            width: 420px;
             > .timeline {
                 flex-basis: 280px;
                 > ul {
@@ -880,12 +888,10 @@
     background-color: rgba(255,255,255,0.2);
     cursor: pointer;
 }
-#pop_extend_column>.reply_col,
-#pop_extend_column>.quote_col,
-#pop_extend_column>.reaction_col,
-#pop_ex_timeline>.search_timeline {
+#pop_ex_timeline>.search_timeline,
+#pop_ex_timeline>.clip_timeline {
     opacity: 0.95;
-    width: 420px;
+    width: 480px;
 }
 #pop_extend_column>.reply_col>h2,
 #pop_extend_column>.quote_col>h2,

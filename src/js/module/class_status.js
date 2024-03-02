@@ -25,7 +25,6 @@ class Status {
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
-        //if (this.detail_flg) console.log(json)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null

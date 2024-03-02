@@ -1015,6 +1015,25 @@ class Account {
         }
     }
 
+    async getClips() {
+        try {
+            const response = await $.ajax({
+                type: "POST",
+                url: `https://${this.pref.domain}/api/clips/list`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({ "i": this.pref.access_token })
+            })
+            // チャンネルをお気に入りしていない場合はreject
+            const clips = []
+            response.forEach(c => clips.push(new Clip(c, this)))
+            return clips
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
+        }
+    }
+
     /**
      * #Method #Ajax
      * このアカウントのチャンネル一覧キャッシュを取得する
