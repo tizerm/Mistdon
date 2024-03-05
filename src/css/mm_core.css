@@ -335,7 +335,7 @@ audio { height: 30px; }
         right: 0px;
 
         > .help_col {
-            width: 640px;
+            width: min(640px,100vw);
             > h2 {
                 border-top-left-radius: 18px;
                 border-bottom-left-radius: 18px;

@@ -1505,8 +1505,10 @@ class Status {
         $("#__hdn_reply_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
         $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        enabledAdditionalAccount(false)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
+        
 
     }
 
@@ -1522,6 +1524,7 @@ class Status {
         $("#__hdn_quote_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
         $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        enabledAdditionalAccount(false)
         $("#__txt_postarea").focus()
     }
 

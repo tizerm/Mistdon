@@ -65,14 +65,16 @@ class Media {
             .each((index, elm) => medias.push({
                 id: $(elm).val(),
                 url: $(elm).next().find("img").attr("src"),
-                sensitive: false // TODO: 一旦falseで
+                sensitive: $(elm).next().is(".warn_sensitive")
             }))
 
         const preview_elm = $('#header>#post_options .attached_media>ul.media_list')
         // 初期メッセージを削除
         preview_elm.find(".__initial_message").remove()
         medias.forEach(media => preview_elm.append(`
-            <li><img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/></li>
+            <li${media.sensitive ? ' class="warn_sensitive"' : ''}>
+                <img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/>
+            </li>
         `))
         $("#pop_util_window").hide("fade", 120)
         $("#header>#post_options").show("slide", { direction: "up" }, 120)

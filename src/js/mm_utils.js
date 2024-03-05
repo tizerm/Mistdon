@@ -101,12 +101,6 @@ function shiftArray(array, obj, limit) {
     return true
 }
 
-function deleteQuoteInfo() {
-    $('#header>#post_options input[type="hidden"]').val("")
-    $('#header>#post_options ul.refernce_post')
-        .html('<li class="__initial_message">返信/引用元なし</li>')
-}
-
 /**
  * #Util
  * 要素を表示したら続きを読み込むスクロールローダーを生成する

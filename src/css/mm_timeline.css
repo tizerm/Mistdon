@@ -695,7 +695,7 @@
                     margin: 0px;
                     padding: 0px;
                     font-size: 13px;
-                    /* TODO: 投稿サイズを一定以上で切るテスト
+                    /*
                     max-height: 160px;
                     overflow: hidden;//*/
                 }
@@ -724,7 +724,6 @@
                         }
                     }
                 }
-
             }
             > .label_head {
                 font-size: 11px;

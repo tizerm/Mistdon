@@ -154,35 +154,36 @@
         target_account.updateEmojiHistory(target_emoji)
     })
 
-    $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
-        const length = $(e.target).val().length
-        const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
-        const rate = length / limit // TODO: とりあえず一旦最大500字固定
-        const deg = 360 * rate
+    if (Preference.GENERAL_PREFERENCE.enable_tool_button) // ツールボタンが表示されている場合のみイベント定義
+        $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
+            const length = $(e.target).val().length
+            const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
+            const rate = length / limit // TODO: とりあえず一旦最大500字固定
+            const deg = 360 * rate
 
-        if (length > 0) {
-            if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
-                "border-color": "#21dec8",
-                "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
-            }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
-                "border-color": "#dea521",
-                "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
-            }); else $("#post_length_graph").css({ // 文字数超過でレッド
-                "border-color": "#de3121",
+            if (length > 0) {
+                if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
+                    "border-color": "#21dec8",
+                    "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
+                }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
+                    "border-color": "#dea521",
+                    "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
+                }); else $("#post_length_graph").css({ // 文字数超過でレッド
+                    "border-color": "#de3121",
+                    "background-image": "none",
+                    "background-color": "#de3121"
+                })
+            } else $("#post_length_graph").css({ // 入力されていない場合はグレー
+                "border-color": "#aaaaaa",
                 "background-image": "none",
-                "background-color": "#de3121"
+                "background-color": "transparent"
             })
-        } else $("#post_length_graph").css({ // 入力されていない場合はグレー
-            "border-color": "#aaaaaa",
-            "background-image": "none",
-            "background-color": "transparent"
         })
-    })
 
-    // TODO: このへん投稿オプションに関して
-    $("#header>#head_postarea #__open_post_options").on("click",
+    $("#__open_post_option").on("click",
         e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
 
+    // TODO: このへん投稿オプションに関して
     $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
         if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
         $("#header>#post_options").show("slide", { direction: "up" }, 120)
@@ -198,7 +199,7 @@
      * #Event
      * 投稿ボタン
      */
-    $("#header #__on_submit").on("click", e =>
+    $("#__on_submit").on("click", e =>
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
             content: $("#__txt_postarea").val(),
             option_obj: $("#post_options"),
@@ -228,13 +229,13 @@
      * #Event
      * 直前の投稿を削除ボタン
      */
-    $("#header #on_last_delete").on("click", e => History.popIf(last => {}, true))
+    $("#__on_last_delete").on("click", e => History.popIf(last => {}, true))
 
     /**
      * #Event
      * 直前の投稿を削除して編集ボタン
      */
-    $("#header #on_last_delete_paste").on("click", e => History.popIf(last => {
+    $("#__on_last_delete_paste").on("click", e => History.popIf(last => {
         last.post.from_account.setPostAccount()
         $("#__txt_postarea").val(last.post.original_text)
         $("#__txt_content_warning").val(last.post.cw_text)
@@ -244,7 +245,7 @@
      * #Event
      * 直前の投稿をコピーボタン
      */
-    $("#header #on_last_copy").on("click", e => History.popIf(last => {
+    $("#__on_on_last_copy").on("click", e => History.popIf(last => {
         $("#__txt_postarea").val(last.post.original_text)
         $("#__txt_content_warning").val(last.post.cw_text)
         toast("直前の投稿内容を再展開しました.", "done")
@@ -254,7 +255,7 @@
      * #Event
      * 直前の投稿につなげるボタン
      */
-    $("#header #on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
+    $("#__on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
     /*=== Post Option Article Area Event =========================================================================*/
 
@@ -274,6 +275,7 @@
         $("#post_options .refernced_post .__on_option_close").click()
         Media.clearAttachMedia()
         deleteQuoteInfo()
+        enabledAdditionalAccount(true)
     })
 
     $("#header>#post_options #__on_set_sensitive").on("click", e => {

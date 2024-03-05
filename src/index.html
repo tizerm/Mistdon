@@ -78,7 +78,11 @@
             <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
         </div>
         <div class="opt_buttons">
+            <button type="button" id="__open_draft" title="下書き一覧を開く"
+                ><img src="resources/ic_draft.png" alt="下書き一覧を開く"/></button>
             <div id="post_length_graph">&nbsp;</div>
+            <button type="button" id="__open_post_option" title="投稿オプションを開く" class="__ignore_close_option"
+                ><img src="resources/ic_down.png" alt="投稿オプションを開く"/></button>
             <button type="button" id="__open_emoji_palette" title="絵文字パレットを開く"
                 ><img src="resources/ic_emoji.png" alt="絵文字パレットを開く"/></button>
         </div>
@@ -91,14 +95,18 @@
                 ><img src="resources/ic_post.png" alt="投稿"/></button>
         </div>
         <div class="additional_buttons">
-            <a id="on_last_delete" title="直前の投稿を削除"
-                ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></a>
-            <a id="on_last_delete_paste" title="直前の投稿を削除して再編集"
-                ><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></a>
-            <a id="on_last_copy" title="直前の投稿をコピー"
-                ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></a>
-            <a id="on_last_replychain" title="直前の投稿につなげる"
-                ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
+            <button type="button" id="__on_last_delete" title="直前の投稿を削除"
+                ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></button>
+            <button type="button" id="__on_last_delete_paste" title="直前の投稿を削除して再編集"
+                ><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></button>
+            <button type="button" id="__on_last_edit" title="直前の投稿を編集(Mastodon専用)"
+                ><img src="resources/ic_undo_edit.png" alt="直前の投稿を編集(Mastodon専用)"/></button>
+            <button type="button" id="__on_save_draft" title="この投稿を下書きに保存"
+                ><img src="resources/ic_add_draft.png" alt="この投稿を下書きに保存"/></button>
+            <button type="button" id="__on_on_last_copy" title="直前の投稿をコピー"
+                ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></button>
+            <button type="button" id="__on_last_replychain" title="直前の投稿につなげる"
+                ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></button>
         </div>
     </div>
     <div id="post_options" class="__ignore_close_option">

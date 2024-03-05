@@ -13,7 +13,10 @@ class Preference {
             const general_pref = await window.accessApi.readGeneralPref()
             if (!general_pref) // ファイルが読み込めなかった場合は初期設定を使用
                 Preference.GENERAL_PREFERENCE = { // 全体設定の初期値
+                    "enable_tool_button"            : true,     // ツールボタン(左にあるやつ)
+                    "enable_post_button"            : true,     // 投稿ボタン
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
+                    "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
                     "enable_action_palette"         : true,     // 簡易アクションパレット
                     "enable_expand_profile_cw"      : false,    // プロフCW展開
                     "enable_expand_profile_media"   : false,    // プロフメディア展開
@@ -98,7 +101,10 @@ class Preference {
 
     static setPreference() {
         // 個別オプション
+        $("#__chk_gen_use_tool_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_tool_button)
+        $("#__chk_gen_use_post_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
         $("#__chk_gen_use_additional_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
+        $("#__chk_gen_hide_additional_account").prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_expand_profile_cw").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_cw)
         $("#__chk_gen_expand_profile_media").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_media)
@@ -129,7 +135,10 @@ class Preference {
 
     static async saveGeneralPreference() {
         const save_pref = {
+            "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
+            "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
+            "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_expand_profile_cw"      : $("#__chk_gen_expand_profile_cw").prop("checked"),
             "enable_expand_profile_media"   : $("#__chk_gen_expand_profile_media").prop("checked"),

@@ -124,6 +124,10 @@ class Account {
         return Account.map.size == 0
     }
 
+    static isMultiAccount() {
+        return Account.map.size > 1
+    }
+
     /**
      * #Method
      * このアカウントを投稿先アカウントに設定
@@ -153,6 +157,7 @@ class Account {
 
         // 引用情報を削除
         deleteQuoteInfo()
+        enabledAdditionalAccount(true)
 
         // 投稿先メニューを生成
         this.createPostToMenu()
