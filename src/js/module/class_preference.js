@@ -35,8 +35,12 @@ class Preference {
                         "media"                     : 320,      // メディア
                         "gallery"                   : 240       // ギャラリー
                     },
-                    "chat_height_limit"             : 0,        // チャット高さ制限
+                    "contents_limit": {                         // 文字数制限
+                        "default"                   : 250,      // ノーマル
+                        "chat"                      : 140,      // チャット
+                    },
                     "history_limit"                 : 200,      // 履歴件数
+                    "reaction_history_limit"        : 20,       // 履歴件数
                     "scroll_speed": {                           // スクロールスピード
                         "default"                   : 250,      // ノーマル
                         "shift"                     : 800       // チャット
@@ -112,25 +116,28 @@ class Preference {
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
 
         // 件数キャッシュ
-        $("#__txt_gen_tlcache_default").val(Preference.GENERAL_PREFERENCE.tl_cache_limit.default)
-        $("#__txt_gen_tlcache_chat").val(Preference.GENERAL_PREFERENCE.tl_cache_limit.chat)
-        $("#__txt_gen_tlcache_list").val(Preference.GENERAL_PREFERENCE.tl_cache_limit.list)
-        $("#__txt_gen_tlcache_media").val(Preference.GENERAL_PREFERENCE.tl_cache_limit.media)
-        $("#__txt_gen_tlcache_gallery").val(Preference.GENERAL_PREFERENCE.tl_cache_limit.gallery)
+        $("#__txt_gen_tlcache_default").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.default)
+        $("#__txt_gen_tlcache_chat").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.chat)
+        $("#__txt_gen_tlcache_list").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.list)
+        $("#__txt_gen_tlcache_media").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.media)
+        $("#__txt_gen_tlcache_gallery").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.gallery)
 
         // メディア高さ制限
-        $("#__txt_gen_imageheight_limit_default").val(Preference.GENERAL_PREFERENCE.media_height_limit.default)
-        $("#__txt_gen_imageheight_limit_chat").val(Preference.GENERAL_PREFERENCE.media_height_limit.chat)
-        $("#__txt_gen_imageheight_limit_media").val(Preference.GENERAL_PREFERENCE.media_height_limit.media)
-        $("#__txt_gen_imageheight_limit_gallery").val(Preference.GENERAL_PREFERENCE.media_height_limit.gallery)
+        $("#__txt_gen_imageheight_limit_default").val(Preference.GENERAL_PREFERENCE.media_height_limit?.default)
+        $("#__txt_gen_imageheight_limit_chat").val(Preference.GENERAL_PREFERENCE.media_height_limit?.chat)
+        $("#__txt_gen_imageheight_limit_media").val(Preference.GENERAL_PREFERENCE.media_height_limit?.media)
+        $("#__txt_gen_imageheight_limit_gallery").val(Preference.GENERAL_PREFERENCE.media_height_limit?.gallery)
 
-        // チャットレイアウトの高さ制限
-        $("#__txt_gen_chatmaxheight").val(Preference.GENERAL_PREFERENCE.chat_height_limit)
+        // コンテンツの文字数制限
+        $("#__txt_gen_content_limit_default").val(Preference.GENERAL_PREFERENCE.contents_limit?.default)
+        $("#__txt_gen_content_limit_chat").val(Preference.GENERAL_PREFERENCE.contents_limit?.chat)
+
         // 履歴件数
         $("#__txt_gen_history_limit").val(Preference.GENERAL_PREFERENCE.history_limit)
+        $("#__txt_gen_reaction_history_limit").val(Preference.GENERAL_PREFERENCE.reaction_history_limit)
         // キーボードスクロール設定
-        $("#__txt_gen_keyscroll_normal").val(Preference.GENERAL_PREFERENCE.scroll_speed.default)
-        $("#__txt_gen_keyscroll_shift").val(Preference.GENERAL_PREFERENCE.scroll_speed.shift)
+        $("#__txt_gen_keyscroll_normal").val(Preference.GENERAL_PREFERENCE.scroll_speed?.default)
+        $("#__txt_gen_keyscroll_shift").val(Preference.GENERAL_PREFERENCE.scroll_speed?.shift)
     }
 
     static async saveGeneralPreference() {
@@ -157,8 +164,12 @@ class Preference {
                 "media"                     : $("#__txt_gen_imageheight_limit_media").val(),
                 "gallery"                   : $("#__txt_gen_imageheight_limit_gallery").val(),
             },
-            "chat_height_limit"             : $("#__txt_gen_chatmaxheight").val(),
+            "contents_limit": {             // 文字数制限
+                "default"                   : $("#__txt_gen_content_limit_default").val(),
+                "chat"                      : $("#__txt_gen_content_limit_chat").val(),
+            },
             "history_limit"                 : $("#__txt_gen_history_limit").val(),
+            "reaction_history_limit"        : $("#__txt_gen_reaction_history_limit").val(),
             "scroll_speed": {               // スクロールスピード
                 "default"                   : $("#__txt_gen_keyscroll_normal").val(),
                 "shift"                     : $("#__txt_gen_keyscroll_shift").val(),

@@ -223,6 +223,7 @@ class Status {
             default:
                 break
         }
+
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
@@ -268,6 +269,12 @@ class Status {
         return $($.parseHTML(this.content)).text()
             .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
             .replace(new RegExp('>', 'g'), '&gt;')
+    }
+    // Getter: 本文の文章の部分の文字数を抜き出す
+    get content_length() {
+        return this.content_text
+            .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '$$')
+            .replace(new RegExp('https?://[^ 　\n]+', 'g'), '$$').length
     }
 
     /**
@@ -638,16 +645,19 @@ class Status {
                 </div>
             `
         }
-        html += '<div class="content">'
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += `<div class="main_content">
-                    ${target_emojis.replace(this.content)}
-                </div>
-            </div>
-        `
+        { // 投稿本文領域
+            html += '<div class="content">'
+            const over_content = !this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default
+            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
+            if (this.cw_text) html /* CWテキスト */ += `
+                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
+            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+            html += '</div>'
+        }
         if (this.poll_options) { // 投票
             let options = ''
             this.poll_options.forEach(elm => options += `
@@ -854,12 +864,17 @@ class Status {
                     break
             }
         }
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `
-        html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+        { // 投稿本文領域
+            const over_content = !this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat
+            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
+            if (this.cw_text) html /* CWテキスト */ += `
+                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
+            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+        }
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
             // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成

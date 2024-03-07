@@ -127,12 +127,21 @@
                     </tr>
                 </tbody></table>
             </dd>
-            <dt>チャットレイアウトの高さ制限
+            <dt>コンテンツ文字数制限
                 <img src="resources/ic_help.png" class="tooltip_help"
-                title="チャットレイアウト時に投稿ひとつの高さが高すぎる場合に指定した高さで切り落とします。0以下を指定した場合は切り落とさずにすべて表示します。"/>
+                title="各種レイアウト時の投稿本文の表示できる限界値を設定します。この文字数を超えると省略表示になり、ポップアップ呼び出しボタンが現れます。"/>
             </dt>
             <dd>
-                <input type="text" id="__txt_gen_chatmaxheight" size="6" maxlength="2"/>px
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_content_limit_default" size="6" maxlength="4"/>文字</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_content_limit_chat" size="6" maxlength="4"/>文字</td>
+                    </tr>
+                </tbody></table>
             </dd>
             <dt>送信履歴の最大保存件数
                 <img src="resources/ic_help.png" class="tooltip_help"
@@ -140,6 +149,13 @@
             </dt>
             <dd>
                 <input type="text" id="__txt_gen_history_limit" size="6" maxlength="3"/>件
+            </dd>
+            <dt>リアクション履歴の最大保存件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各Misskeyアカウントごとのリアクション履歴の最大保存件数を設定します。これを超えると古い順から履歴から消えていきます。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_reaction_history_limit" size="6" maxlength="3"/>個
             </dd>
             <dt>キーボードスクロールのスクロール量設定
                 <img src="resources/ic_help.png" class="tooltip_help"

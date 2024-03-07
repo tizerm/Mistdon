@@ -345,7 +345,7 @@
             }
 
             /*=== Contents Warning Expand Header =================================================*/
-            .expand_header {
+            .expand_header, .content_length_limit {
                 display: block;
                 background-image: url("../resources/ic_warn.png");
                 background-position: center left 8px;
@@ -382,6 +382,13 @@
                         vertical-align: text-bottom;
                     }
                     & p:not(:last-child) { margin-bottom: 1em; }
+                }
+                > .hidden_content {
+                    margin-bottom: 4px;
+                    font-size: 12px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                 }
             }
 
@@ -695,9 +702,6 @@
                     margin: 0px;
                     padding: 0px;
                     font-size: 13px;
-                    /*
-                    max-height: 160px;
-                    overflow: hidden;//*/
                 }
                 > .from_address {
                     text-align: right;
@@ -961,6 +965,7 @@
 .label_bookmark  { background-color: #c10000; }
 .label_cw        { background-color: #8c720b; }
 .label_sensitive { background-color: #a10000; }
+.label_limitover { background-color: #0b638c; }
 .label_private   { background-color: #dfdfdf; color: #333333; }
 .cw_content      { display: none; }
 
