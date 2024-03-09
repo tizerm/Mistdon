@@ -41,27 +41,39 @@
                 return false
             case 46: // Ctrl+Del: 直前の投稿を削除する
                 if (event.ctrlKey || event.metaKey) {
-                    $("#header #on_last_delete").click()
+                    $("#__on_last_delete").click()
                     return false
                 }
                 break
             case 90: // Ctrl+Z: 直前の投稿を削除して再展開する
                 if (event.ctrlKey || event.metaKey) {
-                    $("#header #on_last_delete_paste").click()
+                    $("#__on_last_delete_paste").click()
                     $("#__txt_postarea").focus()
                     return false
                 }
                 break
             case 86: // Ctrl+V: 直前の投稿をコピーして再展開する
                 if (event.ctrlKey || event.metaKey) {
-                    $("#header #on_last_copy").click()
+                    $("#__on_on_last_copy").click()
                     $("#__txt_postarea").focus()
                     return false
                 }
                 break
             case 84: // Ctrl+T: 直前の投稿につなげる
                 if (event.ctrlKey || event.metaKey) {
-                    $("#header #on_last_replychain").click()
+                    $("#__on_last_replychain").click()
+                    return false
+                }
+                break
+            case 69: // Ctrl+E: 直前の投稿を編集する
+                if (event.ctrlKey || event.metaKey) {
+                    $("#__on_last_edit").click()
+                    return false
+                }
+                break
+            case 81: // Ctrl+Q: 下書き一覧を開く
+                if (event.ctrlKey || event.metaKey) {
+                    $("#__open_draft").click()
                     return false
                 }
                 break
@@ -135,6 +147,12 @@
                     return false
                 }
                 break
+            case 80: // Ctrl+P: クリップ
+                if (event.ctrlKey || event.metaKey) {
+                    $("#navi .navi_clips").click()
+                    return false
+                }
+                break
             case 116: // F5: カーソルのカラムをリロードする
                 if (event.ctrlKey || event.metaKey) {
                     // Ctrl+F5: 画面そのものを読み込みなおす(ブラウザリロード)
@@ -143,7 +161,8 @@
                 }
                 Group.getCursor().reload()
                 return false
-            case 13: // Enter: カーソルを下に移動
+            case 13:
+            case 9: // Enter, Tab: カーソルを下に移動
                 gp = Group.disposeCursor()
                 if (event.shiftKey) {
                     // Shift+Enter: カーソルを上に移動
@@ -234,6 +253,12 @@
                         return false
                     } else if (event.shiftKey) { // Shift+Enter: 投稿(フォーカスしたまま)
                         $("#header #__on_submit").click()
+                        return false
+                    }
+                    break
+                case 83: // Ctrl+S: 下書きに保存
+                    if (event.ctrlKey || event.metaKey) {
+                        $("#__on_save_draft").click()
                         return false
                     }
                     break

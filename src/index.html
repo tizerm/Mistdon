@@ -33,6 +33,7 @@
     <script type="text/javascript" src="js/module/class_timeline.js"></script>
     <script type="text/javascript" src="js/module/class_group.js"></script>
     <script type="text/javascript" src="js/module/class_column.js"></script>
+    <script type="text/javascript" src="js/module/class_draft.js"></script>
     <script type="text/javascript" src="js/module/class_history.js"></script>
     <script type="text/javascript" src="js/module/class_query.js"></script>
     <script type="text/javascript" src="js/module/class_clip.js"></script>
@@ -62,7 +63,6 @@
     <ul id="bottom_navi">
         <li><a id="on_help_keybind" title="キーボードショートカット早見表"><img src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
         <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
-        <!--<li><button type="button" class="__on_show_notifications">0</button></li>-->
     </ul>
     <div id="pop_notification_console">
     <!-- hidden: 通知ボックス -->
@@ -88,7 +88,7 @@
         </div>
         <div class="textbox_area">
             <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
-                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
+                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
             <div id="__hdn_text_render"></div>
         </div>
         <div class="submit_button">
@@ -141,7 +141,7 @@
                         src="resources/ic_direct.png" alt="ダイレクトメッセージ"/></label>
                 </div>
                 <div class="cw_box">
-                    <input type="text" id="__txt_content_warning"
+                    <input type="text" id="__txt_content_warning" tabindex="2"
                         class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
                 </div>
                 <div class="misskey_to_box">
@@ -228,6 +228,10 @@
         <!-- hidden: ユーザー一覧 -->
         <ul class="ui_menu"></ul>
     </div>
+    <div id="pop_draft">
+        <!-- hidden: 下書き一覧 -->
+        <ul class="draft_menu"></ul>
+    </div>
     <div id="pop_notification">
     <!-- hidden: 通知 -->
         <ul></ul>
@@ -304,7 +308,7 @@
     </div>
     <div id="pop_expand_post" class="timeline">
         <!-- hidden: 投稿拡大ウィンドウ -->
-        <ul class="__context_posts"></ul>
+        <ul class="expanded_post __context_posts"></ul>
     </div>
     <div id="pop_expand_action">
         <!-- hidden: 追加アクションポップ -->

@@ -17,11 +17,11 @@ class History {
     // スタティックマップを初期化(非同期)
     static {
         (async () => {
-            const historys = await window.accessApi.readHistory()
+            const histories = await window.accessApi.readHistory()
             const posts = []
             const activities = []
-            historys.post.forEach(elm => posts.push(new History(elm, null)))
-            historys.activity.forEach(elm => activities.push(new History(elm, elm.type)))
+            histories.post.forEach(elm => posts.push(new History(elm, null)))
+            histories.activity.forEach(elm => activities.push(new History(elm, elm.type)))
 
             History.post_stack = posts
             History.activity_stack = activities
@@ -254,16 +254,19 @@ class History {
         }
     }
 
-    static async edit(target) {
+    static edit(target) {
         const index = target.closest("li").index()
-        const target_history = History.post_stack[index]
+        History.post_stack[index].openEditor()
+    }
+
+    openEditor() {
         // アカウントを編集対象に変更
-        Account.get(target_history.account_address).setPostAccount()
-        //$("#__txt_postarea").val(target_history.post.content_text)
-        $("#__hdn_text_render").html(target_history.post.content)
-        if (target_history.post.cw_text) $("#__txt_content_warning").val(target_history.post.cw_text)
-        $("#post_options ul.refernce_post").html(target_history.post.element)
-        $("#post_options #__hdn_edit_id").val(target_history.post.id)
+        Account.get(this.account_address).setPostAccount()
+        //$("#__txt_postarea").val(this.post.content_text)
+        $("#__hdn_text_render").html(this.post.content)
+        if (this.post.cw_text) $("#__txt_content_warning").val(this.post.cw_text)
+        $("#post_options ul.refernce_post").html(this.post.element)
+        $("#post_options #__hdn_edit_id").val(this.post.id)
         $("#post_options .refernced_post+.option_close .__on_option_open").click()
         enabledAdditionalAccount(false)
         $("#__txt_postarea").val($("#__hdn_text_render").get(0).innerText)

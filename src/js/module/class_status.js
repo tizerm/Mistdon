@@ -1525,8 +1525,6 @@ class Status {
         enabledAdditionalAccount(false)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
-        
-
     }
 
     /**
@@ -1633,20 +1631,20 @@ class Status {
 
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
-        $("#pop_expand_post>ul").html(this.element).css( // 横幅指定がない場合は320px固定
-            'width', `${this.from_column?.pref.col_width ?? 320}px`)
+        $("#pop_expand_post>ul").html(this.element)
+            .css('width', `${target.closest('ul').outerWidth()}px`)
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
             $("#pop_expand_post").css({
                 'top': 'auto',
                 'bottom': Math.round(window.innerHeight - pos.top - 48),
-                'left': pos.left
+                'left': pos.left - 12
             })
         else $("#pop_expand_post").css({
             'bottom': 'auto',
             'top': pos.top - 24,
-            'left': pos.left
+            'left': pos.left - 12
         })
         $("#pop_expand_post").show("fade", 80)
     }

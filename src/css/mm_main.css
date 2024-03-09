@@ -349,6 +349,65 @@
             }
         }
     }
+
+    /*=== Notifications Layout ===================================================================*/
+    > #pop_draft {
+        display: none;
+        z-index: 11;
+        position: absolute;
+        top: 108px;
+        left: 72px;
+
+        > ul.draft_menu {
+            margin: 0px;
+            padding: 0px;
+            width: 360px;
+            > li {
+                background-color: rgba(56,56,56,0.88);
+                list-style-type: none;
+                margin: 4px 0px;
+                position: relative;
+                padding: 2px 6px;
+                border: solid 2px #cccccc;
+                border-radius: 12px;
+
+                .user_icon {
+                    border-radius: 12px;
+                    width: 48px;
+                    height: 48px;
+                }
+                .user_id {
+                    position: absolute;
+                    left: 64px;
+                    top: 8px;
+                    font-size: 14px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-weight: bold;
+                }
+                .create_date {
+                    position: absolute;
+                    left: 64px;
+                    top: 32px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 13px;
+                }
+                .content {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    font-size: 12px;
+                    margin: 4px 12px;
+                    margin-top: -2px;
+                }
+                &:hover {
+                    background-color: rgba(76,76,76,0.92);
+                    cursor: pointer;
+                }
+
+            }
+        }
+    }
+
     /*=== Notifications Layout ===================================================================*/
     > #pop_notification {
         z-index: 11;
@@ -564,7 +623,10 @@
         & ul {
             background-color: transparent;
             height: auto;
-            > li { border: solid 2px #cccccc; }
+            > li, > li:hover {
+                border: solid 2px #cccccc;
+                background-color: rgba(56,56,56,0.92);
+            }
         }
     }
 
@@ -713,13 +775,26 @@
         > .clip_timeline {
             & ul.clip_list {
                 height: 320px;
-                > li>.content>.main_content {
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
+                > li {
+                    > .content>.main_content {
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                    &:hover {
+                        background-color: rgba(76,76,76,0.683);
+                        cursor: pointer;
+                    }
                 }
             }
-            .clip_description { height: 120px; }
+            .clip_description {
+                background-color: rgba(56,56,56,0.683);
+                border-radius: 12px;
+                padding: 6px 12px;
+                height: 120px;
+                overflow-y: auto;
+                font-size: 13px;
+            }
             & ul.clip_ul { height: calc(100vh - 580px); }
         }
     }

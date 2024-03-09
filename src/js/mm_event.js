@@ -81,12 +81,16 @@
         $("#pop_postuser").hide("slide", { direction: "up" }, 150)
     })
 
+    $("#__open_draft").on("click", e => Draft.createDraftMenu())
+
+    $(document).on("click", "#pop_draft>.draft_menu>.draft_list", e => Draft.loadDraft($(e.target).closest("li").index()))
+
     /**
      * #Event
      * カスタム絵文字呼び出しボタン
      * => カスタム絵文字一覧を表示
      */
-    $("#header>#head_postarea #__open_emoji_palette").on("click", e => {
+    $("#__open_emoji_palette").on("click", e => {
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
         // サジェストテキストボックスにフォーカス
         $("#__txt_emoji_search").focus()
@@ -248,14 +252,24 @@
     $("#__on_on_last_copy").on("click", e => History.popIf(last => {
         $("#__txt_postarea").val(last.post.original_text)
         $("#__txt_content_warning").val(last.post.cw_text)
-        toast("直前の投稿内容を再展開しました.", "done")
     }, false))
 
     /**
      * #Event
      * 直前の投稿につなげるボタン
      */
-    $("#__on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
+    $("#__on_last_replychain").on("click", e => History.popIf(last => {
+        last.post.createReplyWindow()
+        $("#__open_post_option").click()
+    }, false))
+
+    $("#__on_last_edit").on("click", e => History.popIf(last => last.openEditor(), false))
+
+    $("#__on_save_draft").on("click", e => Draft.saveDraft({
+        account: Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")),
+        content: $("#__txt_postarea").val(),
+        option_obj: $("#post_options")
+    }))
 
     /*=== Post Option Article Area Event =========================================================================*/
 
@@ -447,6 +461,10 @@
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus($(e.target).closest("li"))
             .createImageModal(image_url)
+        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+            Timeline.getScrollableStatus($(e.target).closest("li")).createImageModal(image_url)
+        else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
+            Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
         else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
             Status.getStatus($(e.target).closest("li").attr("name"))
                 .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
@@ -515,15 +533,16 @@
 
     /**
      * #Event
-     * 投稿本体(チャットレイアウトとリストレイアウト限定)
+     * 投稿本体(リストレイアウトと文字数超過限定)
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li.short_timeline, .content_length_limit", e => {
-        //if ($(e.target).closest(".expand_header").length > 0) return // CW展開は無視
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li)
+        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+            Timeline.getScrollableStatus(target_li).createExpandWindow(target_li)
         else // 他の部分は直接リモートの投稿を取る
             Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
@@ -907,12 +926,11 @@
     $("body").on("click", e => {
         $("#pop_context_menu").hide("slide", { direction: "left" }, 100)
         $("#pop_context_user").hide("slide", { direction: "left" }, 100)
-        if (!$(e.target).is("#header>#head_postarea .posticon")) 
+        if (!$(e.target).is("#header>#head_postarea .posticon"))
             // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
             $("#pop_postuser").hide("slide", { direction: "up" }, 150)
-        if (!$(e.target).is("#header>#head_postarea #__on_post_to_misskey>*")) 
-            // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
-            $("#pop_post_to").hide("slide", { direction: "up" }, 150)
+        if ($(e.target).closest("#__open_draft").length == 0)
+            $("#pop_draft").hide("slide", { direction: "left" }, 150)
     })
 
     /**

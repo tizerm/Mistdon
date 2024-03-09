@@ -949,7 +949,7 @@
     .__context_posts {
         > li:not(.chat_timeline),
         > li.chat_timeline>.content {
-            &:hover { background-color: rgba(78,78,78,0.92); }
+            &:hover { background-color: rgba(60,60,60,0.9); }
         }
     }
 }
