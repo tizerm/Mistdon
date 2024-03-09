@@ -89,6 +89,7 @@
         <div class="textbox_area">
             <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
+            <div id="__hdn_text_render"></div>
         </div>
         <div class="submit_button">
             <button type="button" id="__on_submit" title="投稿"
@@ -204,11 +205,12 @@
                 </div>
             </div>
             <div class="refernced_post timeline closeable_block">
-                <h5>返信/引用元
+                <h5>返信/引用/編集元
                 <button type="button" class="__on_option_close" title="閉じる(無効化)"
                     ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button></h5>
                 <input type="hidden" id="__hdn_reply_id" value=""/>
                 <input type="hidden" id="__hdn_quote_id" value=""/>
+                <input type="hidden" id="__hdn_edit_id" value=""/>
                 <ul class="refernce_post">
                     <li class="__initial_message">返信/引用元なし</li>
                 </ul>
@@ -343,7 +345,7 @@
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
-            <ul class="__context_posts"></ul>
+            <ul class="scrollable_tl __context_posts"></ul>
         </div>
     </div>
     <div id="pop_util_window" class="ui-widget-content ex_window">

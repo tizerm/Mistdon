@@ -542,10 +542,15 @@
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
         $(document).on("mouseenter", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
-            // メイン画面のタイムラインのみ有効
-            if ($(e.target).closest(".tl_group_box").length == 0) return
-            const target_post = Column.get($(e.target).closest("td"))
-                .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+            let target_post = null
+            if ($(e.target).closest(".tl_group_box").length > 0)
+                // メインタイムラインの場合はGroupのステータスマップから取得
+                target_post = Column.get($(e.target).closest("td"))
+                    .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
+            else if ($(e.target).closest("ul.scrollable_tl").length > 0)
+                // 一時スクロールタイムラインの場合は静的マップから取得
+                target_post = Timeline.getScrollableStatus($(e.target).closest("li"))
+            else return  // 取得できないタイムラインは実行しない
             // 外部インスタンスに対しては使用不可
             if (target_post.from_timeline?.pref?.external) return
             const pos = $(e.currentTarget).offset()
@@ -709,6 +714,8 @@
      * => 対象の投稿を削除/アクション解除する
      */
     $(document).on("click", ".__del_history", e => History.delete($(e.target)))
+
+    $(document).on("click", ".__edit_history", e => History.edit($(e.target)))
 
     /**
      * #Event

@@ -59,7 +59,8 @@ $(() => (async () => {
         stop: (ext, ui) => Preference.storeTempWindowPosition(ui)
     })
     $("#pop_window_timeline").resizable({
-        stop: (ext, ui) => Preference.storeTempWindowSize(ui)
+        stop: (ext, ui) => Preference.storeTempWindowSize(ui),
+        handles: "all"
     })
     // 一時タイムラインウィンドウの保存をするイベントを登録
     Preference.setTempWindow()

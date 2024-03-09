@@ -189,11 +189,13 @@ class History {
         } else { // 通常投稿はIDを書き換える
             elm.find('.user>.userid>a').html(this.account_address)
             button = '<button type="button" class="__del_history">削除</button>'
+            if (this.post.platform == 'Mastodon') // Mastodonの場合は編集ボタンも追加
+                button += '<button type="button" class="__edit_history">編集</button>'
         }
         // 末尾にホバーで表示するボタンモーダルを追加
         elm.append(`
             <div class="delete_modal" id="${this.id}" name="${this.account_address}">
-                ${button}
+                <div class="buttons">${button}</div>
             </div>`)
         return elm
     }
@@ -250,6 +252,23 @@ class History {
         } catch (err) {
             console.log(err)
         }
+    }
+
+    static async edit(target) {
+        const index = target.closest("li").index()
+        const target_history = History.post_stack[index]
+        // アカウントを編集対象に変更
+        Account.get(target_history.account_address).setPostAccount()
+        //$("#__txt_postarea").val(target_history.post.content_text)
+        $("#__hdn_text_render").html(target_history.post.content)
+        if (target_history.post.cw_text) $("#__txt_content_warning").val(target_history.post.cw_text)
+        $("#post_options ul.refernce_post").html(target_history.post.element)
+        $("#post_options #__hdn_edit_id").val(target_history.post.id)
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        enabledAdditionalAccount(false)
+        $("#__txt_postarea").val($("#__hdn_text_render").get(0).innerText)
+        $("#__on_search_close").click() // 送信履歴を閉じる
+        $("#__txt_postarea").focus()
     }
 
     /**

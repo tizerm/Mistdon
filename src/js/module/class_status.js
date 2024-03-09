@@ -86,6 +86,7 @@ class Status {
                 this.sensitive = data.sensitive // 閲覧注意設定
                 this.medias = []
                 data.media_attachments?.forEach(media => this.medias.push({
+                    id: media.id,
                     type: media.type,
                     url: media.url,
                     thumbnail: media.preview_url,
@@ -197,6 +198,7 @@ class Status {
                 this.sensitive = (data.files?.filter(f => f.isSensitive)?.length ?? 0) > 0 // 閲覧注意設定
                 this.medias = []
                 data.files?.forEach(media => this.medias.push({
+                    id: media.id,
                     type: media.type.substring(0, media.type.indexOf("/")),
                     url: media.url,
                     thumbnail: media.thumbnailUrl,
@@ -819,7 +821,7 @@ class Status {
             jqelm.find('.post_footer>.created_at').addClass(`from_address ${time_color}`)
         }
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
-            jqelm.find('.content>.main_content').hide()
+            jqelm.find('.content>.expand_header.label_cw+div').hide()
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
 
@@ -965,10 +967,10 @@ class Status {
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
-            jqelm.find('.content>.main_content').hide()  // CWを非表示にする
-        if (this.sensitive && !this.from_timeline?.pref?.expand_media)
-            jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+            jqelm.find('.content>.expand_header.label_cw+div').hide()
+        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.media>.media_content').hide()
 
         return jqelm
     }

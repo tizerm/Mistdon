@@ -180,6 +180,7 @@ class Account {
         const is_local = arg.option_obj.find('#__chk_local_only').prop('checked')
         const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
         const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
+        const edit_id = arg.option_obj.find('#__hdn_edit_id').val()
         // 一個以上センシティブ設定があったらセンシティブ扱い
         const sensitive = arg.option_obj.find('.attached_media>ul.media_list input[type="checkbox"]:checked').length > 0
         let poll = null
@@ -249,7 +250,17 @@ class Account {
                     }
                     // 添付メディアがある場合はメディアIDを追加
                     if (media_ids.length > 0) request_param.media_ids = media_ids
-                    response = await $.ajax({ // API呼び出し
+
+                    if (edit_id) response = await $.ajax({ // 編集APIを呼び出す
+                        type: "PUT",
+                        url: `https://${this.pref.domain}/api/v1/statuses/${edit_id}`,
+                        dataType: "json",
+                        headers: {
+                            "Authorization": `Bearer ${this.pref.access_token}`,
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                        },
+                        data: request_param
+                    }); else response = await $.ajax({ // 投稿APIを呼び出し
                         type: "POST",
                         url: `https://${this.pref.domain}/api/v1/statuses`,
                         dataType: "json",
@@ -1137,7 +1148,8 @@ class Account {
      */
     updateReactionHistory(code) {
         // リアクション履歴の更新を試行して、変更があったら履歴ファイルを上書き
-        if (!shiftArray(this.reaction_history, code.trim(), 20)) return
+        if (!shiftArray(this.reaction_history, code.trim(),
+            Number(Preference.GENERAL_PREFERENCE.reaction_history_limit))) return
         Account.cacheEmojiHistory()
     }
 

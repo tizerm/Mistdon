@@ -29,6 +29,9 @@ class Timeline {
     // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
 
+    // 投稿データを一次保存するスタティックフィールド
+    static SCROLLABLE_STATUS_MAP = new Map()
+
     /**
      * #Method
      * このタイムラインの最新の投稿を30件取得する
@@ -232,6 +235,10 @@ class Timeline {
                 <span class="loading_text">Now Loading...</span>
             </div>
         `).find("ul").empty()
+        Timeline.SCROLLABLE_STATUS_MAP.clear()
+        console.log(this.pref.color)
+        console.log(this.target_account)
+        $("#pop_window_timeline>h2").css('background-color', `#${this.pref.color ?? this.target_account?.pref.acc_color}`)
         $("#pop_window_timeline>h2>span").text(this.host)
 
         // 参照した投稿からタイムラインを取得
@@ -241,8 +248,11 @@ class Timeline {
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
                 target: $("#pop_window_timeline>.timeline>ul"),
-                bind: (data, target) => {
-                    data.forEach(p => target.append(p.timeline_element))
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.filter(p => !p.muted).forEach(p => {
+                        Timeline.SCROLLABLE_STATUS_MAP.set(p.status_key, p)
+                        target.append(p.timeline_element)
+                    })
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
@@ -251,6 +261,10 @@ class Timeline {
         })
 
         $("#pop_window_timeline").show("fade", 150)
+    }
+
+    static getScrollableStatus(target_li) {
+        return Timeline.SCROLLABLE_STATUS_MAP.get(target_li.attr("id"))
     }
 }
 
