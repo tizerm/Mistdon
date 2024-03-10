@@ -547,6 +547,17 @@
             Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
 
+    $(document).on("click", "li .post_quote", e => {
+        const target_li = $(e.target).closest("li")
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus(target_li).quote.createExpandWindow(target_li)
+        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+            Timeline.getScrollableStatus(target_li).quote.createExpandWindow(target_li)
+        else // 他の部分は直接リモートの投稿を取る
+            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li))
+    })
+
     /**
      * #Event #Mouseleave
      * 投稿ポップアップ
@@ -556,7 +567,7 @@
 
     /**
      * #Event #Mouseenter
-     * 投稿本体に対してホバー(ノーマルレイアウトとチャットレイアウト限定)
+     * 投稿本体に対してホバー
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ

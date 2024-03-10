@@ -176,16 +176,17 @@ class Account {
         // 各種投稿オプションパラメータを取得
         let visibility = arg.option_obj.find('input[name="__opt_visibility"]:checked').val()
         const cw_text = arg.option_obj.find('#__txt_content_warning').val()
-        const post_to = arg.option_obj.find('#__cmb_post_to').val()
-        const is_local = arg.option_obj.find('#__chk_local_only').prop('checked')
+        let post_to = arg.option_obj.find('#__cmb_post_to').val()
+        let is_local = arg.option_obj.find('#__chk_local_only').prop('checked')
         const reply_id = arg.option_obj.find('#__hdn_reply_id').val()
         const quote_id = arg.option_obj.find('#__hdn_quote_id').val()
         const edit_id = arg.option_obj.find('#__hdn_edit_id').val()
         // 一個以上センシティブ設定があったらセンシティブ扱い
         const sensitive = arg.option_obj.find('.attached_media>ul.media_list input[type="checkbox"]:checked').length > 0
+        // アンケートがある場合はアンケートのオブジェクトを生成
         let poll = null
-        if ($(arg.option_obj.find('.__txt_poll_option').get(0)).val()) {
-            // アンケートがある場合はアンケートのオブジェクトを生成
+        if (arg.option_obj.find('.poll_setting').is(':visible')
+            && $(arg.option_obj.find('.__txt_poll_option').get(0)).val()) {
             const options = []
             arg.option_obj.find('.__txt_poll_option').each((index, elm) => options.push($(elm).val()))
             let expire_sec = Number(arg.option_obj.find('#__txt_poll_expire_time').val() || '0')
@@ -205,6 +206,15 @@ class Account {
                 options: options,
                 expire_sec: expire_sec > 0 ? expire_sec : null
             }
+        }
+
+        if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
+            arg.multi_post = true // 再起実行されないようにフラグを立てる
+            arg.option_obj.find('input.__chk_add_account:checked')
+                .each((index, elm) => Account.get($(elm).val()).post(arg))
+        } else { // 追加ユーザーからの投稿の場合は一部のパラメータをデフォルト値に書き換える
+            post_to = this.pref.default_channel
+            is_local = this.pref.default_local
         }
 
         let notification = null
@@ -331,12 +341,6 @@ class Account {
         } catch (err) { // 投稿失敗時
             console.log(err)
             notification.error(`${this.full_address}からの投稿に失敗しました.`)
-        }
-
-        if (!arg.multi_post) { // 追加ユーザーが存在する場合は追加で投稿処理を行う
-            arg.multi_post = true // 再起実行されないようにフラグを立てる
-            arg.option_obj.find('input.__chk_add_account:checked')
-                .each((index, elm) => Account.get($(elm).val()).post(arg))
         }
     }
 

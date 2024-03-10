@@ -191,6 +191,26 @@ class Preference {
         })
     }
 
+    static generateStylesheet() {
+        // CSSをバインド
+        $(`<style>
+            .timeline ul>li {
+                > .media a.__on_media_expand {
+                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                }
+                &.chat_timeline>.media a.__on_media_expand {
+                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                }
+                &.media_timeline>.media a.__on_media_expand {
+                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                }
+                &.gallery_timeline>a.__on_media_expand {
+                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                }
+            }
+        </style>`).appendTo('head')
+    }
+
     /**
      * #StaticMethod
      * 設定ファイルの内容でウィンドウ設定を書き換える

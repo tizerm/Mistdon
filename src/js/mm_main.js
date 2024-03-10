@@ -104,6 +104,10 @@ $(() => (async () => {
         }
     })
 
+    // 設定からスタイルシートを生成
+    // TODO: セキュリティポリシーを見直さないとだめっぽい？
+    //Preference.generateStylesheet()
+
     // カラム生成
     Column.each(col => {
         col.create()

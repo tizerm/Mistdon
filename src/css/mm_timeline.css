@@ -480,7 +480,7 @@
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
                 background-color: rgba(76,76,76,0.683);
-                border-left: solid 8px #cccccc;
+                border-left: solid 8px #bbbbbb;
                 overflow-wrap: break-word;
                 font-size: 11px;
                 padding: 4px 8px;
@@ -490,6 +490,11 @@
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
+                }
+                &:hover {
+                background-color: rgba(76,76,76,0.98);
+                    border-left-color: #ffffff;
+                    cursor: pointer;
                 }
             }
 

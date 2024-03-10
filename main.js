@@ -421,16 +421,19 @@ async function writePrefCols(event, json_data) {
                                 rest_url = `https://${host}/api/notes/timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'homeTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'local': // ローカルタイムライン
                                 rest_url = `https://${host}/api/notes/local-timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'localTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'federation': // 連合タイムライン
                                 rest_url = `https://${host}/api/notes/global-timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'globalTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'list': // リスト
                                 rest_url = `https://${host}/api/notes/user-list-timeline`
@@ -439,6 +442,7 @@ async function writePrefCols(event, json_data) {
                                     'channel': 'userList',
                                     'params': { 'listId': tl.list_id }
                                 }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'channel': // チャンネル
                                 rest_url = `https://${host}/api/channels/timeline`

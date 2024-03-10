@@ -173,16 +173,7 @@ class Status {
                     emojis: data.note?.renote?.emojis ?? data.note?.emojis ?? data.emojis
                 })
                 // 引用ノートがある場合は引用先を設定
-                if (this.quote_flg) this.quote = {
-                    username: data.renote.user.name,
-                    user_id: data.renote.user.username,
-                    content: data.renote.text,
-                    emojis: new Emojis({
-                        host: host,
-                        platform: 'Misskey',
-                        emojis: data.renote.emojis
-                    })
-                }
+                if (this.quote_flg) this.quote = new Status(data.renote, timeline, account)
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
@@ -675,15 +666,22 @@ class Status {
             `
         }
         if (this.platform == 'Misskey' && this.quote_flg) {
+            const content = !this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default ? `
+                <div class="hidden_content">
+                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default)}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
                     <div class="quote_userarea">
-                        <span>${this.quote.username}</span>
-                        <span>@${this.quote.user_id}</span>
+                        <span>${this.quote.user.username}</span>
+                        <span>@${this.quote.user.id}</span>
                     </div>
-                    <div>${target_emojis.replace(this.quote.content)}</div>
+                    ${content}
                 </div>
             `
         }
@@ -916,15 +914,22 @@ class Status {
             `
         }
         if (this.platform == 'Misskey' && this.quote_flg) {
+            const content = !this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat ? `
+                <div class="hidden_content">
+                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat)}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>
-                        <span>${this.quote.username}</span>
-                        <span>@${this.quote.user_id}</span>
+                    <div class="quote_userarea">
+                        <span>${this.quote.user.username}</span>
+                        <span>@${this.quote.user.id}</span>
                     </div>
-                    <div>${target_emojis.replace(this.quote.content)}</div>
+                    ${content}
                 </div>
             `
         }

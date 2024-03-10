@@ -76,7 +76,7 @@
                 font-family: "メイリオ", sans-selif;
                 text-align: left;
                 border-radius: 6px;
-                background-color: #434343;
+                background-color: rgb(56,56,56);
                 border: solid 1px #888888;
                 color: #ffffff;
                 width: calc(100% - 12px);
