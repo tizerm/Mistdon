@@ -203,7 +203,7 @@ class Timeline {
 
     /**
      * #Method
-     * このタイムラインに保存してあるステータス情報を削除する
+     * このタイムラインに保存してあるステータス情報を削除する.
      * 
      * @param id 投稿ID
      */
@@ -214,6 +214,12 @@ class Timeline {
         if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
     }
 
+    /**
+     * #Method
+     * このタイムラインに保存してあるステータス情報を編集内容で更新する.
+     * 
+     * @param post 編集後の投稿オブジェクト
+     */
     updateStatus(post) {
         const status_key = this.status_key_map.get(post.id)
 
@@ -263,6 +269,12 @@ class Timeline {
         $("#pop_window_timeline").show("fade", 150)
     }
 
+    /**
+     * #StaticMethod
+     * 遡りウィンドウから対象のjQueryオブジェクトの投稿オブジェクトを返却する.
+     * 
+     * @param target_li 取得対象のjQueryオブジェクト
+     */
     static getScrollableStatus(target_li) {
         return Timeline.SCROLLABLE_STATUS_MAP.get(target_li.attr("id"))
     }

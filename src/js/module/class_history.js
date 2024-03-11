@@ -78,8 +78,15 @@ class History {
         History.preload($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)
     }
 
+    /**
+     * #StaticMethod
+     * 対象リストをスクロールロード可能な状態で画面に展開する.
+     * 
+     * @param target 展開先のDOMオブジェクト
+     * @param stack 展開対象のスタックオブジェクト
+     */
     static async preload(target, stack) {
-        const load_stack = await History.load(target, stack, null)
+        const load_stack = await History.load(stack, null)
         // ロード画面を消去
         target.prev().remove()
         // スクロールローダーを生成
@@ -91,11 +98,18 @@ class History {
                 // loadのっけた最終インデクスを参照
                 return data.pop().max_id
             },
-            load: async max_id => await History.load(target, stack, max_id)
+            load: async max_id => await History.load(stack, max_id)
         })
     }
 
-    static async load(target, stack, max_index) {
+    /**
+     * #StaticMethod
+     * 対象リストからロード対象のデータを返却する.
+     * 
+     * @param stack 展開対象のスタックオブジェクト
+     * @param max_index ロード対象の先頭インデクス
+     */
+    static async load(stack, max_index) {
         const start = max_index ?? 0
         const end = start + 20
         const load_stack = stack.slice(start, end)
@@ -107,6 +121,10 @@ class History {
         return load_stack
     }
 
+    /**
+     * #Method
+     * このヒストリーデータに紐づいている投稿データを取得する.
+     */
     async getStatus() {
         if (this.post) return // Statusインスタンスがキャッシュされている場合はなにもしない
         let response = null
@@ -254,11 +272,21 @@ class History {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 引数のターゲットエレメントの履歴の投稿を編集する
+     * 
+     * @param target 編集対象の投稿のjQueryオブジェクト
+     */
     static edit(target) {
         const index = target.closest("li").index()
         History.post_stack[index].openEditor()
     }
 
+    /**
+     * #Method
+     * このヒストリーデータに紐づいている投稿データの内容を編集用にフォームに展開する.
+     */
     openEditor() {
         // アカウントを編集対象に変更
         Account.get(this.account_address).setPostAccount()

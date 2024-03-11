@@ -519,6 +519,12 @@ class Status {
         })
     }
 
+    /**
+     * #Method
+     * この投稿を対象のタイムラインレイアウトを使って表示(DOMを返却)する.
+     * 
+     * @param pref 適用するタイムラインレイアウト
+     */
     getLayoutElement(pref) {
         switch (pref) {
             case 'chat': // チャット
@@ -1433,6 +1439,12 @@ class Status {
         }
     }
 
+    /**
+     * #Method
+     * この投稿で対象の投稿エレメントを書き換える.
+     * 
+     * @param jqelm 修正対象の投稿jQueryオブジェクト
+     */
     update(jqelm) {
         // ギャラリーは非対応
         if (jqelm.is('.gallery_timeline')) return

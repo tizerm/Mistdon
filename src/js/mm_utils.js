@@ -1,6 +1,6 @@
 ﻿/**
  * #Ajax
- * fetchでHeaderの取得も可能なAjaxメソッド
+ * fetchでHeaderの取得も可能なAjaxメソッド.
  * 
  * @param arg パラメータオブジェクト
  */
@@ -37,6 +37,12 @@ async function ajax(arg) {
     }
 }
 
+/**
+ * #Ajax
+ * fetchでファイルの送信も可能なAjaxメソッド.
+ * 
+ * @param arg パラメータオブジェクト
+ */
 async function sendFileRequest(arg) {
     try {
         // dataからmultipart/form-dataを生成
@@ -68,10 +74,23 @@ async function sendFileRequest(arg) {
     }
 }
 
+/**
+ * #Util
+ * 指定した時間待機する.
+ * 
+ * @param msec 待機時間(ミリセカンド)
+ */
 async function sleep(msec) {
     return new Promise(resolve => setTimeout(resolve, msec))
 }
 
+/**
+ * #Util
+ * 指定したスケールで切り捨てる.
+ * 
+ * @param num 切り捨て対象
+ * @param scale 切り捨てるスケール
+ */
 function floor(num, scale) {
     const pow = Math.pow(10, scale)
     return Math.trunc(num * pow) / pow

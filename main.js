@@ -162,6 +162,14 @@ async function writePrefAccColor(event, json_data) {
     pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
 }
 
+/**
+ * #IPC
+ * OAuthの認証セッションを開始する.
+ * セッション情報をキャッシュしてOAuth認証画面を開く.
+ * 
+ * @param event イベント
+ * @param json_data 認証セッションに必要な情報オブジェクト
+ */
 async function openOAuthSession(event, json_data) {
     const host = json_data.host
     let permission = null
@@ -225,6 +233,13 @@ async function openOAuthSession(event, json_data) {
     console.log('@INF: OAuth Session stored.')
 }
 
+/**
+ * #ServerMethod
+ * MastodonのOAuth認証情報作成処理.
+ * サーバーから認証コードを受け取ってアクセストークンを取得する.
+ * 
+ * @param auth_code サーバーに渡された認証コード
+ */
 async function authorizeMastodon(auth_code) {
     try {
         const token = await ajax({ // OAuth認証を開始
@@ -279,6 +294,13 @@ async function authorizeMastodon(auth_code) {
     }
 }
 
+/**
+ * #ServerMethod
+ * MisskeyのOAuth認証情報作成処理.
+ * セッション情報からアクセストークンリクエストを送ってトークンを取得する.
+ * 
+ * @param session セッションコード
+ */
 async function authorizeMisskey(session) {
     try {
         const token = await ajax({ // Token取得APIをリクエスト
@@ -522,6 +544,13 @@ async function writePrefCols(event, json_data) {
     pref_columns = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * 保存してある全体設定情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 全体設定情報
+ */
 async function readGeneralPref() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_general) {
@@ -536,6 +565,14 @@ async function readGeneralPref() {
     return pref_general
 }
 
+/**
+ * #IPC
+ * 全体設定を設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function writeGeneralPref(event, json_data) {
     // 絵文字キャッシュデータを書き込み
     const content = await overwriteFile('app_prefs/general_pref.json', json_data)
@@ -583,6 +620,13 @@ async function writeCustomEmojis(event, data) {
     pref_emojis.set(data.host, data.emojis)
 }
 
+/**
+ * #IPC
+ * 保存してある下書き情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 下書き情報
+ */
 async function readDraft() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (cache_draft) {
@@ -599,6 +643,14 @@ async function readDraft() {
     return cache_draft
 }
 
+/**
+ * #IPC
+ * 下書きを設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
 async function overwriteDraft(event, data) {
     const content = await overwriteFile('app_prefs/draft.json', data)
     console.log('@INF: finish write app_prefs/draft.json')
@@ -840,6 +892,14 @@ function jsonToMap(json_data, key_func) {
     return map;
 }
 
+/**
+ * #Utils #Node.js
+ * 汎用リソース読み込みメソッド(同期).
+ * アプリケーション内部のリソースファイルを読み込むのに使用.
+ * 
+ * @param filepath 読み込むディレクトリのパス
+ * @return 読み込んだファイルのデータ
+ */
 function readResource(filepath) {
     let content = null
     try {
@@ -850,6 +910,14 @@ function readResource(filepath) {
     return content
 }
 
+/**
+ * #Utils #node-fetch
+ * Ajax実行メソッド.
+ * node-fetchによるfetchと同じロジックでAjax通信を行う.
+ * 
+ * @param arg パラメータオブジェクト
+ * @return レスポンスオブジェクト
+ */
 async function ajax(arg) {
     try {
         let response = null
@@ -913,6 +981,10 @@ function notification(event, arg) {
 
 /*====================================================================================================================*/
 
+/**
+ * #Main #Node.js
+ * OAuth認証用サーバー起動処理.
+ */
 const bootServer = (win) => {
     // サーバー設定
     const server = http.createServer((request, response) => (async () => {

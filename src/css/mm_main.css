@@ -563,12 +563,18 @@
             width: calc(100vw - 64px);
             height: calc(100vh - 64px);
             &:hover { background-color: rgba(255,255,255,0.1); }
-            > span {
-                display: inline-block;
+            > .message {
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
+                text-align: center;
+                > span {
+                    margin-top: 8px;
+                    display: block;
+                    font-size: 18px;
+                    font-weight: bold;
+                }
             }
         }
     }
@@ -844,6 +850,7 @@
         > h2 {
             font-size: 16px;
             font-family: Arial, "メイリオ", sans-selif;
+            cursor: move;
         }
     }
     > #pop_util_window {
@@ -979,6 +986,7 @@
     cursor: pointer;
 }
 #pop_ex_timeline>.search_timeline,
+#pop_ex_timeline>.trend_timeline,
 #pop_ex_timeline>.clip_timeline {
     opacity: 0.95;
     width: min(480px,100vw);
@@ -999,8 +1007,9 @@
     background-color: #5e5e5e;
 }
 #pop_extend_column>.post_detail_col ul,
-#pop_ex_timeline .search_ul {
-    height: calc(100vh - 224px);
+#pop_ex_timeline .search_ul,
+#pop_ex_timeline .trend_ul {
+    height: calc(100vh - 160px);
 }
 #pop_extend_column>.reaction_col #__txt_reaction_search,
 #pop_custom_emoji #__txt_emoji_search,

@@ -83,6 +83,12 @@ class Account {
         else return Account.map.get(arg)
     }
 
+    /**
+     * #StaticMethod
+     * 指定したホストを持つアカウントを返却する.
+     * 
+     * @param host 検索対象のホスト
+     */
     static getByDomain(host) {
         return [...Account.map.values()].find(account => account.pref.domain == host) ?? null
     }
@@ -124,6 +130,10 @@ class Account {
         return Account.map.size == 0
     }
 
+    /**
+     * #StaticMethod
+     * アカウントデータが2つ以上存在する場合はtrueを返す
+     */
     static isMultiAccount() {
         return Account.map.size > 1
     }
@@ -493,6 +503,13 @@ class Account {
         }
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * 公開範囲や連合設定をしてリノートする.
+     * 
+     * @param url リノート対象の投稿URL
+     * @param option リノート設定
+     */
     async renote(url, option) {
         let response = null
         let target_post = null
@@ -962,6 +979,28 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
+     * このアカウントのホストインスタンスを取得する.
+     */
+    async getInstance() {
+        return await Instance.get(this.pref.domain)
+    }
+
+    /**
+     * #StaticMethod
+     * すべてのアカウントのトレンドを取得する(Promiseで返却).
+     */
+    static async getAllTrendPromise() {
+        const acitr = Account.map.values()
+        const promises = []
+        for (const account of acitr) {
+            const instance = await account.getInstance()
+            promises.push(instance.getTrend())
+        }
+        return promises
+    }
+
+    /**
+     * #Method #Ajax #jQuery
      * このアカウントが作成したリストの一覧を取得する
      */
     async getLists() {
@@ -1035,6 +1074,10 @@ class Account {
         }
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントが作成したクリップ一覧を取得する(Misskey専用)
+     */
     async getClips() {
         try {
             const response = await $.ajax({
@@ -1269,6 +1312,10 @@ class Account {
         return html
     }
 
+    /**
+     * #StaticMethod
+     * 追加投稿アカウントを選択するチェックフォームのDOMを返却
+     */
     static createAdditionalPostAccountList() {
         let html = ''
         Account.map.forEach((v, k) => html += `<li>
@@ -1296,6 +1343,10 @@ class Account {
         return html
     }
 
+    /**
+     * #StaticMethod
+     * 範囲指定リノートのメニュー項目のDOMを返却
+     */
     static async createContextLimitedRenoteList() {
         let html = ''
         const acitr = Account.map.values()

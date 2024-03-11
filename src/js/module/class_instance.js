@@ -9,7 +9,6 @@ class Instance {
     constructor(data) {
         this.platform = data.platform
         this.host = data.host
-        console.log(data)
         switch (data.platform) {
             case 'Mastodon': // Mastodon
                 this.name = data.json.title
@@ -69,10 +68,22 @@ class Instance {
             default:
                 break
         }
+        this.authorized = Account.getByDomain(this.host)
     }
 
     // 認証対象インスタンスを設定
     static AUTH_INSTANCE = null
+
+    // スタティックタイムライン情報を初期化
+    static {
+        Instance.TREND_PREF_TIMELINE = {
+            "parent_group": new Group({
+                "group_id": "__trend_timeline",
+                "tl_layout": "default",
+                "multi_user": true
+            }, null)
+        }
+    }
 
     /**
      * #StaticMethod
@@ -127,6 +138,13 @@ class Instance {
         }
     }
 
+    /**
+     * #StaticMethod
+     * ホストドメインからより詳細なインスタンス情報を格納したクラスオブジェクトを返す
+     * 
+     * @param host インスタンスのホストドメイン
+     * @param platform インスタンスのプラットフォーム
+     */
     static async getDetail(host, platform) {
         let response = null
         let instance_param = null
@@ -225,6 +243,56 @@ class Instance {
         }
     }
 
+    /**
+     * #Method
+     * このインスタンスで現在話題になっている投稿を取得する.
+     */
+    async getTrend() {
+        let response = null
+        let query_param = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    query_param = { "limit": 30 }
+                    let header = {}
+                    if (this.authorized) header = { "Authorization": `Bearer ${this.authorized.pref.access_token}` }
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${this.host}/api/v1/trends/statuses`,
+                        dataType: "json",
+                        headers: header,
+                        data: query_param
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    query_param = { "limit": 30 }
+                    if (this.authorized) query_param.i = this.authorized.pref.access_token
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.host}/api/notes/featured`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(query_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            const posts = []
+            response.forEach(p => posts.push(new Status(p, Instance.TREND_PREF_TIMELINE, this.authorized)))
+            return posts
+        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
+            Notification.error(`${this.host}のトレンドの取得に失敗しました.`)
+            return Promise.reject(err)
+        }
+    }
+
+    /**
+     * #Method
+     * このインスタンスに対して認証ロジックを実行する(旧方式).
+     * 認証画面を表示して認証リクエスト送信用の画面を表示する.
+     */
     async authorize() {
         let permission = null
         try {
@@ -306,6 +374,12 @@ class Instance {
         }
     }
 
+    /**
+     * #Method
+     * このMastodonインスタンスのアクセストークンを取得して保存する(旧方式).
+     * 
+     * @param auth_code 認証コード
+     */
     async saveTokenMastodon(auth_code) {
         const client_id = this.__auth_client_id
         const client_secret = this.__auth_client_secret
@@ -361,6 +435,10 @@ class Instance {
         }
     }
 
+    /**
+     * #Method
+     * このMisskeyインスタンスのアクセストークンを取得して保存する(旧方式).
+     */
     async saveTokenMisskey() {
         const app_secret = this.__auth_app_secret
         const app_token = this.__auth_app_token
@@ -403,6 +481,10 @@ class Instance {
         }
     }
 
+    /**
+     * #Method
+     * このインスタンスのOAuth認証セッションを開始する(主にメインプロセスで実行).
+     */
     async openOAuth() {
         window.accessApi.openOAuthSession({ // メインプロセスのOAuthセッションを呼び出す
             'host': this.host,
@@ -478,6 +560,12 @@ class Instance {
         return jqelm
     }
 
+    /**
+     * #Method
+     * このインスタンスの詳細情報を表示する.
+     * 
+     * @param bind_selector 詳細情報を表示する先のセレクタ
+     */
     createDetailHtml(bind_selector) {
         $(bind_selector).html(`
             <ul class="instance_header"></ul>
@@ -495,6 +583,13 @@ class Instance {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 入力されたドメインからインスタンスの名前を表示する.
+     * 
+     * @param domain 検索対象のインスタンスドメイン
+     * @param target 名称をバインドする先のターゲットエレメント
+     */
     static async showInstanceName(domain, target) {
         if (!domain) { // 空の場合はメッセージを初期化
             target.text("(URLを入力してください)")
@@ -528,6 +623,33 @@ class Instance {
 
         // 生成したインスタンスを返却
         return instance
+    }
+
+    /**
+     * #StaticMethod
+     * トレンドを表示する画面を表示
+     */
+    static createTrendWindow() {
+        // 検索カラムのDOM生成
+        $("#pop_ex_timeline").html(`
+            <h2>トレンド</h2>
+            <div class="trend_timeline">
+                <div id="__trend_timeline" class="timeline">
+                    <div class="col_loading">
+                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                        <span class="loading_text">Now Loading...</span>
+                    </div>
+                    <ul class="trend_ul __context_posts"></ul>
+                </div>
+            </div>
+            <button type="button" id="__on_search_close" class="close_button">×</button>
+        `).show("slide", { direction: "up" }, 150)
+
+        // すべてのアカウントからトレンド情報をを取得してバインド
+        ;(async () => {
+            const promises = await Account.getAllTrendPromise()
+            Instance.TREND_PREF_TIMELINE.parent_group.onLoadTimeline(promises)
+        })()
     }
 }
 

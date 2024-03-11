@@ -30,8 +30,8 @@ class Draft {
     }
 
     /**
-     * #Method
-     * 検索欄を表示する画面を表示
+     * #StaticMethod
+     * 下書き一覧を表示するメニューを表示
      */
     static createDraftMenu() {
         let lists = ''
@@ -42,7 +42,9 @@ class Draft {
 
     /**
      * #StaticMethod
-     * 検索カラムに入力された情報をもとに検索処理を実行(ロード画面生成もいっしょに)
+     * 現在入力中の内容で下書きに保存する.
+     * 
+     * @param arg パラメータオブジェクト
      */
     static async saveDraft(arg) {
         // 各種投稿オプションパラメータを取得
@@ -86,6 +88,12 @@ class Draft {
         Notification.info('下書きに保存しました.')
     }
 
+    /**
+     * #StaticMethod
+     * 選択された下書きをロードして入力欄に展開する.
+     * 
+     * @param index 下書きのインデクス
+     */
     static loadDraft(index) {
         const draft = Draft.list.splice(index, 1)[0]
         $("#__on_reset_option").click()
@@ -95,6 +103,7 @@ class Draft {
         $("#__txt_postarea").focus()
     }
 
+    // Getter: 下書きを一覧に表示する際の項目DOM
     get element() {
         const account = Account.get(this.account)
         return `

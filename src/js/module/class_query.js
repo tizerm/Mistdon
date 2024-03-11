@@ -24,7 +24,7 @@ class Query {
     }
 
     /**
-     * #Method
+     * #StaticMethod
      * 検索欄を表示する画面を表示
      */
     static createSearchWindow() {

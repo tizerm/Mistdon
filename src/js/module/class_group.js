@@ -304,6 +304,13 @@ class Group {
         else del_elm.remove()
     }
 
+    /**
+     * #Method
+     * 引数のjQueryオブジェクトに該当する投稿データを編集後の内容に書き換える
+     * 
+     * @param jqelm 編集対象の投稿のjQueryオブジェクト
+     * @param post 編集後の投稿Statusオブジェクト
+     */
     updateStatus(jqelm, post) {
         const key = jqelm.attr("id")
         // ステータスデータを置き換える

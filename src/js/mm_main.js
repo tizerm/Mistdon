@@ -133,20 +133,30 @@ $(() => (async () => {
     Column.getOpenedFirst().setCursor()
 })())
 
+/**
+ * #LimitedMethod
+ * リプライ/引用/編集元の投稿情報を削除する.
+ */
 function deleteQuoteInfo() {
     $('#header>#post_options input[type="hidden"]').val("")
     $('#header>#post_options ul.refernce_post')
         .html('<li class="__initial_message">返信/引用元なし</li>')
 }
 
+/**
+ * #LimitedMethod
+ * 追加投稿アカウントの表示を有効/無効化する.
+ * 
+ * @param enable 有効にする場合はtrue
+ */
 function enabledAdditionalAccount(enable) {
     const close_elm = $('#header>#post_options .additional_users+.option_close')
-    if (Account.isMultiAccount() && enable) {
+    if (Account.isMultiAccount() && enable) { // アカウントが複数ある場合のみ有効にする
         close_elm.find("button.__on_option_open").prop('disabled', false)
             .find("img").attr('src', 'resources/ic_right.png')
         close_elm.css('background-color', '#514285').hide()
         $('#header>#post_options .additional_users').show()
-    } else {
+    } else { // 単一アカウントか無効化の設定にされた場合は追加投稿を無効化
         close_elm.find("button.__on_option_open").prop('disabled', true)
             .find("img").attr('src', 'resources/ic_not.png')
         close_elm.css('background-color', '#777777').show()

@@ -30,8 +30,8 @@ class Clip {
     }
 
     /**
-     * #Method
-     * 検索欄を表示する画面を表示
+     * #StaticMethod
+     * クリップを表示する画面を表示
      */
     static createClipWindow() {
         // 検索カラムのDOM生成
@@ -62,7 +62,10 @@ class Clip {
 
     /**
      * #StaticMethod
-     * 検索カラムに入力された情報をもとに検索処理を実行(ロード画面生成もいっしょに)
+     * 指定したクリップを表示する.
+     * 
+     * @param account_address クリップを参照しているアカウントのアドレス
+     * @param id クリップID
      */
     static async loadClip(account_address, id) {
         const account = Account.get(account_address)
@@ -114,6 +117,7 @@ class Clip {
         }
     }
 
+    // Getter: クリップ一覧に表示するクリップ項目DOM
     get element() {
         return $($.parseHTML(`
             <li class="clip_list" id="${this.id}" name="${this.host_account.full_address}">

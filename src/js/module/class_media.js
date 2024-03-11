@@ -36,6 +36,12 @@ class Media {
     // 添付メディア
     static ATTACH_MEDIA = new Map()
 
+    /**
+     * #StaticMethod
+     * ローカルから読み込んだファイルをメディアマップに追加してサムネイル表示する.
+     * 
+     * @param files 読み込み対象のファイル
+     */
     static async attachMedia(files) {
         const preview_elm = $('#header>#post_options .attached_media>ul.media_list')
         // 初期メッセージを削除
@@ -59,6 +65,10 @@ class Media {
         })
     }
 
+    /**
+     * #StaticMethod
+     * Misskeyのドライブから参照したメディアファイルを追加してサムネイル表示する.
+     */
     static async attachDriveMedia() {
         const medias = []
         $("#pop_util_window ul.drive_media_list input.__chk_drive_media:checked")
@@ -80,6 +90,10 @@ class Media {
         $("#header>#post_options").show("slide", { direction: "up" }, 120)
     }
 
+    /**
+     * #StaticMethod
+     * 添付メディアリストをクリアする.
+     */
     static clearAttachMedia() {
         $('#header>#post_options .attached_media>ul.media_list').html(`
             <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
@@ -90,9 +104,10 @@ class Media {
 
     /**
      * #StaticMethod
-     * リモートホストも含めたユーザーアドレスからリモートのユーザー情報を取得する
+     * 最近投稿したメディア一覧を取得する.
      * 
-     * @param address ユーザーアカウントのフルアドレス
+     * @param address 取得対象のユーザーアカウントのフルアドレス
+     * @param max_id ページ送り用のメディアID
      */
     static async getRecentMedia(address, max_id) {
         const notification = Notification.progress("対象ユーザーの投稿メディアを取得中です...")
@@ -150,6 +165,14 @@ class Media {
         }
     }
 
+    /**
+     * #StaticMethod
+     * メディアをインスタンスにアップロードする.
+     * 
+     * @param account アップロード対象のアカウント
+     * @param file アップロード対象のファイルオブジェクト
+     * @param sensitive センシティブ判定
+     */
     static async uploadMedia(account, file, sensitive) {
         const filename = file.name
         const notification = Notification.progress(`${filename}をアップロードしています...`)
@@ -204,6 +227,7 @@ class Media {
         }
     }
 
+    // Getter: 最近のメディア一覧を取得した際のメディア選択項目
     get li_element() {
         // メディアごとにタイルブロックを生成
         let html = `<li>
@@ -217,6 +241,12 @@ class Media {
         return $($.parseHTML(html))
     }
 
+    /**
+     * #StaticMethod
+     * 対象のMisskeyアカウントのドライブを開いて表示する.
+     * 
+     * @param address ドライブを開くアカウント
+     */
     static openDriveWindow(address) {
         // 一旦中身を消去
         $("#pop_util_window>.content").html(`

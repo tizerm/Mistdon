@@ -186,6 +186,12 @@ class User {
         }
     }
 
+    /**
+     * #StaticMethod
+     * ユーザー情報詳細表示のテンプレートHTMLを返却.
+     * 
+     * @param address ユーザーフルアドレス
+     */
     static createDetailHtml(address) {
         return `
             <td id="${address}" class="timeline column_profile">
@@ -699,6 +705,10 @@ class User {
         }
     }
 
+    /**
+     * #Method
+     * このユーザーの所属するインスタンスを取得する.
+     */
     async getInstance() {
         try {
             return await Instance.getDetail(this.host, this.platform)
@@ -751,6 +761,10 @@ class User {
         }).show("fade", 80)
     }
 
+    /**
+     * #Method
+     * このユーザーの詳細情報を生成済みのHTMLテンプレートにバインドする.
+     */
     async bindDetail() {
         const target_elm = $(`#pop_ex_timeline td[id="${this.full_address}"]`)
         // ヘッダとプロフィール詳細を表示
@@ -823,6 +837,13 @@ class User {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 対象のユーザー詳細情報の各レイアウトの高さを調整する.
+     * 
+     * @param target_elm 調整対象のjQueryオブジェクト
+     * @param exist_pinned ピン留め投稿が存在する場合はtrue
+     */
     static setHeight(target_elm, exist_pinned) {
         const detail_height = target_elm.find("ul.profile_detail").outerHeight()
         const pinned_height = exist_pinned ? target_elm.find("ul.pinned_post").outerHeight() : 0
@@ -907,6 +928,10 @@ class User {
         })
     }
 
+    /**
+     * #Method
+     * このユーザーのメディア投稿一覧を取得して表示する.
+     */
     async createMediaGallery() {
         const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
         target_td.prepend(`

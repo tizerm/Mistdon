@@ -7,6 +7,8 @@
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
+    $("#navi .navi_trend").on("click", e => Instance.createTrendWindow())
+
     /**
      * #Event
      * 送信履歴ボタン

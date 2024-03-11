@@ -66,6 +66,10 @@ class Preference {
         })();
     }
 
+    /**
+     * #StaticMethod
+     * 全体設定ウィンドウを生成して表示.
+     */
     static openGeneralPrefConfig() {
         // ヘルプウィンドウのDOM生成
         const jqelm = $($.parseHTML(`
@@ -103,6 +107,10 @@ class Preference {
         })
     }
 
+    /**
+     * #StaticMethod
+     * 全体設定ウィンドウに現在の設定値を適用.
+     */
     static setPreference() {
         // 個別オプション
         $("#__chk_gen_use_tool_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_tool_button)
@@ -140,6 +148,10 @@ class Preference {
         $("#__txt_gen_keyscroll_shift").val(Preference.GENERAL_PREFERENCE.scroll_speed?.shift)
     }
 
+    /**
+     * #StaticMethod
+     * 全体設定ウィンドウに入力された内容をファイルに保存.
+     */
     static async saveGeneralPreference() {
         const save_pref = {
             "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
@@ -191,6 +203,11 @@ class Preference {
         })
     }
 
+    /**
+     * #StaticMethod
+     * 全体設定の内容から永続適用CSSを生成.
+     * TODO: セキュリティポリシーの関係でうまく動作していません
+     */
     static generateStylesheet() {
         // CSSをバインド
         $(`<style>
