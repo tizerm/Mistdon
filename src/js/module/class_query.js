@@ -65,11 +65,12 @@ class Query {
         `)
 
         const query = new Query($("#pop_ex_timeline #__txt_search_query").val())
-        const rest_promises = []
-        // すべてのアカウントから検索処理を実行(検索結果をPromise配列に)
-        Account.each(account => rest_promises.push(query.search(account)))
-        // すべての検索結果を取得したらカラムにバインド
-        Query.SEARCH_PREF_TIMELINE.parent_group.onLoadTimeline(rest_promises)
+        // すべてのアカウントから検索処理を実行してバインド
+        const promises = []
+        Account.each(account => promises.push(query.search(account)))
+        const view_group = Query.SEARCH_PREF_TIMELINE.parent_group
+        view_group.status_map.clear()
+        view_group.onLoadTimeline(promises)
     }
 
     /**

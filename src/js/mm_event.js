@@ -783,7 +783,7 @@
      * ユーザープロフィール: フォロー数
      * => フォロイー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow", e =>
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow:not(.label_private)", e =>
         User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('follows')))
 
     /**
@@ -791,7 +791,7 @@
      * ユーザープロフィール: フォロワー数
      * => フォロワー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower", e =>
+    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower:not(.label_private)", e =>
         User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('followers')))
 
     /**

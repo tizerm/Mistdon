@@ -350,7 +350,7 @@
         }
     }
 
-    /*=== Notifications Layout ===================================================================*/
+    /*=== Draft Menu Layout ======================================================================*/
     > #pop_draft {
         display: none;
         z-index: 11;
@@ -425,16 +425,31 @@
                     display: inline-block;
                     border-top-right-radius: 16px;
                     border-bottom-right-radius: 16px;
-                    border: solid 1px #aaaaaa;
+                    border: solid 2px #cccccc;
                     border-left-style: none;
-                    padding: 6px 24px;
-                    padding-left: 36px;
+                    padding: 8px 24px;
+                    padding-left: 88px;
                     background-color: rgba(34,34,34,0.8);
+                    background-position: left center;
+                    background-repeat: no-repeat;
+                    background-size: 72px auto;
                     font-size: 16px;
                     font-weight: bold;
                 }
-                > .done  { background-color: rgba(34,60,72,0.8); }
-                > .error { background-color: rgba(72,42,34,0.8); }
+                > .progress  {
+                    background-image: url("../resources/illust/ani_wait.png");
+                }
+                > .info  {
+                    background-image: url("../resources/illust/il_info2.png");
+                }
+                > .done  {
+                    background-color: rgba(34,60,72,0.8);
+                    background-image: url("../resources/illust/il_done2.png");
+                }
+                > .error {
+                    background-color: rgba(72,42,34,0.8);
+                    background-image: url("../resources/illust/il_err2.png");
+                }
             }
         }
     }

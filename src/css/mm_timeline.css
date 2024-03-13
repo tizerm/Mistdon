@@ -971,7 +971,7 @@
 .label_cw        { background-color: #8c720b; }
 .label_sensitive { background-color: #a10000; }
 .label_limitover { background-color: #0b638c; }
-.label_private   { background-color: #dfdfdf; color: #333333; }
+.label_private   { background-color: #bbbbbb; color: #333333; }
 .cw_content      { display: none; }
 
 /*=== Profile Column Layout ======================================================================*/

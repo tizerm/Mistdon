@@ -68,10 +68,9 @@ class User {
                 this.count_post = arg.json.notesCount
                 this.count_follow = arg.json.followingCount
                 this.count_follower = arg.json.followersCount
-                /*
-                 * TODO: 非表示設定がfollowersVisibilityとfollowingVisibilityに分離したのでこのままだと表示ができない
-                 */
                 this.hide_ff = (arg.json.ffVisibility ?? 'public') != 'public'
+                this.hide_follow = (arg.json.followingVisibility ?? 'public') != 'public'
+                this.hide_follower = (arg.json.followersVisibility ?? 'public') != 'public'
 
                 // フィールドをセット
                 if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
@@ -288,8 +287,14 @@ class User {
         if (this.hide_ff) html += `
             <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
         `; else html += `
-            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
+            <span class="count_follow counter ${this.hide_follow ? 'label_private' : 'label_follow'}"
+                title="${this.hide_follow ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                ${this.hide_follow ? '???' : this.count_follow}
+            </span>
+            <span class="count_follower counter ${this.hide_follower ? 'label_private' : 'label_follower'}"
+                title="${this.hide_follower ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                ${this.hide_follower ? '???' : this.count_follower}
+            </span>
         `
         html += '</div></li>'
 

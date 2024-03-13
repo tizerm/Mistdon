@@ -648,7 +648,9 @@ class Instance {
         // すべてのアカウントからトレンド情報をを取得してバインド
         ;(async () => {
             const promises = await Account.getAllTrendPromise()
-            Instance.TREND_PREF_TIMELINE.parent_group.onLoadTimeline(promises)
+            const view_group = Instance.TREND_PREF_TIMELINE.parent_group
+            view_group.status_map.clear()
+            view_group.onLoadTimeline(promises)
         })()
     }
 }
