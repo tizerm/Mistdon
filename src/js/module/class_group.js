@@ -20,7 +20,8 @@ class Group {
         this.unread = 0
         this.counter = 0
         this.ppm_que = []
-        this.timer_id = null
+        this.speed_timer_id = null
+        this.color_timer_id = null
         this.search_flg = false
 
         // タイムラインはインスタンスを作って管理
@@ -152,8 +153,11 @@ class Group {
                 $(`#${this.id}>.col_loading`).remove()
                 // ソートが終わったらタイムラインをDOMに反映
                 postlist.forEach(post => this.append(post))
-                // 流速タイマーをセット(検索のときはセットしない)
-                if (!this.search_flg) this.initSpeedAnalyzer()
+
+                if (!this.search_flg) { // 流速タイマーをセット(検索のときはセットしない)
+                    this.initSpeedAnalyzer()
+                    this.initColorTimer()
+                }
             } else { // すべてのカラムの取得に失敗した場合
                 $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
                 $(`#${this.id}>.col_loading>.loading_text`)
@@ -262,8 +266,8 @@ class Group {
      * タイムライン流速計測タイマーをセットする
      */
     async initSpeedAnalyzer() {
-        if (!this.timer_id) clearInterval(this.timer_id) // 実行中の場合は一旦削除
-        this.timer_id = setInterval(() => (async () => {
+        if (!this.speed_timer_id) clearInterval(this.speed_timer_id) // 実行中の場合は一旦削除
+        this.speed_timer_id = setInterval(() => (async () => {
             const ppm = this.counter
             this.counter = 0 // 先にカウンターを0にリセット
             this.ppm_que.push(ppm)
@@ -277,6 +281,19 @@ class Group {
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.speed_meter`)
                 .html(insert_text)
         })(), 60000) // 1分おきに実行
+    }
+
+    /**
+     * #Method
+     * 投稿時間カラーラベルを再設定するタイマーをセットする
+     */
+    async initColorTimer() {
+        if (!this.color_timer_id) clearInterval(this.color_timer_id) // 実行中の場合は一旦削除
+        this.color_timer_id = setInterval(() => (async () => $(`#${this.id}>ul>li`).each((index, elm) => {
+            const post = this.status_map.get($(elm).attr("id"))
+            const element = $(elm).is(".chat_timeline") ? $(elm).find(".content") : $(elm)
+            element.css('border-left-color', post.relative_time.color)
+        }))(), 60000) // 1分おきに実行
     }
 
     /**

@@ -74,17 +74,6 @@ class Instance {
     // 認証対象インスタンスを設定
     static AUTH_INSTANCE = null
 
-    // スタティックタイムライン情報を初期化
-    static {
-        Instance.TREND_PREF_TIMELINE = {
-            "parent_group": new Group({
-                "group_id": "__trend_timeline",
-                "tl_layout": "default",
-                "multi_user": true
-            }, null)
-        }
-    }
-
     /**
      * #StaticMethod
      * ホストドメインからインスタンス情報を格納したこのクラスのオブジェクトを返す
@@ -239,51 +228,6 @@ class Instance {
             return new Instance(instance_param)
         } catch (err) {
             console.log(err)
-            return Promise.reject(err)
-        }
-    }
-
-    /**
-     * #Method
-     * このインスタンスで現在話題になっている投稿を取得する.
-     */
-    async getTrend() {
-        let response = null
-        let query_param = null
-        try {
-            switch (this.platform) {
-                case 'Mastodon': // Mastodon
-                    query_param = { "limit": 30 }
-                    let header = {}
-                    if (this.authorized) header = { "Authorization": `Bearer ${this.authorized.pref.access_token}` }
-                    response = await $.ajax({
-                        type: "GET",
-                        url: `https://${this.host}/api/v1/trends/statuses`,
-                        dataType: "json",
-                        headers: header,
-                        data: query_param
-                    })
-                    break
-                case 'Misskey': // Misskey
-                    query_param = { "limit": 30 }
-                    if (this.authorized) query_param.i = this.authorized.pref.access_token
-                    response = await $.ajax({
-                        type: "POST",
-                        url: `https://${this.host}/api/notes/featured`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify(query_param)
-                    })
-                    break
-                default:
-                    break
-            }
-            const posts = []
-            response.forEach(p => posts.push(new Status(p, Instance.TREND_PREF_TIMELINE, this.authorized)))
-            return posts
-        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(err)
-            Notification.error(`${this.host}のトレンドの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
@@ -624,34 +568,4 @@ class Instance {
         // 生成したインスタンスを返却
         return instance
     }
-
-    /**
-     * #StaticMethod
-     * トレンドを表示する画面を表示
-     */
-    static createTrendWindow() {
-        // 検索カラムのDOM生成
-        $("#pop_ex_timeline").html(`
-            <h2>トレンド</h2>
-            <div class="trend_timeline">
-                <div id="__trend_timeline" class="timeline">
-                    <div class="col_loading">
-                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                        <span class="loading_text">Now Loading...</span>
-                    </div>
-                    <ul class="trend_ul __context_posts"></ul>
-                </div>
-            </div>
-            <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show("slide", { direction: "up" }, 150)
-
-        // すべてのアカウントからトレンド情報をを取得してバインド
-        ;(async () => {
-            const promises = await Account.getAllTrendPromise()
-            const view_group = Instance.TREND_PREF_TIMELINE.parent_group
-            view_group.status_map.clear()
-            view_group.onLoadTimeline(promises)
-        })()
-    }
 }
-

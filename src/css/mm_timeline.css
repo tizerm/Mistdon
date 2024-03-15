@@ -242,14 +242,21 @@
         > li {
             background-color: rgba(56,56,56,0.683);
             position: relative;
-            border-radius: 12px;
             list-style-type: none;
             margin: 6px;
             padding: 8px 12px;
 
+            &.normal_layout {
+                border-left: solid 6px #cccccc;
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+                margin-left: 2px;
+            }
+
             > .label_head {
                 font-family: Arial, "メイリオ", sans-selif;
-                border-radius: 12px;
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
                 padding: 3px 24px;
                 margin: -8px -12px 6px;
                 font-size: 12px;
@@ -598,7 +605,6 @@
                     background-position: center right;
                     background-repeat: no-repeat;
                     background-size: 32px 32px;
-                    border-bottom-left-radius: 12px;
                     border-bottom-right-radius: 12px;
                     padding: 3px 18px;
                     margin: 4px -12px -8px;
@@ -697,11 +703,14 @@
                 background-color: rgba(56,56,56,0.683);
                 margin: 0px;
                 padding: 8px 12px;
-                border-radius: 8px;
-                width: calc(100% - 58px);
+                width: calc(100% - 62px);
                 min-height: 20px;
                 color: #ffffff;
                 font-size: 12px;
+
+                border-left: solid 4px #cccccc;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
                 > .main_content {
                     line-height: 1.35em;
                     margin: 0px;
@@ -758,12 +767,18 @@
         /*=== List Layout Style ==================================================================*/
         > li.short_timeline {
             position: relative;
-            border-radius: 12px;
             list-style-type: none;
             margin: 3px 6px;
             padding: 0px;
+            padding-left: 2px;
             height: 24px;
             cursor: default;
+
+            border-left: solid 4px #cccccc;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            margin-left: 2px;
+
             & img {
                 width: 24px;
                 height: 24px;
@@ -829,6 +844,8 @@
             list-style-type: none;
             margin: 4px;
             padding: 0px;
+            padding-left: 4px;
+            border-left: solid 4px #cccccc;
 
             > .label_head {
                 border-radius: 6px;

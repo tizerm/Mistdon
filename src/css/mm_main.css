@@ -646,6 +646,7 @@
             height: auto;
             > li, > li:hover {
                 border: solid 2px #cccccc;
+                border-left-width: 8px;
                 background-color: rgba(56,56,56,0.92);
             }
         }
@@ -817,6 +818,37 @@
                 font-size: 13px;
             }
             & ul.clip_ul { height: calc(100vh - 580px); }
+        }
+
+        /*=== Trend Timeline Layout ==============================================================*/
+        > .trend_timeline {
+            > ul.trend_tags {
+                margin: 0px;
+                padding: 0px 6px;
+                height: 200px;
+                overflow-y: auto;
+                &::-webkit-scrollbar { width: 8px; }
+                > li {
+                    display: inline-block;
+                    list-style-type: none;
+                    border-radius: 6px;
+                    margin: 0px;
+                    padding: 0px 8px;
+                    padding-top: 2px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 13px;
+                    font-weight: bold;
+                    vertical-align: middle;
+                    height: 22px;
+                    border: solid 1px #444444;
+                    > span { vertical-align: middle; }
+                    &:hover {
+                        border-color: #dddddd;
+                        cursor: pointer;
+                    }
+                }
+            }
+            & ul.trend_ul { height: calc(100vh - 400px); }
         }
     }
 
@@ -1022,8 +1054,7 @@
     background-color: #5e5e5e;
 }
 #pop_extend_column>.post_detail_col ul,
-#pop_ex_timeline .search_ul,
-#pop_ex_timeline .trend_ul {
+#pop_ex_timeline .search_ul {
     height: calc(100vh - 160px);
 }
 #pop_extend_column>.reaction_col #__txt_reaction_search,

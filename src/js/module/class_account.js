@@ -986,20 +986,6 @@ class Account {
     }
 
     /**
-     * #StaticMethod
-     * すべてのアカウントのトレンドを取得する(Promiseで返却).
-     */
-    static async getAllTrendPromise() {
-        const acitr = Account.map.values()
-        const promises = []
-        for (const account of acitr) {
-            const instance = await account.getInstance()
-            promises.push(instance.getTrend())
-        }
-        return promises
-    }
-
-    /**
      * #Method #Ajax #jQuery
      * このアカウントが作成したリストの一覧を取得する
      */

@@ -219,6 +219,7 @@ class Status {
 
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
+        this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
     }
 
@@ -234,18 +235,6 @@ class Status {
     // 投稿データを一次保存するスタティックフィールド
     static TEMPORARY_CONTEXT_STATUS = null
     static TEMPORARY_ACTION_STATUS = null
-
-    // 日付フォーマッターはstaticプロパティにする
-    static {
-        Status.DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-            year:   'numeric',
-            month:  '2-digit',
-            day:    '2-digit',
-            hour:   '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        })
-    }
 
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() {
@@ -663,7 +652,7 @@ class Status {
                 <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
             `)
             const label_limit = this.poll_unlimited // 投票期限テキスト
-                ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
             html /* 投票ブロック */ += `
                 <div class="post_poll">
                     <div class="options">${options}</div>
@@ -778,7 +767,7 @@ class Status {
         }
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -812,18 +801,10 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        if (this.profile_post_flg || this.detail_flg) { // プロフィールと詳細表示は投稿時刻で色分けする
-            let time_color = null
-            const diff_msec = Date.now() - this.sort_date.getTime()
-            if      (diff_msec < 86400000)    time_color = "label_24h"
-            else if (diff_msec < 259200000)   time_color = "label_72h"
-            else if (diff_msec < 604800000)   time_color = "label_1w"
-            else if (diff_msec < 2592000000)  time_color = "label_1m"
-            else if (diff_msec < 15552000000) time_color = "label_hfy"
-            else if (diff_msec < 31536000000) time_color = "label_1y"
-            else time_color = "label_none"
-            jqelm.find('.post_footer>.created_at').addClass(`from_address ${time_color}`)
-        }
+        if (this.profile_post_flg || this.detail_flg) // プロフィールと詳細表示は投稿時刻で色分けする
+            jqelm.find('.post_footer>.created_at').addClass(`from_address ${this.relative_time.color_class}`)
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
@@ -847,7 +828,7 @@ class Status {
                         @${this.user.id}
                     </a>
                 </span>
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
             </div>
             <div class="content">
         `
@@ -978,6 +959,8 @@ class Status {
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
+        // 時間で色分け
+        jqelm.find('.content').css('border-left-color', this.relative_time.color)
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
@@ -1036,6 +1019,8 @@ class Status {
             jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (notif_flg) {
             jqelm.closest('li').addClass('short_notification')
             switch (this.notif_type) {
@@ -1148,7 +1133,7 @@ class Status {
         `
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -1176,6 +1161,8 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
             jqelm.find('.content>.main_content').hide()  // CWを非表示にする
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
@@ -1224,7 +1211,7 @@ class Status {
                 <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
             `)
             const label_limit = this.poll_unlimited // 投票期限テキスト
-                ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
             html /* 投票ブロック */ += `
                 <div class="post_poll">
                     <div class="options">${options}</div>
@@ -1381,7 +1368,7 @@ class Status {
             `
         })
         const label_limit = this.poll_unlimited // 投票期限テキスト
-            ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+            ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
         html += `
             <div class="poll_footer">
                 <span>${total_vote} 票</span>

@@ -7,7 +7,7 @@
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
-    $("#navi .navi_trend").on("click", e => Instance.createTrendWindow())
+    $("#navi .navi_trend").on("click", e => Trend.createTrendWindow())
 
     /**
      * #Event
@@ -1035,6 +1035,9 @@
             return false
         }
     })
+
+    $(document).on("click", "#pop_ex_timeline>.trend_timeline>ul.trend_tags>li",
+        e => Trend.TREND_TAG_MAP.get($(e.target).closest("li").attr("name")).search())
 
     $(document).on("click", "#pop_ex_timeline>.clip_timeline ul.clip_list>li", e => {
         const target_li = $(e.target).closest("li")
