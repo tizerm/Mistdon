@@ -767,7 +767,7 @@ class Status {
         }
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -828,7 +828,7 @@ class Status {
                         @${this.user.id}
                     </a>
                 </span>
-                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
             </div>
             <div class="content">
         `
@@ -1133,7 +1133,7 @@ class Status {
         `
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${this.relative_time.absolute}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')

@@ -242,8 +242,6 @@ class Timeline {
             </div>
         `).find("ul").empty()
         Timeline.SCROLLABLE_STATUS_MAP.clear()
-        console.log(this.pref.color)
-        console.log(this.target_account)
         $("#pop_window_timeline>h2").css('background-color', `#${this.pref.color ?? this.target_account?.pref.acc_color}`)
         $("#pop_window_timeline>h2>span").text(this.host)
 

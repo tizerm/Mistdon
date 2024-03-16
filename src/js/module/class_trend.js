@@ -1,6 +1,6 @@
 ﻿/**
  * #Class
- * クリップモジュール
+ * トレンドモジュール
  *
  * @author tizerm@mofu.kemo.no
  */

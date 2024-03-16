@@ -206,11 +206,10 @@ class Preference {
     /**
      * #StaticMethod
      * 全体設定の内容から永続適用CSSを生成.
-     * TODO: セキュリティポリシーの関係でうまく動作していません
      */
     static generateStylesheet() {
         // CSSをバインド
-        $(`<style>
+        $('style').html(`
             .timeline ul>li {
                 > .media a.__on_media_expand {
                     max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
@@ -225,7 +224,7 @@ class Preference {
                     max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
                 }
             }
-        </style>`).appendTo('head')
+        `)
     }
 
     /**

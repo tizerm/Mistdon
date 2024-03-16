@@ -293,6 +293,7 @@ class Group {
             const post = this.status_map.get($(elm).attr("id"))
             const element = $(elm).is(".chat_timeline") ? $(elm).find(".content") : $(elm)
             element.css('border-left-color', post.relative_time.color)
+            $(elm).find(".created_at").text(post.relative_time.both)
         }))(), 60000) // 1分おきに実行
     }
 
@@ -306,10 +307,11 @@ class Group {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
 
+        /*
         // TODO: debug
         console.log(key)
         console.log(post)
-        console.log(this)
+        console.log(this)//*/
 
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
