@@ -39,7 +39,7 @@ class Query {
                 </div>
                 <div id="__search_timeline" class="timeline">
                     <div class="col_loading">
-                        <img src="resources/illust/il_done.png" alt="done"/><br/>
+                        <img src="resources/illust/il_done2.png" alt="done"/><br/>
                         <span class="loading_text">検索結果がここに表示されます。</span>
                     </div>
                     <ul class="search_ul __context_posts"></ul>

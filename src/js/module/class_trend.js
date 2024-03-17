@@ -38,6 +38,7 @@ class Trend {
             }, null)
         }
         Trend.TREND_TAG_MAP = null
+        Trend.TREND_STATUS_MAP = Trend.TREND_PREF_TIMELINE.parent_group.status_map
     }
 
     /**
@@ -139,6 +140,27 @@ class Trend {
     }
 
     /**
+     * #StaticMethod
+     * 話題の投稿一覧を表示する.
+     */
+    static bindFeatures() {
+        // 一旦中身を全消去する
+        $('#pop_ex_timeline ul.trend_ul').empty()
+        $('#pop_ex_timeline ul.trend_ul').before(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
+
+        const promises = []
+        Account.each(account => promises.push(Trend.getFeature(account.pref.domain, account.platform)))
+        const view_group = Trend.TREND_PREF_TIMELINE.parent_group
+        view_group.status_map.clear()
+        view_group.onLoadTimeline(promises)
+    }
+
+    /**
      * #Method
      * このトレンドタグで検索してタイムラインに表示する.
      */
@@ -230,4 +252,15 @@ class Trend {
         jqelm.css("background-color", `#${this.color}`)
         return jqelm
     }
+
+    /**
+     * #StaticMethod
+     * トレンドウィンドウから対象のjQueryオブジェクトの投稿オブジェクトを返却する.
+     * 
+     * @param target_li 取得対象のjQueryオブジェクト
+     */
+    static getStatus(target_li) {
+        return Trend.TREND_STATUS_MAP.get(target_li.attr("id"))
+    }
+
 }

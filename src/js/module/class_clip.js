@@ -46,7 +46,7 @@ class Clip {
                 </div>
                 <div id="__clip_timeline" class="timeline">
                     <div class="col_loading">
-                        <img src="resources/illust/il_done.png" alt="done"/><br/>
+                        <img src="resources/illust/il_done2.png" alt="done"/><br/>
                         <span class="loading_text">クリップの投稿がここに表示されます。</span>
                     </div>
                     <ul class="clip_ul __context_posts"></ul>

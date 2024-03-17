@@ -43,15 +43,27 @@ $(() => (async () => {
     })()
 
     // 添付メディアリストをSortableにする
-    $(".__ui_media_sortable").sortable({
-        axis: "x",
+    $("#post_options .__ui_media_sortable").sortable({
+        connectWith: "#post_options  .__attach_delete_box",
         delay: 100,
         distance: 48,
         placeholder: "ui-sortable-placeholder",
         cancel: ".__initial_message",
         revert: 50,
         opacity: 0.75,
-        tolerance: "pointer"
+        tolerance: "pointer",
+        start: (e, ui) => $("#post_options  .__attach_delete_box").show("fade", 80),
+        stop: (e, ui) => $("#post_options  .__attach_delete_box").hide("fade", 80),
+        update: (e, ui) => {
+            // 添付メディアが空になったら初期化メッセージを表示
+            if ($("#post_options .__ui_media_sortable>li").length == 0)
+                $("#post_options .__ui_media_sortable")
+                    .html('<li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>')
+        }
+    })
+    $("#post_options .__attach_delete_box").sortable({
+        cancel: "span",
+        update: (e, ui) => $("#post_options .__attach_delete_box>li").remove()
     })
     // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
     $("#pop_window_timeline").draggable({

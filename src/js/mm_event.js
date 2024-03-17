@@ -211,7 +211,6 @@
             option_obj: $("#post_options"),
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
-                $("#__txt_postarea").val("")
                 $("#__on_reset_option").click()
                 $("#header>#post_options").hide("slide", { direction: "up" }, 120)
                 $("#__on_emoji_close").click()
@@ -284,7 +283,8 @@
     $(document).on("dblclick", "#header>#post_options ul.account_list input.__chk_add_account+label",
         e => Account.get($(e.target).closest("li").find("input.__chk_add_account").val()).setPostAccount())
 
-    $("#header>#post_options #__on_reset_option").on("click", e => {
+    $("#__on_reset_option").on("click", e => {
+        $("#__txt_postarea").val("")
         $('#header>#post_options input[type="text"]').val("")
         $('#header>#post_options input[type="number"]').val("")
         $("#post_options .poll_setting .__on_option_close").click()
@@ -310,6 +310,9 @@
 
     $("#header>#post_options #__on_poll_remove_item").on("click",
         e => $("#header>#post_options .poll_options>li:last-child").remove())
+
+    $(document).on("click", "#pop_dirve_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
+        $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target).attr("name")))
 
     $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
@@ -458,17 +461,19 @@
      */
     $(document).on("click", ".__on_media_expand", e => {
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
+        const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
             .get($(e.target).closest("td"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus($(e.target).closest("li"))
-            .createImageModal(image_url)
+            .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getScrollableStatus($(e.target).closest("li")).createImageModal(image_url)
+            Timeline.getScrollableStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
             Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
+        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+            Trend.getStatus(target_li).createImageModal(image_url)
         else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
-            Status.getStatus($(e.target).closest("li").attr("name"))
+            Status.getStatus(target_li.attr("name"))
                 .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
         return false
     })
@@ -545,6 +550,8 @@
                 .getStatus(target_li).createExpandWindow(target_li)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getScrollableStatus(target_li).createExpandWindow(target_li)
+        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+            Trend.getStatus(target_li).createExpandWindow(target_li)
         else // 他の部分は直接リモートの投稿を取る
             Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
@@ -556,6 +563,8 @@
                 .getStatus(target_li).quote.createExpandWindow(target_li)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getScrollableStatus(target_li).quote.createExpandWindow(target_li)
+        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+            Trend.getStatus(target_li).quote.createExpandWindow(target_li)
         else // 他の部分は直接リモートの投稿を取る
             Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li))
     })
@@ -835,7 +844,7 @@
             instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
         } catch (err) {
             $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>img')
-                .attr('src', 'resources/illust/il_error.png')
+                .attr('src', 'resources/illust/il_err2.png')
             $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>.loading_text')
                 .text(`インスタンスの情報の取得に失敗しました……。
                     接続できなかったかサポート外のプラットフォーム、インスタンスの場合があります。`)
@@ -1039,6 +1048,8 @@
     $(document).on("click", "#pop_ex_timeline>.trend_timeline>ul.trend_tags>li",
         e => Trend.TREND_TAG_MAP.get($(e.target).closest("li").attr("name")).search())
 
+    $(document).on("click", "#pop_ex_timeline>.trend_timeline>.__on_get_features", e => Trend.bindFeatures())
+
     $(document).on("click", "#pop_ex_timeline>.clip_timeline ul.clip_list>li", e => {
         const target_li = $(e.target).closest("li")
         Clip.loadClip(target_li.attr("name"), target_li.attr("id"))
@@ -1075,6 +1086,6 @@
         $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
     $(document).on("click", "#__on_pop_window_close", e =>
         $("#pop_window_timeline").hide("fade", 150))
-    $(document).on("click", "#__on_util_window_close", e =>
-        $("#pop_util_window").hide("fade", 150))
+    $(document).on("click", "#__on_drive_media_cancel", e =>
+        $("#pop_dirve_window").hide("fade", 120))
 })

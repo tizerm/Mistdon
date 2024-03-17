@@ -159,7 +159,7 @@ class Group {
                     this.initColorTimer()
                 }
             } else { // すべてのカラムの取得に失敗した場合
-                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
+                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_err2.png')
                 $(`#${this.id}>.col_loading>.loading_text`)
                     .text(`${this.pref.label_head}のタイムラインの取得に失敗しました……。`)
             }

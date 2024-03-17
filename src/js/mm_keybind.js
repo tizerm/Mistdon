@@ -241,6 +241,12 @@
                 case 76: // Alt+L: ローカルボタンをトグル
                     $('#header>#post_options input#__chk_local_only').click()
                     return false
+                case 8: // Ctrl+Alt+Backspace: 入力中の内容をリセット
+                    if (event.ctrlKey || event.metaKey) {
+                        $('#__on_reset_option').click()
+                        return false
+                    }
+                    break
                 default:
                     return
             }

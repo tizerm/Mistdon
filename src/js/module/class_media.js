@@ -71,7 +71,7 @@ class Media {
      */
     static async attachDriveMedia() {
         const medias = []
-        $("#pop_util_window ul.drive_media_list input.__chk_drive_media:checked")
+        $("#pop_dirve_window ul.drive_media_list input.__chk_drive_media:checked")
             .each((index, elm) => medias.push({
                 id: $(elm).val(),
                 url: $(elm).next().find("img").attr("src"),
@@ -86,7 +86,7 @@ class Media {
                 <img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/>
             </li>
         `))
-        $("#pop_util_window").hide("fade", 120)
+        $("#pop_dirve_window").hide("fade", 120)
         $("#header>#post_options").show("slide", { direction: "up" }, 120)
     }
 
@@ -107,10 +107,10 @@ class Media {
      * 最近投稿したメディア一覧を取得する.
      * 
      * @param address 取得対象のユーザーアカウントのフルアドレス
+     * @param folder_id MisskeyドライブのフォルダID
      * @param max_id ページ送り用のメディアID
      */
-    static async getRecentMedia(address, max_id) {
-        const notification = Notification.progress("対象ユーザーの投稿メディアを取得中です...")
+    static async getRecentMedia(address, folder_id, max_id) {
         let response = null
         let query_param = null
 
@@ -142,6 +142,7 @@ class Media {
                         "i": account.pref.access_token,
                         "limit": 40
                     }
+                    if (folder_id) query_param.folderId = folder_id // フォルダIDを指定
                     if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
                     response = await $.ajax({
                         type: "POST",
@@ -155,12 +156,46 @@ class Media {
                 default:
                     break
             }
-            notification.done()
             return medias
         } catch (err) {
             // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            notification.error(`${address}のメディアの取得に失敗しました.`)
+            Notification.error(`${address}のメディアの取得に失敗しました.`)
+            return Promise.reject(err)
+        }
+    }
+
+    /**
+     * #StaticMethod
+     * アカウントのドライブフォルダを取得する.
+     * 
+     * @param address 取得対象のユーザーアカウントのフルアドレス
+     * @param max_id ページ送り用のメディアID
+     */
+    static async getFolders(address) {
+        let response = null
+
+        try {
+            // アカウントをユーザー情報として取得
+            const account = Account.get(address)
+            const folders = []
+
+            response = await $.ajax({
+                type: "POST",
+                url: `https://${account.pref.domain}/api/drive/folders`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    "i": account.pref.access_token,
+                    "limit": 100
+                })
+            })
+
+            return response
+        } catch (err) {
+            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
+            Notification.error(`${address}のフォルダの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
@@ -249,34 +284,77 @@ class Media {
      */
     static openDriveWindow(address) {
         // 一旦中身を消去
-        $("#pop_util_window>.content").html(`
+        $("#pop_dirve_window>ul.drive_folder_list").empty()
+        $("#pop_dirve_window>ul.drive_media_list").empty()
+        $("#pop_dirve_window").prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
             </div>
-            <ul class="drive_media_list"></ul>
-        `)
-        $("#pop_util_window>h2>span").text("過去のメディア一覧")
-        $("#pop_util_window>.footer").html(`
-            <button type="button" id="__on_drive_media_confirm" class="close_button">これで決定</button>
         `)
 
+        // フォルダを取得して表示
+        Media.getFolders(address).then(body => {
+            let html = '<li class="__on_select_folder" name="__root">..</li>'
+            body.forEach(folder => html += `
+                <li class="__on_select_folder" name="${folder.id}">
+                    ${folder.name}
+                </li>
+            `)
+            $("#pop_dirve_window>.drive_folder_list").html(html)
+        })
+
         // 参照したアドレスから過去のメディア(ドライブ)を取得
-        Media.getRecentMedia(address, null).then(body => {
+        Media.getRecentMedia(address, null, null).then(body => {
             // ロード画面を削除
-            $("#pop_util_window>.content>.col_loading").remove()
+            $("#pop_dirve_window>.col_loading").remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $("#pop_util_window>.content>ul.drive_media_list"),
+                target: $("#pop_dirve_window>ul.drive_media_list"),
                 bind: (data, target) => {
                     data.forEach(m => target.append(m.li_element))
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
-                load: async max_id => Media.getRecentMedia(address, max_id)
+                load: async max_id => Media.getRecentMedia(address, null, max_id)
             })
         })
-        $("#pop_util_window").show()
+        $("#pop_dirve_window").show("fade", 120)
+    }
+
+    /**
+     * #StaticMethod
+     * 対象のMisskeyアカウントのドライブからフォルダを開いて表示する.
+     * 
+     * @param address ドライブを開くアカウント
+     * @param folder_id MisskeyドライブのフォルダID
+     */
+    static openFolder(address, folder_id) {
+        // 一旦中身を消去
+        $("#pop_dirve_window>ul.drive_media_list").empty()
+        $("#pop_dirve_window").prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
+
+        // フォルダIDを参照してフォルダの中身を検索
+        const id = folder_id != '__root' ? folder_id : null
+        Media.getRecentMedia(address, id, null).then(body => {
+            // ロード画面を削除
+            $("#pop_dirve_window>.col_loading").remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: $("#pop_dirve_window>ul.drive_media_list"),
+                bind: (data, target) => {
+                    data.forEach(m => target.append(m.li_element))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop().id
+                },
+                load: async max_id => Media.getRecentMedia(address, id, max_id)
+            })
+        })
     }
 }
 

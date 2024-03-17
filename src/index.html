@@ -161,8 +161,8 @@
                 </div>
                 <div class="reset_box">
                     <button type="button" id="__on_reset_option"
-                        class="icon_label_set"><img src="resources/ic_reload.png" alt="本文以外リセット"/>
-                        <span>本文以外リセット</span></button>
+                        class="icon_label_set"><img src="resources/ic_reload.png" alt="リセット"/>
+                        <span>リセット</span></button>
                 </div>
             </div>
             <div class="poll_setting closeable_block">
@@ -200,6 +200,7 @@
                 <ul class="media_list __ui_media_sortable">
                     <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
                 </ul>
+                <div class="__attach_delete_box"><span>ここに入れると削除されます。</span></div>
                 <div class="media_option">
                     <button type="button" id="__on_set_sensitive"
                         class="icon_label_set"><img src="resources/ic_warn.png" alt="すべて閲覧注意にする"/>
@@ -343,8 +344,17 @@
             <span class="impress_fav">0</span>
         </div>
     </div>
+    <div id="pop_dirve_window" class="__ignore_close_option">
+        <!-- hidden: ドライブ表示ウィンドウ -->
+        <ul class="drive_folder_list"></ul>
+        <ul class="drive_media_list"></ul>
+        <div class="footer">
+            <button type="button" id="__on_drive_media_confirm" class="close_button">OK</button>
+            <button type="button" id="__on_drive_media_cancel" class="close_button">キャンセル</button>
+        </div>
+    </div>
     <div id="pop_ex_timeline">
-    <!-- hidden: 拡張タイムライン(横付け) -->
+        <!-- hidden: 拡張タイムライン(横付け) -->
     </div>
     <div id="pop_window_timeline" class="ui-widget-content ex_window">
         <!-- hidden: 拡張タイムライン(ウィンドウ) -->
@@ -362,17 +372,8 @@
             <ul class="scrollable_tl __context_posts"></ul>
         </div>
     </div>
-    <div id="pop_util_window" class="ui-widget-content ex_window">
-        <!-- hidden: 汎用ウィンドウ -->
-        <h2>
-            <span>Window</span>
-            <button type="button" id="__on_util_window_close">×</button>
-        </h2>
-        <div class="content"></div>
-        <div class="footer"></div>
-    </div>
     <div id="pop_extend_column">
-    <!-- hidden: 拡張カラム -->
+        <!-- hidden: 拡張カラム(横付け) -->
     </div>
 </div>
 <section id="columns">

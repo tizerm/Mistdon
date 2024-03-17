@@ -253,6 +253,16 @@
                         }
                     }
                 }
+                > .__attach_delete_box {
+                    display: none;
+                    position: absolute;
+                    top: 4px;
+                    left: 4px;
+                    width: 220px;
+                    height: 190px;
+                    background-color: rgba(168,72,96,0.8);
+                    border: dashed 4px #cccccc;
+                }
             }
             > .refernced_post {
                 display: none;
@@ -428,11 +438,11 @@
                     border: solid 2px #cccccc;
                     border-left-style: none;
                     padding: 8px 24px;
-                    padding-left: 88px;
+                    padding-left: 108px;
                     background-color: rgba(34,34,34,0.8);
-                    background-position: left center;
+                    background-position: left bottom 35%;
                     background-repeat: no-repeat;
-                    background-size: 72px auto;
+                    background-size: 96px auto;
                     font-size: 16px;
                     font-weight: bold;
                 }
@@ -707,6 +717,103 @@
         }
     }
 
+    /*=== Drive Window Layout ====================================================================*/
+    > #pop_dirve_window {
+        display: none;
+        background-color: rgba(56,56,56,0.683);
+        padding: 4px;
+        border-radius: 12px;
+        width: 50vw;
+        height: calc(100vh - 380px);
+        position: absolute;
+        top: 320px;
+        left: 50vw;
+        transform: translate(-50%, 0%);
+        z-index: 11;
+        > ul.drive_folder_list {
+            height: 48px;
+            white-space: nowrap;
+            overflow-x: auto;
+            margin: 0px;
+            padding: 0px;
+            > li {
+                display: inline-block;
+                margin: 0px;
+                padding: 4px 12px;
+                border-radius: 12px;
+                background-color: rgba(76,76,76,0.683);
+                width: 180px;
+                height: calc(100% - 18px);
+                font-size: 14px;
+                font-family: Arial, "メイリオ", sans-selif;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                &:hover {
+                    background-color: rgba(76,76,76,0.92);
+                    cursor: pointer;
+                }
+            }
+        }
+        > ul.drive_media_list {
+            height: calc(100% - 108px);
+            overflow-y: auto;
+            margin: 0px;
+            padding: 0px;
+            &::-webkit-scrollbar { width: 8px; }
+            > li {
+                display: inline-block;
+                list-style-type: none;
+                width: 25%;
+                > label {
+                    display: inline-block;
+                    width: 100%;
+                    padding: 0px;
+                    position: relative;
+                    overflow: hidden;
+                    margin: 0px;
+                    &::before {
+                        content: "";
+                        padding-top: 100%;
+                        display: block;
+                    }
+                    > img {
+                        border-radius: 8px;
+                        width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        top: 0px;
+                        left: 0px;
+                        object-fit: cover;
+                        vertical-align: text-bottom;
+                    }
+                    &.warn_sensitive::after {
+                        content: url("../resources/ic_warn.png");
+                        z-index: 1;
+                        position: absolute;
+                        top: 0px;
+                        right: 0px;
+                        background-color: rgba(161,0,0,0.75);
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 16px;
+                    }
+                }
+                &.__scroll_loader {
+                    display: block;
+                    background-color: rgba(62,62,62,0.92);
+                    margin: 6px;
+                    padding: 8px 12px;
+                }
+            }
+        }
+        > .footer>button {
+            display: inline-block;
+            width: calc(50% - 4px);
+            height: 48px;
+        }
+    }
+
     /*=== Extra Timeline Window Layout ===========================================================*/
     > #pop_ex_timeline {
         display: none;
@@ -822,6 +929,20 @@
 
         /*=== Trend Timeline Layout ==============================================================*/
         > .trend_timeline {
+            > a.__on_get_features {
+                display: block;
+                background-color: #3562cc;
+                margin: 4px;
+                padding: 6px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                &:hover {
+                    background-color: #36466e;
+                    cursor: pointer;
+                }
+            }
             > ul.trend_tags {
                 margin: 0px;
                 padding: 0px 6px;
@@ -898,68 +1019,6 @@
             font-size: 16px;
             font-family: Arial, "メイリオ", sans-selif;
             cursor: move;
-        }
-    }
-    > #pop_util_window {
-        display: none;
-        width: 50vw;
-        height: 70vh;
-        left: 25vw;
-        top: 274px;
-        >.content {
-            height: calc(100% - 64px);
-            > ul.drive_media_list {
-                height: 100%;
-                overflow-y: auto;
-                margin: 0px;
-                padding: 0px;
-                &::-webkit-scrollbar { width: 8px; }
-                > li {
-                    display: inline-block;
-                    list-style-type: none;
-                    width: 25%;
-                    > label {
-                        display: inline-block;
-                        width: 100%;
-                        padding: 0px;
-                        position: relative;
-                        overflow: hidden;
-                        margin: 0px;
-                        &::before {
-                            content: "";
-                            padding-top: 100%;
-                            display: block;
-                        }
-                        > img {
-                            border-radius: 8px;
-                            width: 100%;
-                            height: 100%;
-                            position: absolute;
-                            top: 0px;
-                            left: 0px;
-                            object-fit: cover;
-                            vertical-align: text-bottom;
-                        }
-                        &.warn_sensitive::after {
-                            content: url("../resources/ic_warn.png");
-                            z-index: 1;
-                            position: absolute;
-                            top: 0px;
-                            right: 0px;
-                            background-color: rgba(161,0,0,0.75);
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 16px;
-                        }
-                    }
-                    &.__scroll_loader {
-                        display: block;
-                        background-color: rgba(62,62,62,0.92);
-                        margin: 6px;
-                        padding: 8px 12px;
-                    }
-                }
-            }
         }
     }
 
