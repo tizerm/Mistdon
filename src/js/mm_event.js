@@ -3,29 +3,37 @@
 
     /**
      * #Event
-     * 検索ボタン
+     * 検索ボタン.
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
 
+    /**
+     * #Event
+     * トレンドボタン.
+     */
     $("#navi .navi_trend").on("click", e => Trend.createTrendWindow())
 
     /**
      * #Event
-     * 送信履歴ボタン
+     * 送信履歴ボタン.
      */
     $("#navi .navi_history").on("click", e => History.createHistoryWindow())
 
     /**
      * #Event
-     * 全体プロフィールボタン
+     * 全体プロフィールボタン.
      */
     $("#navi .navi_show_profile").on("click", e => Account.createProfileTimeline())
 
+    /**
+     * #Event
+     * クリップボタン.
+     */
     $("#navi .navi_clips").on("click", e => Clip.createClipWindow())
 
     /**
      * #Event
-     * 絵文字キャッシュクリアボタン
+     * 絵文字キャッシュクリアボタン.
      */
     $("#navi .navi_reset_emoji").on("click", e => dialog({
         type: 'confirm',
@@ -41,7 +49,7 @@
 
     /**
      * #Event
-     * キーボードショートカット早見表ボタン
+     * キーボードショートカット早見表ボタン.
      */
     $("#navi #on_help_keybind").on("click", e => {
         // ヘルプウィンドウのDOM生成
@@ -67,7 +75,7 @@
 
     /**
      * #Event
-     * 投稿アカウントアイコン
+     * 投稿アカウントアイコン.
      * => アカウント変更メニュー表示
      */
     $("#header>#head_postarea .__lnk_postuser").on("click", e =>
@@ -75,7 +83,7 @@
 
     /**
      * #Event
-     * アカウント変更メニュー項目
+     * アカウント変更メニュー項目.
      * => 投稿アカウントを変更
      */
     $(document).on("click", ".__lnk_account_elm", e => {
@@ -83,13 +91,23 @@
         $("#pop_postuser").hide("slide", { direction: "up" }, 150)
     })
 
+    /**
+     * #Event
+     * ツールメニュー: 下描き一覧呼び出しボタン.
+     * => 下描き一覧を表示
+     */
     $("#__open_draft").on("click", e => Draft.createDraftMenu())
 
+    /**
+     * #Event
+     * ツールメニュー-下描き一覧: 下描き一覧項目.
+     * => 下描き内容を投稿フォームに展開する.
+     */
     $(document).on("click", "#pop_draft>.draft_menu>.draft_list", e => Draft.loadDraft($(e.target).closest("li").index()))
 
     /**
      * #Event
-     * カスタム絵文字呼び出しボタン
+     * ツールメニュー: カスタム絵文字呼び出しボタン.
      * => カスタム絵文字一覧を表示
      */
     $("#__open_emoji_palette").on("click", e => {
@@ -100,7 +118,7 @@
 
     /**
      * #Event #Keyup
-     * カスタム絵文字一覧のサジェストテキストボックス
+     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧のサジェストテキストボックス.
      * => カスタム絵文字をショートコードで絞り込み
      */
     $(document).on("keyup", "#__txt_emoji_search", e => {
@@ -116,7 +134,7 @@
 
     /**
      * #Event #Keyup
-     * リアクション一覧のサジェストテキストボックス
+     * リアクション一覧のサジェストテキストボックス.
      * => リアクション絵文字をショートコードで絞り込み
      */
     $(document).on("keyup", "#__txt_reaction_search", e => {
@@ -132,7 +150,7 @@
 
     /**
      * #Event
-     * カスタム絵文字一覧の絵文字
+     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
      * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
      */
     $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
@@ -160,6 +178,11 @@
         target_account.updateEmojiHistory(target_emoji)
     })
 
+    /**
+     * #Event #Keyup
+     * 本文投稿フォーム(キーアップイベント).
+     * => 文字数をカウントしてメーターに表示(設定が有効な場合のみ)
+     */
     if (Preference.GENERAL_PREFERENCE.enable_tool_button) // ツールボタンが表示されている場合のみイベント定義
         $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
             const length = $(e.target).val().length
@@ -186,15 +209,29 @@
             })
         })
 
+    /**
+     * #Event
+     * ツールメニュー: 投稿オプション呼び出しボタン.
+     * => 投稿オプションの表示をトグルする
+     */
     $("#__open_post_option").on("click",
         e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
 
-    // TODO: このへん投稿オプションに関して
+    /**
+     * #Event #Focus
+     * 本文投稿フォームとCW入力フォーム(フォーカスイベント)
+     * => 投稿オプションを表示する
+     */
     $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
         if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
         $("#header>#post_options").show("slide", { direction: "up" }, 120)
     })
 
+    /**
+     * #Event
+     * 投稿オプションを閉じない設定の場所をクリック.
+     * => 投稿オプションを閉じる
+     */
     $("body").on("click", e => {
         // 投稿オプションを閉じない場所をクリックした場合はなにもしない
         if ($(e.target).closest(".__ignore_close_option").length > 0 || !$("#header>#post_options").is(":visible")) return
@@ -203,7 +240,7 @@
 
     /**
      * #Event
-     * 投稿ボタン
+     * 投稿ボタン.
      */
     $("#__on_submit").on("click", e =>
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
@@ -219,7 +256,7 @@
 
     /**
      * #Event
-     * リアクション絵文字一覧の絵文字
+     * リアクション絵文字一覧の絵文字.
      * => リアクションを送信
      */
     $(document).on("click", "#pop_extend_column>.reaction_col .__on_emoji_reaction",
@@ -232,13 +269,13 @@
 
     /**
      * #Event
-     * 直前の投稿を削除ボタン
+     * 直前の投稿を削除ボタン.
      */
     $("#__on_last_delete").on("click", e => History.popIf(last => {}, true))
 
     /**
      * #Event
-     * 直前の投稿を削除して編集ボタン
+     * 直前の投稿を削除して編集ボタン.
      */
     $("#__on_last_delete_paste").on("click", e => History.popIf(last => {
         last.post.from_account.setPostAccount()
@@ -248,7 +285,7 @@
 
     /**
      * #Event
-     * 直前の投稿をコピーボタン
+     * 直前の投稿をコピーボタン.
      */
     $("#__on_on_last_copy").on("click", e => History.popIf(last => {
         $("#__txt_postarea").val(last.post.original_text)
@@ -257,15 +294,23 @@
 
     /**
      * #Event
-     * 直前の投稿につなげるボタン
+     * 直前の投稿につなげるボタン.
      */
     $("#__on_last_replychain").on("click", e => History.popIf(last => {
         last.post.createReplyWindow()
         $("#__open_post_option").click()
     }, false))
 
+    /**
+     * #Event
+     * 直前の投稿を編集ボタン.
+     */
     $("#__on_last_edit").on("click", e => History.popIf(last => last.openEditor(), false))
 
+    /**
+     * #Event
+     * 現在入力中のフォーム内容を下描きに保存ボタン.
+     */
     $("#__on_save_draft").on("click", e => Draft.saveDraft({
         account: Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")),
         content: $("#__txt_postarea").val(),
@@ -274,15 +319,35 @@
 
     /*=== Post Option Article Area Event =========================================================================*/
 
+    /**
+     * #Event
+     * オプション各項目のクローズボタン.
+     * => 各オプション項目を閉じて縮小する
+     */
     $("#header>#post_options .__on_option_close").on("click",
         e => $(e.target).closest(".closeable_block").hide().next().show())
 
+    /**
+     * #Event
+     * オプション各項目のオープンボタン.
+     * => 各オプション項目を開いて表示する
+     */
     $("#header>#post_options .__on_option_open").on("click",
         e => $(e.target).closest(".option_close").hide().prev().show())
 
+    /**
+     * #Event #Dblclick
+     * 投稿アカウント: アカウントアイコン(ダブルクリック).
+     * => メインの投稿先をそのアカウントに切り替え
+     */
     $(document).on("dblclick", "#header>#post_options ul.account_list input.__chk_add_account+label",
         e => Account.get($(e.target).closest("li").find("input.__chk_add_account").val()).setPostAccount())
 
+    /**
+     * #Event
+     * CW/公開/投稿先: リセットボタン.
+     * => 投稿先アカウントと公開範囲以外をすべて初期状態に戻す
+     */
     $("#__on_reset_option").on("click", e => {
         $("#__txt_postarea").val("")
         $('#header>#post_options input[type="text"]').val("")
@@ -294,6 +359,27 @@
         enabledAdditionalAccount(true)
     })
 
+    /**
+     * #Event
+     * アンケート: 追加ボタン.
+     * => 回答項目を追加する
+     */
+    $("#header>#post_options #__on_poll_add_item").on("click", e => $("#header>#post_options .poll_options")
+        .append('<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>'))
+
+    /**
+     * #Event
+     * アンケート: 削除ボタン.
+     * => 最後の回答項目を削除する
+     */
+    $("#header>#post_options #__on_poll_remove_item").on("click",
+        e => $("#header>#post_options .poll_options>li:last-child").remove())
+
+    /**
+     * #Event
+     * 添付メディア: すべて閲覧注意にするボタン.
+     * => 添付メディアをすべて閲覧注意設定に変更する
+     */
     $("#header>#post_options #__on_set_sensitive").on("click", e => {
         const target_ul = $('#header>#post_options .attached_media>ul.media_list')
         if (target_ul.find('input[type="checkbox"]:not(:checked)').length > 0)
@@ -302,21 +388,34 @@
         else target_ul.find('input[type="checkbox"]').prop("checked", false)
     })
 
+    /**
+     * #Event
+     * 添付メディア: ドライブから添付ボタン.
+     * => メイン投稿アカウントのMisskeyドライブを開く
+     */
     $("#header>#post_options #__on_open_drive").on("click",
         e => Media.openDriveWindow($("#header>#head_postarea .__lnk_postuser>img").attr("name")))
 
-    $("#header>#post_options #__on_poll_add_item").on("click", e => $("#header>#post_options .poll_options")
-        .append('<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>'))
-
-    $("#header>#post_options #__on_poll_remove_item").on("click",
-        e => $("#header>#post_options .poll_options>li:last-child").remove())
-
+    /**
+     * #Event
+     * 添付メディア-ドライブウィンドウ: フォルダ一覧項目.
+     * => 対象のフォルダを開く
+     */
     $(document).on("click", "#pop_dirve_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
         $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target).attr("name")))
 
+    /**
+     * #Event
+     * 添付メディア-ドライブウィンドウ: OKボタン.
+     * => 選択したメディアを添付メディアに追加する
+     */
     $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
-    // TODO: ドラッグドロップの処理がまだわからんち
+    /**
+     * #Event #Dragenter
+     * 添付メディア: 外部ファイラーからファイルをドラッグ.
+     * => ファイル添付モーダルを表示
+     */
     document.addEventListener("dragenter", e => {
         e.preventDefault()
         // 画面内の画像をドラッグした場合は発火しない
@@ -324,14 +423,23 @@
         $("#modal_drop_files").show("fade", 120)
     })
 
+    /**
+     * #Event #Dragleave
+     * 添付メディア-ファイル添付モーダル: Mistdonからドラッグアウト.
+     * => ファイル添付モーダルをフェードアウトさせる
+     */
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
-
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
         // 再発火の可能性をおさえるため遅めにフェードアウトする
         e.preventDefault()
         $("#modal_drop_files").hide("fade", 800)
     })
 
+    /**
+     * #Event #Drop
+     * 添付メディア-ファイル添付モーダル: ファイルをドロップ.
+     * => ドロップしたファイルをサムネイル表示して添付メディアに追加する
+     */
     $("#modal_drop_files").get(0).addEventListener("drop", e => {
         // デフォルトイベントを無視してファイルを添付メソッドに渡す
         e.preventDefault()
@@ -344,6 +452,11 @@
             $("#header>#post_options").show("slide", { direction: "up" }, 120)
     })
 
+    /**
+     * #Event #Drop
+     * 本文投稿フォーム(画像ファイルがクリップボードにある状態でペースト).
+     * => ペースとした画像を添付メディアに追加する
+     */
     $("#__txt_postarea").get(0).addEventListener("paste", e => {
         // ファイル以外は無視(普通のペースト)
         if (e.clipboardData.types[0] != 'Files') return true
@@ -360,7 +473,7 @@
 
     /**
      * #Event
-     * タイムライングループ本体
+     * タイムライングループ本体.
      * => そのタイムライングループにカーソルを合わせる
      */
     $(document).on("click", ".tl_group_box", e => {
@@ -374,7 +487,7 @@
 
     /**
      * #Event
-     * カラムボタン: トップへ移動
+     * カラムボタン: トップへ移動.
      * => カラム内のグループすべてトップに移動
      */
     $(document).on("click", ".__on_column_top", e =>
@@ -382,28 +495,28 @@
 
     /**
      * #Event
-     * カラムボタン: カラムを開く
+     * カラムボタン: カラムを開く.
      */
     $(document).on("click", ".__on_column_open", e =>
         Column.get($(e.target).closest("td").index(".closed_col")).toggle())
 
     /**
      * #Event
-     * カラムボタン: カラムを閉じる
+     * カラムボタン: カラムを閉じる.
      */
     $(document).on("click", ".__on_column_close", e =>
         Column.get($(e.target).closest("td").index(".column_td")).toggle())
 
     /**
      * #Event
-     * カラムボタン: 可変幅ON/OFF
+     * カラムボタン: 可変幅ON/OFF.
      */
     $(document).on("click", ".__on_column_flex", e =>
         Column.get($(e.target).closest("td")).toggleFlex())
 
     /**
      * #Event
-     * カラムボタン: リロード
+     * カラムボタン: リロード.
      * => カラム内のグループすべてリロード
      */
     $(document).on("click", ".__on_column_reload", e =>
@@ -411,14 +524,14 @@
 
     /**
      * #Event
-     * グループボタン: トップへ移動
+     * グループボタン: トップへ移動.
      */
     $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest("td"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).scroll(0))
 
     /**
      * #Event
-     * グループボタン: リロード
+     * グループボタン: リロード.
      */
     $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest("td"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
@@ -427,7 +540,7 @@
 
     /**
      * #Event
-     * ユーザーアドレス
+     * ユーザーアドレス.
      * => リモートのユーザー情報を右ウィンドウに表示
      */
     $(document).on("click", ".__lnk_userdetail, .usericon", e => User.getByAddress($(e.target).attr("name"))
@@ -436,7 +549,7 @@
 
     /**
      * #Event
-     * Contents Warningヘッダ
+     * Contents Warningヘッダ.
      * => 非表示にしている閲覧注意情報をトグルする
      */
     $(document).on("click", ".expand_header", e =>
@@ -444,7 +557,7 @@
 
     /**
      * #Event
-     * 本文のリンク
+     * 本文のリンク.
      * => 外部ブラウザでリンクを開く
      */
     $(document).on("click", ".content>.main_content a, .prof_field a", e => {
@@ -456,7 +569,7 @@
 
     /**
      * #Event
-     * 画像サムネイル
+     * 画像サムネイル.
      * => 画像拡大モーダルを表示
      */
     $(document).on("click", ".__on_media_expand", e => {
@@ -480,7 +593,7 @@
 
     /**
      * #Event
-     * モーダル内部の要素をクリック
+     * モーダル内部の要素をクリック.
      * => 画像拡大モーダルを閉じる(動画には反応しない)
      */
     $(document).on("click", "#modal_expand_image", e => {
@@ -490,7 +603,7 @@
 
     /**
      * #Event #Mouseenter
-     * モーダル下部の画像サムネイルにホバー
+     * モーダル下部の画像サムネイルにホバー.
      * => 対象の画像に切り替える
      */
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
@@ -507,7 +620,7 @@
 
     /**
      * #Event
-     * アンケートの投票ボタン
+     * アンケートの投票ボタン.
      * => 押した内容で投票して中間結果を表示する
      */
     $(document).on("click", ".__on_poll_vote", e => {
@@ -520,7 +633,7 @@
 
     /**
      * #Event
-     * 投稿日時
+     * 投稿日時.
      * => 投稿を右ウィンドウに詳細表示する
      */
     $(document).on("click", ".__on_datelink", e =>
@@ -528,7 +641,7 @@
 
     /**
      * #Event #Hold
-     * リストレイアウトの投稿本体を長押し
+     * リストレイアウトの投稿本体を長押し.
      * => 詳細表示ウィンドウを表示
      */
     delayHoldEvent({
@@ -540,7 +653,7 @@
 
     /**
      * #Event
-     * 投稿本体(リストレイアウトと文字数超過限定)
+     * 投稿本体(リストレイアウトと文字数超過限定).
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li.short_timeline, .content_length_limit", e => {
@@ -556,6 +669,11 @@
             Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
     })
 
+    /**
+     * #Event
+     * Misskeyのノート内の引用ノート.
+     * => 引用先をノーマルレイアウトでポップアップ表示する
+     */
     $(document).on("click", "li .post_quote", e => {
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
@@ -571,14 +689,14 @@
 
     /**
      * #Event #Mouseleave
-     * 投稿ポップアップ
+     * 投稿ポップアップ.
      * => マウスが出たらポップアップを消す
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
 
     /**
      * #Event #Mouseenter
-     * 投稿本体に対してホバー
+     * 投稿本体に対してホバー.
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
@@ -621,7 +739,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: リプライ
+     * 簡易アクションバー: リプライ.
      */
     $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reply',
@@ -630,7 +748,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: ブースト/リノート
+     * 簡易アクションバー: ブースト/リノート.
      */
     $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reblog',
@@ -639,7 +757,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 引用
+     * 簡易アクションバー: 引用.
      */
     $(document).on("click", ".__short_quote", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_quote',
@@ -648,7 +766,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: お気に入り
+     * 簡易アクションバー: お気に入り.
      */
     $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_favorite',
@@ -657,7 +775,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: ブックマーク
+     * 簡易アクションバー: ブックマーク.
      */
     $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_bookmark',
@@ -666,25 +784,29 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 最近のリアクションを開く
+     * 簡易アクションバー: 最近のリアクションを開く.
      */
     $(document).on("click", ".__short_open_reaction",
         e => $("#pop_expand_action>.reactions").show("slide", { direction: "up" }, 80))
 
     /**
      * #Event
-     * 簡易アクションバー: 外部ブラウザで開く
+     * 簡易アクションバー: 外部ブラウザで開く.
      */
     $(document).on("click", ".__short_browser",
         e => window.accessApi.openExternalBrowser(Status.TEMPORARY_ACTION_STATUS.uri))
 
     /**
      * #Event
-     * 簡易アクションバー: ここから遡る
+     * 簡易アクションバー: ここから遡る.
      */
     $(document).on("click", ".__short_prepost",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
 
+    /**
+     * #Event
+     * 簡易アクションバー: 簡易インプレッション表示.
+     */
     $(document).on("click", ".__short_impression",
         e => Status.getStatus(Status.TEMPORARY_ACTION_STATUS.uri).then(post => {
             $("#pop_expand_action>.impressions>.impress_reply").text(post.count_reply)
@@ -695,7 +817,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 直近のリアクション
+     * 簡易アクションバー: 直近のリアクション.
      */
     $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
         e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
@@ -706,7 +828,7 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 他のリアクションを送る
+     * 簡易アクションバー: 他のリアクションを送る.
      */
     $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
         target_mode: '__menu_reaction',
@@ -715,7 +837,7 @@
 
     /**
      * #Event #Mouseleave
-     * 投稿本体からマウスアウト
+     * 投稿本体からマウスアウト.
      * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
      */
     $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
@@ -728,7 +850,7 @@
 
     /**
      * #Event #Mouseleave
-     * アクションバーからマウスアウト
+     * アクションバーからマウスアウト.
      * => アクションバーポップアップを消す
      */
     $(document).on("mouseleave", "#pop_expand_action", e => {
@@ -739,7 +861,7 @@
 
     /**
      * #Event
-     * 詳細表示: ハッシュタグ
+     * 詳細表示: ハッシュタグ.
      * => ハッシュタグ検索を実行
      */
     $(document).on("click", ".__on_detail_hashtag", e => {
@@ -751,16 +873,21 @@
 
     /**
      * #Event
-     * 送信履歴: 削除/解除ボタン
+     * 送信履歴: 削除/解除ボタン.
      * => 対象の投稿を削除/アクション解除する
      */
     $(document).on("click", ".__del_history", e => History.delete($(e.target)))
 
+    /**
+     * #Event
+     * 送信履歴: 編集ボタン.
+     * => 対象の投稿を編集モードで本文投稿フォームに展開する
+     */
     $(document).on("click", ".__edit_history", e => History.edit($(e.target)))
 
     /**
      * #Event
-     * ユーザープロフィール: ピンどめ
+     * ユーザープロフィール: ピンどめ.
      * => ピンどめ投稿を閉じる
      */
     $(document).on("click", "#pop_ex_timeline .pinned_block>h4", e => {
@@ -778,7 +905,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: 投稿数
+     * ユーザープロフィール: 投稿数.
      * => ユーザーの投稿を表示
      */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .count_post", e => {
@@ -789,7 +916,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: フォロー数
+     * ユーザープロフィール: フォロー数.
      * => フォロイー一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow:not(.label_private)", e =>
@@ -797,7 +924,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: フォロワー数
+     * ユーザープロフィール: フォロワー数.
      * => フォロワー一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower:not(.label_private)", e =>
@@ -805,7 +932,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: お気に入り(Mastodon)
+     * ユーザープロフィール: お気に入り(Mastodon).
      * => お気に入り一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_mastfav", e =>
@@ -813,7 +940,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: お気に入り(Misskey)
+     * ユーザープロフィール: お気に入り(Misskey).
      * => お気に入り一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_miskfav", e =>
@@ -821,7 +948,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: ブックマーク
+     * ユーザープロフィール: ブックマーク.
      * => ブックマーク一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_bookmark", e =>
@@ -829,12 +956,17 @@
 
     /**
      * #Event
-     * ユーザープロフィール: リアクション
+     * ユーザープロフィール: リアクション.
      * => 最近リアクションを送信したノート一覧を表示
      */
     $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
         Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
 
+    /**
+     * #Event
+     * ユーザープロフィール: プラットフォームアイコン.
+     * => ユーザーが所属しているインスタンスの情報を表示
+     */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .__on_show_instance", e => (async () => {
         $("#pop_ex_timeline .single_user").css("width", "880px")
         $("#pop_ex_timeline .column_instance_info").show()
@@ -851,11 +983,21 @@
         }
     })())
 
+    /**
+     * #Event
+     * ユーザープロフィール: 全投稿タブ.
+     * => ユーザーの投稿一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_posts", e => {
         $(e.target).closest(".user_post_elm").find(".media_uls").hide()
         $(e.target).closest(".user_post_elm").find(".post_uls").show()
     })
 
+    /**
+     * #Event
+     * ユーザープロフィール: メディアタブ.
+     * => ユーザーのメディアを含む投稿の一覧を表示
+     */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_medias", e => {
         if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
             // メディアタイムラインを未取得の場合は取得する
@@ -866,7 +1008,7 @@
 
     /**
      * #Event #Delayhover
-     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー
+     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー.
      * => 上部に簡易プロフィールを表示
      */
     delayHoverEvent({
@@ -879,7 +1021,7 @@
 
     /**
      * #Event
-     * ユーザープロフィール: フォロー/フォロワーのネームタグ
+     * ユーザープロフィール: フォロー/フォロワーのネームタグ.
      * => フルプロフィールの簡易ポップアップを表示
      */
     $(document).on("click", "#pop_ex_timeline>.account_timeline .ff_nametags>li", e =>
@@ -887,7 +1029,7 @@
 
     /**
      * #Event #Delayhover
-     * ユーザープロフィール: 簡易ポップアップからリリース
+     * ユーザープロフィール: 簡易ポップアップからリリース.
      * => 簡易ポップアップを閉じる
      */
     $(document).on("mouseleave", "#pop_ex_timeline>.ff_pop_user", e => {
@@ -901,7 +1043,7 @@
 
     /**
      * #Event #Contextmenu
-     * ポストを右クリック
+     * ポストを右クリック.
      * => 投稿用のコンテキストメニューを表示
      */
     $(document).on("contextmenu", "ul.__context_posts>li", e => {
@@ -926,7 +1068,7 @@
 
     /**
      * #Event #Contextmenu
-     * ユーザー詳細を右クリック
+     * ユーザー詳細を右クリック.
      * => ユーザーアクション用のコンテキストメニューを表示
      */
     $(document).on("contextmenu", "ul.__context_user>li", e => {
@@ -942,7 +1084,7 @@
 
     /**
      * #Event #Contextmenu
-     * コンテキストメニュー以外をクリック
+     * コンテキストメニュー以外をクリック.
      * => 表示してあるコンテキストメニューを閉じる
      */
     $("body").on("click", e => {
@@ -957,7 +1099,7 @@
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: アカウント項目
+     * 投稿系メニュー: アカウント項目.
      * => 投稿に対して指定したアカウントからアクションを実行
      */
     $(document).on("click", "#pop_context_menu>.ui_menu>li ul.account_menu>li", e => {
@@ -969,27 +1111,33 @@
         })
     })
 
-    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
-        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
-        $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
-        const clicked_elm = $(e.target).closest("li")
-        let option = null
-        if (clicked_elm.is(".__renote_send_local")) option = 'local'
-        else if (clicked_elm.is(".__renote_send_home")) option = 'home'
-        else option = clicked_elm.attr("name")
-        target_account.renote($("#pop_context_menu").attr("name"), option)
-    })
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 範囲指定リノートの各項目.
+     * => 投稿を指定した範囲にリノートする
+     */
+    $(document).on("click",
+        "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
+            const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+            $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
+            const clicked_elm = $(e.target).closest("li")
+            let option = null
+            if (clicked_elm.is(".__renote_send_local")) option = 'local'
+            else if (clicked_elm.is(".__renote_send_home")) option = 'home'
+            else option = clicked_elm.attr("name")
+            target_account.renote($("#pop_context_menu").attr("name"), option)
+        })
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: 詳細表示
+     * 投稿系メニュー: 詳細表示.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_detail",
         e => Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.createDetailWindow()))
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: URLをコピー
+     * 投稿系メニュー: URLをコピー.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_url",
         e => navigator.clipboard.writeText($("#pop_context_menu").attr("name"))
@@ -997,28 +1145,28 @@
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: ブラウザで開く
+     * 投稿系メニュー: ブラウザで開く.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_browser",
         e => window.accessApi.openExternalBrowser($("#pop_context_menu").attr("name")))
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: ここから前に遡る
+     * 投稿系メニュー: ここから前に遡る.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: 削除
+     * 投稿系メニュー: 削除.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_del", e =>
         Account.get($(e.target).closest("li").attr("name")).deletePost($("#pop_context_menu").attr("name")))
 
     /**
      * #Event #Contextmenu
-     * ユーザー系メニュー: アカウント項目
+     * ユーザー系メニュー: アカウント項目.
      * => ユーザーに対して指定したアカウントからアクションを実行
      */
     $(document).on("click", "#pop_context_user>.ui_menu>li ul>li", e => {
@@ -1033,11 +1181,10 @@
     /*=== Other Event ============================================================================================*/
 
     /**
-     * #Event
-     * 検索ウィンドウ: 検索処理実行
+     * #Event #Keydown
+     * 検索ウィンドウ: 検索フォームでエンターで検索処理を実行.
      */
     $(document).on("click", "#__on_search", e => Query.onSearchTimeline())
-
     $(document).on("keydown", "#__txt_search_query", e => {
         if (e.keyCode === 13) { // Enterで検索処理実行
             $("#__on_search").click()
@@ -1045,11 +1192,26 @@
         }
     })
 
+    /**
+     * #Event
+     * トレンドウィンドウ: トレンドタグ.
+     * => 対象のタグで投稿を検索してウィンドウに表示する
+     */
     $(document).on("click", "#pop_ex_timeline>.trend_timeline>ul.trend_tags>li",
         e => Trend.TREND_TAG_MAP.get($(e.target).closest("li").attr("name")).search())
 
+    /**
+     * #Event
+     * トレンドウィンドウ: ホットトピックを表示ボタン.
+     * => 各サーバーで注目の投稿を一覧表示する
+     */
     $(document).on("click", "#pop_ex_timeline>.trend_timeline>.__on_get_features", e => Trend.bindFeatures())
 
+    /**
+     * #Event
+     * クリップウィンドウ: クリップ項目クリック.
+     * => 対象のクリップの投稿を表示する
+     */
     $(document).on("click", "#pop_ex_timeline>.clip_timeline ul.clip_list>li", e => {
         const target_li = $(e.target).closest("li")
         Clip.loadClip(target_li.attr("name"), target_li.attr("id"))
@@ -1057,7 +1219,7 @@
 
     /**
      * #Event
-     * 一時ウィンドウ: 透過ボックス
+     * 一時ウィンドウ: 透過ボックス.
      * => ホバーアウトしたときにウィンドウを透過するクラスを付与する
      */
     $(document).on("change", "#__window_opacity", e => {
@@ -1065,6 +1227,11 @@
         else $("#pop_window_timeline").removeClass("__opacity_on")
     })
 
+    /**
+     * #Event
+     * 画面リサイズイベント.
+     * => プロフィール画面を表示している場合は適当な大きさにリサイズする
+     */
     let resize_timer = 0
     window.addEventListener("resize", () => {
         // プロフィール画面が表示されていなかったらなにもしない
@@ -1076,16 +1243,11 @@
 
     /**
      * #Event
-     * 各種閉じるボタン
+     * 各種ウィンドウの閉じるボタン.
      */
-    $(document).on("click", "#__on_reply_close", e =>
-        $("#pop_extend_column").hide("slide", { direction: "right" }, 150))
-    $(document).on("click", "#__on_search_close", e =>
-        $("#pop_ex_timeline").hide("slide", { direction: "right" }, 150))
-    $(document).on("click", "#__on_emoji_close", e =>
-        $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
-    $(document).on("click", "#__on_pop_window_close", e =>
-        $("#pop_window_timeline").hide("fade", 150))
-    $(document).on("click", "#__on_drive_media_cancel", e =>
-        $("#pop_dirve_window").hide("fade", 120))
+    $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150))
+    $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide("slide", { direction: "right" }, 150))
+    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
+    $(document).on("click", "#__on_pop_window_close", e => $("#pop_window_timeline").hide("fade", 150))
+    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide("fade", 120))
 })
