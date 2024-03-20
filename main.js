@@ -102,6 +102,7 @@ async function writePrefMskyAccs(event, json_data) {
     const i = crypto.createHash("sha256")
         .update(json_data.access_token + json_data.app_secret, "utf8")
         .digest("hex")
+
     // JSONを生成(あとでキャッシュに入れるので)
     const write_json = {
         'domain': json_data.domain,
@@ -109,8 +110,8 @@ async function writePrefMskyAccs(event, json_data) {
         'user_id': json_data.user.username,
         'username': json_data.user.name,
         'socket_url': `wss://${json_data.domain}/streaming`,
-        'client_id': json_data.access_token,
-        'client_secret': json_data.app_secret,
+        'client_id': '__app_auth',
+        'client_secret': json_data.access_token,
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
         'post_maxlength': json_data.post_maxlength,
@@ -317,8 +318,8 @@ async function authorizeMisskey(session) {
             'user_id': user_data.username,
             'username': user_data.name,
             'socket_url': `wss://${oauth_session.domain}/streaming`,
-            'client_id': 'MiAuth',
-            'client_secret': 'MiAuth',
+            'client_id': '__mi_auth',
+            'client_secret': null,
             'access_token': access_token,
             'avatar_url': user_data.avatarUrl,
             'post_maxlength': oauth_session.post_maxlength,

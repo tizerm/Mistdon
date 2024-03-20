@@ -1123,6 +1123,7 @@ class Account {
                     break
                 case 'Misskey': // Misskey
                     // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
+                    /*
                     response = await $.ajax({
                         type: "POST",
                         url: `https://${this.pref.domain}/api/i/revoke-token`,
@@ -1132,7 +1133,7 @@ class Account {
                             "i": this.pref.access_token,
                             "token": this.pref.access_token
                         })
-                    })
+                    })//*/
                     break
                 default:
                     break

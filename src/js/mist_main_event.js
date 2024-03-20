@@ -1047,15 +1047,23 @@
      * => 投稿用のコンテキストメニューを表示
      */
     $(document).on("contextmenu", "ul.__context_posts>li", e => {
+        if ($(e.target).closest("li").is(".short_userinfo")) return // 簡易プロフィールは無視
+
         // タイムライングループでの表示(メイン画面のTL)の場合のフラグを保存
         const tl_group_flg = $(e.target).closest(".tl_group_box").length > 0
-        if ($(e.target).closest("li").is(".short_userinfo")) return // 簡易プロフィールは無視
-        if ($(e.target).closest("table").is("#auth_account_table")) // 認証アカウント一覧のときは削除可能にする
-            $("#pop_context_menu .__menu_post_del") // 削除クラスを消してnameにアカウントアドレスを付与
+
+        // 認証アカウント一覧と自分の投稿は削除可能にする
+        if ($(e.target).closest("li").is(".self_post")) {
+            const post_id = $(e.target).closest("li").attr("id")
+            $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
+                .removeClass("ui-state-disabled").attr("name", post_id.substring(post_id.indexOf('@')))
+        } else if ($(e.target).closest("table").is("#auth_account_table"))
+            $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
-        else $("#pop_context_menu .__menu_post_del").addClass("ui-state-disabled")
-        if (!tl_group_flg) // メイン画面のTL出ない場合は遡りを禁止
-            $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")
+
+        // メイン画面のTL出ない場合は遡りを禁止
+        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
         else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
@@ -1156,6 +1164,14 @@
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 編集.
+     * TODO: 編集ロジックを組む
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_edit", e =>
+        Account.get($(e.target).closest("li").attr("name")).deletePost($("#pop_context_menu").attr("name")))
 
     /**
      * #Event #Contextmenu

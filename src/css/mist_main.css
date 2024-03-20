@@ -703,11 +703,11 @@
                 font-weight: bold;
                 &.impress_reply {
                     background-color: #cc355d;
-                    background-image: url("../resources/ic_cnt_rp.png");
+                    background-image: url("../resources/ic_rpl.png");
                 }
                 &.impress_reblog {
                     background-color: #408a08;
-                    background-image: url("../resources/ic_cnt_rblg.png");
+                    background-image: url("../resources/ic_reblog.png");
                 }
                 &.impress_fav {
                     background-color: #a8880a;
@@ -850,6 +850,7 @@
         > .history_timeline {
             & td {
                 width: 360px;
+                max-width: 360px;
                 > .col_head {
                     border-top-left-radius: 18px;
                     border-top-right-radius: 18px;

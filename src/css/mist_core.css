@@ -35,8 +35,13 @@ input[type="radio"], input[type="checkbox"] {
     + label {
         display: inline-block;
         background-color: rgba(255,255,255,0.1);
-        border-radius: 6px;
-        padding: 1px 12px;
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: 24px auto;
+        background-image: url("../resources/ic_rem32.png");
+        border-radius: 12px;
+        padding: 3px 12px;
+        padding-left: 32px;
         margin: 1px 0px;
         color: #cccccc;
         &:hover {
@@ -45,6 +50,7 @@ input[type="radio"], input[type="checkbox"] {
         }
         &:has(>img:only-child) {
             background-color: transparent;
+            background-image: none;
             padding: 0px;
             cursor: pointer;
             > img { vertical-align: text-bottom; }
@@ -64,7 +70,8 @@ input[type="radio"], input[type="checkbox"] {
         }
     }
 }
-input[type="checkbox"]:checked+label::before { content: "✔"; }
+input[type="checkbox"]:checked+label { background-image: url("../resources/ic_check.png"); }
+input[type="radio"]:checked+label    { background-image: url("../resources/ic_radio.png"); }
 button {
     border-radius: 6px;
     border: solid 1px #cccccc;
@@ -95,6 +102,7 @@ button:has(>img:only-child) {
 input[type="checkbox"]+label.icon_label_set, button.icon_label_set {
     position: relative;
     background-color: rgba(255,255,255,0.15);
+    background-image: none;
     border-style: none;
     border-radius: 16px;
     font-size: 13px;

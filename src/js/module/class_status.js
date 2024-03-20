@@ -1031,7 +1031,7 @@ class Status {
                 case 'reblog': // ブースト
                 case 'renote': // リノート
                     jqelm.closest('li').addClass('rebloged_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_rblg.png')
+                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_reblog.png')
                     break
                 case 'reaction': // 絵文字リアクション
                     jqelm.closest('li').addClass('favorited_post')

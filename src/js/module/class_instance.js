@@ -269,7 +269,7 @@ class Instance {
                     }
                 case 'Misskey': // Misskey
                     // 権限を設定
-                    permission = ["read:account", "read:notes", "write:notes", "write:blocks",
+                    permission = ["read:account", "write:notes", "write:blocks",
                         "read:drive", "write:drive", "read:favorites", "write:favorites",
                         "read:following", "write:following", "write:mutes", "read:notifications",
                         "read:reactions", "write:reactions", "write:votes",

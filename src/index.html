@@ -11,14 +11,14 @@
         content="default-src 'self'; img-src * data:; media-src *; connect-src *; script-src 'self'; style-src 'nonce-8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f'"
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_core.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_main.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_timeline.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_core.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_main.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_timeline.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="js/mm_ui.js"></script>
-    <script type="text/javascript" src="js/mm_help.js"></script>
-    <script type="text/javascript" src="js/mm_utils.js"></script>
+    <script type="text/javascript" src="js/mist_ui.js"></script>
+    <script type="text/javascript" src="js/mist_help.js"></script>
+    <script type="text/javascript" src="js/mist_utils.js"></script>
     <script type="text/javascript" src="js/module/class_relative_time.js"></script>
     <script type="text/javascript" src="js/module/class_notification.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
@@ -27,8 +27,8 @@
     <script type="text/javascript" src="js/module/class_account.js"></script>
     <script type="text/javascript" src="js/module/class_media.js"></script>
 
-    <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1) -->
-    <script type="text/javascript" src="js/mm_updater_032.js"></script>
+    <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1 => v1.0.0) -->
+    <script type="text/javascript" src="js/mist_updater_100.js"></script>
 
     <script type="text/javascript" src="js/module/class_timeline.js"></script>
     <script type="text/javascript" src="js/module/class_group.js"></script>
@@ -40,10 +40,10 @@
     <script type="text/javascript" src="js/module/class_query.js"></script>
     <script type="text/javascript" src="js/module/class_clip.js"></script>
     <script type="text/javascript" src="js/module/class_preference.js"></script>
-    <script type="text/javascript" src="js/mm_keybind.js"></script>
-    <script type="text/javascript" src="js/mm_emoji_suggester.js"></script>
-    <script type="text/javascript" src="js/mm_main.js"></script>
-    <script type="text/javascript" src="js/mm_event.js"></script>
+    <script type="text/javascript" src="js/mist_main_keybind.js"></script>
+    <script type="text/javascript" src="js/mist_emoji_suggester.js"></script>
+    <script type="text/javascript" src="js/mist_main_load.js"></script>
+    <script type="text/javascript" src="js/mist_main_event.js"></script>
 
     <!-- コミットするnonce値は仮打ち -->
     <style nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"></style>
@@ -55,7 +55,7 @@
         <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
-        <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
+        <li><a href="preference.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
         <li><a class="navi_search" title="検索(ハッシュタグ検索)"><img src="resources/ic_search.png" alt="検索"/></a></li>
         <li><a class="navi_trend" title="トレンド"><img src="resources/ic_trend.png" alt="トレンド"/></a></li>
         <li><a class="navi_history" title="送信履歴"><img src="resources/ic_history.png" alt="送信履歴"/></a></li>
@@ -161,7 +161,7 @@
                 </div>
                 <div class="reset_box">
                     <button type="button" id="__on_reset_option"
-                        class="icon_label_set"><img src="resources/ic_reload.png" alt="リセット"/>
+                        class="icon_label_set"><img src="resources/ic_not.png" alt="リセット"/>
                         <span>リセット</span></button>
                 </div>
             </div>
@@ -286,6 +286,7 @@
             <li class="__menu_post_url"><div>URLをコピー</div></li>
             <li class="__menu_post_open_browser"><div>ブラウザで開く</div></li>
             <li class="__menu_post_open_temporary"><div>ここから前に遡る</div></li>
+            <li class="__menu_post_edit ui-state-disabled" name="{user_id}"><div>編集(Mastodon)</div></li>
             <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
     </div>
@@ -324,8 +325,8 @@
     <div id="pop_expand_action">
         <!-- hidden: 追加アクションポップ -->
         <div class="std_action">
-            <a class="__short_reply" title="リプライ"><img src="resources/ic_cnt_rp.png" alt="リプライ"/></a>
-            <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_cnt_rblg.png" alt="ブースト/リノート"/></a>
+            <a class="__short_reply" title="リプライ"><img src="resources/ic_rpl.png" alt="リプライ"/></a>
+            <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_reblog.png" alt="ブースト/リノート"/></a>
             <a class="__short_quote" title="引用"><img src="resources/ic_quote.png" alt="引用"/></a>
             <a class="__short_fav" title="お気に入り"><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
             <a class="__short_bookmark" title="ブックマーク"><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
