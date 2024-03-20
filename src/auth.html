@@ -56,7 +56,7 @@
 <section id="content">
     <div id="account_list">
         <h2>アカウント一覧</h2>
-        <button type="button" id="on_save_color">色と順番を保存</button>
+        <button type="button" id="on_save_account_info">アカウント設定を保存</button>
         <span>※ドメイン名をドラッグ&amp;ドロップすると<br/>並び替えができます。</span>
         <ul class="__ui_sortable"><!-- jQueryでバインディング処理をします --></ul>
     </div>
@@ -72,7 +72,9 @@
                 <div class="instance_info">(URLを入力してください)</div>
                 <button type="button" id="on_auth_instance_oauth" disabled>OAuth認証</button>
                 <button type="button" id="on_auth_instance" disabled>旧方式で認証</button>
-                <strong>※OAuth,MiAuth認証をオススメしますがエラーが出る場合は右の旧方式認証をお使いください。</strong>
+                <strong class="bottom_auth_warn">
+                    ※OAuth,MiAuth認証をオススメしますがエラーが出る場合は右の旧方式認証をお使いください。
+                </strong>
             </div>
             <div id="form_mastodon" class="platform_section">
                 <h3>Mastodonアカウントの追加</h3>
@@ -84,7 +86,7 @@
                     <input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
                     <input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
                     <button type="button" id="on_mst_auth_token">登録</button>
-                    <button type="button" id="on_close_auth" disabled>キャンセル</button>
+                    <button type="button" class="on_close_auth">キャンセル</button>
                 </div>
             </div>
             <div id="form_misskey" class="platform_section">
@@ -96,7 +98,7 @@
                     <input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
                     <input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
                     <button type="button" id="on_msk_auth_token">登録</button>
-                    <button type="button" id="on_close_auth" disabled>キャンセル</button>
+                    <button type="button" class="on_close_auth">キャンセル</button>
                 </div>
             </div>
         </div>

@@ -1101,7 +1101,7 @@ class Account {
     /**
      * #Method #Ajax #jQuery
      * このアカウントとMistdonとの認証を解除する
-     * (現状MisskeyはtokenをrevokeするAPIの仕様がよくわからないので消すだけ)
+     * (Misskeyはサードパーティアプリから認証解除ができないためMastodon限定です)
      */
     async unauthorize() {
         let response = null
@@ -1122,18 +1122,7 @@ class Account {
                     })
                     break
                 case 'Misskey': // Misskey
-                    // TODO: 認証解除方法がわからん！トークン渡してもアクセス拒否される
-                    /*
-                    response = await $.ajax({
-                        type: "POST",
-                        url: `https://${this.pref.domain}/api/i/revoke-token`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": this.pref.access_token,
-                            "token": this.pref.access_token
-                        })
-                    })//*/
+                    // Misskeyは認証解除に非対応です
                     break
                 default:
                     break
@@ -1373,12 +1362,14 @@ class Account {
         const acitr = Account.map.values()
         for (const account of acitr) {
             let misskey_elm = ''
+            let unauth_button_label = '認証解除'
             if (account.pref.platform == 'Misskey') { // Misskeyの場合の特殊設定
+                unauth_button_label = '認証情報削除'
                 misskey_elm /* 連合なし設定 */ += `
                     <li>
                         <input type="checkbox" id="dl_${account.full_address}"
                             class="__chk_default_local"${account.pref.default_local ? ' checked' : ''}/>
-                        <label for="dl_${account.full_address}">ローカル(連合なし)をデフォルトにする</label><br/>
+                        <label for="dl_${account.full_address}">ローカルをデフォルト</label><br/>
                     </li>
                 `
                 try {
@@ -1415,7 +1406,7 @@ class Account {
                         </li>
                     </ul>
                     <div class="foot_button">
-                        <button type="button" class="__btn_unauth_acc">認証解除</button>
+                        <button type="button" class="__btn_unauth_acc">${unauth_button_label}</button>
                     </div>
                 </li>
             `

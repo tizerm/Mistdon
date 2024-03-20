@@ -187,10 +187,15 @@ input[type="text"] {
                     vertical-align: text-bottom;
                 }
             }
+            > .bottom_auth_warn {
+                display: block;
+                color: #ffd561;
+            }
         }
         .platform_section {
             position: absolute;
-            top: calc(50vh - 280px);
+            top: 50%;
+            transform: translate(0%, -50%);
             padding: 24px;
             right: 0px;
             left: 0px;
