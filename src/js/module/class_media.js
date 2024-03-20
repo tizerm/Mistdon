@@ -278,6 +278,26 @@ class Media {
 
     /**
      * #StaticMethod
+     * 投稿オブジェクトから添付メディアのDOMを生成.
+     * 
+     * @param post 添付メディアを展開する投稿オブジェクト
+     */
+    static getAttachElement(post) {
+        let html = ''
+        post.medias.forEach(media => html += `
+            <li>
+                <input type="checkbox" id="__chk_attach_${media.id}" name="__chk_attach_sensitive"
+                    class="__chk_attach_sensitive"${post.sensitive ? ' checked' : ''}/>
+                <label for="__chk_attach_${media.id}"><img
+                    src="${media.thumbnail}" class="__img_attach media_from_drive"
+                    name="${media.id}"/><div class="check_mask"></div></label>
+            </li>
+        `)
+        return html
+    }
+
+    /**
+     * #StaticMethod
      * 対象のMisskeyアカウントのドライブを開いて表示する.
      * 
      * @param address ドライブを開くアカウント

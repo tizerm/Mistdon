@@ -53,21 +53,28 @@
 <nav id="navi">
     <ul id="top_navi">
         <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
-        <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
-        <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
+        <li class="li_home"><a href="index.html" title="ホーム"><img
+                src="resources/ic_home.png" alt="ホーム"/></a></li>
+        <li class="li_auth"><a href="auth.html" title="アカウント認証"><img
+                src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="preference.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
-        <li><a class="navi_search" title="検索(ハッシュタグ検索)"><img src="resources/ic_search.png" alt="検索"/></a></li>
-        <li><a class="navi_trend" title="トレンド"><img src="resources/ic_trend.png" alt="トレンド"/></a></li>
-        <li><a class="navi_history" title="送信履歴"><img src="resources/ic_history.png" alt="送信履歴"/></a></li>
-        <li><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"
-                ><img src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
-        <li><a class="navi_clips" title="クリップ(Misskey)"><img src="resources/ic_clip.png" alt="クリップ(Misskey)"/></a></li>
-        <li><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"
-                ><img src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
+        <li class="li_search"><a class="navi_search" title="検索(ハッシュタグ検索)"><img
+                src="resources/ic_search.png" alt="検索"/></a></li>
+        <li class="li_trend"><a class="navi_trend" title="トレンド"><img
+                src="resources/ic_trend.png" alt="トレンド"/></a></li>
+        <li class="li_history"><a class="navi_history" title="送信履歴"><img
+                src="resources/ic_history.png" alt="送信履歴"/></a></li>
+        <li class="li_profile"><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"><img
+                src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
+        <li class="li_clips"><a class="navi_clips" title="クリップ(Misskey)"><img
+                src="resources/ic_clip.png" alt="クリップ(Misskey)"/></a></li>
+        <li class="li_emoji"><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"><img
+                src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
     <ul id="bottom_navi">
-        <li><a id="on_help_keybind" title="キーボードショートカット早見表"><img src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
-        <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
+        <li class="li_keyborad"><a id="on_help_keybind" title="キーボードショートカット早見表"><img
+                src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
+        <li class="li_help"><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
     </ul>
     <div id="pop_notification_console">
     <!-- hidden: 通知ボックス -->
@@ -325,15 +332,24 @@
     <div id="pop_expand_action">
         <!-- hidden: 追加アクションポップ -->
         <div class="std_action">
-            <a class="__short_reply" title="リプライ"><img src="resources/ic_rpl.png" alt="リプライ"/></a>
-            <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_reblog.png" alt="ブースト/リノート"/></a>
-            <a class="__short_quote" title="引用"><img src="resources/ic_quote.png" alt="引用"/></a>
-            <a class="__short_fav" title="お気に入り"><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
-            <a class="__short_bookmark" title="ブックマーク"><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
-            <a class="__short_open_reaction" title="最近のリアクションを開く"><img src="resources/ic_emoji.png" alt="最近のリアクションを開く"/></a>
-            <a class="__short_browser" title="ブラウザで開く"><img src="resources/ic_window.png" alt="ブラウザで開く"/></a>
-            <a class="__short_prepost" title="ここから遡る"><img src="resources/ic_return.png" alt="ここから遡る"/></a>
-            <a class="__short_impression" title="簡易インプレッション表示"><img src="resources/ic_poll.png" alt="簡易インプレッション表示"/></a>
+            <button type="button" class="__short_reply" title="リプライ"><img
+                src="resources/ic_rpl.png" alt="リプライ"/></button>
+            <button type="button" class="__short_reblog" title="ブースト/リノート"><img
+                src="resources/ic_reblog.png" alt="ブースト/リノート"/></button>
+            <button type="button" class="__short_quote" title="引用"><img
+                src="resources/ic_quote.png" alt="引用"/></button>
+            <button type="button" class="__short_fav" title="お気に入り"><img
+                src="resources/ic_favorite.png" alt="お気に入り"/></button>
+            <button type="button" class="__short_bookmark" title="ブックマーク"><img
+                src="resources/ic_bkm.png" alt="ブックマーク"/></button>
+            <button type="button" class="__short_open_reaction" title="最近のリアクションを開く"><img
+                src="resources/ic_emoji.png" alt="最近のリアクションを開く"/></button>
+            <button type="button" class="__short_browser" title="ブラウザで開く"><img
+                src="resources/ic_window.png" alt="ブラウザで開く"/></button>
+            <button type="button" class="__short_prepost" title="ここから遡る"><img
+                src="resources/ic_return.png" alt="ここから遡る"/></button>
+            <button type="button" class="__short_impression" title="簡易インプレッション表示"><img
+                src="resources/ic_poll.png" alt="簡易インプレッション表示"/></button>
         </div>
         <div class="reactions">
             <div class="recent"></div>

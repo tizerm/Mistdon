@@ -255,7 +255,7 @@ class User {
                     <a class="__on_show_bookmark" title="ブックマーク"
                         ><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
                     <a class="__on_show_mastfav" title="お気に入り"
-                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                        ><img src="resources/ic_favorite.png" alt="お気に入り"/></a>
                 `
                 instance = `
                     <a class="__on_show_instance" title="所属インスタンス情報"
@@ -268,7 +268,7 @@ class User {
                     <a class="__on_show_reaction" title="リアクション"
                         ><img src="resources/ic_emoji.png" alt="リアクション"/></a>
                     <a class="__on_show_miskfav" title="お気に入り"
-                        ><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
+                        ><img src="resources/ic_favorite.png" alt="お気に入り"/></a>
                 `
                 instance = `
                     <a class="__on_show_instance" title="所属インスタンス情報"

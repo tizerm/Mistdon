@@ -86,7 +86,10 @@
                     background-color: #dddddd;
                 }
             }
-            > #__hdn_text_render { display: none; }
+            > #__hdn_text_render {
+                z-index: -1;
+                position: absolute;
+            }
         }
         > .submit_button { width: 74px; }
         > .additional_buttons {
@@ -673,6 +676,14 @@
         max-width: 320px;
         padding: 4px;
 
+        & button {
+            vertical-align: text-bottom;
+            > img {
+                vertical-align: text-bottom;
+                height: 28px;
+                width: auto;
+            }
+        }
         & a {
             > img {
                 display: inline-block;
@@ -711,7 +722,7 @@
                 }
                 &.impress_fav {
                     background-color: #a8880a;
-                    background-image: url("../resources/ic_cnt_fav.png");
+                    background-image: url("../resources/ic_favorite.png");
                 }
             }
         }

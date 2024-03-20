@@ -280,26 +280,8 @@ class History {
      */
     static edit(target) {
         const index = target.closest("li").index()
-        History.post_stack[index].openEditor()
-    }
-
-    /**
-     * #Method
-     * このヒストリーデータに紐づいている投稿データの内容を編集用にフォームに展開する.
-     */
-    openEditor() {
-        // アカウントを編集対象に変更
-        Account.get(this.account_address).setPostAccount()
-        //$("#__txt_postarea").val(this.post.content_text)
-        $("#__hdn_text_render").html(this.post.content)
-        if (this.post.cw_text) $("#__txt_content_warning").val(this.post.cw_text)
-        $("#post_options ul.refernce_post").html(this.post.element)
-        $("#post_options #__hdn_edit_id").val(this.post.id)
-        $("#post_options .refernced_post+.option_close .__on_option_open").click()
-        enabledAdditionalAccount(false)
-        $("#__txt_postarea").val($("#__hdn_text_render").get(0).innerText)
+        History.post_stack[index].post.edit()
         $("#__on_search_close").click() // 送信履歴を閉じる
-        $("#__txt_postarea").focus()
     }
 
     /**
@@ -399,16 +381,14 @@ class History {
      * @param presentCallback データが存在したときに実行するコールバック関数
      * @param del_flg 先頭のデータをポップ(削除)する場合はtrue
      */
-    static popIf(presentCallback, del_flg) {
+    static async popIf(presentCallback, del_flg) {
         const pop = History.post_stack[0]
         if (!pop) { // なにもなかったらそのままおしまい
             Notification.error("直前の投稿がありません.")
             return
         }
-        if (!pop.post) { // データ取得前の場合はメッセージを出す
-            Notification.error("直前の投稿データが未取得です. 一度送信履歴画面を開いてください.")
-            return
-        }
+        // 直前の投稿をキャッシュ
+        await pop.getStatus()
         // 削除する場合
         if (del_flg) pop.post.delete().then(() => {
             presentCallback(History.post_stack.shift())

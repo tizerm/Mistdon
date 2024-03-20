@@ -300,18 +300,13 @@ class Group {
     /**
      * #Method
      * 引数のjQueryオブジェクトに該当する投稿データを画面から消去する
+     * (キャッシュ破棄のためにDOMから要素を参照するようにしているのでこういうめんどくさい実装になってます)
      * 
      * @param jqelm 消去対象の投稿のjQueryオブジェクト
      */
     removeStatus(jqelm, delay) {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
-
-        /*
-        // TODO: debug
-        console.log(key)
-        console.log(post)
-        console.log(this)//*/
 
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
@@ -327,16 +322,16 @@ class Group {
      * #Method
      * 引数のjQueryオブジェクトに該当する投稿データを編集後の内容に書き換える
      * 
-     * @param jqelm 編集対象の投稿のjQueryオブジェクト
+     * @param status_key 投稿ステータスのユニークキー
      * @param post 編集後の投稿Statusオブジェクト
      */
-    updateStatus(jqelm, post) {
+    updateStatus(status_key, post) {
+        const jqelm = this.getStatusElement(status_key)
+        const pre_post = this.status_map.get(status_key)
         const key = jqelm.attr("id")
-        // ステータスデータを置き換える
-        post.from_timeline.status_key_map.set(post.status_id, post)
-        this.status_map.set(post.status_key, post)
+
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
-        post.update(jqelm.parent().find(`li[id="${key}"]`))
+        pre_post.update(post, jqelm.parent().find(`li[id="${key}"]`))
     }
 
     /**

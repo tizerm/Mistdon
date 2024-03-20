@@ -135,6 +135,12 @@
                 }
                 Column.getCursor().toggleFlex()
                 return false
+            case 80: // Ctrl+P: トレンド
+                if (event.ctrlKey || event.metaKey) {
+                    $("#navi .navi_trend").click()
+                    return false
+                }
+                break
             case 72: // Ctrl+H: 送信履歴
                 if (event.ctrlKey || event.metaKey) {
                     $("#navi .navi_history").click()
@@ -147,7 +153,7 @@
                     return false
                 }
                 break
-            case 80: // Ctrl+P: クリップ
+            case 75: // Ctrl+K: クリップ
                 if (event.ctrlKey || event.metaKey) {
                     $("#navi .navi_clips").click()
                     return false

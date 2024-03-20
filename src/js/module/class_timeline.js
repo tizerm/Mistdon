@@ -93,6 +93,7 @@ class Timeline {
     /**
      * #Method
      * このタイムラインのWebSocket設定パラメータをアカウント情報にわたす
+     * WebSocket通信でメッセージ受信時のイベント関数もここで定義する
      * (この段階ではWebSocketへはまだ接続しない)
      */
     setSocketParam() {
@@ -105,7 +106,7 @@ class Timeline {
         // プラットフォーム判定
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                // メッセージ受信時のコールバック関数
+                // !==========> メッセージ受信時のコールバック関数
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
 
@@ -120,15 +121,19 @@ class Timeline {
                         this.parent_group.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
                     // 削除された投稿を検知
                     else if (data.event == "delete") this.removeStatus(data.payload)
-                    else if (data.event == "status.update") // 更新された投稿を検知
+                    // 更新された投稿を検知
+                    else if (data.event == "status.update")
                         this.updateStatus(new Status(JSON.parse(data.payload), this, this.target_account))
                 }
+                // !==========> ここまで
+
                 // 購読パラメータの設定
                 this.pref.socket_param.type = "subscribe"
                 send_param = JSON.stringify(this.pref.socket_param)
                 break
             case 'Misskey': // Misskey
                 const uuid = crypto.randomUUID()
+                // !==========> メッセージ受信時のコールバック関数
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
 
@@ -138,6 +143,8 @@ class Timeline {
                         || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
                         this.parent_group.prepend(new Status(data.body.body, this, this.target_account))
                 }
+                // !==========> ここまで
+
                 // 購読パラメータの設定
                 this.pref.socket_param.id = uuid
                 send_param = JSON.stringify({
@@ -224,7 +231,7 @@ class Timeline {
         const status_key = this.status_key_map.get(post.id)
 
         // タイムラインに存在する投稿だけ修正対象とする
-        if (status_key) this.parent_group.updateStatus(this.parent_group.getStatusElement(status_key), post)
+        if (status_key) this.parent_group.updateStatus(status_key, post)
     }
 
     /**

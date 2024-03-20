@@ -59,6 +59,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.allow_reblog = this.visibility == 'public' || this.visibility == 'unlisted'
                 this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
                 if (this.notif_type && this.notif_type != 'follow') { // 本文(通知の場合はstatusから)
@@ -149,6 +150,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.allow_reblog = this.visibility == 'public' || this.visibility == 'home'
                 this.local_only = data.localOnly
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
@@ -794,6 +796,8 @@ class Status {
         // カードがある場合はカードに背景を設定
         if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
             .css("background-image", `url("${this.card.image}")`)
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -955,6 +959,8 @@ class Status {
         // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && !this.detail_flg && (this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
@@ -1014,6 +1020,8 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1026,7 +1034,7 @@ class Status {
             switch (this.notif_type) {
                 case 'favourite': // お気に入り
                     jqelm.closest('li').addClass('favorited_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_fav.png')
+                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_favorite.png')
                     break
                 case 'reblog': // ブースト
                 case 'renote': // リノート
@@ -1154,6 +1162,8 @@ class Status {
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1259,6 +1269,8 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && (this.detail_flg || this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
@@ -1388,9 +1400,6 @@ class Status {
     /**
      * #Method
      * この投稿をサーバーから削除する
-     * 削除後にこの投稿をパラメータとしてコールバック関数を実行
-     * 
-     * @param callback 削除処理実行後に実行するコールバック関数
      */
     async delete() {
         const notification = Notification.progress("投稿を削除しています...")
@@ -1428,13 +1437,56 @@ class Status {
 
     /**
      * #Method
+     * この投稿を編集モードで本文投稿フォームに展開する.
+     */
+    edit() {
+        // アカウントを編集対象に変更
+        Account.get(`@${this.user.full_address}`).setPostAccount()
+
+        // 投稿本文とCWテキストをフォームに展開
+        this.getRenderContent().then(text => $("#__txt_postarea").val(text))
+        if (this.cw_text) $("#__txt_content_warning").val(this.cw_text)
+
+        // メディアがある場合はアップ済みのメディアを初期添付
+        if (this.medias.length > 0) $('#header>#post_options .attached_media>ul.media_list').html(Media.getAttachElement(this))
+
+        $("#post_options ul.refernce_post").html(this.element)
+        $("#post_options #__hdn_edit_id").val(this.id)
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        enabledAdditionalAccount(false)
+
+        $("#__txt_postarea").focus()
+    }
+
+    /**
+     * #Method
+     * この投稿の本文のレンダリングされたテキストを取得する.
+     */
+    async getRenderContent() {
+        // 一度DOMにレンダリングする
+        $("#__hdn_text_render").html(this.content)
+        // 一度レンダリングされた内容でinnerTextを取得(ここはjQueryではできない)
+        const render_text = document.getElementById("__hdn_text_render").innerText
+        $("#__hdn_text_render").empty()
+        return render_text
+    }
+
+    /**
+     * #Method
      * この投稿で対象の投稿エレメントを書き換える.
      * 
+     * @param post 更新された後の投稿オブジェクト
      * @param jqelm 修正対象の投稿jQueryオブジェクト
      */
-    update(jqelm) {
+    update(post, jqelm) {
         // ギャラリーは非対応
         if (jqelm.is('.gallery_timeline')) return
+
+        // 修正対象のコンテンツを内部的に書き換える
+        this.content = post.content
+        this.emojis = post.emojis
+        this.sensitive = post.sensitive
+        this.medias = post.medias
 
         // メインコンテンツを書き換える
         if (jqelm.is('.short_timeline') || jqelm.is('.media_timeline')) // リストとメディアは1行で書き換え

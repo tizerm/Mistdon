@@ -13,6 +13,18 @@ class Preference {
             const general_pref = await window.accessApi.readGeneralPref()
             if (!general_pref) // ファイルが読み込めなかった場合は初期設定を使用
                 Preference.GENERAL_PREFERENCE = { // 全体設定の初期値
+                    "navigation_visible": {                     // ナビゲーションメニューの表示設定
+                        "home"                      : true,     // ホーム
+                        "auth"                      : true,     // アカウント認証
+                        "search"                    : true,     // 検索
+                        "trend"                     : true,     // トレンド
+                        "history"                   : true,     // 送信履歴
+                        "profile"                   : true,     // 認証アカウントプロフィール
+                        "clip"                      : true,     // クリップ
+                        "emoji_cache"               : true,     // 絵文字キャッシュ
+                        "help_keyborad"             : true,     // ショートカット早見表
+                        "help"                      : true      // ヘルプ
+                    },
                     "enable_tool_button"            : true,     // ツールボタン(左にあるやつ)
                     "enable_post_button"            : true,     // 投稿ボタン
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
@@ -112,6 +124,18 @@ class Preference {
      * 全体設定ウィンドウに現在の設定値を適用.
      */
     static setPreference() {
+        // メニュー表示設定
+        $("#__chk_gen_navi_home").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.home)
+        $("#__chk_gen_navi_auth").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.auth)
+        $("#__chk_gen_navi_search").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.search)
+        $("#__chk_gen_navi_trend").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.trend)
+        $("#__chk_gen_navi_history").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.history)
+        $("#__chk_gen_navi_profile").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.profile)
+        $("#__chk_gen_navi_clip").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.clip)
+        $("#__chk_gen_navi_emoji").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.emoji_cache)
+        $("#__chk_gen_navi_help_keyborad").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help_keyborad)
+        $("#__chk_gen_navi_help").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
+
         // 個別オプション
         $("#__chk_gen_use_tool_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_tool_button)
         $("#__chk_gen_use_post_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
@@ -154,6 +178,18 @@ class Preference {
      */
     static async saveGeneralPreference() {
         const save_pref = {
+            "navigation_visible": {         // ナビゲーションメニューの表示設定
+                "home"                      : $("#__chk_gen_navi_home").prop("checked"),
+                "auth"                      : $("#__chk_gen_navi_auth").prop("checked"),
+                "search"                    : $("#__chk_gen_navi_search").prop("checked"),
+                "trend"                     : $("#__chk_gen_navi_trend").prop("checked"),
+                "history"                   : $("#__chk_gen_navi_history").prop("checked"),
+                "profile"                   : $("#__chk_gen_navi_profile").prop("checked"),
+                "clip"                      : $("#__chk_gen_navi_clip").prop("checked"),
+                "emoji_cache"               : $("#__chk_gen_navi_emoji").prop("checked"),
+                "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
+                "help"                      : $("#__chk_gen_navi_help").prop("checked")
+            },
             "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
             "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),

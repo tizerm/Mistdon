@@ -573,7 +573,7 @@
                 .count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
                 .count_reply          { background-image: url("../resources/ic_rpl.png"); }
                 .count_reblog         { background-image: url("../resources/ic_reblog.png"); }
-                .count_fav            { background-image: url("../resources/ic_cnt_fav.png"); }
+                .count_fav            { background-image: url("../resources/ic_favorite.png"); }
                 .count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
                 .counter              { width: 17%; }
                 .count_reaction {

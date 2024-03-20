@@ -77,6 +77,17 @@ $(() => (async () => {
     // 一時タイムラインウィンドウの保存をするイベントを登録
     Preference.setTempWindow()
     window.addEventListener("beforeunload", e => Preference.saveTempWindowPref($("#pop_window_timeline")))
+    // ナビゲーションの表示設定
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.search) $("#navi .li_search").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.clip) $("#navi .li_clips").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()
     // 投稿フォームの各種ボタン表示制御
     if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
     if (!Preference.GENERAL_PREFERENCE.enable_post_button) $("#header>#head_postarea>.submit_button").hide()

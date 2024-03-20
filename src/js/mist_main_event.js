@@ -279,7 +279,7 @@
      */
     $("#__on_last_delete_paste").on("click", e => History.popIf(last => {
         last.post.from_account.setPostAccount()
-        $("#__txt_postarea").val(last.post.original_text)
+        last.post.getRenderContent().then(text => $("#__txt_postarea").val(text))
         $("#__txt_content_warning").val(last.post.cw_text)
     }, true))
 
@@ -288,7 +288,7 @@
      * 直前の投稿をコピーボタン.
      */
     $("#__on_on_last_copy").on("click", e => History.popIf(last => {
-        $("#__txt_postarea").val(last.post.original_text)
+        last.post.getRenderContent().then(text => $("#__txt_postarea").val(text))
         $("#__txt_content_warning").val(last.post.cw_text)
     }, false))
 
@@ -305,7 +305,7 @@
      * #Event
      * 直前の投稿を編集ボタン.
      */
-    $("#__on_last_edit").on("click", e => History.popIf(last => last.openEditor(), false))
+    $("#__on_last_edit").on("click", e => History.popIf(last => last.post.edit(), false))
 
     /**
      * #Event
@@ -718,6 +718,7 @@
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
                 $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+                $("#pop_expand_action .__short_quote").prop("disabled", !target_post.allow_reblog)
                 $("#pop_expand_action .__short_bookmark").hide()
                 $("#pop_expand_action .__short_quote").show()
                 $("#pop_expand_action .__short_open_reaction").show()
@@ -726,6 +727,7 @@
                 $("#pop_expand_action .__short_quote").hide()
                 $("#pop_expand_action .__short_open_reaction").hide()
             }
+            $("#pop_expand_action .__short_reblog").prop("disabled", !target_post.allow_reblog)
             $("#pop_expand_action>.reactions").hide()
             $("#pop_expand_action>.impressions").hide()
 
@@ -1062,6 +1064,13 @@
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
         else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")
 
+        // フォロ限などはブースト/リノートを禁止
+        if ($(e.target).closest("li").is(".reblog_disabled")) $(
+            "#pop_context_menu #__menu_reblog, #pop_context_menu #__menu_quote, #pop_context_menu #__menu_limited_renote")
+            .closest("li").addClass("ui-state-disabled")
+        else $("#pop_context_menu #__menu_reblog, #pop_context_menu #__menu_quote, #pop_context_menu #__menu_limited_renote")
+            .closest("li").removeClass("ui-state-disabled")
+
         // メイン画面のTL出ない場合は遡りを禁止
         if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
         else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
@@ -1168,10 +1177,9 @@
     /**
      * #Event #Contextmenu
      * 投稿系メニュー: 編集.
-     * TODO: 編集ロジックを組む
      */
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_edit", e =>
-        Account.get($(e.target).closest("li").attr("name")).deletePost($("#pop_context_menu").attr("name")))
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_edit",
+        e => Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.edit()))
 
     /**
      * #Event #Contextmenu

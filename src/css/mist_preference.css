@@ -161,6 +161,10 @@
                         text-align: center;
 
                         > select.__cmb_tl_layout { width: 96px; }
+                        > button.__open_multi_tl_layout>img {
+                            width: 18px;
+                            height: 18px;
+                        }
                     }
                     > table.tl_layout_options {
                         display: none;
