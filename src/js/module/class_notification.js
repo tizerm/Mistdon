@@ -9,7 +9,7 @@ class Notification {
     constructor(message, type) {
         this.message = message
         this.type = type
-        this.create_date = new Date()
+        this.create_date = new RelativeTime(new Date())
         this.uuid = crypto.randomUUID()
     }
 
@@ -92,6 +92,14 @@ class Notification {
         </li>`
     }
 
+    // Getter: 通知ログのDOM
+    get log_elm() {
+        return `<li class="${this.type}">
+            <span>${this.create_date.absolute}:</span>
+            <span>${this.message}</span>
+        </li>`
+    }
+
     /**
      * #StaticMethod
      * タスクの実行状況に対応してアプリアイコンを変更する.
@@ -124,5 +132,18 @@ class Notification {
      */
     push() {
         Notification.NOTIFICATION_HISTORY.unshift(this)
+        if (Notification.NOTIFICATION_HISTORY.length > 200) Notification.NOTIFICATION_HISTORY.pop()
     }
+
+    /**
+     * #StaticMethod
+     * 通知ログを生成して表示する.
+     */
+    static createLog() {
+        let html = ''
+        Notification.NOTIFICATION_HISTORY.forEach(n => html += n.log_elm)
+        $("#pop_notif_log>ul").html(html)
+        $("#pop_notif_log").show("slide", { direction: "left" }, 150)
+    }
+
 }

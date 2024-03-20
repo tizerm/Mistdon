@@ -3,6 +3,12 @@
 
     /**
      * #Event
+     * アプリアイコン.
+     */
+    $("#navi #__on_notification").on("click", e => Notification.createLog())
+
+    /**
+     * #Event
      * 検索ボタン.
      */
     $("#navi .navi_search").on("click", e => Query.createSearchWindow())
@@ -1112,6 +1118,8 @@
             $("#pop_postuser").hide("slide", { direction: "up" }, 150)
         if ($(e.target).closest("#__open_draft").length == 0)
             $("#pop_draft").hide("slide", { direction: "left" }, 150)
+        if ($(e.target).closest("#pop_notif_log").length == 0 && $(e.target).closest("#__on_notification").length == 0)
+            $("#pop_notif_log").hide("slide", { direction: "left" }, 150)
     })
 
     /**

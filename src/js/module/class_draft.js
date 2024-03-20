@@ -8,7 +8,7 @@ class Draft {
     // コンストラクタ: 下書きオブジェクトからクラスオブジェクトを生成
     constructor(arg) {
         this.account = arg.account
-        this.date = arg.date
+        this.date = new RelativeTime(new Date(arg.date))
         this.content = arg.content
         this.cw = arg.cw || null
         this.visibility = arg.visibility
@@ -71,7 +71,7 @@ class Draft {
         // 下書きオブジェクトを生成
         const draft = new Draft({
             account: arg.account.full_address,
-            date: new Date(),
+            date: new Date().toJSON(),
             content: arg.content,
             cw: cw_text,
             visibility: visibility,
@@ -86,6 +86,7 @@ class Draft {
         // 下書きをファイルに書き出し
         await window.accessApi.overwriteDraft(Draft.list.map(elm => elm.json))
         Notification.info('下書きに保存しました.')
+        $("#__on_reset_option").click()
     }
 
     /**
@@ -111,7 +112,7 @@ class Draft {
                 <div class="user">
                     <img src="${account.pref.avatar_url}" class="user_icon"/>
                     <div class="user_id">${this.account}</div>
-                    <div class="create_date">${this.date}</div>
+                    <div class="create_date">${this.date.absolute}</div>
                 </div>
                 <div class="content">${this.content}</div>
             </li>

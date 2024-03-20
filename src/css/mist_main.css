@@ -269,11 +269,11 @@
             }
             > .refernced_post {
                 display: none;
-                flex-basis: 340px;
-                flex-grow: 1;
+                flex-basis: 270px;
+                max-width: 360px;
                 > ul.refernce_post {
                     height: auto;
-                    max-height: 168px;
+                    max-width: 100%;
                     > li {
                         margin: 2px;
                         &.__initial_message {
@@ -460,9 +460,34 @@
                     background-image: url("../resources/illust/il_done2.png");
                 }
                 > .error {
-                    background-color: rgba(72,42,34,0.8);
                     background-image: url("../resources/illust/il_err2.png");
                 }
+            }
+        }
+    }
+
+    
+    /*=== Notification Log Layout ================================================================*/
+    > #pop_notif_log {
+        display: none;
+        z-index: 3;
+        position: absolute;
+        bottom: 0px;
+        left: 64px;
+
+        > ul {
+            background-color: rgba(0,0,0,0.92);
+            margin: 0px;
+            padding: 6px;
+            height: 50vh;
+            width: min(720px,calc(100vw - 64px));
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
+
+            > li {
+                list-style-type: none;
+                font-family: Consolas, "ＭＳ ゴシック", sans-selif;
+                font-size: 14px;
             }
         }
     }
@@ -734,7 +759,7 @@
         background-color: rgba(56,56,56,0.683);
         padding: 4px;
         border-radius: 12px;
-        width: 50vw;
+        width: min(800px,90vw);
         height: calc(100vh - 380px);
         position: absolute;
         top: 320px;
@@ -747,6 +772,7 @@
             overflow-x: auto;
             margin: 0px;
             padding: 0px;
+            &::-webkit-scrollbar { height: 8px; }
             > li {
                 display: inline-block;
                 margin: 0px;
