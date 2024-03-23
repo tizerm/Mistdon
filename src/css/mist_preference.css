@@ -36,11 +36,18 @@
         > .pref_content {
             overflow-y: auto;
             background-color: rgba(34,34,34,0.5);
-            padding: 0px 18px 12px;
+            padding: 0px 8px 12px;
             font-size: 13px;
             height: calc(100vh - 240px);
 
             &::-webkit-scrollbar { width: 8px; }
+            & h5 {
+                margin: 12px 0px 8px -24px;
+                padding: 0px 12px;
+                font-size: 14px;
+                font-weight: bold;
+                border-bottom: solid 1px #aaaaaa;
+            }
             & dt {
                 padding: 0px 12px;
                 margin-bottom: 12px;

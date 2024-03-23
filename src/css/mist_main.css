@@ -858,7 +858,7 @@
         display: none;
         z-index: 5;
         border-radius: 8px;
-        background-color: rgba(34,34,34,0.8);
+        background-color: rgba(34,34,34,0.683);
         padding: 4px 0px 4px 4px;
         position: absolute;
         top: 32px;
@@ -878,7 +878,7 @@
         /*=== Accounts Timeline Layout ===========================================================*/
         > .account_timeline {
             opacity: 1.0;
-            background-color: rgba(34,34,34,0.8);
+            background-color: rgba(34,34,34,0.683);
             width: calc(100vw - 72px);
             overflow-x: scroll;
             &::-webkit-scrollbar { height: 8px; }
@@ -1099,21 +1099,6 @@
 
     /*=== Extend Column (Optional) ===============================================================*/
     > #pop_extend_column {
-        > .post_detail_col {
-            opacity: 0.95;
-            width: min(480px,100vw);
-            > .lnk_post_browser {
-                display: block;
-                background-color: rgba(255,255,255,0.1);
-                border-radius: 8px;
-                padding: 2px;
-                margin: 4px 12px;
-                text-align: center;
-                width: 100%;
-                &:hover { background-color: rgba(255,255,255,0.15); }
-            }
-            > .quote_col .visibility_icon { text-align: center; }
-        }
         > .reaction_col {
             display: flex;
             flex-direction: column;

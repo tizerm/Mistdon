@@ -98,18 +98,6 @@
                         title="投稿にマウスオーバーしたときに表示されるリプライ/ブースト/リノートなどが手軽に行えるアクションパレットを使用するか設定します。"/>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_expand_profile_cw"/>
-                        <label for="__chk_gen_expand_profile_cw">ユーザープロフィールのCWを自動展開する</label>
-                        <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにするとユーザーの個別プロフィールを表示したときのCW(Contents Warning)を開いた状態で表示します。"/>
-                    </li>
-                    <li>
-                        <input type="checkbox" id="__chk_gen_expand_profile_media"/>
-                        <label for="__chk_gen_expand_profile_media">ユーザープロフィールの閲覧注意メディアを自動展開する</label>
-                        <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにするとユーザーの個別プロフィールを表示したときの閲覧注意メディアを開いた状態で表示します。"/>
-                    </li>
-                    <li>
                         <input type="checkbox" id="__chk_gen_show_media_confirm"/>
                         <label for="__chk_gen_show_media_confirm">メディア投稿時に確認ウィンドウを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
@@ -120,6 +108,78 @@
                         <label for="__chk_gen_show_tips">TIPSを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="タイトルヘッダにTIPSを表示します。オンにすると30秒おきにMistdonの簡潔な操作説明のTIPSが流れてきます。"/>
+                    </li>
+                </ul>
+            </dd>
+            <dt>メインタイムライン以外の自動展開設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ユーザープロフィールやトレンド、検索欄など、一時的に生成するタイムラインでCWや閲覧注意メディアを自動展開するか設定します。チェックをオンにした場合は自動的に展開します。"/>
+            </dt>
+            <dd>
+                <h5>検索</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_search"/>
+                        <label for="__chk_gen_expand_cw_search">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_search"/>
+                        <label for="__chk_gen_expand_media_search">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>トレンド</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_trend"/>
+                        <label for="__chk_gen_expand_cw_trend">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_trend"/>
+                        <label for="__chk_gen_expand_media_trend">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>送信履歴</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_history"/>
+                        <label for="__chk_gen_expand_cw_history">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_history"/>
+                        <label for="__chk_gen_expand_media_history">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>クリップ</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_clip"/>
+                        <label for="__chk_gen_expand_cw_clip">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_clip"/>
+                        <label for="__chk_gen_expand_media_clip">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>詳細表示</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_detail"/>
+                        <label for="__chk_gen_expand_cw_detail">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_detail"/>
+                        <label for="__chk_gen_expand_media_detail">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>ユーザープロフィール</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_profile"/>
+                        <label for="__chk_gen_expand_cw_profile">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_profile"/>
+                        <label for="__chk_gen_expand_media_profile">閲覧注意メディア (NSFW)</label>
                     </li>
                 </ul>
             </dd>

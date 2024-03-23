@@ -30,10 +30,22 @@ class Preference {
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
                     "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
                     "enable_action_palette"         : true,     // 簡易アクションパレット
-                    "enable_expand_profile_cw"      : false,    // プロフCW展開
-                    "enable_expand_profile_media"   : false,    // プロフメディア展開
                     "enable_media_confirm"          : true,     // メディア投稿確認
                     "enable_tips"                   : true,     // TIPS表示
+                    "auto_expand": {                            // 自動展開
+                        "search_cw"                 : false,    // 検索: CW
+                        "search_media"              : false,    // 検索: メディア
+                        "trend_cw"                  : false,    // トレンド: CW
+                        "trend_media"               : false,    // トレンド: メディア
+                        "history_cw"                : false,    // 送信履歴: CW
+                        "history_media"             : false,    // 送信履歴: メディア
+                        "clip_cw"                   : false,    // クリップ: CW
+                        "clip_media"                : false,    // クリップ: メディア
+                        "detail_cw"                 : false,    // 詳細表示: CW
+                        "detail_media"              : false,    // 詳細表示: メディア
+                        "profile_cw"                : false,    // プロフィール: CW
+                        "profile_media"             : false     // プロフィール: メディア
+                    },
                     "tl_cache_limit": {                         // TLキャッシュ件数
                         "default"                   : 100,      // ノーマル
                         "chat"                      : 150,      // チャット
@@ -142,10 +154,22 @@ class Preference {
         $("#__chk_gen_use_additional_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
         $("#__chk_gen_hide_additional_account").prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
-        $("#__chk_gen_expand_profile_cw").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_cw)
-        $("#__chk_gen_expand_profile_media").prop("checked", Preference.GENERAL_PREFERENCE.enable_expand_profile_media)
         $("#__chk_gen_show_media_confirm").prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
+
+        // 自動展開
+        $("#__chk_gen_expand_cw_search").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.search_cw)
+        $("#__chk_gen_expand_media_search").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.search_media)
+        $("#__chk_gen_expand_cw_trend").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw)
+        $("#__chk_gen_expand_media_trend").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.trend_media)
+        $("#__chk_gen_expand_cw_history").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.history_cw)
+        $("#__chk_gen_expand_media_history").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.history_media)
+        $("#__chk_gen_expand_cw_clip").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.clip_cw)
+        $("#__chk_gen_expand_media_clip").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.clip_media)
+        $("#__chk_gen_expand_cw_detail").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.detail_cw)
+        $("#__chk_gen_expand_media_detail").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.detail_media)
+        $("#__chk_gen_expand_cw_profile").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw)
+        $("#__chk_gen_expand_media_profile").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_media)
 
         // 件数キャッシュ
         $("#__txt_gen_tlcache_default").val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.default)
@@ -195,10 +219,22 @@ class Preference {
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
             "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
-            "enable_expand_profile_cw"      : $("#__chk_gen_expand_profile_cw").prop("checked"),
-            "enable_expand_profile_media"   : $("#__chk_gen_expand_profile_media").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
+            "auto_expand": {                // 自動展開
+                "search_cw"                 : $("#__chk_gen_expand_cw_search").prop("checked"),
+                "search_media"              : $("#__chk_gen_expand_media_search").prop("checked"),
+                "trend_cw"                  : $("#__chk_gen_expand_cw_trend").prop("checked"),
+                "trend_media"               : $("#__chk_gen_expand_media_trend").prop("checked"),
+                "history_cw"                : $("#__chk_gen_expand_cw_history").prop("checked"),
+                "history_media"             : $("#__chk_gen_expand_media_history").prop("checked"),
+                "clip_cw"                   : $("#__chk_gen_expand_cw_clip").prop("checked"),
+                "clip_media"                : $("#__chk_gen_expand_media_clip").prop("checked"),
+                "detail_cw"                 : $("#__chk_gen_expand_cw_detail").prop("checked"),
+                "detail_media"              : $("#__chk_gen_expand_media_detail").prop("checked"),
+                "profile_cw"                : $("#__chk_gen_expand_cw_profile").prop("checked"),
+                "profile_media"             : $("#__chk_gen_expand_media_profile").prop("checked")
+            },
             "tl_cache_limit": {             // TLキャッシュ件数
                 "default"                   : $("#__txt_gen_tlcache_default").val(),
                 "chat"                      : $("#__txt_gen_tlcache_chat").val(),
@@ -237,6 +273,47 @@ class Preference {
             // サブウィンドウを閉じる
             accept: () => $("#pop_extend_column").hide()
         })
+    }
+
+    /**
+     * #StaticMethod
+     * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
+     */
+    static setAlternateTimelinePref() {
+        // 検索タイムライン
+        Query.SEARCH_PREF_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.search_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.search_media
+        }
+        // トレンドタイムライン
+        Trend.TREND_PREF_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.trend_media
+        }
+        // 送信履歴タイムライン
+        History.HISTORY_PREF_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.history_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.history_media
+        }
+        // クリップタイムライン
+        Clip.CLIP_PREF_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.clip_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.clip_media
+        }
+        // 詳細表示タイムライン
+        Status.DETAIL_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.detail_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.detail_media
+        }
+        // ユーザープロフィールタイムライン
+        User.USER_MAIN_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.profile_media
+        }
+        User.DETAIL_TIMELINE.pref = {
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.profile_media
+        }
     }
 
     /**
@@ -318,7 +395,7 @@ class Preference {
             "left": Preference.TEMPORARY_WINDOW_POSITION.left,
             "width": Preference.TEMPORARY_WINDOW_SIZE.width,
             "height": Preference.TEMPORARY_WINDOW_SIZE.height,
-            "opacity": target.find("#__window_opacity").prop("checked")
+            "opacity": target.find("#__window_opacity_timeline").prop("checked")
         })
     }
 }

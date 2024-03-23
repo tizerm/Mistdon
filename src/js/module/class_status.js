@@ -10,7 +10,6 @@ class Status {
         // タイムラインから呼び出す場合はtimelineとaccountが渡ってくる
         // 個別の投稿をAPIから呼び出した場合はtimelineがnullで渡ってくる(accountは呼び出し元アカウント)
         this.from_timeline = timeline
-        this.detail_flg = !timeline
         this.user_profile_flg = timeline?.parent_column == null
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
@@ -20,6 +19,8 @@ class Status {
 
         if (timeline?.__extended_timeline == 'profile_post') // プロフィールのユーザー投稿の場合
             this.profile_post_flg = true
+        else if (timeline?.__extended_timeline == 'detail_post') // 詳細表示の場合
+            this.detail_flg = true
 
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
@@ -240,6 +241,11 @@ class Status {
     static TEMPORARY_CONTEXT_STATUS = null
     static TEMPORARY_ACTION_STATUS = null
 
+    // スタティックタイムライン情報を初期化
+    static {
+        Status.DETAIL_TIMELINE = { "__extended_timeline": "detail_post" }
+    }
+
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() {
         return this.from_timeline?.pref?.timeline_type == 'channel'
@@ -366,7 +372,7 @@ class Status {
                     return
             }
             notification.done()
-            return new Status(response, null, { // accountには最低限の情報だけ入れる
+            return new Status(response, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                 "platform": platform,
                 "pref": { "domain": domain }
             })
@@ -406,7 +412,7 @@ class Status {
                     Notification.error("詳細表示のできない投稿です.")
                     return
             }
-            return new Status(response, null, { // accountには最低限の情報だけ入れる
+            return new Status(response, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                 "platform": arg.platform,
                 "pref": { "domain": arg.domain }
             })
@@ -459,7 +465,7 @@ class Status {
                         }).then(data => {
                             if (data.length == 0) return 'resolve' // 終端まで取得したら終了
                             data.forEach(post => {
-                                const ins_post = new Status(post, null, { // accountには最低限の情報だけ入れる
+                                const ins_post = new Status(post, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                                     "platform": 'Misskey',
                                     "pref": { "domain": domain }
                                 })
@@ -479,7 +485,7 @@ class Status {
                             data: JSON.stringify({ "noteId": this.id })
                         }).then(data => {
                             data.forEach(post => parent_promises.push((async () => {
-                                return new Status(post, null, { // accountには最低限の情報だけ入れる
+                                return new Status(post, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                                     "platform": this.from_account.platform,
                                     "pref": { "domain": domain }
                                 })
