@@ -1,6 +1,6 @@
 {
   "name": "Mistdon",
-  "version": "0.5.1",
+  "version": "0.9.9",
   "description": "This is Electron base Mastodon and Misskey client.",
   "main": "main.js",
   "scripts": {
@@ -28,6 +28,7 @@
   "dependencies": {
     "@electron-forge/publisher-github": "^6.4.2",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-window-state": "^5.0.3"
+    "electron-window-state": "^5.0.3",
+    "node-fetch": "^2.7.0"
   }
 }

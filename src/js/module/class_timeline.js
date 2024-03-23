@@ -29,6 +29,9 @@ class Timeline {
     // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
 
+    // 投稿データを一次保存するスタティックフィールド
+    static SCROLLABLE_STATUS_MAP = new Map()
+
     /**
      * #Method
      * このタイムラインの最新の投稿を30件取得する
@@ -37,71 +40,60 @@ class Timeline {
      * 
      * @param max_id この投稿よりも前の投稿を取得する起点のID
      */
-    getTimeline(max_id) {
+    async getTimeline(max_id) {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
         if (!this.pref.external && !this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
         let query_param = this.pref.query_param
         query_param.limit = 30
-        let rest_promise = null
-        // プラットフォーム判定
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                // ヘッダにアクセストークンをセット(認証済みの場合)
-                let header = {}
-                if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
-                if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "GET",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: header,
-                    data: query_param
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            case 'Misskey': // Misskey
-                // クエリパラメータにアクセストークンをセット(認証済みの場合)
-                if (!this.pref.external) query_param.i = this.target_account.pref.access_token
-                if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
-                // REST APIで最新TLを30件取得、する処理をプロミスとして格納
-                rest_promise = $.ajax({
-                    type: "POST",
-                    url: this.pref.rest_url,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(query_param)
-                }).then(data => {
-                    return (async () => {
-                        // 投稿データをソートマップ可能にする処理を非同期で実行(Promise返却)
-                        const posts = []
-                        data.forEach(p => posts.push(new Status(p, this, this.target_account)))
-                        return posts
-                    })()
-                })
-                break
-            default:
-                break
+        let response = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // ヘッダにアクセストークンをセット(認証済みの場合)
+                    let header = {}
+                    if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
+                    if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                    // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+                    response = await $.ajax({
+                        type: "GET",
+                        url: this.pref.rest_url,
+                        dataType: "json",
+                        headers: header,
+                        data: query_param
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    // クエリパラメータにアクセストークンをセット(認証済みの場合)
+                    if (!this.pref.external) query_param.i = this.target_account.pref.access_token
+                    if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                    // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+                    response = await $.ajax({
+                        type: "POST",
+                        url: this.pref.rest_url,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(query_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            // 投稿データをソートマップ可能なオブジェクトにして返却
+            const posts = []
+            response.forEach(p => posts.push(new Status(p, this, this.target_account)))
+            return posts
+        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
+            Notification.error(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`)
+            return Promise.reject(err)
         }
-        // Promiseを返却(実質非同期)
-        return rest_promise.catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
-            toast(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
     }
 
     /**
      * #Method
      * このタイムラインのWebSocket設定パラメータをアカウント情報にわたす
+     * WebSocket通信でメッセージ受信時のイベント関数もここで定義する
      * (この段階ではWebSocketへはまだ接続しない)
      */
     setSocketParam() {
@@ -114,7 +106,7 @@ class Timeline {
         // プラットフォーム判定
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                // メッセージ受信時のコールバック関数
+                // !==========> メッセージ受信時のコールバック関数
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
 
@@ -129,13 +121,19 @@ class Timeline {
                         this.parent_group.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
                     // 削除された投稿を検知
                     else if (data.event == "delete") this.removeStatus(data.payload)
+                    // 更新された投稿を検知
+                    else if (data.event == "status.update")
+                        this.updateStatus(new Status(JSON.parse(data.payload), this, this.target_account))
                 }
+                // !==========> ここまで
+
                 // 購読パラメータの設定
                 this.pref.socket_param.type = "subscribe"
                 send_param = JSON.stringify(this.pref.socket_param)
                 break
             case 'Misskey': // Misskey
                 const uuid = crypto.randomUUID()
+                // !==========> メッセージ受信時のコールバック関数
                 message_callback = (event) => {
                     const data = JSON.parse(event.data)
 
@@ -145,6 +143,8 @@ class Timeline {
                         || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
                         this.parent_group.prepend(new Status(data.body.body, this, this.target_account))
                 }
+                // !==========> ここまで
+
                 // 購読パラメータの設定
                 this.pref.socket_param.id = uuid
                 send_param = JSON.stringify({
@@ -166,7 +166,7 @@ class Timeline {
             send_param: send_param,
             messageFunc: message_callback,
             openFunc: () => {},
-            closeFunc: () => toast(`${this.host}との接続が切断されました。`, "error"),
+            closeFunc: () => Notification.info(`${this.host}との接続が切断されました。`),
             reconnect: true
         })
     }
@@ -191,7 +191,7 @@ class Timeline {
         })
         // エラーハンドラ
         this.socket.addEventListener("error", (event) => {
-            toast(`${this.host}で接続エラーが発生しました、再接続してください。`, "error")
+            Notification.error(`${this.host}で接続エラーが発生しました、再接続してください。`)
             // エラーで切れた場合は再接続しない
             this.reconnect = false
             console.log(event)
@@ -210,14 +210,28 @@ class Timeline {
 
     /**
      * #Method
-     * このタイムラインに保存してあるステータス情報を削除する
+     * このタイムラインに保存してあるステータス情報を削除する.
      * 
      * @param id 投稿ID
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
+
         // タイムラインに存在する投稿だけ削除対象とする
-        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key))
+        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
+    }
+
+    /**
+     * #Method
+     * このタイムラインに保存してあるステータス情報を編集内容で更新する.
+     * 
+     * @param post 編集後の投稿オブジェクト
+     */
+    updateStatus(post) {
+        const status_key = this.status_key_map.get(post.id)
+
+        // タイムラインに存在する投稿だけ修正対象とする
+        if (status_key) this.parent_group.updateStatus(status_key, post)
     }
 
     /**
@@ -234,6 +248,8 @@ class Timeline {
                 <span class="loading_text">Now Loading...</span>
             </div>
         `).find("ul").empty()
+        Timeline.SCROLLABLE_STATUS_MAP.clear()
+        $("#pop_window_timeline>h2").css('background-color', `#${this.pref.color ?? this.target_account?.pref.acc_color}`)
         $("#pop_window_timeline>h2>span").text(this.host)
 
         // 参照した投稿からタイムラインを取得
@@ -243,8 +259,11 @@ class Timeline {
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
                 target: $("#pop_window_timeline>.timeline>ul"),
-                bind: (data, target) => {
-                    data.forEach(p => target.append(p.timeline_element))
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.filter(p => !p.muted).forEach(p => {
+                        Timeline.SCROLLABLE_STATUS_MAP.set(p.status_key, p)
+                        target.append(p.timeline_element)
+                    })
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
@@ -253,6 +272,16 @@ class Timeline {
         })
 
         $("#pop_window_timeline").show("fade", 150)
+    }
+
+    /**
+     * #StaticMethod
+     * 遡りウィンドウから対象のjQueryオブジェクトの投稿オブジェクトを返却する.
+     * 
+     * @param target_li 取得対象のjQueryオブジェクト
+     */
+    static getScrollableStatus(target_li) {
+        return Timeline.SCROLLABLE_STATUS_MAP.get(target_li.attr("id"))
     }
 }
 

@@ -24,7 +24,7 @@ class Query {
     }
 
     /**
-     * #Method
+     * #StaticMethod
      * 検索欄を表示する画面を表示
      */
     static createSearchWindow() {
@@ -39,7 +39,7 @@ class Query {
                 </div>
                 <div id="__search_timeline" class="timeline">
                     <div class="col_loading">
-                        <img src="resources/illust/il_done.png" alt="done"/><br/>
+                        <img src="resources/illust/il_done2.png" alt="done"/><br/>
                         <span class="loading_text">検索結果がここに表示されます。</span>
                     </div>
                     <ul class="search_ul __context_posts"></ul>
@@ -65,11 +65,12 @@ class Query {
         `)
 
         const query = new Query($("#pop_ex_timeline #__txt_search_query").val())
-        const rest_promises = []
-        // すべてのアカウントから検索処理を実行(検索結果をPromise配列に)
-        Account.each(account => rest_promises.push(query.search(account)))
-        // すべての検索結果を取得したらカラムにバインド
-        Query.SEARCH_PREF_TIMELINE.parent_group.onLoadTimeline(rest_promises)
+        // すべてのアカウントから検索処理を実行してバインド
+        const promises = []
+        Account.each(account => promises.push(query.search(account)))
+        const view_group = Query.SEARCH_PREF_TIMELINE.parent_group
+        view_group.status_map.clear()
+        view_group.onLoadTimeline(promises)
     }
 
     /**
@@ -79,75 +80,71 @@ class Query {
      * @param account 検索処理を実行するアカウント
      */
     async search(account) {
-        let rest_promise = null
-        // 検索文字列を渡して投稿を検索
-        switch (account.platform) {
-            case 'Mastodon': // Mastodon
-                if (this.hashtag) // ハッシュタグ検索
-                    rest_promise = $.ajax({
-                        type: "GET",
-                        url: `https://${account.pref.domain}/api/v1/timelines/tag/${this.hashtag}`,
-                        dataType: "json",
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                        data: { "limit": 30 }
-                    })
-                else // 全文検索
-                    rest_promise = $.ajax({
-                        type: "GET",
-                        url: `https://${account.pref.domain}/api/v2/search`,
-                        dataType: "json",
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
-                        data: {
-                            "q": this.query,
-                            "type": "statuses",
-                            "limit": 30
-                        }
-                    }).then(data => { return data.statuses })
-                break
-            case 'Misskey': // Misskey
-                if (this.hashtag) // ハッシュタグ検索
-                    rest_promise = $.ajax({
-                        type: "POST",
-                        url: `https://${account.pref.domain}/api/notes/search-by-tag`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": account.pref.access_token,
-                            "reply": false,
-                            "renote": false,
-                            "tag": this.hashtag,
-                            "limit": 30
+        let response = null
+        try { // 検索文字列を渡して投稿を検索
+            switch (account.platform) {
+                case 'Mastodon': // Mastodon
+                    if (this.hashtag) // ハッシュタグ検索
+                        response = await $.ajax({
+                            type: "GET",
+                            url: `https://${account.pref.domain}/api/v1/timelines/tag/${this.hashtag}`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                            data: { "limit": 30 }
                         })
-                    })
-                else // 全文検索
-                    rest_promise = $.ajax({
-                        type: "POST",
-                        url: `https://${account.pref.domain}/api/notes/search`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": account.pref.access_token,
-                            "query": this.query,
-                            "limit": 30
+                    else { // 全文検索
+                        response = await $.ajax({
+                            type: "GET",
+                            url: `https://${account.pref.domain}/api/v2/search`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                            data: {
+                                "q": this.query,
+                                "type": "statuses",
+                                "limit": 30
+                            }
                         })
-                    })
-                break
-            default:
-                break
+                        response = response.statuses
+                    }
+                    break
+                case 'Misskey': // Misskey
+                    if (this.hashtag) // ハッシュタグ検索
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/search-by-tag`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "reply": false,
+                                "renote": false,
+                                "tag": this.hashtag,
+                                "limit": 30
+                            })
+                        })
+                    else // 全文検索
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${account.pref.domain}/api/notes/search`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": account.pref.access_token,
+                                "query": this.query,
+                                "limit": 30
+                            })
+                        })
+                    break
+                default:
+                    break
+            }
+            const posts = []
+            response.forEach(p => posts.push(new Status(p, Query.SEARCH_PREF_TIMELINE, account)))
+            return posts
+        } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
+            console.log(err)
+            Notification.error(`${account.pref.domain}での投稿の検索でエラーが発生しました.`)
+            return Promise.reject(err)
         }
-        // Promiseを返却(実質非同期)
-        return rest_promise.then(data => {
-            return (async () => {
-                const posts = []
-                data.forEach(p => posts.push(
-                    new Status(p, Query.SEARCH_PREF_TIMELINE, account)))
-                return posts
-            })()
-        }).catch(jqXHR => {
-            // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
-            console.log(jqXHR)
-            toast(`${account.pref.domain}での投稿の検索でエラーが発生しました.`, "error")
-            return Promise.reject(jqXHR)
-        })
     }
 }

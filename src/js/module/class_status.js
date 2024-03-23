@@ -10,7 +10,6 @@ class Status {
         // タイムラインから呼び出す場合はtimelineとaccountが渡ってくる
         // 個別の投稿をAPIから呼び出した場合はtimelineがnullで渡ってくる(accountは呼び出し元アカウント)
         this.from_timeline = timeline
-        this.detail_flg = !timeline
         this.user_profile_flg = timeline?.parent_column == null
         this.from_account = account
         this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
@@ -20,15 +19,17 @@ class Status {
 
         if (timeline?.__extended_timeline == 'profile_post') // プロフィールのユーザー投稿の場合
             this.profile_post_flg = true
+        else if (timeline?.__extended_timeline == 'detail_post') // 詳細表示の場合
+            this.detail_flg = true
 
         // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
-        //if (this.detail_flg) console.log(json)
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
+                this.allow_context = !(this.type == 'notification' && json.type == "follow")
                 original_date = json.created_at
                 this.reblog = json.reblog ? true : false // ブーストフラグ
                 this.reblog_by = this.reblog ? json.account.acct : null // ブースト元ユーザー
@@ -60,6 +61,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.allow_reblog = this.visibility == 'public' || this.visibility == 'unlisted'
                 this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
                 if (this.notif_type && this.notif_type != 'follow') { // 本文(通知の場合はstatusから)
@@ -87,6 +89,7 @@ class Status {
                 this.sensitive = data.sensitive // 閲覧注意設定
                 this.medias = []
                 data.media_attachments?.forEach(media => this.medias.push({
+                    id: media.id,
                     type: media.type,
                     url: media.url,
                     thumbnail: media.preview_url,
@@ -108,6 +111,7 @@ class Status {
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
+                this.allow_context = !(this.type == 'notification' && json.type == "follow")
                 if (this.notif_type == 'achievementEarned') return // TODO: 実績は一旦除外
 
                 original_date = json.createdAt
@@ -149,6 +153,7 @@ class Status {
                 }
                 // 投稿コンテンツに関するデータ
                 this.visibility = data.visibility
+                this.allow_reblog = this.visibility == 'public' || this.visibility == 'home'
                 this.local_only = data.localOnly
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
@@ -173,16 +178,7 @@ class Status {
                     emojis: data.note?.renote?.emojis ?? data.note?.emojis ?? data.emojis
                 })
                 // 引用ノートがある場合は引用先を設定
-                if (this.quote_flg) this.quote = {
-                    username: data.renote.user.name,
-                    user_id: data.renote.user.username,
-                    content: data.renote.text,
-                    emojis: new Emojis({
-                        host: host,
-                        platform: 'Misskey',
-                        emojis: data.renote.emojis
-                    })
-                }
+                if (this.quote_flg) this.quote = new Status(data.renote, timeline, account)
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
@@ -198,6 +194,7 @@ class Status {
                 this.sensitive = (data.files?.filter(f => f.isSensitive)?.length ?? 0) > 0 // 閲覧注意設定
                 this.medias = []
                 data.files?.forEach(media => this.medias.push({
+                    id: media.id,
                     type: media.type.substring(0, media.type.indexOf("/")),
                     url: media.url,
                     thumbnail: media.thumbnailUrl,
@@ -218,13 +215,16 @@ class Status {
                         url: data.reactionEmojis ? data.reactionEmojis[key.substring(1, key.length - 1)] : null
                     }))
                     this.reactions = reactions
+                    this.count_fav = reactions.reduce((sum, react) => sum + Number(react.count), 0)
                 }
                 break
             default:
                 break
         }
+
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
+        this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
     }
 
@@ -241,16 +241,9 @@ class Status {
     static TEMPORARY_CONTEXT_STATUS = null
     static TEMPORARY_ACTION_STATUS = null
 
-    // 日付フォーマッターはstaticプロパティにする
+    // スタティックタイムライン情報を初期化
     static {
-        Status.DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-            year:   'numeric',
-            month:  '2-digit',
-            day:    '2-digit',
-            hour:   '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        })
+        Status.DETAIL_TIMELINE = { "__extended_timeline": "detail_post" }
     }
 
     // Getter: 取得元アカウントのアカウントカラー
@@ -269,6 +262,12 @@ class Status {
             .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
             .replace(new RegExp('>', 'g'), '&gt;')
     }
+    // Getter: 本文の文章の部分の文字数を抜き出す
+    get content_length() {
+        return this.content_text
+            .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '$$')
+            .replace(new RegExp('https?://[^ 　\n]+', 'g'), '$$').length
+    }
 
     /**
      * #StaticMethod
@@ -286,7 +285,7 @@ class Status {
                 poll.options.forEach(elm => poll_options.push({
                     text: elm.title,
                     count: elm.votes_count,
-                    rate: total_vote > 0 ? Math.round((elm.votes_count / total_vote) * 1000) / 10 : 0
+                    rate: total_vote > 0 ? floor((elm.votes_count / total_vote) * 100, 1) : 0
                 }))
                 break
             case 'Misskey': // Misskey
@@ -294,7 +293,7 @@ class Status {
                 poll.choices.forEach(elm => poll_options.push({
                     text: elm.text,
                     count: elm.votes,
-                    rate: total_vote > 0 ? Math.round((elm.votes / total_vote) * 1000) / 10 : 0
+                    rate: total_vote > 0 ? floor((elm.votes / total_vote) * 100, 1) : 0
                 }))
                 break
             default:
@@ -325,9 +324,7 @@ class Status {
             toast("詳細表示のできない投稿です.", "error")
             return
         }
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("投稿の取得中です...", "progress", toast_uuid)
+        const notification = Notification.progress("投稿の取得中です...")
         // URLパターンからプラットフォームを判定
         const spl_url = url.split('/')
         let platform = null
@@ -344,35 +341,45 @@ class Status {
             id = spl_url[spl_url.length - 1]
             domain = spl_url[spl_url.length - 3]
         }
-        let request_promise = null
-        switch (platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "GET",
-                    url: `https://${domain}/api/v1/statuses/${id}`,
-                    dataType: "json",
-                })
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "POST",
-                    url: `https://${domain}/api/notes/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "noteId": id })
-                })
-                break
-            default:
-                toast("詳細表示のできない投稿です.", "error", toast_uuid)
-                return
-        }
-        return request_promise.then(data => {
-            toast(null, "hide", toast_uuid)
-            return new Status(data, null, { // accountには最低限の情報だけ入れる
+
+        let response = null
+        try { // リモートの投稿を直接取得
+            const authed_account = Account.getByDomain(domain)
+            switch (platform) {
+                case 'Mastodon': // Mastodon
+                    let header = {}
+                    if (authed_account) header = { "Authorization": `Bearer ${authed_account.pref.access_token}` }
+                    response = await $.ajax({
+                        type: "GET",
+                        url: `https://${domain}/api/v1/statuses/${id}`,
+                        dataType: "json",
+                        headers: header
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    let query_param = { "noteId": id }
+                    if (authed_account) query_param.i = authed_account.pref.access_token
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(query_param)
+                    })
+                    break
+                default:
+                    notification.error("詳細表示のできない投稿です.")
+                    return
+            }
+            notification.done()
+            return new Status(response, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                 "platform": platform,
                 "pref": { "domain": domain }
             })
-        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        } catch (err) {
+            console.log(err)
+            notification.error("投稿の取得に失敗しました.")
+        }
     }
 
     /**
@@ -382,34 +389,37 @@ class Status {
      * @param arg パラメータオブジェクト
      */
     static async getTreePost(arg) {
-        let request_promise = null
-        switch (arg.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "GET",
-                    url: `https://${arg.domain}/api/v1/statuses/${arg.id}`,
-                    dataType: "json",
-                })
-                break
-            case 'Misskey': // Misskey
-                request_promise = $.ajax({ // リモートの投稿を直接取得
-                    type: "POST",
-                    url: `https://${arg.domain}/api/notes/show`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "noteId": arg.id })
-                })
-                break
-            default:
-                toast("詳細表示のできない投稿です.", "error", toast_uuid)
-                return
-        }
-        return request_promise.then(data => {
-            return new Status(data, null, { // accountには最低限の情報だけ入れる
+        let response = null
+        try { // リモートの投稿を直接取得
+            switch (arg.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // リモートの投稿を直接取得
+                        type: "GET",
+                        url: `https://${arg.domain}/api/v1/statuses/${arg.id}`,
+                        dataType: "json",
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({ // リモートの投稿を直接取得
+                        type: "POST",
+                        url: `https://${arg.domain}/api/notes/show`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "noteId": arg.id })
+                    })
+                    break
+                default:
+                    Notification.error("詳細表示のできない投稿です.")
+                    return
+            }
+            return new Status(response, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                 "platform": arg.platform,
                 "pref": { "domain": arg.domain }
             })
-        }).catch(jqXHR => toast("投稿の取得に失敗しました.", "error", toast_uuid))
+        } catch (err) {
+            console.log(err)
+            Notification.error("投稿の取得に失敗しました.")
+        }
     }
 
     /**
@@ -419,80 +429,84 @@ class Status {
      */
     async getThread() {
         const domain = this.from_account.pref.domain
-        let main_promise = null
         const parent_promises = []
         const child_promises = []
-        switch (this.from_account.platform) {
-            case 'Mastodon': // Mastodon
-                main_promise = $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
-                    type: "GET",
-                    url: `https://${domain}/api/v1/statuses/${this.id}/context`,
-                    dataType: "json"
-                }).then(data => {
+        let response = null
+        try {
+            switch (this.from_account.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // ツリー元ツートとチェインしているツートを同時取得
+                        type: "GET",
+                        url: `https://${domain}/api/v1/statuses/${this.id}/context`,
+                        dataType: "json"
+                    })
                     // ツリー元のツートを取得(逆順)
-                    data.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
+                    response.ancestors.reverse().forEach(ids => parent_promises.push(Status.getTreePost({
                         id: ids.id,
                         platform: this.from_account.platform,
                         domain: domain
                     })))
                     // チェインしているツートを取得
-                    data.descendants.forEach(ids => child_promises.push(Status.getTreePost({
+                    response.descendants.forEach(ids => child_promises.push(Status.getTreePost({
                         id: ids.id,
                         platform: this.from_account.platform,
                         domain: domain
                     })))
-                    return 'resolve'
-                })
-                break
-            case 'Misskey': // Misskey
-                const recurseChain = async (post) => { // 再帰参照できるチェインノート取得関数
-                    const recurse_promise = []
-                    return $.ajax({ // チェインしているノートを取得
-                        type: "POST",
-                        url: `https://${domain}/api/notes/children`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ "noteId": post.id })
-                    }).then(data => {
-                        if (data.length == 0) return 'resolve' // 終端まで取得したら終了
-                        data.forEach(post => {
-                            const ins_post = new Status(post, null, { // accountには最低限の情報だけ入れる
-                                "platform": 'Misskey',
-                                "pref": { "domain": domain }
+                    break
+                case 'Misskey': // Misskey
+                    const recurseChain = async (post) => { // 再帰参照できるチェインノート取得関数
+                        const recurse_promise = []
+                        return $.ajax({ // チェインしているノートを取得
+                            type: "POST",
+                            url: `https://${domain}/api/notes/children`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ "noteId": post.id })
+                        }).then(data => {
+                            if (data.length == 0) return 'resolve' // 終端まで取得したら終了
+                            data.forEach(post => {
+                                const ins_post = new Status(post, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
+                                    "platform": 'Misskey',
+                                    "pref": { "domain": domain }
+                                })
+                                child_promises.push((async () => { return ins_post })())
+                                // 取得したノートを起点に再帰的に取得処理を呼ぶ
+                                recurse_promise.push(recurseChain(ins_post))
                             })
-                            child_promises.push((async () => { return ins_post })())
-                            // 取得したノートを起点に再帰的に取得処理を呼ぶ
-                            recurse_promise.push(recurseChain(ins_post))
+                            return Promise.all(recurse_promise)
                         })
-                        return Promise.all(recurse_promise)
-                    })
-                }
-                main_promise = Promise.all([
-                    $.ajax({ // ツリー元のノートを取得
-                        type: "POST",
-                        url: `https://${domain}/api/notes/conversation`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({ "noteId": this.id })
-                    }).then(data => {
-                        data.forEach(post => parent_promises.push((async () => {
-                            return new Status(post, null, { // accountには最低限の情報だけ入れる
-                                "platform": this.from_account.platform,
-                                "pref": { "domain": domain }
-                            })
-                        })()))
-                    }), recurseChain(this)]).then(datas => { return 'resolve' })
-                break
-            default:
-                break
+                    }
+                    await Promise.all([
+                        $.ajax({ // ツリー元のノートを取得
+                            type: "POST",
+                            url: `https://${domain}/api/notes/conversation`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({ "noteId": this.id })
+                        }).then(data => {
+                            data.forEach(post => parent_promises.push((async () => {
+                                return new Status(post, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
+                                    "platform": this.from_account.platform,
+                                    "pref": { "domain": domain }
+                                })
+                            })()))
+                        }), recurseChain(this)])
+                    break
+                default:
+                    break
+            }
+            // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
+            await Promise.allSettled([ // 2つのPromiseを同時実行しながら終了までresolveしない
+                Promise.all(parent_promises).then(parents => parents
+                    .forEach(post => $(`#post_window_${this.__detail_uuid}>.timeline>ul`).prepend(post.element))),
+                Promise.all(child_promises).then(children => children
+                    .forEach(post => $(`#post_window_${this.__detail_uuid}>.timeline>ul`).append(post.element)))
+            ])
+            return Promise.resolve('finish.')
+        } catch (err) {
+            console.log(err)
+            Notification.error("スレッドの取得に失敗しました.")
         }
-        // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
-        main_promise.then(() => {
-            Promise.all(parent_promises).then(parents => parents
-                .forEach(post => $("#pop_extend_column .timeline>ul").prepend(post.element)))
-            Promise.all(child_promises).then(children => children
-                .forEach(post => $("#pop_extend_column .timeline>ul").append(post.element)))
-        }).catch(jqXHR => toast("スレッドの取得に失敗しました.", "error"))
     }
 
     /**
@@ -507,9 +521,14 @@ class Status {
         })
     }
 
-    // Getter: タイムラインに表示する投稿HTMLを生成して返却(オプションで変化)
-    get timeline_element() {
-        switch (this.from_group.pref.tl_layout) {
+    /**
+     * #Method
+     * この投稿を対象のタイムラインレイアウトを使って表示(DOMを返却)する.
+     * 
+     * @param pref 適用するタイムラインレイアウト
+     */
+    getLayoutElement(pref) {
+        switch (pref) {
             case 'chat': // チャット
                 if (this.type != 'notification' || this.notif_type == 'poll'
                     || this.notif_type == 'mention' || this.notif_type == 'reply' || this.notif_type == 'quote')
@@ -524,10 +543,17 @@ class Status {
                 else return this.list_elm
             case 'gallery': // ギャラリー
                 return this.gallery_elm
+            case 'anonymous': // アノニマス
+                return this.anonymous_elm
+            case 'multi': // マルチレイアウト
+                return this.mix_element
             default: // デフォルト(ノーマル)
                 return this.element
         }
     }
+
+    // Getter: タイムラインに表示する投稿HTMLを生成して返却(オプションで変化)
+    get timeline_element() { return this.getLayoutElement(this.from_group.pref.tl_layout) }
 
     // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
@@ -620,23 +646,26 @@ class Status {
                 </div>
             `
         }
-        html += '<div class="content">'
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += `<div class="main_content">
-                    ${target_emojis.replace(this.content)}
-                </div>
-            </div>
-        `
+        { // 投稿本文領域
+            html += '<div class="content">'
+            const over_content = !this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default
+            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
+            if (this.cw_text) html /* CWテキスト */ += `
+                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
+            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+            html += '</div>'
+        }
         if (this.poll_options) { // 投票
             let options = ''
             this.poll_options.forEach(elm => options += `
                 <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
             `)
             const label_limit = this.poll_unlimited // 投票期限テキスト
-                ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
             html /* 投票ブロック */ += `
                 <div class="post_poll">
                     <div class="options">${options}</div>
@@ -645,15 +674,22 @@ class Status {
             `
         }
         if (this.platform == 'Misskey' && this.quote_flg) {
+            const content = !this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default ? `
+                <div class="hidden_content">
+                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default)}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
                     <div class="quote_userarea">
-                        <span>${this.quote.username}</span>
-                        <span>@${this.quote.user_id}</span>
+                        <span>${this.quote.user.username}</span>
+                        <span>@${this.quote.user.id}</span>
                     </div>
-                    <div>${target_emojis.replace(this.quote.content)}</div>
+                    ${content}
                 </div>
             `
         }
@@ -667,20 +703,19 @@ class Status {
             html += `<div class="reaction_emoji">${alias}</div>`
         }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+            const img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
             html += '<div class="media">'
             if (this.sensitive) html /* 閲覧注意 */ += `
                 <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
                 <div class="media_content">
-            `; else if (this.medias.length > 4) /* 添付画像5枚以上 */ html += `
-                <a class="expand_header label_cw">添付画像が5枚以上あります</a>
-                <div class="media_content cw_content">
             `; else html += '<div class="media_content">'
             // アスペクト比をリンクオプションとして設定
             this.medias.forEach(media => {
                 if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
                     <audio controls src="${media.url}" preload="none"></audio>
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                        class="__on_media_expand ${img_class}">
                         <img src="${media.thumbnail}" class="media_preview"/>
                     </a>
                 `
@@ -745,7 +780,7 @@ class Status {
         }
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -772,6 +807,10 @@ class Status {
         // カードがある場合はカードに背景を設定
         if (this.detail_flg && this.card) jqelm.find('.detail_info>.card_link')
             .css("background-image", `url("${this.card.image}")`)
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
+        // フォロー通知の場合はコンテキストメニューを禁止する
+        if (!this.allow_context) jqelm.closest('li').addClass('context_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -779,10 +818,14 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
-            jqelm.find('.content>.main_content').hide()  // CWを非表示にする
-        if (this.sensitive && !this.from_timeline?.pref?.expand_media)
-            jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        if (this.profile_post_flg || this.detail_flg) // プロフィールと詳細表示は投稿時刻で色分けする
+            jqelm.find('.post_footer>.created_at').addClass(`from_address ${this.relative_time.color_class}`)
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+            jqelm.find('.content>.expand_header.label_cw+div').hide()
+        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.media>.media_content').hide()
 
         return jqelm
     }
@@ -802,7 +845,7 @@ class Status {
                         @${this.user.id}
                     </a>
                 </span>
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
             </div>
             <div class="content">
         `
@@ -825,12 +868,17 @@ class Status {
                     break
             }
         }
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `
-        html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+        { // 投稿本文領域
+            const over_content = !this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat
+            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
+            if (this.cw_text) html /* CWテキスト */ += `
+                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
+            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+        }
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
             // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
@@ -870,33 +918,39 @@ class Status {
             `
         }
         if (this.platform == 'Misskey' && this.quote_flg) {
+            const content = !this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat ? `
+                <div class="hidden_content">
+                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat)}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
                 <div class="post_quote">
-                    <div>
-                        <span>${this.quote.username}</span>
-                        <span>@${this.quote.user_id}</span>
+                    <div class="quote_userarea">
+                        <span>${this.quote.user.username}</span>
+                        <span>@${this.quote.user.id}</span>
                     </div>
-                    <div>${target_emojis.replace(this.quote.content)}</div>
+                    ${content}
                 </div>
             `
         }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+            const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
             html += '<div class="media">'
             if (this.sensitive) html /* 閲覧注意 */ += `
                 <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
                 <div class="media_content">
-            `; else if (this.medias.length > 4) /* 添付画像5枚以上 */ html += `
-                <a class="expand_header label_cw">添付画像が5枚以上あります</a>
-                <div class="media_content cw_content">
             `; else html += '<div class="media_content">'
             // アスペクト比をリンクオプションとして設定
             this.medias.forEach(media => {
                 if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
                     <audio controls src="${media.url}" preload="none"></audio>
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                        class="__on_media_expand ${img_class}">
                         <img src="${media.thumbnail}" class="media_preview"/>
                     </a>
                 `
@@ -918,14 +972,18 @@ class Status {
         // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && !this.detail_flg && (this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
-            jqelm.find('.content>.main_content').hide()  // CWを非表示にする
-        if (this.sensitive && !this.from_timeline?.pref?.expand_media)
-            jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        // 時間で色分け
+        jqelm.find('.content').css('border-left-color', this.relative_time.color)
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+            jqelm.find('.content>.expand_header.label_cw+div').hide()
+        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.media>.media_content').hide()
 
         return jqelm
     }
@@ -975,22 +1033,28 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
+        // フォロー通知の場合はコンテキストメニューを禁止する
+        if (!this.allow_context) jqelm.closest('li').addClass('context_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (notif_flg) {
             jqelm.closest('li').addClass('short_notification')
             switch (this.notif_type) {
                 case 'favourite': // お気に入り
                     jqelm.closest('li').addClass('favorited_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_fav.png')
+                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_favorite.png')
                     break
                 case 'reblog': // ブースト
                 case 'renote': // リノート
                     jqelm.closest('li').addClass('rebloged_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_rblg.png')
+                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_reblog.png')
                     break
                 case 'reaction': // 絵文字リアクション
                     jqelm.closest('li').addClass('favorited_post')
@@ -1052,20 +1116,21 @@ class Status {
         `
         // 本文よりも先にメディアを表示
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+            let img_class = 'img_grid_single'
+            if (this.medias.length > 4) img_class = 'img_grid_16'
+            else if (this.medias.length > 1) img_class = 'img_grid_4'
             html += '<div class="media">'
             if (this.sensitive) html /* 閲覧注意 */ += `
                 <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
                 <div class="media_content">
-            `; else if (this.medias.length > 4) /* 添付画像5枚以上 */ html += `
-                <a class="expand_header label_cw">添付画像が5枚以上あります</a>
-                <div class="media_content cw_content">
             `; else html += '<div class="media_content">'
             // アスペクト比をリンクオプションとして設定
             this.medias.forEach(media => {
                 if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
                     <audio controls src="${media.url}" preload="none"></audio>
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                        class="__on_media_expand ${img_class}">
                         <img src="${media.thumbnail}" class="media_preview"/>
                     </a>
                 `
@@ -1084,14 +1149,14 @@ class Status {
             <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
         `; html += '<div class="main_content">'
 
-        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content)
+        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content_text)
         html += `
                 </div>
             </div>
         `
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${Status.DATE_FORMATTER.format(this.sort_date)}</a>
+                <a class="created_at __on_datelink">${this.relative_time.both}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -1112,11 +1177,17 @@ class Status {
         jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
-        // BTRNにはクラスをつける
-        if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
+        if (this.reblog) { // BTRNにはクラスをつけて背景をセット
+            jqelm.closest('li').addClass('rebloged_post')
+            jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+        }
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
             jqelm.find('.content>.main_content').hide()  // CWを非表示にする
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
@@ -1142,6 +1213,103 @@ class Status {
         return $($.parseHTML(html))
     }
 
+    // Getter: アノニマスタイプのHTMLを生成して返却
+    get anonymous_elm() {
+        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
+
+        let target_emojis = null
+        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="anonymous_layout">`
+
+        html += '<div class="content">'
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
+        if (this.cw_text) html /* CWテキスト */ += `
+            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+        `; html += `<div class="main_content">
+                    ${target_emojis.replace(this.content)}
+                </div>
+            </div>
+        `
+        if (this.poll_options) { // 投票
+            let options = ''
+            this.poll_options.forEach(elm => options += `
+                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
+            `)
+            const label_limit = this.poll_unlimited // 投票期限テキスト
+                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+            html /* 投票ブロック */ += `
+                <div class="post_poll">
+                    <div class="options">${options}</div>
+                    <div class="poll_info">${label_limit}</div>
+                </div>
+            `
+        }
+        if (this.platform == 'Misskey' && this.quote_flg) {
+            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
+            html /* 引用ノート(Misskeyのみ) */ += `
+                <div class="post_quote">
+                    <div>${target_emojis.replace(this.quote.content)}</div>
+                </div>
+            `
+        }
+
+        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+            const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
+            html += '<div class="media">'
+            if (this.sensitive) html /* 閲覧注意 */ += `
+                <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
+                <div class="media_content">
+            `; else html += '<div class="media_content">'
+            // アスペクト比をリンクオプションとして設定
+            this.medias.forEach(media => {
+                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
+                    <audio controls src="${media.url}" preload="none"></audio>
+                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                        class="__on_media_expand ${img_class}">
+                        <img src="${media.thumbnail}" class="media_preview"/>
+                    </a>
+                `
+            })
+            html += `
+                    </div>
+                </div>
+            `
+        }
+        html += `
+                </div>
+            </li>
+        `
+
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(html))
+        // フォロ限の場合はブースト/リノート禁止クラスを付与
+        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
+        // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
+        if (this.poll_options && (this.detail_flg || this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
+            jqelm.find('.post_poll').after(this.poll_graph).remove()
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+            jqelm.find('.content>.main_content').hide()
+        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.media>.media_content').hide()
+
+        return jqelm
+    }
+
+    // Getter: マルチレイアウトのHTML返却
+    get mix_element() {
+        // メディア(無視する場合は後続の設定を使う)
+        if (this.medias.length > 0 && this.from_group.pref.multi_layout_option.media != 'ignore')
+            return this.getLayoutElement(this.from_group.pref.multi_layout_option.media)
+        // ブースト/リノート(メディアの次に優先)
+        else if (this.reblog) return this.getLayoutElement(this.from_group.pref.multi_layout_option.reblog)
+        else if (this.type == 'notification') // 通知
+            return this.getLayoutElement(this.from_group.pref.multi_layout_option.notification)
+        // 通常の投稿
+        else return this.getLayoutElement(this.from_group.pref.multi_layout_option.default)
+    }
+
     /**
      * #Method
      * この投稿のアンケートに対して投票する
@@ -1149,41 +1317,37 @@ class Status {
      * @param target_elm 票を入れるボタンのjQueryオブジェクト
      */
     async vote(target_elm) {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast(`${target_elm.text()} に投票しています...`, "progress", toast_uuid)
-
+        const notification = Notification.progress(`${target_elm.text()} に投票しています...`)
         const index = target_elm.index()
-        let request_promise = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
-                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
-                    data: { "choices": [index] }
-                })
-                break
-            case 'Misskey': // Misskey
-                const request_param = {
-                    "i": this.from_account.pref.access_token,
-                    "noteId": this.status_id,
-                    "choice": index
-                }
-                request_promise = $.ajax({
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(request_param)
-                })
-                break
-            default:
-                break
-        }
+        let response = null
         try { // 投票リクエストを送信
-            let response = await request_promise
-            if (!response) // Misskeyの場合投票結果がresponseに返ってこないので投稿データから取得
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
+                        headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
+                        data: { "choices": [index] }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    const request_param = {
+                        "i": this.from_account.pref.access_token,
+                        "noteId": this.status_id,
+                        "choice": index
+                    }
+                    response = await $.ajax({
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify(request_param)
+                    })
+                    break
+                default:
+                    break
+            }
+            if (!response) { // Misskeyの場合投票結果がresponseに返ってこないので投稿データから取得
                 response = await $.ajax({
                     type: "POST",
                     url: `https://${this.from_account.pref.domain}/api/notes/show`,
@@ -1193,8 +1357,10 @@ class Status {
                         "i": this.from_account.pref.access_token,
                         "noteId": this.id
                     })
-                }).then(data => { return data.poll })
-            toast(`${target_elm.text()} に投票しました. 中間結果を表示します.`, "done", toast_uuid)
+                })
+                response = response.poll
+            }
+            notification.done(`${target_elm.text()} に投票しました. 中間結果を表示します.`)
 
             // 最新の投票データをステータスに書き込む
             this.poll_options = Status.asArrayPoll(response, this.platform)
@@ -1206,11 +1372,11 @@ class Status {
             if (err.status == 422 // Mastodonの場合、期限切れは422が返ってくる
                || err.responseJSON.error?.code == 'ALREADY_EXPIRED' // Misskeyの場合
                 ) { // 投票期限の切れたアンケートに投票した場合
-                toast("既に投票を終了しているアンケートです.", "error", toast_uuid)
+                notification.error("既に投票を終了しているアンケートです.")
                 return
             }
             // それ以外は失敗メッセージを出す
-            toast("投票に失敗しました.", "error", toast_uuid)
+            notification.error("投票に失敗しました.")
             console.log(err)
         }
     }
@@ -1229,7 +1395,7 @@ class Status {
             `
         })
         const label_limit = this.poll_unlimited // 投票期限テキスト
-            ? '無期限' : `${Status.DATE_FORMATTER.format(this.poll_expired_time)} まで`
+            ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
         html += `
             <div class="poll_footer">
                 <span>${total_vote} 票</span>
@@ -1249,42 +1415,135 @@ class Status {
     /**
      * #Method
      * この投稿をサーバーから削除する
-     * 削除後にこの投稿をパラメータとしてコールバック関数を実行
-     * 
-     * @param callback 削除処理実行後に実行するコールバック関数
      */
-    delete(callback) {
-        // 先にtoast表示
-        const toast_uuid = crypto.randomUUID()
-        toast("投稿を削除しています...", "progress", toast_uuid)
-
-        let request_promise = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
-                    type: "DELETE",
-                    url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
-                    headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
-                })
-                break
-            case 'Misskey': // Misskey
-                const request_param = {
-                    "i": this.from_account.pref.access_token,
-                    "noteId": this.status_id
-                }
-                request_promise = $.ajax({ // このステータスIDを使って削除リクエストを送信
-                    type: "POST",
-                    url: `https://${this.from_account.pref.domain}/api/notes/delete`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify(request_param)
-                })
-                break
-            default:
-                break
+    async delete() {
+        const notification = Notification.progress("投稿を削除しています...")
+        let response = null
+        try {
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信
+                        type: "DELETE",
+                        url: `https://${this.from_account.pref.domain}/api/v1/statuses/${this.status_id}`,
+                        headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` }
+                    })
+                    break
+                case 'Misskey': // Misskey
+                    response = await $.ajax({ // このステータスIDを使って削除リクエストを送信6
+                        type: "POST",
+                        url: `https://${this.from_account.pref.domain}/api/notes/delete`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({
+                            "i": this.from_account.pref.access_token,
+                            "noteId": this.status_id
+                        })
+                    })
+                    break
+                default:
+                    break
+            }
+            notification.done("投稿の削除が完了しました.")
+        } catch (err) {
+            console.log(err)
+            notification.error("投稿の削除に失敗しました.")
         }
-        request_promise.then(() => callback(this, toast_uuid))
-            .catch(jqXHR => toast("投稿の削除に失敗しました.", "error", toast_uuid))
+    }
+
+    /**
+     * #Method
+     * この投稿を編集モードで本文投稿フォームに展開する.
+     */
+    edit() {
+        // クリックイベントは先に実行
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+
+        // アカウントを編集対象に変更
+        Account.get(`@${this.user.full_address}`).setPostAccount()
+
+        // 投稿本文とCWテキストをフォームに展開
+        this.getRenderContent().then(text => $("#__txt_postarea").val(text))
+        if (this.cw_text) $("#__txt_content_warning").val(this.cw_text)
+
+        // メディアがある場合はアップ済みのメディアを初期添付
+        if (this.medias.length > 0) $('#header>#post_options .attached_media>ul.media_list').html(Media.getAttachElement(this))
+
+        $("#post_options ul.refernce_post").html(this.element)
+        $("#post_options #__hdn_edit_id").val(this.id)
+        enabledAdditionalAccount(false)
+
+        $("#__txt_postarea").focus()
+    }
+
+    /**
+     * #Method
+     * この投稿の本文のレンダリングされたテキストを取得する.
+     */
+    async getRenderContent() {
+        // 一度DOMにレンダリングする
+        $("#__hdn_text_render").html(this.content)
+        // 一度レンダリングされた内容でinnerTextを取得(ここはjQueryではできない)
+        const render_text = document.getElementById("__hdn_text_render").innerText
+        $("#__hdn_text_render").empty()
+        return render_text
+    }
+
+    /**
+     * #Method
+     * この投稿で対象の投稿エレメントを書き換える.
+     * 
+     * @param post 更新された後の投稿オブジェクト
+     * @param jqelm 修正対象の投稿jQueryオブジェクト
+     */
+    update(post, jqelm) {
+        // ギャラリーは非対応
+        if (jqelm.is('.gallery_timeline')) return
+
+        // 修正対象のコンテンツを内部的に書き換える
+        this.content = post.content
+        this.emojis = post.emojis
+        this.sensitive = post.sensitive
+        this.medias = post.medias
+
+        // メインコンテンツを書き換える
+        if (jqelm.is('.short_timeline') || jqelm.is('.media_timeline')) // リストとメディアは1行で書き換え
+            jqelm.find('.main_content').hide("fade", 1500,
+                () => jqelm.find('.main_content').html(this.emojis.replace(this.content_text)).show("fade", 1500))
+        else jqelm.find('.main_content').hide("fade", 1500,
+            () => jqelm.find('.main_content').html(this.emojis.replace(this.content)).show("fade", 1500))
+
+        if (this.medias.length > 0) { // メディアコンテンツを書き換える
+            if (jqelm.is('.short_timeline')) // リストレイアウトのときは最初の一枚だけ書き換え
+                jqelm.find('.list_media').hide("fade", 1500, () => jqelm.find('.list_media').html(`
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
+                        <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
+                    </a>
+                `).show("fade", 1500))
+            else { // それ以外は各レイアウトに合わせて書き換え
+                let img_class = 'img_grid_single'
+                if (jqelm.is('.media_timeline')) { // メディアタイムライン
+                    if (this.medias.length > 4) img_class = 'img_grid_16'
+                    else if (this.medias.length > 1) img_class = 'img_grid_4'
+                } else if (jqelm.is('.chat_timeline')) // チャットタイムライン
+                    img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
+                else img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
+                jqelm.find('.media_content').hide("fade", 1500, () => {
+                    let html = ''
+                    // アスペクト比をリンクオプションとして設定
+                    this.medias.forEach(media => {
+                        if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
+                            <audio controls src="${media.url}" preload="none"></audio>
+                        `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
+                            <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                                class="__on_media_expand ${img_class}">
+                                <img src="${media.thumbnail}" class="media_preview"/>
+                            </a>
+                        `
+                    })
+                    jqelm.find('.media_content').html(html).show("fade", 1500)
+                })
+            }
+        }
     }
 
     /**
@@ -1323,80 +1582,38 @@ class Status {
 
     /**
      * #Method
-     * この投稿に対する返信を投稿するための画面を表示
+     * この投稿に対する返信を投稿するための投稿オプションを設定
      */
     createReplyWindow() {
+        $("#header>#post_options").hide()
+        $("#__on_reset_option").click()
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         // 返信先のアカウントが返信元のアカウントと同じ場合は先頭のユーザーIDを表示しない
         const userid = `@${this.user.full_address}` != this.from_account.full_address ? `@${this.user.id} ` : ''
-        // リプライウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="reply_col">
-                <h2>From ${this.from_account.full_address}</h2>
-                <div class="reply_form">
-                    <input type="hidden" id="__hdn_reply_id" value="${this.id}"/>
-                    <input type="hidden" id="__hdn_reply_account" value="${this.from_account.full_address}"/>
-                    <input type="hidden" id="__hdn_reply_visibility" value="${this.visibility}"/>
-                    <textarea id="__txt_replyarea" class="__ignore_keyborad __emoji_suggest"
-                        placeholder="(Ctrl+Enterでも投稿できます)">${userid}</textarea>
-                    <button type="button" id="__on_reply_submit" class="close_button">投稿</button>
-                </div>
-                <div class="timeline">
-                    <ul></ul>
-                </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
-            </div>
-        `))
-        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
+
+        // 投稿IDを隠しフォームにセットして投稿オプションをセット
+        Account.get(this.from_account.full_address).setPostAccount()
+        $("#__hdn_reply_id").val(this.id)
+        $("#post_options ul.refernce_post").html(this.element)
+        enabledAdditionalAccount(false)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
-        const replyarea = $("#pop_extend_column #__txt_replyarea")
-        replyarea.focus()
-        replyarea.get(0).setSelectionRange(500, 500)
+        $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
     }
 
     /**
      * #Method
-     * この投稿を引用した投稿するための画面を表示
+     * この投稿を引用した投稿するための投稿オプションを設定
      */
     createQuoteWindow() {
-        // リプライウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="quote_col">
-                <h2>From ${this.from_account.full_address}</h2>
-                <div class="quote_form">
-                    <input type="hidden" id="__hdn_quote_id" value="${this.id}"/>
-                    <input type="hidden" id="__hdn_quote_account" value="${this.from_account.full_address}"/>
-                    <div class="visibility_icon">
-                        <a class="__lnk_visibility" title="公開">
-                            <img src="resources/ic_public.png" alt="公開" id="visibility_public" class="selected"/></a>
-                        <a class="__lnk_visibility" title="未収載/ホーム">
-                            <img src="resources/ic_unlisted.png" alt="未収載/ホーム" id="visibility_unlisted"/></a>
-                        <a class="__lnk_visibility" title="フォロワー限定">
-                            <img src="resources/ic_followers.png" alt="フォロワー限定" id="visibility_followers"/></a>
-                        <a class="__lnk_visibility" title="ダイレクトメッセージ">
-                            <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
-                    </div>
-                    <input type="text" id="__txt_quote_cw"
-                        class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
-                    <textarea id="__txt_quotearea" class="__ignore_keyborad __emoji_suggest"
-                        placeholder="(Ctrl+Enterでも投稿できます)"></textarea>
-                    <button type="button" id="__on_quote_submit" class="close_button">投稿</button>
-                </div>
-                <div class="timeline">
-                    <ul></ul>
-                </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
-            </div>
-        `))
-        // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
-        // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
-        const replyarea = $("#pop_extend_column #__txt_quotearea")
-        replyarea.focus()
+        // 投稿IDを隠しフォームにセットして投稿オプションをセット
+        $("#header>#post_options").hide()
+        $("#__on_reset_option").click()
+        Account.get(this.from_account.full_address).setPostAccount()
+        $("#__hdn_quote_id").val(this.id)
+        $("#post_options ul.refernce_post").html(this.element)
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        enabledAdditionalAccount(false)
+        $("#__txt_postarea").focus()
     }
 
     /**
@@ -1443,21 +1660,47 @@ class Status {
      * この投稿の詳細情報を表示する画面を表示
      */
     createDetailWindow() {
-        // 詳細表示のDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="post_detail_col">
-                <h2>From ${this.from_account.pref.domain}</h2>
-                <a href="${this.uri}" class="__lnk_external lnk_post_browser">ブラウザで表示</a>
+        // すでに開いているウィンドウの数を算出
+        const window_num = $("#pop_multi_window>.ex_window").length
+        // DOMの一意認識用のUUIDを生成
+        this.__detail_uuid = crypto.randomUUID()
+        $("#pop_multi_window").append(`
+            <div id="post_window_${this.__detail_uuid}" class="post_detail_window ex_window">
+                <h2><a href="${this.uri}" class="__lnk_external">${this.uri}</a></h2>
+                <div class="window_buttons">
+                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__detail_uuid}"/>
+                    <label for="__window_opacity_${this.__detail_uuid}" class="window_opacity_button" title="透過"><img
+                        src="resources/ic_alpha.png" alt="透過"/></label>
+                    <button type="button" class="window_close_button" title="閉じる"><img
+                        src="resources/ic_not.png" alt="閉じる"/></button>
+                </div>
                 <div class="timeline">
                     <ul class="__context_posts"></ul>
                 </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
-        `))
-        // Classを設定してDOMを拡張カラムにバインド
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        const parent_post = $(`#pop_extend_column .timeline>ul>li[id="${this.status_key}"]`)
+        `)
+        // プロフィール情報バインド処理を実行してレイアウトを設定
+        $(`#post_window_${this.__detail_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
+        $(`#post_window_${this.__detail_uuid}`).draggable({ handle: "h2" })
+        $(`#post_window_${this.__detail_uuid}>.window_buttons`).tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
+        $(`#post_window_${this.__detail_uuid}>.timeline>ul`).append(this.element)
+
+        // 一旦ウィンドウを表示して後続の処理を非同期で実行する
+        $(`#post_window_${this.__detail_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
+        const parent_post = $(`#post_window_${this.__detail_uuid}>.timeline>ul>li[id="${this.status_key}"]`)
 
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.from_account.pref.domain
@@ -1466,10 +1709,10 @@ class Status {
             Emojis.replaceDomAsync(parent_post.find(".main_content"), host) // 本文
             Emojis.replaceDomAsync(parent_post.find(".__yet_replace_reaction"), host) // 未置換のリアクション
         }
-        // 一度表示してからチェインしている投稿を取得する(非同期)
-        this.getThread()
-        // 詳細表示のターゲットになっている投稿の直上に簡易プロフィールを設置(非同期)
-        this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
+        // 親にチェインしている投稿と簡易プロフィールを取得(非同期) 終わったら対象の投稿へスクロール
+        Promise.allSettled([this.getThread(),
+            this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
+        ]).then(result => parent_post.get(0).scrollIntoView({ block: 'center' }))
     }
 
     /**
@@ -1487,20 +1730,20 @@ class Status {
 
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
-        $("#pop_expand_post>ul").html(this.element).css( // 横幅指定がない場合は320px固定
-            'width', `${this.from_column?.pref.col_width ?? 320}px`)
+        $("#pop_expand_post>ul").html(this.element)
+            .css('width', `${target.closest('ul').outerWidth()}px`)
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
             $("#pop_expand_post").css({
                 'top': 'auto',
                 'bottom': Math.round(window.innerHeight - pos.top - 48),
-                'left': pos.left
+                'left': pos.left - 12
             })
         else $("#pop_expand_post").css({
             'bottom': 'auto',
             'top': pos.top - 24,
-            'left': pos.left
+            'left': pos.left - 12
         })
         $("#pop_expand_post").show("fade", 80)
     }
@@ -1564,7 +1807,8 @@ class Status {
                 break;
         }
 
-        // 通知を返却
+        // 画面側にも通知を出して通知オブジェクトを返却
+        Notification.info(title)
         return {
             title: title,
             // HTMLとして解析して中身の文章だけを取り出す

@@ -17,6 +17,71 @@
     }
 }
 
+/*=== Popup Window Area ==========================================================================*/
+
+#pop {
+    /*=== Extend Column (Help Window) ============================================================*/
+    > #pop_extend_column>.pref_col {
+        width: 480px;
+        > h2 {
+            border-top-left-radius: 18px;
+            border-bottom-left-radius: 18px;
+            background-color: #738c83;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-size: 20px;
+            color: #ffffff;
+            margin: 0px;
+            padding: 12px 24px;
+        }
+        > .pref_content {
+            overflow-y: auto;
+            background-color: rgba(34,34,34,0.5);
+            padding: 0px 8px 12px;
+            font-size: 13px;
+            height: calc(100vh - 240px);
+
+            &::-webkit-scrollbar { width: 8px; }
+            & h5 {
+                margin: 12px 0px 8px -24px;
+                padding: 0px 12px;
+                font-size: 14px;
+                font-weight: bold;
+                border-bottom: solid 1px #aaaaaa;
+            }
+            & dt {
+                padding: 0px 12px;
+                margin-bottom: 12px;
+                font-size: 16px;
+                font-weight: bold;
+                border-left: solid 12px #aaaaaa;
+                border-bottom: solid 1px #aaaaaa;
+            }
+            & dd { margin-bottom: 24px; }
+            & th, & td {
+                margin: 1px;
+                border-radius: 6px;
+                padding: 4px 12px;
+                background-color: rgba(255,255,255,0.08);
+            }
+            & img.tooltip_help {
+                display: inline-block;
+                width: 18px;
+                height: 18px;
+                vertical-align: text-bottom;
+                cursor: help;
+            }
+            .selector_list {
+                margin: 0px;
+                padding: 0px;
+                > li {
+                    margin: 2px 0px;
+                    list-style-type: none;
+                }
+            }
+        }
+    }
+}
+
 /*=== Column Layout ==============================================================================*/
 
 #columns {
@@ -57,6 +122,7 @@
             > .col_tl_groups {
                 height: calc(100vh - 284px);
                 > .tl_group {
+                    position: relative;
                     > .group_head {
                         background-color: #505050;
                         background-image: url("../resources/ic_sort_move.png");
@@ -102,6 +168,29 @@
                         text-align: center;
 
                         > select.__cmb_tl_layout { width: 96px; }
+                        > button.__open_multi_tl_layout>img {
+                            width: 18px;
+                            height: 18px;
+                        }
+                    }
+                    > table.tl_layout_options {
+                        display: none;
+                        background-color: rgba(34,34,34,0.92);
+                        border-radius: 6px;
+                        z-index: 1;
+                        position: absolute;
+                        top: 60px;
+                        left: 0px;
+                        width: 100%;
+                        font-size: 11px;
+                        & td { vertical-align: top; }
+                        & label {
+                            display: block;
+                            margin: 2px 0px;
+                            padding: 2px 4px;
+                            font-size: 11px;
+                            text-align: center;
+                        }
                     }
                     > ul {
                         margin: 0px;
@@ -142,7 +231,7 @@
                                 margin: 6px 12px;
                                 > div { margin: 12px 0px; }
                                 .lbl_external_instance {
-                                    >.instance_info {
+                                    > .instance_info {
                                         background-color: rgba(255,255,255,0.08);
                                         background-size: auto 64px;
                                         background-position: center center;

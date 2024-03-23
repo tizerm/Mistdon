@@ -189,27 +189,6 @@ class Column {
 
     /**
      * #Method
-     * タイムライン流速計測タイマーをセットする
-     */
-    async initSpeedAnalyzer() {
-        if (!this.timer_id) clearInterval(this.timer_id) // 実行中の場合は一旦削除
-        this.timer_id = setInterval(() => (async () => {
-            const ppm = this.counter
-            this.counter = 0 // 先にカウンターを0にリセット
-            this.ppm_que.push(ppm)
-            if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
-            // pph(post per hour)を計算
-            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
-            const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
-
-            const target = $(`#${this.id}`)
-            target.find(".col_head h6").html(insert_text)
-            target.prev().find("h2 .speed").html(insert_text)
-        })(), 60000) // 1分おきに実行
-    }
-
-    /**
-     * #Method
      * このカラムにカーソルを設定
      */
     setCursor() {

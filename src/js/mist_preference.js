@@ -50,6 +50,9 @@
     // グループカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_color",
         e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`));
+    // マルチタイムラインレイアウト表示
+    $(document).on("click", ".__open_multi_tl_layout",
+        e => $(e.target).closest(".tl_group").find(".tl_layout_options").toggle("slide", { direction: "up" }, 120));
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`));
@@ -68,4 +71,10 @@
     $("#on_save_pref").on("click", e => ColumnPref.save());
     // 戻るボタンイベント
     $("#on_close").on("click", e => window.open("index.html", "_self"));
+    // 全体設定ボタンイベント
+    $("#on_general_pref").on("click", e => Preference.openGeneralPrefConfig());
+    // 全体設定-保存して閉じるボタンイベント
+    $(document).on("click", "#__on_pref_save", e => Preference.saveGeneralPreference());
+    // 全体設定-保存せずに閉じるボタンイベント
+    $(document).on("click", "#__on_pref_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
 });
