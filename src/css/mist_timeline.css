@@ -201,7 +201,8 @@
 }
 
 #columns>table,
-#pop_ex_timeline>.account_timeline>table {
+.account_timeline>table,
+.instance_window>table {
     width: 100%;
     table-layout: fixed;
 }
@@ -1160,8 +1161,6 @@
 /*=== Instance Info Layout =======================================================================*/
 
 .column_instance_info {
-    display: none;
-    width: 360px;
     position: relative;
     > .instance_header {
         height: 312px;
@@ -1225,7 +1224,7 @@
 
     /*=== Instance Description Layout (Invoke default layout) ====================================*/
     > .instance_detail {
-        height: calc(100vh - 646px);
+        height: calc(100% - 548px);
         & h1, & h2, & h3, & h4, & h5, & h6 {
             border-radius: 0px !important;
             border-left: solid 12px #aaaaaa !important;

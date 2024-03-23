@@ -74,6 +74,20 @@ $(() => (async () => {
         stop: (ext, ui) => Preference.storeTempWindowSize(ui),
         handles: "all"
     })
+    $("#pop_window_timeline>.window_buttons").tooltip({
+        position: {
+            my: "center top",
+            at: "center bottom"
+        },
+        show: {
+            effect: "slideDown",
+            duration: 80
+        },
+        hide: {
+            effect: "slideUp",
+            duration: 80
+        }
+    })
     // 一時タイムラインウィンドウの保存をするイベントを登録
     Preference.setTempWindow()
     window.addEventListener("beforeunload", e => Preference.saveTempWindowPref($("#pop_window_timeline")))

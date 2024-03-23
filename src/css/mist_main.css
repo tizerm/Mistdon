@@ -488,6 +488,8 @@
                 list-style-type: none;
                 font-family: Consolas, "ＭＳ ゴシック", sans-selif;
                 font-size: 14px;
+                &.done  { color: #00ff00; }
+                &.error { color: #ff0000; }
             }
         }
     }
@@ -676,7 +678,7 @@
     /*=== Post Expand Window Layout ==============================================================*/
     > #pop_expand_post {
         display: none;
-        z-index: 6;
+        z-index: 7;
         position: absolute;
 
         & ul {
@@ -881,7 +883,6 @@
             overflow-x: scroll;
             &::-webkit-scrollbar { height: 8px; }
         }
-        > .single_user { width: min(480px,100vw); }
 
         /*=== History Timeline Layout ============================================================*/
         > .history_timeline {
@@ -931,6 +932,14 @@
                             }
                         }
                         &:hover>.delete_modal { display: block; }
+                        &.external_deleted {
+                            background-color: #bbbbbb;
+                            color: #333333;
+                            text-align: center;
+                            font-size: 14px;
+                            font-weight: bold;
+                            border-radius: 16px;
+                        }
                     }
                 }
                 &.reaction_history>.col_head { background-color: #408a08; }
@@ -1012,51 +1021,79 @@
     }
 
     /*=== Internal Extend Timeline Window Layout =================================================*/
-    > .ex_window {
+    .ex_window {
+        display: none;
         position: absolute;
-        z-index: 4;
-        border-radius: 12px;
-        background-color: rgba(34,34,34,0.8);
+        top: 18px;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        border: solid 2px #bbbbbb;
+        background-color: rgba(34,34,34,0.683);
         color: #fff;
-        & a { color: #bbb; }
         > h2 {
-            position: relative;
             background-color: #87995f;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             margin: 0px;
-            padding: 4px 12px;
-            font-size: 14px;
+            padding: 8px 16px;
+            padding-right: 72px;
+            font-size: 18px;
+            font-family: Arial, "メイリオ", sans-selif;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
-            > #__on_pop_window_close {
+            cursor: move;
+        }
+        > .window_buttons {
+            > button.window_close_button, > label.window_opacity_button {
                 position: absolute;
                 top: 4px;
-                right: 8px;
-                border-radius: 12px;
-                font-size: 14px;
-                border: solid 2px #ffffff;
+                margin: 0px;
+                padding: 0px;
+                > img {
+                    height: 28px;
+                    width: auto;
+                }
             }
+            > button.window_close_button  { right: 6px; }
+            > label.window_opacity_button { right: 42px; }
         }
-    }
-    > #pop_window_timeline {
-        display: none;
-        width: 50vw;
-        height: 50vh;
-        >.timeline {
-            height: calc(100% - 38px);
-            > ul { height: 100%; }
-        }
-        &.__opacity_on {
-            opacity: 0.2;
+        &:has(input.__window_opacity:checked) {
+            opacity: 0.12;
             transition: opacity 0.2s;
             &:hover { opacity: 1.0; }
         }
-        > h2 {
-            font-size: 16px;
-            font-family: Arial, "メイリオ", sans-selif;
-            cursor: move;
+    }
+    > #pop_window_timeline {
+        z-index: 4;
+        width: 50vw;
+        height: 50vh;
+        > .timeline {
+            height: calc(100% - 38px);
+            > ul { height: 100%; }
+        }
+    }
+    .account_timeline.single_user.ex_window {
+        width: min(480px,100vw);
+        z-index: 6;
+        right: 0px;
+    }
+    .instance_window.ex_window {
+        width: min(420px,100vw);
+        height: min(960px,100vh);
+        z-index: 7;
+        right: 0px;
+        > table { height: calc(100% - 36px); }
+    }
+    .post_detail_window.ex_window {
+        width: min(480px,100vw);
+        height: min(800px,100vh);
+        z-index: 8;
+        right: 0px;
+        > h2>a { color: #fff; }
+        > .timeline {
+            height: calc(100% - 36px);
+            > ul { height: calc(100% - 8px); }
         }
     }
 

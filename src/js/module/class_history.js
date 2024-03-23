@@ -163,7 +163,8 @@ class History {
 
     // Getter: 投稿履歴のDOM Elementを生成
     get element() {
-        if (!this.post) return "" // データがとれない場合は空を返却
+        // データがとれない場合は削除されたことを表示
+        if (!this.post) return '<li class="external_deleted">(外部から削除された投稿です)</li>'
         // まず投稿本体のjQueryオブジェクトを取得
         const elm = this.post.element
         let button = ''
@@ -279,9 +280,9 @@ class History {
      * @param target 編集対象の投稿のjQueryオブジェクト
      */
     static edit(target) {
+        $("#__on_search_close").click() // 送信履歴を閉じる
         const index = target.closest("li").index()
         History.post_stack[index].post.edit()
-        $("#__on_search_close").click() // 送信履歴を閉じる
     }
 
     /**

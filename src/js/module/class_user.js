@@ -91,7 +91,11 @@ class User {
         // Mistdonに認証情報のあるホストの場合は対象アカウントを引っ張ってくる
         this.authorized = Account.getByDomain(host)
         if (this.platform == 'Misskey') this.use_emoji_cache = this.authorized ? true : false
+        this.user_uuid = crypto.randomUUID()
     }
+
+    // 画面に表示したユーザーのオブジェクトをキャッシュするマップ
+    static USER_CACHE_MAP = new Map()
 
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.authorized?.emojis }
@@ -145,6 +149,26 @@ class User {
 
     /**
      * #StaticMethod
+     * ローカルにキャッシュされているユーザーオブジェクトを取得する.
+     * 
+     * @param target_td 取得対象のプロフィールのTD DOM
+     */
+    static getCache(target_td) {
+        return User.USER_CACHE_MAP.get(target_td.attr("id"))
+    }
+
+    /**
+     * #StaticMethod
+     * ローカルにキャッシュされているユーザーオブジェクトを削除する.
+     * 
+     * @param target_td 取得対象のプロフィールのTD DOM
+     */
+    static deleteCache(target_td) {
+        return User.USER_CACHE_MAP.delete(target_td.attr("id"))
+    }
+
+    /**
+     * #StaticMethod
      * サーバーのアカウントIDからユーザー情報を取得する
      * 
      * @param arg パラメータオブジェクト
@@ -193,7 +217,7 @@ class User {
      */
     static createDetailHtml(address) {
         return `
-            <td id="${address}" class="timeline column_profile">
+            <td class="timeline column_profile" name="${address}">
                 <div class="col_loading">
                     <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                     <span class="loading_text">Now Loading...</span>
@@ -724,46 +748,61 @@ class User {
 
     /**
      * #Method
-     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する
+     * このユーザーオブジェクトのユニークIDを対象のプロフィールDOMに付与する.
+     * (アカウントプロフィール一覧で使用)
      */
-    createDetailWindow() {
-        $("#pop_ex_timeline").html(`
-            <div class="account_timeline single_user">
-                <table><tbody><tr>
-                    <td class="timeline column_instance_info">
-                        <div class="col_loading">
-                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                            <span class="loading_text">Now Loading...</span>
-                        </div>
-                    </td>
-                    ${User.createDetailHtml(this.full_address)}
-                </tr></tbody></table>
-            </div>
-            <div class="account_timeline single_user ff_pop_user"></div>
-            <button type="button" id="__on_search_close" class="close_button">×</button>
-        `)
-        this.bindDetail()
-        $("#pop_ex_timeline").show("slide", { direction: "right" }, 150)
+    addProfileUniqueId() {
+        $(`#pop_ex_timeline>.account_timeline td[name="${this.full_address}"]`)
+            .attr('id', `user_${this.user_uuid}`)
     }
 
     /**
      * #Method
-     * このユーザーの詳細情報を表示するポップアップウィンドウのDOMを生成して表示する
-     * 
-     * @param target クリックしたElementの親のユーザーのjQueryオブジェクト
+     * このユーザーの詳細情報を表示するウィンドウのDOMを生成して表示する.
+     * v0.5.1以前と違いひとつひとつ独立したウィンドウとして生成.
      */
-    createDetailPop(target) {
-        const pos = target.closest("td").offset()
-        $("#pop_ex_timeline>.ff_pop_user").html(`
-            <table><tbody><tr>
-                ${User.createDetailHtml(this.full_address)}
-            </tr></tbody></table>
+    createDetailWindow() {
+        // すでに開いているウィンドウの数を算出
+        const window_num = $("#pop_multi_window>.ex_window").length
+        $("#pop_multi_window").append(`
+            <div id="user_window_${this.user_uuid}" class="account_timeline single_user ex_window">
+                <h2><span>${this.full_address}</span></h2>
+                <div class="window_buttons">
+                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.user_uuid}"/>
+                    <label for="__window_opacity_${this.user_uuid}" class="window_opacity_button" title="透過"><img
+                        src="resources/ic_alpha.png" alt="透過"/></label>
+                    <button type="button" class="window_close_button" title="閉じる"><img
+                        src="resources/ic_not.png" alt="閉じる"/></button>
+                </div>
+                <table><tbody><tr>
+                    ${User.createDetailHtml(this.full_address)}
+                </tr></tbody></table>
+            </div>
         `)
+        // プロフィール情報バインド処理を実行してレイアウトを設定
+        $(`#user_window_${this.user_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
+        $(`#user_window_${this.user_uuid} td[name="${this.full_address}"]`).attr('id', `user_${this.user_uuid}`)
+        $(`#user_window_${this.user_uuid}`).draggable({
+            handle: "h2",
+            axis: "x"
+        })
+        $(`#user_window_${this.user_uuid}>.window_buttons`).tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
         this.bindDetail()
-        $("#pop_ex_timeline>.ff_pop_user").css({
-            'left': `${pos.left - 138}px`,
-            'top': `${pos.top - 48}px`,
-        }).show("fade", 80)
+        // 開いているウィンドウの数だけ初期位置をズラす
+        $(`#user_window_${this.user_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
     }
 
     /**
@@ -771,7 +810,10 @@ class User {
      * このユーザーの詳細情報を生成済みのHTMLテンプレートにバインドする.
      */
     async bindDetail() {
-        const target_elm = $(`#pop_ex_timeline td[id="${this.full_address}"]`)
+        // このオブジェクトを参照するキーを生成してマップに保存する
+        const user_key = `user_${this.user_uuid}`
+        User.USER_CACHE_MAP.set(user_key, this)
+        const target_elm = $(`.account_timeline td#${user_key}[name="${this.full_address}"]`)
         // ヘッダとプロフィール詳細を表示
         target_elm.find(".profile_header").html(this.header_element)
         target_elm.find(".profile_detail").html(this.profile_element)
@@ -869,7 +911,7 @@ class User {
      * @param type お気に入り/ブックマーク/リアクションのどれかを指定
      */
     async createBookmarkList(type) {
-        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
@@ -903,7 +945,7 @@ class User {
      * @param type フォローを取得するかフォロワーを取得するか指定
      */
     async createFFTaglist(type) {
-        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
@@ -938,7 +980,7 @@ class User {
      * このユーザーのメディア投稿一覧を取得して表示する.
      */
     async createMediaGallery() {
-        const target_td = $(`#pop_ex_timeline>.account_timeline td[id="${this.full_address}"]`)
+        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>

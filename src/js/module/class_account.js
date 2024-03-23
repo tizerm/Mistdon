@@ -1428,11 +1428,13 @@ class Account {
                     <tr>${template_html}</tr>
                 </tbody></table>
             </div>
-            <div class="account_timeline single_user ff_pop_user"></div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show("slide", { direction: "right" }, 150)
 
         // それぞれのアカウントのユーザー情報を取得してバインド
-        Account.each(account => account.getInfo().then(user => user.bindDetail()))
+        Account.each(account => account.getInfo().then(user => {
+            user.addProfileUniqueId()
+            user.bindDetail()
+        }))
     }
 }

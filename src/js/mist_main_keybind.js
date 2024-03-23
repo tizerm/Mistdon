@@ -37,6 +37,14 @@
                 $("#__txt_postarea").focus()
                 return false
             case 66: // b: CWテキストボックスにフォーカス
+                if (event.ctrlKey || event.metaKey) {
+                    // Ctrl+B: マルチウィンドウをすべて透過
+                    // ひとつでも透過済みのウィンドウがある場合はすべての透過を解除する
+                    if ($("#pop_multi_window>.ex_window>.window_buttons>input.__window_opacity:checked").length > 0)
+                        $("#pop_multi_window>.ex_window>.window_buttons>input.__window_opacity").prop("checked", false)
+                    else $("#pop_multi_window>.ex_window>.window_buttons>input.__window_opacity").prop("checked", true)
+                    return false
+                }
                 $("#__txt_content_warning").focus()
                 return false
             case 46: // Ctrl+Del: 直前の投稿を削除する
@@ -78,10 +86,17 @@
                 }
                 break
             case 115: // F4: 右に表示される拡張カラムを閉じる
+                if (event.ctrlKey || event.metaKey) {
+                    if (event.shiftKey) // Ctrl+Shift+F4: 表示されているウィンドウをすべて閉じる
+                        $(".ex_window>.window_buttons>.window_close_button").click()
+                    else // Ctrl+F4: 一時タイムライン以外のウィンドウをすべて閉じる
+                        $("#pop_multi_window>.ex_window>.window_buttons>.window_close_button").click()
+                    return false
+                }
                 $("#pop_extend_column:visible").hide("slide", { direction: "right" }, 150)
                 $("#pop_ex_timeline:visible").hide("slide", { direction: "up" }, 150)
                 $("#pop_custom_emoji:visible").hide("slide", { direction: "left" }, 150)
-                break
+                return false
             case 65:
             case 37: // a, <-: カーソルを左に移動
                 col = Column.disposeCursor()

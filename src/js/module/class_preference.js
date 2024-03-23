@@ -277,8 +277,7 @@ class Preference {
             "height": `${Preference.TEMPORARY_WINDOW_SIZE.height}px`
         })
         if (Preference.TEMPORARY_WINDOW_POSITION.opacity) // 透過設定
-            window_elm.addClass("__opacity_on").find("#__window_opacity")
-                .prop("checked", Preference.TEMPORARY_WINDOW_POSITION.opacity)
+            window_elm.find("#__window_opacity_timeline").prop("checked", Preference.TEMPORARY_WINDOW_POSITION.opacity)
     }
 
     /**

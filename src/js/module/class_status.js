@@ -28,6 +28,7 @@ class Status {
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
+                this.allow_context = !(this.type == 'notification' && json.type == "follow")
                 original_date = json.created_at
                 this.reblog = json.reblog ? true : false // ブーストフラグ
                 this.reblog_by = this.reblog ? json.account.acct : null // ブースト元ユーザー
@@ -109,6 +110,7 @@ class Status {
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
+                this.allow_context = !(this.type == 'notification' && json.type == "follow")
                 if (this.notif_type == 'achievementEarned') return // TODO: 実績は一旦除外
 
                 original_date = json.createdAt
@@ -488,10 +490,13 @@ class Status {
                     break
             }
             // すべてのAPIの呼び出しが終わったら親と子の取得処理が終わり次第バインド処理に移行
-            Promise.all(parent_promises).then(parents => parents
-                .forEach(post => $("#pop_extend_column .timeline>ul").prepend(post.element)))
-            Promise.all(child_promises).then(children => children
-                .forEach(post => $("#pop_extend_column .timeline>ul").append(post.element)))
+            await Promise.allSettled([ // 2つのPromiseを同時実行しながら終了までresolveしない
+                Promise.all(parent_promises).then(parents => parents
+                    .forEach(post => $(`#post_window_${this.__detail_uuid}>.timeline>ul`).prepend(post.element))),
+                Promise.all(child_promises).then(children => children
+                    .forEach(post => $(`#post_window_${this.__detail_uuid}>.timeline>ul`).append(post.element)))
+            ])
+            return Promise.resolve('finish.')
         } catch (err) {
             console.log(err)
             Notification.error("スレッドの取得に失敗しました.")
@@ -798,6 +803,8 @@ class Status {
             .css("background-image", `url("${this.card.image}")`)
         // フォロ限の場合はブースト/リノート禁止クラスを付与
         if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
+        // フォロー通知の場合はコンテキストメニューを禁止する
+        if (!this.allow_context) jqelm.closest('li').addClass('context_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1022,6 +1029,8 @@ class Status {
         const jqelm = $($.parseHTML(html))
         // フォロ限の場合はブースト/リノート禁止クラスを付与
         if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
+        // フォロー通知の場合はコンテキストメニューを禁止する
+        if (!this.allow_context) jqelm.closest('li').addClass('context_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
@@ -1440,6 +1449,9 @@ class Status {
      * この投稿を編集モードで本文投稿フォームに展開する.
      */
     edit() {
+        // クリックイベントは先に実行
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+
         // アカウントを編集対象に変更
         Account.get(`@${this.user.full_address}`).setPostAccount()
 
@@ -1452,7 +1464,6 @@ class Status {
 
         $("#post_options ul.refernce_post").html(this.element)
         $("#post_options #__hdn_edit_id").val(this.id)
-        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         enabledAdditionalAccount(false)
 
         $("#__txt_postarea").focus()
@@ -1568,16 +1579,16 @@ class Status {
      * この投稿に対する返信を投稿するための投稿オプションを設定
      */
     createReplyWindow() {
+        $("#header>#post_options").hide()
+        $("#__on_reset_option").click()
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         // 返信先のアカウントが返信元のアカウントと同じ場合は先頭のユーザーIDを表示しない
         const userid = `@${this.user.full_address}` != this.from_account.full_address ? `@${this.user.id} ` : ''
 
         // 投稿IDを隠しフォームにセットして投稿オプションをセット
-        $("#header>#post_options").hide()
-        $("#__on_reset_option").click()
         Account.get(this.from_account.full_address).setPostAccount()
         $("#__hdn_reply_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
-        $("#post_options .refernced_post+.option_close .__on_option_open").click()
         enabledAdditionalAccount(false)
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
@@ -1643,21 +1654,47 @@ class Status {
      * この投稿の詳細情報を表示する画面を表示
      */
     createDetailWindow() {
-        // 詳細表示のDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="post_detail_col">
-                <h2>From ${this.from_account.pref.domain}</h2>
-                <a href="${this.uri}" class="__lnk_external lnk_post_browser">ブラウザで表示</a>
+        // すでに開いているウィンドウの数を算出
+        const window_num = $("#pop_multi_window>.ex_window").length
+        // DOMの一意認識用のUUIDを生成
+        this.__detail_uuid = crypto.randomUUID()
+        $("#pop_multi_window").append(`
+            <div id="post_window_${this.__detail_uuid}" class="post_detail_window ex_window">
+                <h2><a href="${this.uri}" class="__lnk_external">${this.uri}</a></h2>
+                <div class="window_buttons">
+                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__detail_uuid}"/>
+                    <label for="__window_opacity_${this.__detail_uuid}" class="window_opacity_button" title="透過"><img
+                        src="resources/ic_alpha.png" alt="透過"/></label>
+                    <button type="button" class="window_close_button" title="閉じる"><img
+                        src="resources/ic_not.png" alt="閉じる"/></button>
+                </div>
                 <div class="timeline">
                     <ul class="__context_posts"></ul>
                 </div>
-                <button type="button" id="__on_reply_close" class="close_button">×</button>
             </div>
-        `))
-        // Classを設定してDOMを拡張カラムにバインド
-        jqelm.find('.timeline>ul').append(this.element)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
-        const parent_post = $(`#pop_extend_column .timeline>ul>li[id="${this.status_key}"]`)
+        `)
+        // プロフィール情報バインド処理を実行してレイアウトを設定
+        $(`#post_window_${this.__detail_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
+        $(`#post_window_${this.__detail_uuid}`).draggable({ handle: "h2" })
+        $(`#post_window_${this.__detail_uuid}>.window_buttons`).tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
+        $(`#post_window_${this.__detail_uuid}>.timeline>ul`).append(this.element)
+
+        // 一旦ウィンドウを表示して後続の処理を非同期で実行する
+        $(`#post_window_${this.__detail_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
+        const parent_post = $(`#post_window_${this.__detail_uuid}>.timeline>ul>li[id="${this.status_key}"]`)
 
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.from_account.pref.domain
@@ -1666,10 +1703,10 @@ class Status {
             Emojis.replaceDomAsync(parent_post.find(".main_content"), host) // 本文
             Emojis.replaceDomAsync(parent_post.find(".__yet_replace_reaction"), host) // 未置換のリアクション
         }
-        // 一度表示してからチェインしている投稿を取得する(非同期)
-        this.getThread()
-        // 詳細表示のターゲットになっている投稿の直上に簡易プロフィールを設置(非同期)
-        this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
+        // 親にチェインしている投稿と簡易プロフィールを取得(非同期) 終わったら対象の投稿へスクロール
+        Promise.allSettled([this.getThread(),
+            this.getAuthorInfo().then(user => parent_post.before(user.short_elm))
+        ]).then(result => parent_post.get(0).scrollIntoView({ block: 'center' }))
     }
 
     /**

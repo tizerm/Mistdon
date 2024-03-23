@@ -302,10 +302,7 @@
      * #Event
      * 直前の投稿につなげるボタン.
      */
-    $("#__on_last_replychain").on("click", e => History.popIf(last => {
-        last.post.createReplyWindow()
-        $("#__open_post_option").click()
-    }, false))
+    $("#__on_last_replychain").on("click", e => History.popIf(last => last.post.createReplyWindow(), false))
 
     /**
      * #Event
@@ -705,8 +702,8 @@
      * 投稿本体に対してホバー.
      * => 表示アカウントのアクションバーを表示
      */
-    if (Preference.GENERAL_PREFERENCE.enable_action_palette) // 設定が有効になっている場合のみ
-        $(document).on("mouseenter", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
+    if (Preference.GENERAL_PREFERENCE.enable_action_palette) $(document).on("mouseenter",
+        "li:not(.chat_timeline, .short_timeline, .context_disabled), li.chat_timeline>.content", e => {
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
@@ -716,6 +713,7 @@
                 // 一時スクロールタイムラインの場合は静的マップから取得
                 target_post = Timeline.getScrollableStatus($(e.target).closest("li"))
             else return  // 取得できないタイムラインは実行しない
+
             // 外部インスタンスに対しては使用不可
             if (target_post.from_timeline?.pref?.external) return
             const pos = $(e.currentTarget).offset()
@@ -849,8 +847,8 @@
      * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
      */
     $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
-        // メイン画面のタイムラインのみ有効
-        if ($(e.target).closest(".tl_group_box").length == 0) return
+        if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0) return
+
         // アクションバーに移動した場合は消さない
         if ($(e.relatedTarget).closest("#pop_expand_action").length > 0) return
         $("#pop_expand_action").hide()
@@ -873,7 +871,6 @@
      * => ハッシュタグ検索を実行
      */
     $(document).on("click", ".__on_detail_hashtag", e => {
-        $("#pop_extend_column").hide()
         Query.createSearchWindow()
         $("#pop_ex_timeline #__txt_search_query").val(`#${$(e.target).attr('name')}`)
         $("#pop_ex_timeline #__on_search").click()
@@ -898,7 +895,7 @@
      * ユーザープロフィール: ピンどめ.
      * => ピンどめ投稿を閉じる
      */
-    $(document).on("click", "#pop_ex_timeline .pinned_block>h4", e => {
+    $(document).on("click", ".account_timeline .pinned_block>h4", e => {
         const btn = $(e.target)
         if (btn.is(".closed")) { // 既に閉じていた場合は開く
             btn.removeClass("closed")
@@ -916,7 +913,7 @@
      * ユーザープロフィール: 投稿数.
      * => ユーザーの投稿を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_post", e => {
+    $(document).on("click", ".account_timeline .count_post", e => {
         $(e.target).closest("td").find(".user_ff_elm").hide()
         $(e.target).closest("td").find(".user_bookmark_elm").hide()
         $(e.target).closest("td").find(".user_post_elm").show()
@@ -927,76 +924,63 @@
      * ユーザープロフィール: フォロー数.
      * => フォロイー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follow:not(.label_private)", e =>
-        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('follows')))
+    $(document).on("click", ".account_timeline .count_follow:not(.label_private)",
+        e => User.getCache($(e.target).closest("td")).createFFTaglist('follows'))
 
     /**
      * #Event
      * ユーザープロフィール: フォロワー数.
      * => フォロワー一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .count_follower:not(.label_private)", e =>
-        User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createFFTaglist('followers')))
+    $(document).on("click", ".account_timeline .count_follower:not(.label_private)",
+        e => User.getCache($(e.target).closest("td")).createFFTaglist('followers'))
 
     /**
      * #Event
      * ユーザープロフィール: お気に入り(Mastodon).
      * => お気に入り一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_mastfav", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Mastodon')))
+    $(document).on("click", ".account_timeline .__on_show_mastfav",
+        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Mastodon'))
 
     /**
      * #Event
      * ユーザープロフィール: お気に入り(Misskey).
      * => お気に入り一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_miskfav", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Favorite_Misskey')))
+    $(document).on("click", ".account_timeline .__on_show_miskfav",
+        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Misskey'))
 
     /**
      * #Event
      * ユーザープロフィール: ブックマーク.
      * => ブックマーク一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_bookmark", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Bookmark')))
+    $(document).on("click", ".account_timeline .__on_show_bookmark",
+        e => User.getCache($(e.target).closest("td")).createBookmarkList('Bookmark'))
 
     /**
      * #Event
      * ユーザープロフィール: リアクション.
      * => 最近リアクションを送信したノート一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline .auth_details .__on_show_reaction", e =>
-        Account.get($(e.target).closest("td").attr("id")).getInfo().then(user => user.createBookmarkList('Reaction')))
+    $(document).on("click", ".account_timeline .__on_show_reaction",
+        e => User.getCache($(e.target).closest("td")).createBookmarkList('Reaction'))
 
     /**
      * #Event
      * ユーザープロフィール: プラットフォームアイコン.
      * => ユーザーが所属しているインスタンスの情報を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .__on_show_instance", e => (async () => {
-        $("#pop_ex_timeline .single_user").css("width", "880px")
-        $("#pop_ex_timeline .column_instance_info").show()
-        try {
-            const user = await User.getByAddress($(e.target).closest("td").attr("id"))
-            const instance = await user.getInstance()
-            instance.createDetailHtml("#pop_ex_timeline .column_instance_info")
-        } catch (err) {
-            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>img')
-                .attr('src', 'resources/illust/il_err2.png')
-            $('#pop_ex_timeline>.account_timeline .column_instance_info>.col_loading>.loading_text')
-                .text(`インスタンスの情報の取得に失敗しました……。
-                    接続できなかったかサポート外のプラットフォーム、インスタンスの場合があります。`)
-        }
-    })())
+    $(document).on("click", ".account_timeline .__on_show_instance",
+        e => User.getCache($(e.target).closest("td")).getInstance().then(instance => instance.createDetailHtml()))
 
     /**
      * #Event
      * ユーザープロフィール: 全投稿タブ.
      * => ユーザーの投稿一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_posts", e => {
+    $(document).on("click", ".account_timeline .__tab_profile_posts", e => {
         $(e.target).closest(".user_post_elm").find(".media_uls").hide()
         $(e.target).closest(".user_post_elm").find(".post_uls").show()
     })
@@ -1006,10 +990,10 @@
      * ユーザープロフィール: メディアタブ.
      * => ユーザーのメディアを含む投稿の一覧を表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .__tab_profile_medias", e => {
+    $(document).on("click", ".account_timeline .__tab_profile_medias", e => {
         if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
             // メディアタイムラインを未取得の場合は取得する
-            User.getByAddress($(e.target).closest("td").attr("id")).then(user => user.createMediaGallery())
+            User.getCache($(e.target).closest("td")).createMediaGallery()
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
     })
@@ -1020,7 +1004,7 @@
      * => 上部に簡易プロフィールを表示
      */
     delayHoverEvent({
-        selector: "#pop_ex_timeline>.account_timeline .ff_nametags>li",
+        selector: ".account_timeline .ff_nametags>li",
         enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
             .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
         leaveFunc: e => {},
@@ -1030,22 +1014,10 @@
     /**
      * #Event
      * ユーザープロフィール: フォロー/フォロワーのネームタグ.
-     * => フルプロフィールの簡易ポップアップを表示
+     * => フルプロフィールを新しくウィンドウを生成して表示
      */
-    $(document).on("click", "#pop_ex_timeline>.account_timeline .ff_nametags>li", e =>
-        User.getByAddress($(e.target).closest("li").attr("name")).then(user => user.createDetailPop($(e.target))))
-
-    /**
-     * #Event #Delayhover
-     * ユーザープロフィール: 簡易ポップアップからリリース.
-     * => 簡易ポップアップを閉じる
-     */
-    $(document).on("mouseleave", "#pop_ex_timeline>.ff_pop_user", e => {
-        const to = $(e.relatedTarget)
-        // コンテキストメニューに移動した場合はなにもしない
-        if (to.closest(".pop_context").length > 0) return
-        $(e.currentTarget).hide("fade", 80)
-    })
+    $(document).on("click", ".account_timeline .ff_nametags>li",
+        e => User.getByAddress($(e.target).closest("li").attr("name")).then(user => user.createDetailWindow()))
 
     /*=== Context Menu Event =====================================================================================*/
 
@@ -1054,9 +1026,7 @@
      * ポストを右クリック.
      * => 投稿用のコンテキストメニューを表示
      */
-    $(document).on("contextmenu", "ul.__context_posts>li", e => {
-        if ($(e.target).closest("li").is(".short_userinfo")) return // 簡易プロフィールは無視
-
+    $(document).on("contextmenu", "ul.__context_posts>li:not(.short_userinfo, .context_disabled)", e => {
         // タイムライングループでの表示(メイン画面のTL)の場合のフラグを保存
         const tl_group_flg = $(e.target).closest(".tl_group_box").length > 0
 
@@ -1067,7 +1037,7 @@
                 .removeClass("ui-state-disabled").attr("name", post_id.substring(post_id.indexOf('@')))
         } else if ($(e.target).closest("table").is("#auth_account_table"))
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
-                .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("id"))
+                .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("name"))
         else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")
 
         // フォロ限などはブースト/リノートを禁止
@@ -1096,7 +1066,7 @@
      */
     $(document).on("contextmenu", "ul.__context_user>li", e => {
         popContextMenu(e, "pop_context_user")
-        $("#pop_context_user").attr("name", $(e.target).closest("td").attr("id"))
+        $("#pop_context_user").attr("name", $(e.target).closest("td").attr("name"))
         return false
     })
     $(document).on("contextmenu", "li.short_userinfo, li.user_nametag", e => {
@@ -1251,12 +1221,14 @@
 
     /**
      * #Event
-     * 一時ウィンドウ: 透過ボックス.
-     * => ホバーアウトしたときにウィンドウを透過するクラスを付与する
+     * マルチウィンドウ(プロフィールウィンドウ): 閉じるボタン.
+     * => キャッシュを消してからウィンドウを閉じてDOM自体を消去する
      */
-    $(document).on("change", "#__window_opacity", e => {
-        if ($(e.target).prop('checked')) $("#pop_window_timeline").addClass("__opacity_on")
-        else $("#pop_window_timeline").removeClass("__opacity_on")
+    $(document).on("click", "#pop_multi_window .window_close_button", e => {
+        const target_window = $(e.target).closest(".ex_window")
+        // ユーザープロフィールを開いている場合はキャッシュを削除
+        if (target_window.is(".account_timeline")) User.deleteCache(target_window.find("td"))
+        target_window.hide("fade", 150, () => target_window.remove())
     })
 
     /**
@@ -1267,9 +1239,9 @@
     let resize_timer = 0
     window.addEventListener("resize", () => {
         // プロフィール画面が表示されていなかったらなにもしない
-        if (!$("#pop_ex_timeline").is(":visible")) return
+        if (!$("#pop_ex_timeline").is(":visible") && $("#pop_multi_window>.account_timeline").length == 0) return
         clearTimeout(resize_timer)
-        resize_timer = setTimeout(() => $("#pop_ex_timeline>.account_timeline td.column_profile")
+        resize_timer = setTimeout(() => $(".account_timeline td.column_profile")
             .each((index, elm) => User.setHeight($(elm), $(elm).find(".pinned_block").length > 0)), 250)
     })
 

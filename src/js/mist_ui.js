@@ -285,3 +285,11 @@ function dialog(arg) {
     });
 }
 
+/**
+ * #Renderer
+ * ランダムでカラーパレットの色を取得する.
+ */
+function getRandomColor() {
+    const index = Math.floor(Math.random() * color_palette.length)
+    return color_palette[index]
+}

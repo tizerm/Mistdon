@@ -107,7 +107,7 @@
             <button type="button" id="__on_submit" title="投稿"
                 ><img src="resources/ic_post.png" alt="投稿"/></button>
         </div>
-        <div class="additional_buttons">
+        <div class="additional_buttons __ignore_close_option">
             <button type="button" id="__on_last_delete" title="直前の投稿を削除"
                 ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></button>
             <button type="button" id="__on_last_delete_paste" title="直前の投稿を削除して再編集"
@@ -305,13 +305,13 @@
         <!-- hidden: 右クリックコンテキストメニュー(ユーザー) -->
         <ul class="ui_menu">
             <li><div>フォロー</div>
-                <ul id="__menu_follow"></ul>
+                <ul id="__menu_follow" class="account_menu"></ul>
             </li>
             <li><div>ミュート</div>
-                <ul id="__menu_mute"></ul>
+                <ul id="__menu_mute" class="account_menu"></ul>
             </li>
             <li><div>ブロック</div>
-                <ul id="__menu_block"></ul>
+                <ul id="__menu_block" class="account_menu"></ul>
             </li>
         </ul>
     </div>
@@ -377,14 +377,16 @@
     <div id="pop_ex_timeline">
         <!-- hidden: 拡張タイムライン(横付け) -->
     </div>
-    <div id="pop_window_timeline" class="ui-widget-content ex_window">
+    <div id="pop_window_timeline" class="ex_window">
         <!-- hidden: 拡張タイムライン(ウィンドウ) -->
-        <h2>
-            <span>Window</span>
-            <input type="checkbox" id="__window_opacity"/>
-            <label for="__window_opacity">透過</label>
-            <button type="button" id="__on_pop_window_close">×</button>
-        </h2>
+        <h2><span>Window</span></h2>
+        <div class="window_buttons">
+            <input type="checkbox" class="__window_opacity" id="__window_opacity_timeline"/>
+            <label for="__window_opacity_timeline" class="window_opacity_button" title="透過"><img
+                src="resources/ic_alpha.png" alt="透過"/></label>
+            <button type="button" id="__on_pop_window_close" class="window_close_button" title="閉じる"><img
+                src="resources/ic_not.png" alt="閉じる"/></button>
+        </div>
         <div class="timeline">
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
@@ -392,6 +394,9 @@
             </div>
             <ul class="scrollable_tl __context_posts"></ul>
         </div>
+    </div>
+    <div id="pop_multi_window">
+        <!-- hidden: 複数ウィンドウ生成ボックス -->
     </div>
     <div id="pop_extend_column">
         <!-- hidden: 拡張カラム(横付け) -->
