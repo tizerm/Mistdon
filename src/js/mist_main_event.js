@@ -433,8 +433,10 @@
      */
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
-        // 再発火の可能性をおさえるため遅めにフェードアウトする(これは設定で無効化しない)
         e.preventDefault()
+        // 内部の要素に移動した場合は発火しない
+        if (!$(e.relatedTarget).is("#modal_drop_files")) return
+        // 再発火の可能性をおさえるため遅めにフェードアウトする(これは設定で無効化しない)
         $("#modal_drop_files").hide("fade", 800)
     })
 
@@ -446,7 +448,7 @@
     $("#modal_drop_files").get(0).addEventListener("drop", e => {
         // デフォルトイベントを無視してファイルを添付メソッドに渡す
         e.preventDefault()
-        if (!$(e.target).is("#modal_drop_files>.dropbox")) return // ボックス外で外した場合は無視
+        if ($(e.target).closest(".dropbox").length == 0) return // ボックス外で外した場合は無視
         Media.attachMedia([...e.dataTransfer.files])
 
         // ドロップ領域を消して投稿オプションを開く

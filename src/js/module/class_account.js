@@ -1179,7 +1179,7 @@ class Account {
     // Getter: 最近使用したカスタム絵文字を一覧で出力
     get recent_reaction_html() {
         let html = ''
-        this.reaction_history.map(code => this.emojis.get(code)).forEach(emoji => html += `
+        this.reaction_history.map(code => this.emojis.get(code)).filter(f => f).forEach(emoji => html += `
             <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
         `)
         return html
@@ -1207,7 +1207,7 @@ class Account {
             </div>
         `).show(...Preference.getAnimation("FADE_STD"))
         // 絵文字履歴を表示する
-        this.emoji_history.map(code => this.emojis.get(code)).forEach(
+        this.emoji_history.map(code => this.emojis.get(code)).filter(f => f).forEach(
             emoji => $("#pop_custom_emoji .recent_emoji").append(`
                 <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `))

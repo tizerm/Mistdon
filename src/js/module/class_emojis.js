@@ -239,7 +239,7 @@ class Emojis {
         $("#pop_emoji_suggester>.recent_emoji_list").empty()
         $("#pop_emoji_suggester>.suggest_emoji_list").empty()
         // 絵文字履歴を表示する
-        target_account.emoji_history.map(code => target_account.emojis.get(code)).forEach(
+        target_account.emoji_history.map(code => target_account.emojis.get(code)).filter(f => f).forEach(
             emoji => $("#pop_emoji_suggester>.recent_emoji_list").append(`
                 <li>
                     <a class="__on_emoji_suggest_append" name="${emoji.shortcode}">

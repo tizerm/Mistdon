@@ -424,6 +424,17 @@
                     padding-top: 100%;
                     display: block;
                 }
+                &[type="video"], &[type="gifv"] {
+                    &::after {
+                        content: url("../resources/ic_video.png");
+                        z-index: 1;
+                        position: absolute;
+                        top: 4px;
+                        right: 4px;
+                        width: 48px;
+                        height: 48px;
+                    }
+                }
                 &.img_grid_single { width: 100%; }
                 &.img_grid_4      { width: calc(50% - 3px); }
                 &.img_grid_16     { width: calc(25% - 6px); }

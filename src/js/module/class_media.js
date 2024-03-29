@@ -47,21 +47,80 @@ class Media {
         // 初期メッセージを削除
         preview_elm.find(".__initial_message").remove()
         files.forEach(file => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file)
             // ファイルの識別はUUIDで
             const uuid = crypto.randomUUID()
-            // ファイルのURLを生成して画像として埋め込む
-            reader.addEventListener("load", () => preview_elm.append(`
-                <li>
-                    <input type="checkbox" id="__chk_attach_${uuid}"
-                        name="__chk_attach_sensitive" class="__chk_attach_sensitive"/>
-                    <label for="__chk_attach_${uuid}"><img src="${reader.result}" class="__img_attach" name="${uuid}"/
-                        ><div class="check_mask"></div></label>\
-                </li>
-            `))
+            if (file.type.match(/image/)) // 画像ファイル
+                Media.loadImage(file, preview_elm, uuid)
+            else if (file.type.match(/video/)) // 動画ファイル
+                Media.loadVideoThumbnail(file, preview_elm, uuid)
             // 添付メディアマップに追加
             Media.ATTACH_MEDIA.set(uuid, file)
+        })
+    }
+
+    /**
+     * #StaticMethod
+     * 画像ファイルのサムネイルを添付ファイルに追加する.
+     * 
+     * @param file 読み込み対象のファイル
+     * @param preview_elm 追加先の添付ブロックDOM
+     * @param uuid ファイルを識別するためのUUID
+     */
+    static async loadImage(file, preview_elm, uuid) {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        // ファイルのURLを生成して画像として埋め込む
+        reader.addEventListener("load", () => preview_elm.append(`
+            <li>
+                <input type="checkbox" id="__chk_attach_${uuid}"
+                    name="__chk_attach_sensitive" class="__chk_attach_sensitive"/>
+                <label for="__chk_attach_${uuid}"><img src="${reader.result}" class="__img_attach" name="${uuid}"/
+                    ><div class="check_mask"></div></label>\
+            </li>
+        `))
+    }
+
+    /**
+     * #StaticMethod
+     * 動画ファイルからサムネイルを生成して添付ファイルに追加する.
+     * 
+     * @param file 読み込み対象のファイル
+     * @param preview_elm 追加先の添付ブロックDOM
+     * @param uuid ファイルを識別するためのUUID
+     */
+    static async loadVideoThumbnail(file, preview_elm, uuid) {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.addEventListener("load", () => {
+            // 一旦renderにvideoとcanvasをを生成
+            $("#__hdn_text_render").html(`
+                <video id="__attach_video_thumbnail" src="${reader.result}" autoplay muted></video>
+                <canvas id="__attach_thumbnail_drawer"></canvas>
+            `)
+            const video = $("#__attach_video_thumbnail").get(0)
+            // 自動再生が開始したらすぐに再生を止める
+            video.addEventListener('play', e => video.pause())
+            video.addEventListener('pause', e => {
+                // 再生が止まった段階でcanvasにvideoの画像を描画
+                const canvas = $("#__attach_thumbnail_drawer").get(0)
+                canvas.width  = video.videoWidth
+                canvas.height = video.videoHeight
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height)
+
+                // canvasに描画したデータをdataスキーマでblob化してサムネイルとして埋め込む
+                const blob = canvas.toDataURL("image/png")
+                preview_elm.append(`
+                    <li>
+                        <input type="checkbox" id="__chk_attach_${uuid}"
+                            name="__chk_attach_sensitive" class="__chk_attach_sensitive"/>
+                        <label for="__chk_attach_${uuid}"><img src="${blob}" class="__img_attach" name="${uuid}"/
+                            ><div class="check_mask"></div></label>\
+                    </li>
+                `)
+
+                // 描画に使った要素は削除
+                $("#__hdn_text_render").empty()
+            })
         })
     }
 
