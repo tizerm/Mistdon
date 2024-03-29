@@ -79,7 +79,7 @@
                     return false
                 }
                 break
-            case 81: // Ctrl+Q: 下書き一覧を開く
+            case 82: // Ctrl+R: 下書き一覧を開く
                 if (event.ctrlKey || event.metaKey) {
                     $("#__open_draft").click()
                     return false
@@ -87,10 +87,8 @@
                 break
             case 115: // F4: 右に表示される拡張カラムを閉じる
                 if (event.ctrlKey || event.metaKey) {
-                    if (event.shiftKey) // Ctrl+Shift+F4: 表示されているウィンドウをすべて閉じる
-                        $(".ex_window>.window_buttons>.window_close_button").click()
-                    else // Ctrl+F4: 一時タイムライン以外のウィンドウをすべて閉じる
-                        $("#pop_multi_window>.ex_window>.window_buttons>.window_close_button").click()
+                    // Ctrl+F4: マルチウィンドウをすべて閉じる
+                    $("#pop_multi_window>.ex_window>.window_buttons>.window_close_button").click()
                     return false
                 }
                 $("#pop_extend_column:visible").hide("slide", { direction: "right" }, 150)
@@ -259,7 +257,10 @@
                         return false
                     }
                     return
-                case 76: // Alt+L: ローカルボタンをトグル
+                case 72: // Alt+H: 投稿先を通常タイムラインに戻す
+                    $('#header>#post_options select#__cmb_post_to').val('__default')
+                    return false
+                case 71: // Alt+G: ローカルボタンをトグル
                     $('#header>#post_options input#__chk_local_only').click()
                     return false
                 case 8: // Ctrl+Alt+Backspace: 入力中の内容をリセット

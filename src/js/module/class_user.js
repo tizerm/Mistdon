@@ -106,6 +106,9 @@ class User {
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.authorized?.emojis }
 
+    // Getter: ユーザーキャッシュを認識するためのキー
+    get user_key() { return `user_${this.user_uuid}` }
+
     /**
      * #StaticMethod
      * リモートホストも含めたユーザーアドレスからリモートのユーザー情報を取得する
@@ -744,47 +747,35 @@ class User {
      * v0.5.1以前と違いひとつひとつ独立したウィンドウとして生成.
      */
     createDetailWindow() {
-        // すでに開いているウィンドウの数を算出
-        const window_num = $("#pop_multi_window>.ex_window").length
-        $("#pop_multi_window").append(`
-            <div id="user_window_${this.user_uuid}" class="account_timeline single_user ex_window">
-                <h2><span>${this.full_address}</span></h2>
-                <div class="window_buttons">
-                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.user_uuid}"/>
-                    <label for="__window_opacity_${this.user_uuid}" class="window_opacity_button" title="透過"><img
-                        src="resources/ic_alpha.png" alt="透過"/></label>
-                    <button type="button" class="window_close_button" title="閉じる"><img
-                        src="resources/ic_not.png" alt="閉じる"/></button>
+        // 一意認識用のUUIDを生成
+        const window_key = `user_window_${this.user_uuid}`
+
+        // ウィンドウを生成
+        createWindow({
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="account_timeline single_user ex_window">
+                    <h2><span>${this.full_address}</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.user_uuid}"/>
+                        <label for="__window_opacity_${this.user_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <table><tbody><tr>
+                        ${User.createDetailHtml(this.full_address)}
+                    </tr></tbody></table>
                 </div>
-                <table><tbody><tr>
-                    ${User.createDetailHtml(this.full_address)}
-                </tr></tbody></table>
-            </div>
-        `)
-        // プロフィール情報バインド処理を実行してレイアウトを設定
-        $(`#user_window_${this.user_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
-        $(`#user_window_${this.user_uuid} td[name="${this.full_address}"]`).attr('id', `user_${this.user_uuid}`)
-        $(`#user_window_${this.user_uuid}`).draggable({
-            handle: "h2",
-            axis: "x"
+            `,
+            color: getRandomColor(),
+            drag_only_x: true,
+            resizable: false
         })
-        $(`#user_window_${this.user_uuid}>.window_buttons`).tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 80
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 80
-            }
-        })
+
+        // キーを設定してバインド処理を実行
+        $(`#${window_key} td[name="${this.full_address}"]`).attr('id', this.user_key)
         this.bindDetail()
-        // 開いているウィンドウの数だけ初期位置をズラす
-        $(`#user_window_${this.user_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
     }
 
     /**
@@ -792,10 +783,9 @@ class User {
      * このユーザーの詳細情報を生成済みのHTMLテンプレートにバインドする.
      */
     async bindDetail() {
-        // このオブジェクトを参照するキーを生成してマップに保存する
-        const user_key = `user_${this.user_uuid}`
-        User.USER_CACHE_MAP.set(user_key, this)
-        const target_elm = $(`.account_timeline td#${user_key}[name="${this.full_address}"]`)
+        // キャッシュマップに保存
+        User.USER_CACHE_MAP.set(this.user_key, this)
+        const target_elm = $(`.account_timeline td#${this.user_key}[name="${this.full_address}"]`)
         // ヘッダとプロフィール詳細を表示
         target_elm.find(".profile_header").html(this.header_element)
         target_elm.find(".profile_detail").html(this.profile_element)

@@ -9,8 +9,10 @@ class Timeline {
     constructor(pref, group) {
         this.pref = pref
         this.__group_id = group.id
-        this.__column_id = group.__column_id
+        if (group.__column_id) this.__column_id = group.__column_id
+        else this.__dummy_col = {}
         this.status_key_map = new Map()
+        this.ref_group = group
     }
 
     // Getter: このタイムラインのホスト(サーバードメイン)
@@ -22,15 +24,15 @@ class Timeline {
     // Getter: このタイムラインのアカウント
     get target_account() { return Account.get(this.pref.key_address) }
     // Getter: このタイムラインが所属するカラム
-    get parent_column() { return Column.get(this.__column_id) }
+    get parent_column() { return this.__column_id ? Column.get(this.__column_id) : this.__dummy_col }
     // Getter: このタイムラインが所属するグループ
-    get parent_group() { return Column.get(this.__column_id).getGroup(this.__group_id) }
+    get parent_group() { return this.__column_id ? Column.get(this.__column_id).getGroup(this.__group_id) : this.ref_group }
 
     // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
 
     // 投稿データを一次保存するスタティックフィールド
-    static SCROLLABLE_STATUS_MAP = new Map()
+    static TIMELINE_WINDOW_MAP = new Map()
 
     /**
      * #Method
@@ -241,47 +243,74 @@ class Timeline {
      * @param ref_id 起点にする投稿ID
      */
     createScrollableTimeline(ref_id) {
-        // 一旦中身を消去
-        $("#pop_window_timeline>.timeline").prepend(`
-            <div class="col_loading">
-                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                <span class="loading_text">Now Loading...</span>
-            </div>
-        `).find("ul").empty()
-        Timeline.SCROLLABLE_STATUS_MAP.clear()
-        $("#pop_window_timeline>h2").css('background-color', `#${this.pref.color ?? this.target_account?.pref.acc_color}`)
-        $("#pop_window_timeline>h2>span").text(this.host)
+        // 一意認識用のUUIDを生成
+        this.__timeline_uuid = crypto.randomUUID()
+        const timeline_key = `timeline_${this.__timeline_uuid}`
+        const window_key = `timeline_window_${this.__timeline_uuid}`
+
+        // ウィンドウを生成
+        createWindow({
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="timeline_window ex_window">
+                    <h2><span>${this.host}</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__timeline_uuid}"/>
+                        <label for="__window_opacity_${this.__timeline_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="timeline">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
+                        </div>
+                        <ul id="${timeline_key}" class="scrollable_tl __context_posts"></ul>
+                    </div>
+                </div>
+            `,
+            color: this.pref.color ?? this.target_account?.pref.acc_color,
+            drag_only_x: false,
+            resizable: true
+        })
 
         // 参照した投稿からタイムラインを取得
         this.getTimeline(ref_id).then(body => {
             // ロード画面を削除
-            $("#pop_window_timeline>.timeline>.col_loading").remove()
+            $(`#timeline_window_${this.__timeline_uuid}>.timeline>.col_loading`).remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $("#pop_window_timeline>.timeline>ul"),
+                target: $(`#timeline_window_${this.__timeline_uuid}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.filter(p => !p.muted).forEach(p => {
-                        Timeline.SCROLLABLE_STATUS_MAP.set(p.status_key, p)
-                        target.append(p.timeline_element)
-                    })
+                    data.forEach(p => this.ref_group.addStatus(p, () => target.append(p.timeline_element)))
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
                 load: async max_id => this.getTimeline(max_id)
             })
         })
-
-        $("#pop_window_timeline").show("fade", 150)
+        Timeline.TIMELINE_WINDOW_MAP.set(timeline_key, this)
     }
 
     /**
      * #StaticMethod
-     * 遡りウィンドウから対象のjQueryオブジェクトの投稿オブジェクトを返却する.
+     * ローカルにキャッシュされているタイムラインウィンドウオブジェクトを取得する.
      * 
-     * @param target_li 取得対象のjQueryオブジェクト
+     * @param target 取得対象のターゲットDOM
      */
-    static getScrollableStatus(target_li) {
-        return Timeline.SCROLLABLE_STATUS_MAP.get(target_li.attr("id"))
+    static getWindow(target) {
+        return Timeline.TIMELINE_WINDOW_MAP.get(target.closest("ul.scrollable_tl").attr("id"))
+    }
+
+    /**
+     * #StaticMethod
+     * ローカルにキャッシュされているタイムラインウィンドウオブジェクトを削除する.
+     * 
+     * @param target 取得対象のターゲットDOM
+     */
+    static deleteWindow(target) {
+        return Timeline.TIMELINE_WINDOW_MAP.delete(target.find("ul.scrollable_tl").attr("id"))
     }
 }
 

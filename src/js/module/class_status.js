@@ -1660,47 +1660,36 @@ class Status {
      * この投稿の詳細情報を表示する画面を表示
      */
     createDetailWindow() {
-        // すでに開いているウィンドウの数を算出
-        const window_num = $("#pop_multi_window>.ex_window").length
-        // DOMの一意認識用のUUIDを生成
+        // 一意認識用のUUIDを生成
         this.__detail_uuid = crypto.randomUUID()
-        $("#pop_multi_window").append(`
-            <div id="post_window_${this.__detail_uuid}" class="post_detail_window ex_window">
-                <h2><a href="${this.uri}" class="__lnk_external">${this.uri}</a></h2>
-                <div class="window_buttons">
-                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__detail_uuid}"/>
-                    <label for="__window_opacity_${this.__detail_uuid}" class="window_opacity_button" title="透過"><img
-                        src="resources/ic_alpha.png" alt="透過"/></label>
-                    <button type="button" class="window_close_button" title="閉じる"><img
-                        src="resources/ic_not.png" alt="閉じる"/></button>
-                </div>
-                <div class="timeline">
-                    <ul class="__context_posts"></ul>
-                </div>
-            </div>
-        `)
-        // プロフィール情報バインド処理を実行してレイアウトを設定
-        $(`#post_window_${this.__detail_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
-        $(`#post_window_${this.__detail_uuid}`).draggable({ handle: "h2" })
-        $(`#post_window_${this.__detail_uuid}>.window_buttons`).tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 80
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 80
-            }
-        })
-        $(`#post_window_${this.__detail_uuid}>.timeline>ul`).append(this.element)
+        const window_key = `post_window_${this.__detail_uuid}`
 
-        // 一旦ウィンドウを表示して後続の処理を非同期で実行する
-        $(`#post_window_${this.__detail_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
-        const parent_post = $(`#post_window_${this.__detail_uuid}>.timeline>ul>li[id="${this.status_key}"]`)
+        // ウィンドウを生成
+        createWindow({
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="post_detail_window ex_window">
+                    <h2><a href="${this.uri}" class="__lnk_external">${this.uri}</a></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__detail_uuid}"/>
+                        <label for="__window_opacity_${this.__detail_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="timeline">
+                        <ul class="__context_posts"></ul>
+                    </div>
+                </div>
+            `,
+            color: getRandomColor(),
+            drag_only_x: false,
+            resizable: false
+        })
+
+        // 投稿内容をバインドして追加情報を非同期でバインド
+        $(`#${window_key}>.timeline>ul`).append(this.element)
+        const parent_post = $(`#${window_key}>.timeline>ul>li[id="${this.status_key}"]`)
 
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             const host = this.from_account.pref.domain
@@ -1753,7 +1742,9 @@ class Status {
      * この投稿よりも前のタイムラインを取得するウィンドウを生成
      */
     openScrollableWindow() {
-        this.from_timeline?.createScrollableTimeline(this.id)
+       // 参照元のタイムラインを使って新たにタイムラインオブジェクトを生成
+        const scroll_tl = new Timeline(this.from_timeline?.pref, new Group(this.from_group?.pref, null))
+        scroll_tl.createScrollableTimeline(this.id)
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却

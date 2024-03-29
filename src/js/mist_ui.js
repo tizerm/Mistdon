@@ -286,6 +286,49 @@ function dialog(arg) {
 }
 
 /**
+ * #Renderer #jQuery
+ * 複数展開可能なウィンドウを生成.
+ * 
+ * @param arg 設定オブジェクト
+ */
+function createWindow(arg) {
+    // すでに開いているウィンドウの数を算出
+    const window_num = $("#pop_multi_window>.ex_window").length
+
+    // 初期HTMLをバインド
+    $("#pop_multi_window").append(arg.html)
+    $(`#${arg.window_key}>h2`).css('background-color', `#${arg.color}`)
+
+    // Draggableにする(横方向にしか移動不可にするならパラメータ指定)
+    $(`#${arg.window_key}`).draggable({
+        handle: "h2",
+        axis: arg.drag_only_x ? "x" : false
+    })
+
+    // リサイズ可能にする場合はResizableにする
+    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: "all" })
+
+    // ヘッダボタンにツールチップを設定
+    $(`#${arg.window_key}>.window_buttons`).tooltip({
+        position: {
+            my: "center top",
+            at: "center bottom"
+        },
+        show: {
+            effect: "slideDown",
+            duration: 80
+        },
+        hide: {
+            effect: "slideUp",
+            duration: 80
+        }
+    })
+
+    // 開いているウィンドウの数だけ初期配置をズラす
+    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).show("fade", 150)
+}
+
+/**
  * #Renderer
  * ランダムでカラーパレットの色を取得する.
  */

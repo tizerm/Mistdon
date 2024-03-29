@@ -583,7 +583,7 @@
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getScrollableStatus(target_li).createImageModal(image_url)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
             Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
@@ -665,7 +665,7 @@
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getScrollableStatus(target_li).createExpandWindow(target_li)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
             Trend.getStatus(target_li).createExpandWindow(target_li)
         else // 他の部分は直接リモートの投稿を取る
@@ -683,7 +683,7 @@
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).quote.createExpandWindow(target_li)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getScrollableStatus(target_li).quote.createExpandWindow(target_li)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
             Trend.getStatus(target_li).quote.createExpandWindow(target_li)
         else // 他の部分は直接リモートの投稿を取る
@@ -711,7 +711,7 @@
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
             else if ($(e.target).closest("ul.scrollable_tl").length > 0)
                 // 一時スクロールタイムラインの場合は静的マップから取得
-                target_post = Timeline.getScrollableStatus($(e.target).closest("li"))
+                target_post = Timeline.getWindow($(e.target)).ref_group.getStatus($(e.target).closest("li"))
             else return  // 取得できないタイムラインは実行しない
 
             // 外部インスタンスに対しては使用不可
@@ -1221,14 +1221,25 @@
 
     /**
      * #Event
-     * マルチウィンドウ(プロフィールウィンドウ): 閉じるボタン.
+     * マルチウィンドウ: 閉じるボタン.
      * => キャッシュを消してからウィンドウを閉じてDOM自体を消去する
      */
     $(document).on("click", "#pop_multi_window .window_close_button", e => {
         const target_window = $(e.target).closest(".ex_window")
-        // ユーザープロフィールを開いている場合はキャッシュを削除
+        // ユーザーウィンドウとタイムラインウィンドウはキャッシュマップを削除
         if (target_window.is(".account_timeline")) User.deleteCache(target_window.find("td"))
+        else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
         target_window.hide("fade", 150, () => target_window.remove())
+    })
+
+    /**
+     * #Event #Mousedown
+     * マルチウィンドウ: どっかしらクリック.
+     * => クリックしたウィンドウを先頭に移動
+     */
+    $(document).on("mousedown", "#pop_multi_window>.ex_window", e => {
+        $("#pop_multi_window>.ex_window").removeClass('active')
+        $(e.target).closest(".ex_window").addClass('active')
     })
 
     /**

@@ -65,32 +65,7 @@ $(() => (async () => {
         cancel: "span",
         update: (e, ui) => $("#post_options .__attach_delete_box>li").remove()
     })
-    // 一時タイムラインウィンドウをドラッグ/リサイズ可能にする
-    $("#pop_window_timeline").draggable({
-        handle: "h2",
-        stop: (ext, ui) => Preference.storeTempWindowPosition(ui)
-    })
-    $("#pop_window_timeline").resizable({
-        stop: (ext, ui) => Preference.storeTempWindowSize(ui),
-        handles: "all"
-    })
-    $("#pop_window_timeline>.window_buttons").tooltip({
-        position: {
-            my: "center top",
-            at: "center bottom"
-        },
-        show: {
-            effect: "slideDown",
-            duration: 80
-        },
-        hide: {
-            effect: "slideUp",
-            duration: 80
-        }
-    })
-    // 一時タイムラインウィンドウの保存をするイベントを登録
-    Preference.setTempWindow()
-    window.addEventListener("beforeunload", e => Preference.saveTempWindowPref($("#pop_window_timeline")))
+
     // ナビゲーションの表示設定
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()

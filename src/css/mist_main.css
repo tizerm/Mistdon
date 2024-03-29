@@ -1064,10 +1064,13 @@
             &:hover { opacity: 1.0; }
         }
     }
-    > #pop_window_timeline {
+    .timeline_window.ex_window {
         z-index: 4;
-        width: 50vw;
-        height: 50vh;
+        width: min(380px,100vw);
+        height: min(960px,100vh);
+        right: 0px;
+        top: auto;
+        bottom: 12px;
         > .timeline {
             height: calc(100% - 38px);
             > ul { height: 100%; }
@@ -1096,6 +1099,7 @@
             > ul { height: calc(100% - 8px); }
         }
     }
+    > #pop_multi_window>.ex_window.active { z-index: 9; }
 
     /*=== Extend Column (Optional) ===============================================================*/
     > #pop_extend_column {

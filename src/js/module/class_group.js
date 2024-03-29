@@ -290,7 +290,7 @@ class Group {
     async initColorTimer() {
         if (!this.color_timer_id) clearInterval(this.color_timer_id) // 実行中の場合は一旦削除
         this.color_timer_id = setInterval(() => (async () => $(`#${this.id}>ul>li`).each((index, elm) => {
-            const post = this.status_map.get($(elm).attr("id"))
+            const post = this.getStatus($(elm))
             const element = $(elm).is(".chat_timeline") ? $(elm).find(".content") : $(elm)
             element.css('border-left-color', post.relative_time.color)
             $(elm).find(".created_at").text(post.relative_time.both)

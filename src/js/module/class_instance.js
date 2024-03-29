@@ -509,57 +509,47 @@ class Instance {
      * このインスタンスの詳細情報を表示するウィンドウのDOMを生成して表示する.
      */
     createDetailHtml() {
-        // すでに開いているウィンドウの数を算出
-        const window_num = $("#pop_multi_window>.ex_window").length
-        // DOMの一意認識用のUUIDを生成
-        const instance_uuid = crypto.randomUUID()
-        $("#pop_multi_window").append(`
-            <div id="instance_window_${instance_uuid}" class="instance_window ex_window">
-                <h2><span>${this.host}</span></h2>
-                <div class="window_buttons">
-                    <input type="checkbox" class="__window_opacity" id="__window_opacity_${instance_uuid}"/>
-                    <label for="__window_opacity_${instance_uuid}" class="window_opacity_button" title="透過"><img
-                        src="resources/ic_alpha.png" alt="透過"/></label>
-                    <button type="button" class="window_close_button" title="閉じる"><img
-                        src="resources/ic_not.png" alt="閉じる"/></button>
-                </div>
-                <table><tbody><tr>
-                    <td class="timeline column_instance_info">
-                        <ul class="instance_header"></ul>
-                        <ul class="instance_detail"></ul>
-                        <ul class="instance_admin">
-                            <li class="admin_header">Administrator</li>
-                        </ul>
-                    </td>
-                </tr></tbody></table>
-            </div>
-        `)
-        // プロフィール情報バインド処理を実行してレイアウトを設定
-        $(`#instance_window_${instance_uuid}>h2`).css('background-color', `#${getRandomColor()}`)
-        $(`#instance_window_${instance_uuid}`).draggable({ handle: "h2" })
-        $(`#instance_window_${instance_uuid}>.window_buttons`).tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 80
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 80
-            }
-        })
-        $(`#instance_window_${instance_uuid} .instance_header`).html(this.header_element)
-        $(`#instance_window_${instance_uuid} .instance_detail`).html(this.description_element)
-        if (this.admin_user) $(`#instance_window_${instance_uuid} .instance_admin`).append(this.admin_user.short_elm)
-        else { // 管理人情報が取得できない場合は管理人情報を消して高さを変える
-            $(`#instance_window_${instance_uuid} .instance_admin`).remove()
-            $(`#instance_window_${instance_uuid} .instance_detail`).css('height', 'calc(100% - 312px)')
-        }
+        // 一意認識用のUUIDを生成
+        this.__instance_uuid = crypto.randomUUID()
+        const window_key = `instance_window_${this.__instance_uuid}`
 
-        $(`#instance_window_${instance_uuid}`).css('right', `${window_num * 48}px`).show("fade", 150)
+        // ウィンドウを生成
+        createWindow({
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="instance_window ex_window">
+                    <h2><span>${this.host}</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.__instance_uuid}"/>
+                        <label for="__window_opacity_${this.__instance_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <table><tbody><tr>
+                        <td class="timeline column_instance_info">
+                            <ul class="instance_header"></ul>
+                            <ul class="instance_detail"></ul>
+                            <ul class="instance_admin">
+                                <li class="admin_header">Administrator</li>
+                            </ul>
+                        </td>
+                    </tr></tbody></table>
+                </div>
+            `,
+            color: getRandomColor(),
+            drag_only_x: false,
+            resizable: false
+        })
+
+        // 内容をウィンドウにバインド
+        $(`#${window_key} .instance_header`).html(this.header_element)
+        $(`#${window_key} .instance_detail`).html(this.description_element)
+        if (this.admin_user) $(`#${window_key} .instance_admin`).append(this.admin_user.short_elm)
+        else { // 管理人情報が取得できない場合は管理人情報を消して高さを変える
+            $(`#${window_key} .instance_admin`).remove()
+            $(`#${window_key} .instance_detail`).css('height', 'calc(100% - 312px)')
+        }
     }
 
     /**
