@@ -37,7 +37,7 @@ class Draft {
         let lists = ''
         Draft.list.forEach(d => lists += d.element)
         $("#pop_draft>.draft_menu").html(lists || '<li class="draft_empty">(下書きがありません。)</li>')
-        $("#pop_draft").show("slide", { direction: "left" }, 150)
+        $("#pop_draft").show(...Preference.getAnimation("FADE_STD"))
     }
 
     /**

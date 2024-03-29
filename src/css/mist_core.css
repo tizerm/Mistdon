@@ -235,24 +235,6 @@ audio { height: 30px; }
         left: 0px;
         bottom: 0px;
     }
-    > #pop_notification_console {
-        display: none;
-        z-index: 5;
-        border-radius: 8px;
-        background-color: rgba(34,34,34,0.85);
-        padding: 8px;
-        font-size: 12px;
-        color: #c7ffde;
-        position: absolute;
-        bottom: 0px;
-        left: 74px;
-        width: 50vw;
-        height: 30vh;
-        overflow-y: auto;
-
-        &::-webkit-scrollbar { width: 8px; }
-        > .console_error { color: #ff6978; }
-    }
 }
 .__on_show_notifications {
     border-radius: 18px;
@@ -334,7 +316,7 @@ audio { height: 30px; }
     /*=== Extend Column (Help Window) ============================================================*/
     > #pop_extend_column {
         display: none;
-        z-index: 6;
+        z-index: 60;
         border-radius: 12px;
         background-color: rgba(34,34,34,0.8);
         padding: 4px 0px 4px 4px;

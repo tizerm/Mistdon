@@ -14,7 +14,7 @@
         const code = $(e.target).val().substring(start, end);
         if ((!code && e.key == ' ') || start > end) {
             // 未入力でスペースが押されたか、始点コロンが消えた場合サジェスターを停止
-            $("#pop_emoji_suggester").hide("fade", 120);
+            $("#pop_emoji_suggester").hide(...Preference.getAnimation("WINDOW_FOLD"))
             return;
         }
 
@@ -50,7 +50,7 @@
 
         if (e.key == 'Enter') { // Enterが押されたら選択中の候補で決定
             $("#pop_emoji_suggester>.suggest_emoji_list>.__selected_emoji>a").click();
-            $("#pop_emoji_suggester").hide("fade", 120);
+            $("#pop_emoji_suggester").hide(...Preference.getAnimation("WINDOW_FOLD"))
             return false;
         }
 
@@ -66,13 +66,13 @@
 
             // テンキーの番号の絵文字をクリック
             $(`#pop_emoji_suggester>.recent_emoji_list>li:nth-child(${number})>a`).click();
-            $("#pop_emoji_suggester").hide("fade", 120);
+            $("#pop_emoji_suggester").hide(...Preference.getAnimation("WINDOW_FOLD"))
             return false;
         }
     });
 
     // フォーカスアウトでサジェスターを閉じる
-    $(document).on("blur", ".__emoji_suggest", e => $("#pop_emoji_suggester").hide("fade", 120));
+    $(document).on("blur", ".__emoji_suggest", e => $("#pop_emoji_suggester").hide(...Preference.getAnimation("WINDOW_FOLD")))
 
     // サジェスターから絵文字選択した時のイベント
     $(document).on("click", "#pop_emoji_suggester .__on_emoji_suggest_append", e => {
@@ -89,7 +89,7 @@
 
         // 最近使った絵文字に登録してサジェスターを停止
         target_account.updateEmojiHistory(target_emoji);
-        $("#pop_emoji_suggester").hide("fade", 120);
+        $("#pop_emoji_suggester").hide(...Preference.getAnimation("WINDOW_FOLD"))
     });
 });
 

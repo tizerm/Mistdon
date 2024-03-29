@@ -1577,7 +1577,7 @@ class Status {
         // 動画の場合は自動再生
         if (target_media.is("video")) target_media.get(0).play()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
-        $("#modal_expand_image").show("fade", 80)
+        $("#modal_expand_image").show(...Preference.getAnimation("FADE_STD"))
     }
 
     /**
@@ -1645,7 +1645,7 @@ class Status {
         jqelm.find('.timeline>ul').append(this.element)
         // リアクション履歴を表示する
         jqelm.find('.recent_reaction').append(this.from_account.recent_reaction_html)
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "up" }, 150)
+        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("FADE_STD"))
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()
 
@@ -1664,8 +1664,7 @@ class Status {
         this.__detail_uuid = crypto.randomUUID()
         const window_key = `post_window_${this.__detail_uuid}`
 
-        // ウィンドウを生成
-        createWindow({
+        createWindow({ // ウィンドウを生成
             window_key: window_key,
             html: `
                 <div id="${window_key}" class="post_detail_window ex_window">
@@ -1684,7 +1683,8 @@ class Status {
             `,
             color: getRandomColor(),
             drag_only_x: false,
-            resizable: false
+            resizable: true,
+            resize_only_y: true
         })
 
         // 投稿内容をバインドして追加情報を非同期でバインド
@@ -1734,7 +1734,7 @@ class Status {
             'top': pos.top - 24,
             'left': pos.left - 12
         })
-        $("#pop_expand_post").show("fade", 80)
+        $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
     }
 
     /**

@@ -211,7 +211,7 @@ class Group {
             let remove_flg = false
             if (ul.find("li").length >= limit) remove_flg = true
             ul.prepend(post.timeline_element)
-            ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
+            ul.find('li:first-child').hide().show(...Preference.getAnimation("TIMELINE_DROP"))
             // 未読カウンターを上げる
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                 .text(++this.unread)
@@ -313,7 +313,7 @@ class Group {
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
         const del_elm = jqelm.parent().find(`li[id="${key}"]`)
         if (delay) // 遅延削除する場合は一旦時間をかけてフェードさせてから削除する
-            del_elm.hide("fade", 2500, () => del_elm.remove())
+            del_elm.hide(...Preference.getAnimation("FADE_DELETE"), () => del_elm.remove())
         // 遅延削除しない場合は即座にelementを削除
         else del_elm.remove()
     }

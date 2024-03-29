@@ -1205,7 +1205,7 @@ class Account {
                 </div>
                 <button type="button" id="__on_emoji_close" class="close_button">×</button>
             </div>
-        `).show("slide", { direction: "left" }, 150)
+        `).show(...Preference.getAnimation("FADE_STD"))
         // 絵文字履歴を表示する
         this.emoji_history.map(code => this.emojis.get(code)).forEach(
             emoji => $("#pop_custom_emoji .recent_emoji").append(`
@@ -1429,7 +1429,7 @@ class Account {
                 </tbody></table>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show("slide", { direction: "right" }, 150)
+        `).show(...Preference.getAnimation("WINDOW_FOLD"))
 
         // それぞれのアカウントのユーザー情報を取得してバインド
         Account.each(account => account.getInfo().then(user => {

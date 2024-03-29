@@ -105,7 +105,7 @@
         top: 108px;
         left: 0px;
         margin-top: 4px;
-        z-index: 10;
+        z-index: 50;
         border-radius: 8px;
         background-color: rgba(48,48,48,0.85);
         border: solid 1px #bbbbbb;
@@ -300,7 +300,7 @@
     /*=== General Context Menu Layout ============================================================*/
     > .pop_context {
         display: none;
-        z-index: 15;
+        z-index: 92;
         position: absolute;
         top: 108px;
         left: 12px;
@@ -331,7 +331,7 @@
     /*=== Post Account Select Menu ===============================================================*/
     > #pop_postuser {
         display: none;
-        z-index: 11;
+        z-index: 82;
         width: 360px;
         position: absolute;
         top: 108px;
@@ -366,7 +366,7 @@
     /*=== Draft Menu Layout ======================================================================*/
     > #pop_draft {
         display: none;
-        z-index: 11;
+        z-index: 81;
         position: absolute;
         top: 108px;
         left: 72px;
@@ -423,7 +423,7 @@
 
     /*=== Notifications Layout ===================================================================*/
     > #pop_notification {
-        z-index: 11;
+        z-index: 76;
         position: absolute;
         top: 108px;
         left: 64px;
@@ -497,7 +497,7 @@
     /*=== Custom Emojis Palette Layout ===========================================================*/
     > #pop_custom_emoji {
         display: none;
-        z-index: 7;
+        z-index: 61;
         width: min(400px,100vw);
         position: absolute;
         top: 198px;
@@ -548,7 +548,7 @@
         background-color: rgba(34,34,34,0.8);
         border: solid 1px #cccccc;
         border-radius: 8px;
-        z-index: 11;
+        z-index: 62;
         position: absolute;
         top: 198px;
         left: 64px;
@@ -608,7 +608,7 @@
         height: 100vh;
     }
     > #modal_drop_files {
-        z-index: 20;
+        z-index: 100;
         > .dropbox {
             position: absolute;
             top: 50%;
@@ -636,7 +636,7 @@
 
     /*=== Expand Image Modal Layout ==============================================================*/
     > #modal_expand_image {
-        z-index: 12;
+        z-index: 91;
         > ul {
             margin: 0px;
             padding: 0px;
@@ -678,7 +678,7 @@
     /*=== Post Expand Window Layout ==============================================================*/
     > #pop_expand_post {
         display: none;
-        z-index: 7;
+        z-index: 42;
         position: absolute;
 
         & ul {
@@ -695,7 +695,7 @@
     /*=== Post Default Action Pop Layout =========================================================*/
     > #pop_expand_action {
         display: none;
-        z-index: 6;
+        z-index: 41;
         position: absolute;
         border-radius: 8px;
         background-color: rgba(62,62,62,0.8);
@@ -767,7 +767,7 @@
         top: 320px;
         left: 50vw;
         transform: translate(-50%, 0%);
-        z-index: 11;
+        z-index: 71;
         > ul.drive_folder_list {
             height: 48px;
             white-space: nowrap;
@@ -856,7 +856,7 @@
     /*=== Extra Timeline Window Layout ===========================================================*/
     > #pop_ex_timeline {
         display: none;
-        z-index: 5;
+        z-index: 63;
         border-radius: 8px;
         background-color: rgba(34,34,34,0.683);
         padding: 4px 0px 4px 4px;
@@ -1065,7 +1065,7 @@
         }
     }
     .timeline_window.ex_window {
-        z-index: 4;
+        z-index: 31;
         width: min(380px,100vw);
         height: min(960px,100vh);
         right: 0px;
@@ -1078,20 +1078,20 @@
     }
     .account_timeline.single_user.ex_window {
         width: min(480px,100vw);
-        z-index: 6;
+        z-index: 32;
         right: 0px;
     }
     .instance_window.ex_window {
         width: min(420px,100vw);
         height: min(960px,100vh);
-        z-index: 7;
+        z-index: 33;
         right: 0px;
         > table { height: calc(100% - 36px); }
     }
     .post_detail_window.ex_window {
         width: min(480px,100vw);
         height: min(800px,100vh);
-        z-index: 8;
+        z-index: 34;
         right: 0px;
         > h2>a { color: #fff; }
         > .timeline {
@@ -1099,7 +1099,7 @@
             > ul { height: calc(100% - 8px); }
         }
     }
-    > #pop_multi_window>.ex_window.active { z-index: 9; }
+    > #pop_multi_window>.ex_window.active { z-index: 39; }
 
     /*=== Extend Column (Optional) ===============================================================*/
     > #pop_extend_column {

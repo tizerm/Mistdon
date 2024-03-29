@@ -52,8 +52,8 @@ $(() => (async () => {
         revert: 50,
         opacity: 0.75,
         tolerance: "pointer",
-        start: (e, ui) => $("#post_options  .__attach_delete_box").show("fade", 80),
-        stop: (e, ui) => $("#post_options  .__attach_delete_box").hide("fade", 80),
+        start: (e, ui) => $("#post_options  .__attach_delete_box").show(...Preference.getAnimation("FADE_FAST")),
+        stop: (e, ui) => $("#post_options  .__attach_delete_box").hide(...Preference.getAnimation("FADE_FAST")),
         update: (e, ui) => {
             // 添付メディアが空になったら初期化メッセージを表示
             if ($("#post_options .__ui_media_sortable>li").length == 0)
@@ -88,35 +88,8 @@ $(() => (async () => {
     Preference.setAlternateTimelinePref()
 
     // ツールチップを設定表示
-    $("#header>#head_postarea").tooltip({
-        position: {
-            my: "center top",
-            at: "center bottom"
-        },
-        show: {
-            effect: "slideDown",
-            duration: 80
-        },
-        hide: {
-            effect: "slideUp",
-            duration: 80
-        }
-    })
-    $("#pop_expand_action, #post_options").tooltip({
-        position: {
-            my: "center bottom-8",
-            at: "center top"
-        }
-        ,
-        show: {
-            effect: "fade",
-            duration: 80
-        },
-        hide: {
-            effect: "fade",
-            duration: 80
-        }
-    })
+    $("#header>#head_postarea").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
+    $("#pop_expand_action, #post_options").tooltip(Preference.getUIPref("UPPER", "UI_FADE_ANIMATION"))
 
     // 設定からスタイルシートを生成
     Preference.generateStylesheet()
@@ -141,7 +114,8 @@ $(() => (async () => {
         closeFunc: () => Notification.info(`${account.full_address}との接続が一時的に切断されました.`),
         reconnect: true
     }))
-    Column.tooltip() // カラムにツールチップを設定
+    // カラムにツールチップを設定
+    $("td .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
     // 見えている中で最初のカラムにカーソルをセット
     Column.getOpenedFirst().setCursor()
 })())

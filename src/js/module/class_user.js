@@ -750,8 +750,7 @@ class User {
         // 一意認識用のUUIDを生成
         const window_key = `user_window_${this.user_uuid}`
 
-        // ウィンドウを生成
-        createWindow({
+        createWindow({ // ウィンドウを生成
             window_key: window_key,
             html: `
                 <div id="${window_key}" class="account_timeline single_user ex_window">
@@ -770,7 +769,8 @@ class User {
             `,
             color: getRandomColor(),
             drag_only_x: true,
-            resizable: false
+            resizable: false,
+            resize_only_y: false
         })
 
         // キーを設定してバインド処理を実行
@@ -797,20 +797,7 @@ class User {
         `); else target_elm.find('.profile_header .user_header').css('background-size', '480px auto')
 
         // ヘッダ部分にツールチップを生成
-        target_elm.find(".detail_info").tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 80
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 80
-            }
-        })
+        target_elm.find(".detail_info").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             Emojis.replaceDomAsync(target_elm.find(".profile_header .username"), this.host) // ユーザー名
             Emojis.replaceDomAsync(target_elm.find(".profile_detail .main_content"), this.host) // プロフィール文

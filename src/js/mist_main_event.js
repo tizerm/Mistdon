@@ -66,7 +66,7 @@
                 <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("FADE_STD"))
         $.ajax({
             url: "help/help_keybind.html",
             cache: false
@@ -85,7 +85,7 @@
      * => アカウント変更メニュー表示
      */
     $("#header>#head_postarea .__lnk_postuser").on("click", e =>
-        $("#pop_postuser").show("slide", { direction: "up" }, 150))
+        $("#pop_postuser").show(...Preference.getAnimation("WINDOW_FOLD")))
 
     /**
      * #Event
@@ -94,7 +94,7 @@
      */
     $(document).on("click", ".__lnk_account_elm", e => {
         Account.get($(e.target).closest(".__lnk_account_elm").attr('name')).setPostAccount()
-        $("#pop_postuser").hide("slide", { direction: "up" }, 150)
+        $("#pop_postuser").hide(...Preference.getAnimation("WINDOW_FOLD"))
     })
 
     /**
@@ -193,7 +193,7 @@
         $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
             const length = $(e.target).val().length
             const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
-            const rate = length / limit // TODO: とりあえず一旦最大500字固定
+            const rate = length / limit
             const deg = 360 * rate
 
             if (length > 0) {
@@ -221,7 +221,7 @@
      * => 投稿オプションの表示をトグルする
      */
     $("#__open_post_option").on("click",
-        e => $("#header>#post_options").toggle("slide", { direction: "up" }, 120))
+        e => $("#header>#post_options").toggle(...Preference.getAnimation("SLIDE_FAST")))
 
     /**
      * #Event #Focus
@@ -230,7 +230,7 @@
      */
     $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
         if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
-        $("#header>#post_options").show("slide", { direction: "up" }, 120)
+        $("#header>#post_options").show(...Preference.getAnimation("SLIDE_FAST"))
     })
 
     /**
@@ -241,7 +241,7 @@
     $("body").on("click", e => {
         // 投稿オプションを閉じない場所をクリックした場合はなにもしない
         if ($(e.target).closest(".__ignore_close_option").length > 0 || !$("#header>#post_options").is(":visible")) return
-        $("#header>#post_options").hide("slide", { direction: "up" }, 120)
+        $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
     })
 
     /**
@@ -255,7 +255,7 @@
             // 投稿成功時処理(書いた内容を消す)
             success: () => {
                 $("#__on_reset_option").click()
-                $("#header>#post_options").hide("slide", { direction: "up" }, 120)
+                $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
                 $("#__on_emoji_close").click()
             }
         }))
@@ -270,7 +270,7 @@
             id: $("#__hdn_reaction_id").val(),
             shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
             // 投稿成功時処理(リプライウィンドウを閉じる)
-            success: () => $("#pop_extend_column").hide("slide", { direction: "right" }, 150)
+            success: () => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP"))
         }))
 
     /**
@@ -423,7 +423,7 @@
         e.preventDefault()
         // 画面内の画像をドラッグした場合は発火しない
         if (e.dataTransfer.types[0] != 'Files' || $("#modal_drop_files").is(":visible")) return
-        $("#modal_drop_files").show("fade", 120)
+        $("#modal_drop_files").show(...Preference.getAnimation("FADE_STD"))
     })
 
     /**
@@ -433,7 +433,7 @@
      */
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragover", e => e.preventDefault())
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
-        // 再発火の可能性をおさえるため遅めにフェードアウトする
+        // 再発火の可能性をおさえるため遅めにフェードアウトする(これは設定で無効化しない)
         e.preventDefault()
         $("#modal_drop_files").hide("fade", 800)
     })
@@ -450,9 +450,9 @@
         Media.attachMedia([...e.dataTransfer.files])
 
         // ドロップ領域を消して投稿オプションを開く
-        $("#modal_drop_files").hide("fade", 120)
+        $("#modal_drop_files").hide(...Preference.getAnimation("FADE_STD"))
         if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
-            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+            $("#header>#post_options").show(...Preference.getAnimation("SLIDE_FAST"))
     })
 
     /**
@@ -469,7 +469,7 @@
         Media.attachMedia([e.clipboardData.items[0].getAsFile()])
 
         if (!$("#header>#post_options").is(":visible")) // 投稿オプションを開く
-            $("#header>#post_options").show("slide", { direction: "up" }, 120)
+            $("#header>#post_options").show(...Preference.getAnimation("SLIDE_FAST"))
     })
 
     /*=== Column And Group Event =================================================================================*/
@@ -556,7 +556,7 @@
      * => 非表示にしている閲覧注意情報をトグルする
      */
     $(document).on("click", ".expand_header", e =>
-        $(e.target).closest("a").next().toggle("slide", { direction: "up" }, 100))
+        $(e.target).closest("a").next().toggle(...Preference.getAnimation("SLIDE_DOWN")))
 
     /**
      * #Event
@@ -601,7 +601,7 @@
      */
     $(document).on("click", "#modal_expand_image", e => {
         if ($(e.target).is("video")) return // 動画の場合はなにもしない
-        $("#modal_expand_image").hide("fade", 80, () => $("#modal_expand_image video").remove())
+        $("#modal_expand_image").hide(...Preference.getAnimation("FADE_STD"), () => $("#modal_expand_image video").remove())
     })
 
     /**
@@ -695,7 +695,7 @@
      * 投稿ポップアップ.
      * => マウスが出たらポップアップを消す
      */
-    $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide("fade", 80))
+    $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide(...Preference.getAnimation("FADE_STD")))
 
     /**
      * #Event #Mouseenter
@@ -793,7 +793,7 @@
      * 簡易アクションバー: 最近のリアクションを開く.
      */
     $(document).on("click", ".__short_open_reaction",
-        e => $("#pop_expand_action>.reactions").show("slide", { direction: "up" }, 80))
+        e => $("#pop_expand_action>.reactions").show(...Preference.getAnimation("SLIDE_DOWN")))
 
     /**
      * #Event
@@ -818,7 +818,7 @@
             $("#pop_expand_action>.impressions>.impress_reply").text(post.count_reply)
             $("#pop_expand_action>.impressions>.impress_reblog").text(post.count_reblog)
             $("#pop_expand_action>.impressions>.impress_fav").text(post.count_fav)
-            $("#pop_expand_action>.impressions").show("slide", { direction: "up" }, 80)
+            $("#pop_expand_action>.impressions").show(...Preference.getAnimation("FADE_STD"))
         }))
 
     /**
@@ -1081,15 +1081,15 @@
      * => 表示してあるコンテキストメニューを閉じる
      */
     $("body").on("click", e => {
-        $("#pop_context_menu").hide("slide", { direction: "left" }, 100)
-        $("#pop_context_user").hide("slide", { direction: "left" }, 100)
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        $("#pop_context_user").hide(...Preference.getAnimation("WINDOW_FOLD"))
         if (!$(e.target).is("#header>#head_postarea .posticon"))
             // 投稿アイコン以外をクリックした場合に投稿アカウント変更を隠す
-            $("#pop_postuser").hide("slide", { direction: "up" }, 150)
+            $("#pop_postuser").hide(...Preference.getAnimation("WINDOW_FOLD"))
         if ($(e.target).closest("#__open_draft").length == 0)
-            $("#pop_draft").hide("slide", { direction: "left" }, 150)
+            $("#pop_draft").hide(...Preference.getAnimation("WINDOW_FOLD"))
         if ($(e.target).closest("#pop_notif_log").length == 0 && $(e.target).closest("#__on_notification").length == 0)
-            $("#pop_notif_log").hide("slide", { direction: "left" }, 150)
+            $("#pop_notif_log").hide(...Preference.getAnimation("WINDOW_FOLD"))
     })
 
     /**
@@ -1099,7 +1099,7 @@
      */
     $(document).on("click", "#pop_context_menu>.ui_menu>li ul.account_menu>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"))
-        $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
         target_account.reaction({
             target_mode: $(e.target).closest("ul").attr("id"),
             target_url: $("#pop_context_menu").attr("name")
@@ -1114,7 +1114,7 @@
     $(document).on("click",
         "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
             const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
-            $("#pop_context_menu").hide("slide", { direction: "up" }, 100)
+            $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
             const clicked_elm = $(e.target).closest("li")
             let option = null
             if (clicked_elm.is(".__renote_send_local")) option = 'local'
@@ -1173,7 +1173,7 @@
      */
     $(document).on("click", "#pop_context_user>.ui_menu>li ul>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"))
-        $("#pop_context_user").hide("slide", { direction: "up" }, 100)
+        $("#pop_context_user").hide(...Preference.getAnimation("WINDOW_FOLD"))
         target_account.userAction({
             target_mode: $(e.target).closest("ul").attr("id"),
             target_user: $("#pop_context_user").attr("name")
@@ -1229,7 +1229,7 @@
         // ユーザーウィンドウとタイムラインウィンドウはキャッシュマップを削除
         if (target_window.is(".account_timeline")) User.deleteCache(target_window.find("td"))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
-        target_window.hide("fade", 150, () => target_window.remove())
+        target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
 
     /**
@@ -1260,9 +1260,8 @@
      * #Event
      * 各種ウィンドウの閉じるボタン.
      */
-    $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150))
-    $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide("slide", { direction: "right" }, 150))
-    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide("slide", { direction: "left" }, 150))
-    $(document).on("click", "#__on_pop_window_close", e => $("#pop_window_timeline").hide("fade", 150))
-    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide("fade", 120))
+    $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
+    $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
+    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
+    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("WINDOW_FOLD")))
 })

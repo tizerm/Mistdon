@@ -166,28 +166,6 @@ class Column {
     }
 
     /**
-     * #StaticMethod
-     * カラムのボタンにツールチップを設定する
-     */
-    static tooltip() {
-        // カラムオプションにツールチップ表示
-        $("td .col_action, .tl_group_box .gp_action").tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 100
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 100
-            }
-        });
-    }
-
-    /**
      * #Method
      * このカラムにカーソルを設定
      */

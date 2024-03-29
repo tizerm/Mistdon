@@ -25,20 +25,8 @@ $(() => {
     });//*/
 
     // ナビゲーションメニューホバー時にツールチップ表示
-    $("#navi").tooltip({
-        position: {
-            my: "left+15 bottom+2",
-            at: "right center"
-        },
-        show: {
-            effect: "slide",
-            duration: 80
-        },
-        hide: {
-            effect: "slide",
-            duration: 80
-        }
-    });
+    $("#navi").tooltip(Preference.getUIPref("RIGHT", "UI_DROP_ANIMATION"))
+
     // 外部表示リンククリックイベント
     $(document).on("click", ".__lnk_external", e => {
         const url = $(e.target).closest("a").attr("href");
@@ -196,7 +184,7 @@ function popContextMenu(e, id) {
         'top': `${e.pageY - 8}px`,
         'left': `${e.pageX - 8}px`
     });
-    $(`#${id}`).show("slide", { direction: "left" }, 100);
+    $(`#${id}`).show(...Preference.getAnimation("WINDOW_FOLD"))
 }
 
 /**
@@ -243,19 +231,14 @@ function toast(text, type, progress_id) {
 function dialog(arg) {
     const dialog_elm = $("#pop_dialog");
     dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
+    const animation_pref = Preference.getUIPref(null, "UI_DIALOG_ANIMATION")
     if (arg.type == 'alert') dialog_elm.dialog({ // アラート
         resizable: false,
         draggable: false,
         width: 400,
         modal: true,
-        show: {
-            effect: "bounce",
-            duration: 120
-        },
-        hide: {
-            effect: "puff",
-            duration: 120
-        },
+        show: animation_pref?.show,
+        hide: animation_pref?.hide,
         close: (event, ui) => { // ダイアログを閉じた後になにか処理がある場合はコールバック実行
             dialog_elm.dialog("destroy");
             if (arg.accept) arg.accept();
@@ -266,14 +249,8 @@ function dialog(arg) {
         draggable: false,
         width: 400,
         modal: true,
-        show: {
-            effect: "bounce",
-            duration: 120
-        },
-        hide: {
-            effect: "puff",
-            duration: 120
-        },
+        show: animation_pref?.show,
+        hide: animation_pref?.hide,
         close: (event, ui) => dialog_elm.dialog("destroy"),
         buttons: {
             "OK": () => { // ダイアログを閉じてコールバック関数を実行
@@ -306,26 +283,13 @@ function createWindow(arg) {
     })
 
     // リサイズ可能にする場合はResizableにする
-    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: "all" })
+    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: arg.resize_only_y ? "n, s" : "all" })
 
     // ヘッダボタンにツールチップを設定
-    $(`#${arg.window_key}>.window_buttons`).tooltip({
-        position: {
-            my: "center top",
-            at: "center bottom"
-        },
-        show: {
-            effect: "slideDown",
-            duration: 80
-        },
-        hide: {
-            effect: "slideUp",
-            duration: 80
-        }
-    })
+    $(`#${arg.window_key}>.window_buttons`).tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
 
     // 開いているウィンドウの数だけ初期配置をズラす
-    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).show("fade", 150)
+    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).show(...Preference.getAnimation("WINDOW_FOLD"))
 }
 
 /**

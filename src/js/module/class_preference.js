@@ -31,6 +31,7 @@ class Preference {
                     "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
                     "enable_action_palette"         : true,     // 簡易アクションパレット
                     "enable_media_confirm"          : true,     // メディア投稿確認
+                    "enable_animation"              : true,     // アニメーション
                     "enable_tips"                   : true,     // TIPS表示
                     "auto_expand": {                            // 自動展開
                         "search_cw"                 : false,    // 検索: CW
@@ -76,6 +77,86 @@ class Preference {
                 }
             else Preference.GENERAL_PREFERENCE = general_pref
         })()
+
+        // アニメーションの固定値設定
+        Preference.NO_ANIMATION = ["fade", 1]
+        const animation_map = new Map()
+
+        animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
+        animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
+        animation_map.set("TIMELINE_DROP"    , ["drop" , { direction: "up"    }, 160])
+        animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
+        animation_map.set("SLIDE_FAST"       , ["slide", { direction: "up"    }, 80])
+        animation_map.set("SLIDE_DOWN"       , ["slide", { direction: "up"    }, 160])
+        animation_map.set("FADE_FAST"        , ["fade"                         , 80])
+        animation_map.set("FADE_STD"         , ["fade"                         , 160])
+        animation_map.set("FADE_DELETE"      , ["fade"                         , 2500])
+        animation_map.set("WINDOW_FOLD"      , ["fold" , { size : 32          }, 160])
+
+        Preference.ANIMATION_MAP = animation_map
+
+        // UIアニメーションの固定値設定
+        const position_map = new Map()
+
+        position_map.set("DROP", {
+            my: "center top",
+            at: "center bottom"
+        })
+        position_map.set("UPPER", {
+            my: "center bottom-8",
+            at: "center top"
+        })
+        position_map.set("RIGHT", {
+            my: "left+15 bottom+2",
+            at: "right center"
+        })
+
+        Preference.POSITION_MAP = position_map
+
+        const ui_map = new Map()
+
+        ui_map.set("UI_DROP_ANIMATION", {
+            show: {
+                effect: "slide",
+                duration: 80
+            },
+            hide: {
+                effect: "slide",
+                duration: 80
+            }
+        })
+        ui_map.set("UI_FADE_ANIMATION", {
+            show: {
+                effect: "fade",
+                duration: 80
+            },
+            hide: {
+                effect: "fade",
+                duration: 80
+            }
+        })
+        ui_map.set("UI_DIALOG_ANIMATION", {
+            show: {
+                effect: "fold",
+                duration: 160
+            },
+            hide: {
+                effect: "fold",
+                duration: 160
+            }
+        })
+
+        Preference.UI_ANIM_MAP = ui_map
+        Preference.UI_NO_ANIMATION = {
+            show: {
+                effect: "fade",
+                duration: 1
+            },
+            hide: {
+                effect: "fade",
+                duration: 1
+            }
+        }
     }
 
     /**
@@ -143,6 +224,7 @@ class Preference {
         $("#__chk_gen_hide_additional_account").prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_show_media_confirm").prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
+        $("#__chk_gen_animation").prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
 
         // 自動展開
@@ -208,6 +290,7 @@ class Preference {
             "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
+            "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
             "auto_expand": {                // 自動展開
                 "search_cw"                 : $("#__chk_gen_expand_cw_search").prop("checked"),
@@ -327,5 +410,32 @@ class Preference {
             }
         `)
     }
-}
+
+    /**
+     * #StaticMethod
+     * イージングの種類を指定してアニメーションパラメータを取得.
+     * 
+     * @param type アニメーションタイプ
+     */
+    static getAnimation(type) {
+        if (Preference.GENERAL_PREFERENCE.enable_animation) return Preference.ANIMATION_MAP.get(type)
+        else return Preference.NO_ANIMATION
+    }
+
+    /**
+     * #StaticMethod
+     * イージングの種類を指定してjQueryUI用のパラメータを取得.
+     * 
+     * @param position ポジションタイプ
+     * @param animation アニメーションタイプ
+     */
+    static getUIPref(position, animation) {
+        const animation_obj = Preference.GENERAL_PREFERENCE.enable_animation
+            ? Preference.UI_ANIM_MAP.get(animation) : Preference.UI_NO_ANIMATION
+        return {
+            position: position ? Preference.POSITION_MAP.get(position) : undefined,
+            show: animation_obj?.show,
+            hide: animation_obj?.hide
+        }
+    }}
 

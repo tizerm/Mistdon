@@ -91,9 +91,9 @@
                     $("#pop_multi_window>.ex_window>.window_buttons>.window_close_button").click()
                     return false
                 }
-                $("#pop_extend_column:visible").hide("slide", { direction: "right" }, 150)
-                $("#pop_ex_timeline:visible").hide("slide", { direction: "up" }, 150)
-                $("#pop_custom_emoji:visible").hide("slide", { direction: "left" }, 150)
+                $("#pop_extend_column:visible").hide(...Preference.getAnimation("EXTEND_DROP"))
+                $("#pop_ex_timeline:visible").hide(...Preference.getAnimation("EXTEND_DROP"))
+                $("#pop_custom_emoji:visible").hide(...Preference.getAnimation("EXTEND_DROP"))
                 return false
             case 65:
             case 37: // a, <-: カーソルを左に移動

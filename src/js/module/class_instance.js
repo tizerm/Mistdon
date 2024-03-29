@@ -513,8 +513,7 @@ class Instance {
         this.__instance_uuid = crypto.randomUUID()
         const window_key = `instance_window_${this.__instance_uuid}`
 
-        // ウィンドウを生成
-        createWindow({
+        createWindow({ // ウィンドウを生成
             window_key: window_key,
             html: `
                 <div id="${window_key}" class="instance_window ex_window">
@@ -539,7 +538,8 @@ class Instance {
             `,
             color: getRandomColor(),
             drag_only_x: false,
-            resizable: false
+            resizable: false,
+            resize_only_y: false
         })
 
         // 内容をウィンドウにバインド

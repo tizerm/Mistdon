@@ -118,12 +118,12 @@ class Notification {
         // 通知トーストを生成して表示
         $("#pop_notification>ul").append(this.element)
         const target_elm = $(`#pop_notification>ul>li#${this.uuid}`)
-        target_elm.hide().show("slide", { direction: "up" }, 80)
+        target_elm.hide().show(...Preference.getAnimation("LEFT_DROP"))
 
         // アイコンを変更
         Notification.progressIcon()
         // 1.2secでトーストを削除
-        setTimeout(() => target_elm.hide("fade", 400, () => target_elm.remove()), 1600)
+        setTimeout(() => target_elm.hide(...Preference.getAnimation("NOTIFICATION_DROP"), () => target_elm.remove()), 1600)
     }
 
     /**
@@ -143,7 +143,7 @@ class Notification {
         let html = ''
         Notification.NOTIFICATION_HISTORY.forEach(n => html += n.log_elm)
         $("#pop_notif_log>ul").html(html)
-        $("#pop_notif_log").show("slide", { direction: "left" }, 150)
+        $("#pop_notif_log").show(...Preference.getAnimation("FADE_STD"))
     }
 
 }

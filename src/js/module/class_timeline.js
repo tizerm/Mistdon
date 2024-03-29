@@ -248,8 +248,7 @@ class Timeline {
         const timeline_key = `timeline_${this.__timeline_uuid}`
         const window_key = `timeline_window_${this.__timeline_uuid}`
 
-        // ウィンドウを生成
-        createWindow({
+        createWindow({ // ウィンドウを生成
             window_key: window_key,
             html: `
                 <div id="${window_key}" class="timeline_window ex_window">
@@ -272,7 +271,8 @@ class Timeline {
             `,
             color: this.pref.color ?? this.target_account?.pref.acc_color,
             drag_only_x: false,
-            resizable: true
+            resizable: true,
+            resize_only_y: false
         })
 
         // 参照した投稿からタイムラインを取得
