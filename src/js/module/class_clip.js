@@ -53,7 +53,7 @@ class Clip {
                 </div>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show(...Preference.getAnimation("FADE_STD"))
+        `).show(...Preference.getAnimation("SLIDE_RIGHT"))
 
         // 非同期でクリップ一覧を表示
         ; (async () => Account.eachPlatform('Misskey', account => account.getClips()

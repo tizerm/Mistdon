@@ -145,7 +145,7 @@ class Media {
                 <img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/>
             </li>
         `))
-        $("#pop_dirve_window").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        $("#pop_dirve_window").hide(...Preference.getAnimation("SLIDE_DOWN"))
         $("#header>#post_options").show(...Preference.getAnimation("SLIDE_DOWN"))
     }
 
@@ -398,7 +398,7 @@ class Media {
                 load: async max_id => Media.getRecentMedia(address, null, max_id)
             })
         })
-        $("#pop_dirve_window").show(...Preference.getAnimation("WINDOW_FOLD"))
+        $("#pop_dirve_window").show(...Preference.getAnimation("SLIDE_DOWN"))
     }
 
     /**

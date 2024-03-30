@@ -123,7 +123,7 @@ class Draft {
     get json() {
         return {
             "account": this.account,
-            "date": this.date,
+            "date": this.date.time,
             "content": this.content,
             "cw": this.cw,
             "visibility": this.visibility,

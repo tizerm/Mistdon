@@ -289,7 +289,8 @@ function createWindow(arg) {
     $(`#${arg.window_key}>.window_buttons`).tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
 
     // 開いているウィンドウの数だけ初期配置をズラす
-    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).show(...Preference.getAnimation("WINDOW_FOLD"))
+    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).mousedown()
+    $(`#${arg.window_key}`).show(...Preference.getAnimation("WINDOW_FOLD"))
 }
 
 /**

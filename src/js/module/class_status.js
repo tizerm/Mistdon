@@ -1645,7 +1645,7 @@ class Status {
         jqelm.find('.timeline>ul').append(this.element)
         // リアクション履歴を表示する
         jqelm.find('.recent_reaction').append(this.from_account.recent_reaction_html)
-        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("FADE_STD"))
+        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()
 
@@ -1734,7 +1734,7 @@ class Status {
             'top': pos.top - 24,
             'left': pos.left - 12
         })
-        $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
+        $("#pop_expand_post").show(...Preference.getAnimation("POP_FOLD"))
     }
 
     /**

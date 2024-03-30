@@ -72,7 +72,7 @@ class History {
                 </tr></tbody></table>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show(...Preference.getAnimation("FADE_STD"))
+        `).show(...Preference.getAnimation("SLIDE_RIGHT"))
 
         History.preload($("#pop_ex_timeline .post_history ul"), History.post_stack)
         History.preload($("#pop_ex_timeline .reaction_history ul"), History.activity_stack)

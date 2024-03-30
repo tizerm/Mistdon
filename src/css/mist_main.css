@@ -114,7 +114,8 @@
         &::-webkit-scrollbar { height: 8px; }
         > .flex_section {
             display: flex;
-            width: max(calc(100vw - 72px),800px);
+            width: max(calc(100vw - 72px),880px);
+            height: 208px;
             & h5 {
                 border-bottom: solid 1px #dddddd;
                 margin: 4px 0px;
@@ -153,37 +154,44 @@
             }
 
             > .additional_users {
-                flex-basis: 172px;
+                width: 172px;
+                min-width: 172px;
                 text-align: center;
-                > ul.account_list>li {
-                    display: inline-block;
-                    > label {
-                        border-radius: 16px;
-                        padding: 1px;
-                        margin: 2px;
-                        > img {
-                            width: 48px;
-                            height: 48px;
+                > ul.account_list {
+                    overflow-y: auto;
+                    height: calc(100% - 32px);
+                    &::-webkit-scrollbar { width: 8px; }
+                    > li {
+                        display: inline-block;
+                        > label {
                             border-radius: 16px;
+                            padding: 1px;
+                            margin: 2px;
+                            > img {
+                                width: 48px;
+                                height: 48px;
+                                border-radius: 16px;
+                            }
+                            > .check_mask {
+                                border-radius: 16px;
+                                background-size: 32px 32px;
+                            }
                         }
-                        > .check_mask {
-                            border-radius: 16px;
-                            background-size: 32px 32px;
+                        > input.__chk_add_account[disabled]+label>.check_mask {
+                            display: block;
+                            background-color: rgba(119,119,119,0.6);
+                            background-image: url("../resources/ic_check.png");
                         }
                     }
-                    > input.__chk_add_account[disabled]+label>.check_mask {
-                        display: block;
-                        background-color: rgba(119,119,119,0.6);
-                        background-image: url("../resources/ic_check.png");
+                    + .option_close {
+                        background-color: #514285;
+                        display: none;
                     }
-                }
-                + .option_close {
-                    background-color: #514285;
-                    display: none;
                 }
             }
             > .publish_setting {
-                flex-basis: 172px;
+                width: 172px;
+                min-width: 172px;
                 text-align: center;
                 & input[name="__opt_visibility"]+label {
                     border-radius: 16px;
@@ -197,7 +205,12 @@
             > .poll_setting {
                 display: none;
                 flex-basis: 156px;
-                .__txt_poll_option { width: 100%; }
+                > ul.poll_options {
+                    overflow-y: auto;
+                    height: calc(100% - 82px);
+                    &::-webkit-scrollbar { width: 8px; }
+                }
+                .__txt_poll_option { width: calc(100% - 8px); }
                 #__txt_poll_expire_time { width: 82px; }
                 + .option_close { background-color: #428571; }
             }
@@ -206,6 +219,9 @@
                 > ul.media_list {
                     margin: 0px 8px;
                     margin-bottom: 4px;
+                    overflow-y: auto;
+                    height: calc(100% - 62px);
+                    &::-webkit-scrollbar { width: 8px; }
                     > li {
                         position: relative;
                         display: inline-block;
@@ -269,10 +285,11 @@
             }
             > .refernced_post {
                 display: none;
-                flex-basis: 270px;
-                max-width: 360px;
+                flex-basis: 320px;
+                max-width: 320px;
                 > ul.refernce_post {
-                    height: auto;
+                    overflow-y: auto;
+                    height: calc(100% - 32px);
                     max-width: 100%;
                     > li {
                         margin: 2px;
@@ -464,6 +481,7 @@
                 }
             }
         }
+        > ul.progress { display: none; }
     }
 
     
@@ -883,6 +901,7 @@
             overflow-x: scroll;
             &::-webkit-scrollbar { height: 8px; }
         }
+        &:has(>.account_timeline) { z-index: 30; }
 
         /*=== History Timeline Layout ============================================================*/
         > .history_timeline {

@@ -46,7 +46,7 @@ class Query {
                 </div>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show(...Preference.getAnimation("FADE_STD"), () => $("#__txt_search_query").focus())
+        `).show(...Preference.getAnimation("SLIDE_RIGHT"), () => $("#__txt_search_query").focus())
     }
 
     /**

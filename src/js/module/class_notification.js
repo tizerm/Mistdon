@@ -116,14 +116,26 @@ class Notification {
      */
     show() {
         // 通知トーストを生成して表示
-        $("#pop_notification>ul").append(this.element)
-        const target_elm = $(`#pop_notification>ul>li#${this.uuid}`)
+        $("#pop_notification>ul.pushed").append(this.element)
+        const target_elm = $(`#pop_notification>ul.pushed>li#${this.uuid}`)
         target_elm.hide().show(...Preference.getAnimation("LEFT_DROP"))
 
         // アイコンを変更
         Notification.progressIcon()
         // 1.2secでトーストを削除
         setTimeout(() => target_elm.hide(...Preference.getAnimation("NOTIFICATION_DROP"), () => target_elm.remove()), 1600)
+    }
+
+    /**
+     * #StaticMethod
+     * 実行中のタスクをポップアップ表示する.
+     */
+    static showProgress() {
+        // なかったらなにもしない
+        if (Notification.PROGRESS_MAP.size == 0) return
+        const pgitr = Notification.PROGRESS_MAP.values()
+        for (const elm of pgitr) $("#pop_notification>ul.progress").append(elm.element)
+        $("#pop_notification>ul.progress").show(...Preference.getAnimation("LEFT_DROP"))
     }
 
     /**
@@ -143,7 +155,7 @@ class Notification {
         let html = ''
         Notification.NOTIFICATION_HISTORY.forEach(n => html += n.log_elm)
         $("#pop_notif_log>ul").html(html)
-        $("#pop_notif_log").show(...Preference.getAnimation("FADE_STD"))
+        $("#pop_notif_log").show(...Preference.getAnimation("SLIDE_LEFT"))
     }
 
 }

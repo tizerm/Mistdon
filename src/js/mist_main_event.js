@@ -4,8 +4,27 @@
     /**
      * #Event
      * アプリアイコン.
+     * => 通知ログを生成
      */
     $("#navi #__on_notification").on("click", e => Notification.createLog())
+
+    /**
+     * #Event #Mouseenter
+     * アプリアイコン(ホバー).
+     * => 実行中のタスクを表示
+     */
+    $("#navi #__on_notification").on("mouseenter", e => Notification.showProgress())
+
+    /**
+     * #Event #Mouseleave
+     * アプリアイコン(ホバーアウト).
+     * => 実行中のタスク一覧を消去
+     */
+    $("#navi #__on_notification").on("mouseleave", e => {
+        if (!$("#pop_notification>ul.progress").is(":visible")) return // 表示されていなかったらなにもしない
+        $("#pop_notification>ul.progress").hide(...Preference.getAnimation("LEFT_DROP"),
+            () => $("#pop_notification>ul.progress").empty())
+    })
 
     /**
      * #Event
@@ -66,7 +85,7 @@
                 <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
-        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("FADE_STD"))
+        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         $.ajax({
             url: "help/help_keybind.html",
             cache: false
@@ -415,8 +434,7 @@
     $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
     /**
-     * #Event #Dragenter
-     * 添付メディア: 外部ファイラーからファイルをドラッグ.
+     * #Event #Dragenter     * 添付メディア: 外部ファイラーからファイルをドラッグ.
      * => ファイル添付モーダルを表示
      */
     document.addEventListener("dragenter", e => {
@@ -697,7 +715,8 @@
      * 投稿ポップアップ.
      * => マウスが出たらポップアップを消す
      */
-    $(document).on("mouseleave", "#pop_expand_post>ul>li", e => $("#pop_expand_post").hide(...Preference.getAnimation("FADE_STD")))
+    $(document).on("mouseleave", "#pop_expand_post>ul>li",
+        e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
 
     /**
      * #Event #Mouseenter
@@ -1265,5 +1284,5 @@
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
-    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("WINDOW_FOLD")))
+    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("SLIDE_DOWN")))
 })

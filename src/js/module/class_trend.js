@@ -222,7 +222,7 @@ class Trend {
                 </div>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
-        `).show(...Preference.getAnimation("FADE_STD"))
+        `).show(...Preference.getAnimation("SLIDE_RIGHT"))
 
         // すべてのアカウントからトレンド情報をを取得してバインド
         ;(async () => {

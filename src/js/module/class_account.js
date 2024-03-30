@@ -312,7 +312,7 @@ class Account {
                      // アンケートがある場合はアンケートを生成
                     if (poll) request_param.poll = {
                         "choices": poll.options,
-                        "expiredAfter": poll.expire_sec
+                        "expiredAfter": poll.expire_sec * 1000
                     }
                     // リプライの場合はリプライ先ノートIDを設定
                     if (reply_id) request_param.replyId = reply_id
@@ -1205,7 +1205,7 @@ class Account {
                 </div>
                 <button type="button" id="__on_emoji_close" class="close_button">×</button>
             </div>
-        `).show(...Preference.getAnimation("FADE_STD"))
+        `).show(...Preference.getAnimation("SLIDE_LEFT"))
         // 絵文字履歴を表示する
         this.emoji_history.map(code => this.emojis.get(code)).filter(f => f).forEach(
             emoji => $("#pop_custom_emoji .recent_emoji").append(`
@@ -1299,6 +1299,7 @@ class Account {
             <label for="__chk_${k}" title="${k}"><img
                 src="${v.pref.avatar_url}" class="user_icon"/><div class="check_mask"></div></label>
         </li>`)
+
         return html
     }
 

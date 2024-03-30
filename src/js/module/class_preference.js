@@ -82,15 +82,18 @@ class Preference {
         Preference.NO_ANIMATION = ["fade", 1]
         const animation_map = new Map()
 
+        animation_map.set("TIMELINE_APPEND"  , ["drop" , { direction: "left"  }, 250])
+        animation_map.set("TIMELINE_DELETE"  , ["drop" , { direction: "left"  }, 2500])
         animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
         animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
-        animation_map.set("TIMELINE_DROP"    , ["drop" , { direction: "up"    }, 160])
         animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
-        animation_map.set("SLIDE_FAST"       , ["slide", { direction: "up"    }, 80])
-        animation_map.set("SLIDE_DOWN"       , ["slide", { direction: "up"    }, 160])
+        animation_map.set("SLIDE_FAST"       , ["blind", { direction: "up"    }, 80])
+        animation_map.set("SLIDE_DOWN"       , ["blind", { direction: "up"    }, 160])
+        animation_map.set("SLIDE_RIGHT"      , ["blind", { direction: "right" }, 160])
+        animation_map.set("SLIDE_LEFT"       , ["blind", { direction: "left"  }, 160])
         animation_map.set("FADE_FAST"        , ["fade"                         , 80])
         animation_map.set("FADE_STD"         , ["fade"                         , 160])
-        animation_map.set("FADE_DELETE"      , ["fade"                         , 2500])
+        animation_map.set("POP_FOLD"         , ["fold" , { size : 32          }, 80])
         animation_map.set("WINDOW_FOLD"      , ["fold" , { size : 32          }, 160])
 
         Preference.ANIMATION_MAP = animation_map
@@ -110,7 +113,6 @@ class Preference {
             my: "left+15 bottom+2",
             at: "right center"
         })
-
         Preference.POSITION_MAP = position_map
 
         const ui_map = new Map()
@@ -145,7 +147,6 @@ class Preference {
                 duration: 160
             }
         })
-
         Preference.UI_ANIM_MAP = ui_map
         Preference.UI_NO_ANIMATION = {
             show: {
