@@ -266,8 +266,25 @@
     /**
      * #Event
      * 投稿ボタン.
+     * => メディア投稿を確認する場合は確認ダイアログを出す
      */
-    $("#__on_submit").on("click", e =>
+    $("#__on_submit").on("click", e => {
+        if (!Preference.IGNORE_DIALOG && $("#post_options .media_list>li:not(.__initial_message)").length > 0
+            && Preference.GENERAL_PREFERENCE.enable_media_confirm) {
+            /*
+            dialog({
+                type: 'confirm',
+                title: "絵文字キャッシュ取得",
+                text: `登録アカウントすべてのカスタム絵文字のキャッシュを更新します。<br/>
+                    よろしいですか？<br/>
+                    (Misskeyのサーバーに新しいカスタム絵文字が追加されたときに実行するのをおすすめします。)`,
+                accept: () => { // OKボタン押下時の処理
+                    Emojis.clearCache()
+                    Account.cacheEmojis()
+                }
+            })//*/
+        }
+        // 投稿処理
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
             content: $("#__txt_postarea").val(),
             option_obj: $("#post_options"),
@@ -277,7 +294,10 @@
                 $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
                 $("#__on_emoji_close").click()
             }
-        }))
+        })
+        // ダイアログフラグをリセット
+        Preference.IGNORE_DIALOG = false
+    })
 
     /**
      * #Event
@@ -679,7 +699,7 @@
      * 投稿本体(リストレイアウトと文字数超過限定).
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
-    $(document).on("click", "li.short_timeline, .content_length_limit", e => {
+    $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
@@ -724,7 +744,7 @@
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) $(document).on("mouseenter",
-        "li:not(.chat_timeline, .short_timeline, .context_disabled), li.chat_timeline>.content", e => {
+        "li:not(.chat_timeline, .short_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得

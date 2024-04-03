@@ -97,6 +97,10 @@ class Status {
                     aspect: media.meta?.original?.aspect ?? 1
                 }))
 
+                // フィルター設定
+                this.mute_warning = data.filtered?.some(f => f.filter.filter_action == "warn") ?? false
+                this.mute_exclude = data.filtered?.some(f => f.filter.filter_action == "hide") ?? false
+
                 // 詳細表示に関するデータ
                 this.author_id = data.account.id
                 this.card = data.card
@@ -108,6 +112,7 @@ class Status {
                 this.count_reply = data.replies_count
                 this.count_reblog = data.reblogs_count
                 this.count_fav = data.favourites_count
+
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -253,7 +258,8 @@ class Status {
     }
     // Getter: ミュート判定
     get muted() {
-        return (this.from_timeline?.pref?.exclude_reblog && this.reblog)
+        return this.mute_exclude
+            || (this.from_timeline?.pref?.exclude_reblog && this.reblog)
             || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
     }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
@@ -528,6 +534,8 @@ class Status {
      * @param pref 適用するタイムラインレイアウト
      */
     getLayoutElement(pref) {
+        // フィルターされた投稿の場合はフィルターメッセージを表示する
+        if (!this.popout_flg && !this.detail_flg && this.mute_warning) return this.filtered_elm
         switch (pref) {
             case 'chat': // チャット
                 if (this.type != 'notification' || this.notif_type == 'poll'
@@ -1308,6 +1316,16 @@ class Status {
             return this.getLayoutElement(this.from_group.pref.multi_layout_option.notification)
         // 通常の投稿
         else return this.getLayoutElement(this.from_group.pref.multi_layout_option.default)
+    }
+
+    // Getter: Mastodonでフィルターされた投稿を表示するHTMLを返却
+    get filtered_elm() {
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        return $($.parseHTML(`
+            <li id="${this.status_key}" name="${this.uri}" class="filtered_timeline">
+                <span>フィルターされた投稿です</span>
+            </li>
+        `))
     }
 
     /**

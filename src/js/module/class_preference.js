@@ -83,7 +83,7 @@ class Preference {
         const animation_map = new Map()
 
         animation_map.set("TIMELINE_APPEND"  , ["drop" , { direction: "left"  }, 250])
-        animation_map.set("TIMELINE_DELETE"  , ["drop" , { direction: "left"  }, 2500])
+        animation_map.set("TIMELINE_DELETE"  , ["fade"                         , 2500])
         animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
         animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
         animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
@@ -159,6 +159,9 @@ class Preference {
             }
         }
     }
+
+    // 確認ダイアログを無視するフラグ
+    static IGNORE_DIALOG = false
 
     /**
      * #StaticMethod

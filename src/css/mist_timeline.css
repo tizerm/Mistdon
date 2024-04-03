@@ -968,6 +968,25 @@
 
         }
 
+        /*=== Filtered Toot Layout ===============================================================*/
+        > li.filtered_timeline {
+            border-left: solid 4px #cccccc;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            margin-left: 2px;
+            padding: 2px;
+            background-color: #bbbbbb;
+            color: #333333;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            &:hover {
+                background-color: #999999;
+                color: #ffffff;
+                cursor: pointer;
+            }
+        }
+
         /*=== Scroll Loader Layout ===============================================================*/
         > li.__scroll_loader {
             background-image: url("../resources/ic_reload.png");
