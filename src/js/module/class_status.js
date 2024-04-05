@@ -98,7 +98,7 @@ class Status {
                 }))
 
                 // フィルター設定
-                this.mute_warning = data.filtered?.some(f => f.filter.filter_action == "warn") ?? false
+                this.mute_warning = data.filtered?.map(m => m.filter).filter(f => f.filter_action == "warn")[0]?.title ?? null
                 this.mute_exclude = data.filtered?.some(f => f.filter.filter_action == "hide") ?? false
 
                 // 詳細表示に関するデータ
@@ -551,8 +551,6 @@ class Status {
                 else return this.list_elm
             case 'gallery': // ギャラリー
                 return this.gallery_elm
-            case 'anonymous': // アノニマス
-                return this.anonymous_elm
             case 'multi': // マルチレイアウト
                 return this.mix_element
             default: // デフォルト(ノーマル)
@@ -1221,90 +1219,6 @@ class Status {
         return $($.parseHTML(html))
     }
 
-    // Getter: アノニマスタイプのHTMLを生成して返却
-    get anonymous_elm() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
-
-        let target_emojis = null
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="anonymous_layout">`
-
-        html += '<div class="content">'
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += `<div class="main_content">
-                    ${target_emojis.replace(this.content)}
-                </div>
-            </div>
-        `
-        if (this.poll_options) { // 投票
-            let options = ''
-            this.poll_options.forEach(elm => options += `
-                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
-            `)
-            const label_limit = this.poll_unlimited // 投票期限テキスト
-                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
-            html /* 投票ブロック */ += `
-                <div class="post_poll">
-                    <div class="options">${options}</div>
-                    <div class="poll_info">${label_limit}</div>
-                </div>
-            `
-        }
-        if (this.platform == 'Misskey' && this.quote_flg) {
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
-            html /* 引用ノート(Misskeyのみ) */ += `
-                <div class="post_quote">
-                    <div>${target_emojis.replace(this.quote.content)}</div>
-                </div>
-            `
-        }
-
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
-            const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
-            html += '<div class="media">'
-            if (this.sensitive) html /* 閲覧注意 */ += `
-                <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-                <div class="media_content">
-            `; else html += '<div class="media_content">'
-            // アスペクト比をリンクオプションとして設定
-            this.medias.forEach(media => {
-                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                    <audio controls src="${media.url}" preload="none"></audio>
-                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                        class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail}" class="media_preview"/>
-                    </a>
-                `
-            })
-            html += `
-                    </div>
-                </div>
-            `
-        }
-        html += `
-                </div>
-            </li>
-        `
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
-        // フォロ限の場合はブースト/リノート禁止クラスを付与
-        if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
-        // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
-        if (this.poll_options && (this.detail_flg || this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
-            jqelm.find('.post_poll').after(this.poll_graph).remove()
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
-            jqelm.find('.content>.main_content').hide()
-        if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
-            jqelm.find('.media>.media_content').hide()
-
-        return jqelm
-    }
-
     // Getter: マルチレイアウトのHTML返却
     get mix_element() {
         // メディア(無視する場合は後続の設定を使う)
@@ -1323,7 +1237,7 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         return $($.parseHTML(`
             <li id="${this.status_key}" name="${this.uri}" class="filtered_timeline">
-                <span>フィルターされた投稿です</span>
+                <span>フィルター: ${this.mute_warning}</span>
             </li>
         `))
     }

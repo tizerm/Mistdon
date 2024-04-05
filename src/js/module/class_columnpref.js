@@ -331,7 +331,6 @@ class GroupPref {
                         <option value="list">リスト</option>
                         <option value="media">メディア</option>
                         <option value="gallery">ギャラリー</option>
-                        <option value="anonymous">アノニマス</option>
                         <option value="multi">マルチ</option>
                     </select>
                     色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
@@ -357,9 +356,6 @@ class GroupPref {
                             <input type="radio" id="tll_def_${uuid}_4" name="tll_def_${uuid}"
                                 class="__opt_tll_default" value="list"/>
                             <label for="tll_def_${uuid}_4">リスト</label>
-                            <input type="radio" id="tll_def_${uuid}_5" name="tll_def_${uuid}"
-                                class="__opt_tll_default" value="anonymous"/>
-                            <label for="tll_def_${uuid}_5">アノニマス</label>
                         </td>
                         <td>
                             <input type="radio" id="tll_btrn_${uuid}_1" name="tll_btrn_${uuid}"
@@ -374,9 +370,6 @@ class GroupPref {
                             <input type="radio" id="tll_btrn_${uuid}_4" name="tll_btrn_${uuid}"
                                 class="__opt_tll_btrn" value="list"/>
                             <label for="tll_btrn_${uuid}_4">リスト</label>
-                            <input type="radio" id="tll_btrn_${uuid}_5" name="tll_btrn_${uuid}"
-                                class="__opt_tll_btrn" value="anonymous"/>
-                            <label for="tll_btrn_${uuid}_5">アノニマス</label>
                         </td>
                         <td>
                             <input type="radio" id="tll_media_${uuid}_1" name="tll_media_${uuid}"
@@ -397,9 +390,6 @@ class GroupPref {
                             <input type="radio" id="tll_media_${uuid}_6" name="tll_media_${uuid}"
                                 class="__opt_tll_media" value="gallery"/>
                             <label for="tll_media_${uuid}_6">ギャラリー</label>
-                            <input type="radio" id="tll_media_${uuid}_7" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="anonymous"/>
-                            <label for="tll_media_${uuid}_7">アノニマス</label>
                             <input type="radio" id="tll_media_${uuid}_8" name="tll_media_${uuid}"
                                 class="__opt_tll_media" value="ignore"/>
                             <label for="tll_media_${uuid}_8">無視</label>
