@@ -517,6 +517,29 @@
                 }
             }
 
+            /*=== Quote Info =====================================================================*/
+            > .notified_impression {
+                text-align: center;
+                & span {
+                    display: inline-block;
+                    border-radius: 12px;
+                    padding: 2px 18px;
+                    margin: 2px;
+                    width: calc(50% - 64px);
+                    background-position: center right;
+                    background-repeat: no-repeat;
+                    background-size: 24px 24px;
+                    padding-right: 32px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: right;
+                    &.count_reblog         { background-image: url("../resources/ic_reblog.png"); }
+                    &.count_fav            { background-image: url("../resources/ic_favorite.png"); }
+                    &.count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
+                }
+            }
+
             /*=== Detail Info ====================================================================*/
             > .detail_info {
                 margin: 6px 8px;

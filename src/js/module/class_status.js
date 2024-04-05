@@ -212,7 +212,8 @@ class Status {
                 this.hashtags = data.tags
                 this.count_reply = data.repliesCount
                 this.count_reblog = data.renoteCount
-                if (this.detail_flg && data.reactions) { // リアクションがある場合はリアクション一覧をリスト化する
+                // リアクションがある場合はリアクション一覧をリスト化する
+                if ((this.detail_flg || this.notif_type == 'reaction' || this.notif_type == 'renote') && data.reactions) {
                     const reactions = []
                     Object.keys(data.reactions).forEach(key => reactions.push({
                         shortcode: key,
@@ -731,6 +732,25 @@ class Status {
                 </div>
             `
         }
+
+        // 一部の通知はインプレッション数値を表示する
+        if (Preference.GENERAL_PREFERENCE.enable_notified_impression
+            && ['favourite', 'reblog', 'reaction', 'renote'].includes(this.notif_type)) {
+            html += `<div class="notified_impression">
+                <span class="count_reblog counter label_reblog" title="ブースト/リノート数">${this.count_reblog}</span>`
+            switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    html += `<span class="count_fav counter label_favorite" title="お気に入り数">${this.count_fav}</span>`
+                    break
+                case 'Misskey': // Misskey
+                    html += `<span class="count_reaction_total counter label_favorite" title="リアクション合計">${this.count_fav}</span>`
+                    break
+                default:
+                    break
+            }
+            html += '</div>'
+        }
+
         if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
             html += '<div class="detail_info">'
             // カード

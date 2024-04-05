@@ -30,6 +30,7 @@ class Preference {
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
                     "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
                     "enable_action_palette"         : true,     // 簡易アクションパレット
+                    "enable_notified_impression"    : true,     // 通知欄のインプレッション表示
                     "enable_media_confirm"          : true,     // メディア投稿確認
                     "enable_animation"              : true,     // アニメーション
                     "enable_tips"                   : true,     // TIPS表示
@@ -227,6 +228,7 @@ class Preference {
         $("#__chk_gen_use_additional_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
         $("#__chk_gen_hide_additional_account").prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
+        $("#__chk_gen_use_notified_impression").prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
         $("#__chk_gen_show_media_confirm").prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_animation").prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
@@ -293,6 +295,7 @@ class Preference {
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
             "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
+            "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
