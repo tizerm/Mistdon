@@ -65,15 +65,17 @@ class Preference {
                         "default"                   : 250,      // ノーマル
                         "chat"                      : 140,      // チャット
                     },
-                    "history_limit"                 : 200,      // 履歴件数
-                    "reaction_history_limit"        : 20,       // 履歴件数
+                    "history_limit"                 : 200,      // 送信履歴件数
+                    "reaction_history_limit"        : 20,       // リアクション履歴件数
                     "scroll_speed": {                           // スクロールスピード
                         "default"                   : 250,      // ノーマル
                         "shift"                     : 800       // チャット
                     },
                     "background": {                             // 背景
                         "type"                      : "mitlin", // 背景タイプ
-                        "color"                     : "222222"  // 背景色
+                        "color"                     : "222222", // 背景色
+                        "mitlin_version"            : "ver041", // 背景にするミトリンの種類
+                        "file_path"                 : null      // 背景に設定する背景画像パス
                     }
                 }
             else Preference.GENERAL_PREFERENCE = general_pref
@@ -267,9 +269,16 @@ class Preference {
         // 履歴件数
         $("#__txt_gen_history_limit").val(Preference.GENERAL_PREFERENCE.history_limit)
         $("#__txt_gen_reaction_history_limit").val(Preference.GENERAL_PREFERENCE.reaction_history_limit)
+
         // キーボードスクロール設定
         $("#__txt_gen_keyscroll_normal").val(Preference.GENERAL_PREFERENCE.scroll_speed?.default)
         $("#__txt_gen_keyscroll_shift").val(Preference.GENERAL_PREFERENCE.scroll_speed?.shift)
+
+        // 背景設定
+        $(`input.__opt_gen_background[value="${Preference.GENERAL_PREFERENCE.background?.type}"]`).prop("checked", true)
+        $("#__txt_gen_background_color").val(Preference.GENERAL_PREFERENCE.background?.color)
+        $("#__cmb_gen_backmitlin_type").val(Preference.GENERAL_PREFERENCE.background?.mitlin_version)
+        $("#__hdn_gen_bgfile").val(Preference.GENERAL_PREFERENCE.background?.file_path)
     }
 
     /**
@@ -337,8 +346,10 @@ class Preference {
                 "shift"                     : $("#__txt_gen_keyscroll_shift").val(),
             },
             "background": {                 // 背景
-                "type"                      : "mitlin", // 背景タイプ
-                "color"                     : "222222"  // 背景色
+                "type"                      : $(`input.__opt_gen_background:checked`).val(),
+                "color"                     : $("#__txt_gen_background_color").val(),
+                "mitlin_version"            : $("#__cmb_gen_backmitlin_type").val(),
+                "file_path"                 : $("#__hdn_gen_bgfile").val().replace(/\\/g, '/')
             }
         }
 
@@ -416,6 +427,51 @@ class Preference {
                 }
             }
         `)
+    }
+
+    /**
+     * #StaticMethod
+     * 全体設定の内容から背景画像を設定.
+     */
+    static setBackground() {
+        switch (Preference.GENERAL_PREFERENCE.background?.type) {
+            case 'mono_color': // 単色カラー
+                $("body").css({
+                    "background-image": 'none',
+                    "background-color": `#${Preference.GENERAL_PREFERENCE.background?.color}`
+                })
+                break
+            case 'mitlin': // ミトリン
+                let mitlin_url = null
+                switch (Preference.GENERAL_PREFERENCE.background?.mitlin_version) {
+                    case 'ver011':
+                        mitlin_url = 'resources/illust/mitlin_back1.jpg'
+                        break
+                    case 'ver031':
+                        mitlin_url = 'resources/illust/mitlin_back2.jpg'
+                        break
+                    case 'ver041':
+                        mitlin_url = 'resources/illust/mitlin_back3.jpg'
+                        break
+                    case 'ver051':
+                        mitlin_url = 'resources/illust/mitlin_back4.jpg'
+                        break
+                    default: // デフォルトはv1.0.0
+                        mitlin_url = 'resources/illust/mitlin_back100.jpg'
+                        break
+                }
+                $("body").css("background-image", `url("${mitlin_url}")`)
+                break
+            case 'select_image': // ユーザー指定画像
+                $("body").css({
+                    "background-image": `url("${Preference.GENERAL_PREFERENCE.background?.file_path}")`,
+                    "background-position": 'center center',
+                    "background-size": 'cover'
+                })
+                break
+            default:
+                break
+        }
     }
 
     /**

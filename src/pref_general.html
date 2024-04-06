@@ -305,10 +305,6 @@
                         #<input type="text" id="__txt_gen_background_color" class="__pull_color_palette" size="6"/>
                     </li>
                     <li>
-                        <input type="radio" id="__opt_gen_background2" name="__opt_gen_background" class="__opt_gen_background" value="select_image"/>
-                        <label for="__opt_gen_background2">指定の画像</label>
-                    </li>
-                    <li>
                         <input type="radio" id="__opt_gen_background3" name="__opt_gen_background" class="__opt_gen_background" value="mitlin"/>
                         <label for="__opt_gen_background3">ミトリン</label>
                         <select id="__cmb_gen_backmitlin_type">
@@ -318,6 +314,12 @@
                             <option value="ver051">Mitlin v0.5.1</option>
                             <option value="ver100">Mitlin v1.0.0</option>
                         </select>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_background2" name="__opt_gen_background" class="__opt_gen_background" value="select_image"/>
+                        <label for="__opt_gen_background2">指定の画像</label>
+                        <input type="file" id="__file_gen_background" accept="image/png, image/jpeg"/>
+                        <input type="hidden" id="__hdn_gen_bgfile" value=""/>
                     </li>
                 </ul>
             </dd>

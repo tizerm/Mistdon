@@ -93,6 +93,7 @@ $(() => (async () => {
 
     // 設定からスタイルシートを生成
     Preference.generateStylesheet()
+    Preference.setBackground()
 
     // カラム生成
     Column.each(col => {

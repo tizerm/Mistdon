@@ -2,6 +2,7 @@
 
 body {
     background-color: #222222;
+    background-image: url("../resources/illust/mitlin_back3.jpg");
     background-attachment: fixed;
     background-position: left 64px bottom 32px;
     background-repeat: no-repeat;
