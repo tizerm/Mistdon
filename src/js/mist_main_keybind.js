@@ -235,7 +235,7 @@
                         element = $('#header>#post_options select#__cmb_post_to')
                         index = element.find('option:checked').prev().val()
                         if (index) {
-                            element.val(index)
+                            element.val(index).change()
                             return false
                         }
                     } else {
@@ -249,7 +249,7 @@
                         element = $('#header>#post_options select#__cmb_post_to')
                         index = element.find('option:checked').next().val()
                         if (index) {
-                            element.val(index)
+                            element.val(index).change()
                             return false
                         }
                     } else {

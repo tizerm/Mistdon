@@ -322,7 +322,7 @@ class GroupPref {
                     </div>
                 </div>
                 <div class="group_option">
-                    <button type="button" class="__open_multi_tl_layout" title="マルチタイムラインレイアウトを編集"
+                    <button type="button" class="__open_multi_tl_layout tooltip" title="マルチタイムラインレイアウトを編集"
                         ><img src="resources/ic_return.png" alt="マルチタイムラインレイアウトを編集"/></button>
                     <select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
                         <option value="default">ノーマル</option>
@@ -335,78 +335,49 @@ class GroupPref {
                     </select>
                     色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
                 </div>
-                <table class="tl_layout_options">
-                    <thead><tr>
-                        <th>通常</th>
-                        <th>ブースト<br/>リノート</th>
-                        <th>メディア</th>
-                        <th>通知</th>
-                    </tr></thead>
-                    <tbody><tr>
-                        <td>
-                            <input type="radio" id="tll_def_${uuid}_1" name="tll_def_${uuid}"
-                                class="__opt_tll_default" value="default" checked/>
-                            <label for="tll_def_${uuid}_1">ノーマル</label>
-                            <input type="radio" id="tll_def_${uuid}_2" name="tll_def_${uuid}"
-                                class="__opt_tll_default" value="normal2"/>
-                            <label for="tll_def_${uuid}_2">ノーマル2</label>
-                            <input type="radio" id="tll_def_${uuid}_3" name="tll_def_${uuid}"
-                                class="__opt_tll_default" value="chat"/>
-                            <label for="tll_def_${uuid}_3">チャット</label>
-                            <input type="radio" id="tll_def_${uuid}_4" name="tll_def_${uuid}"
-                                class="__opt_tll_default" value="list"/>
-                            <label for="tll_def_${uuid}_4">リスト</label>
-                        </td>
-                        <td>
-                            <input type="radio" id="tll_btrn_${uuid}_1" name="tll_btrn_${uuid}"
-                                class="__opt_tll_btrn" value="default" checked/>
-                            <label for="tll_btrn_${uuid}_1">ノーマル</label>
-                            <input type="radio" id="tll_btrn_${uuid}_2" name="tll_btrn_${uuid}"
-                                class="__opt_tll_btrn" value="normal2"/>
-                            <label for="tll_btrn_${uuid}_2">ノーマル2</label>
-                            <input type="radio" id="tll_btrn_${uuid}_3" name="tll_btrn_${uuid}"
-                                class="__opt_tll_btrn" value="chat"/>
-                            <label for="tll_btrn_${uuid}_3">チャット</label>
-                            <input type="radio" id="tll_btrn_${uuid}_4" name="tll_btrn_${uuid}"
-                                class="__opt_tll_btrn" value="list"/>
-                            <label for="tll_btrn_${uuid}_4">リスト</label>
-                        </td>
-                        <td>
-                            <input type="radio" id="tll_media_${uuid}_1" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="default" checked/>
-                            <label for="tll_media_${uuid}_1">ノーマル</label>
-                            <input type="radio" id="tll_media_${uuid}_2" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="normal2"/>
-                            <label for="tll_media_${uuid}_2">ノーマル2</label>
-                            <input type="radio" id="tll_media_${uuid}_3" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="chat"/>
-                            <label for="tll_media_${uuid}_3">チャット</label>
-                            <input type="radio" id="tll_media_${uuid}_4" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="list"/>
-                            <label for="tll_media_${uuid}_4">リスト</label>
-                            <input type="radio" id="tll_media_${uuid}_5" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="media"/>
-                            <label for="tll_media_${uuid}_5">メディア</label>
-                            <input type="radio" id="tll_media_${uuid}_6" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="gallery"/>
-                            <label for="tll_media_${uuid}_6">ギャラリー</label>
-                            <input type="radio" id="tll_media_${uuid}_8" name="tll_media_${uuid}"
-                                class="__opt_tll_media" value="ignore"/>
-                            <label for="tll_media_${uuid}_8">無視</label>
-                        </td>
-                        <td>
-                            <input type="radio" id="tll_notif_${uuid}_1" name="tll_notif_${uuid}"
-                                class="__opt_tll_notif" value="default" checked/>
-                            <label for="tll_notif_${uuid}_1">ノーマル</label>
-                            <input type="radio" id="tll_notif_${uuid}_2" name="tll_notif_${uuid}"
-                                class="__opt_tll_notif" value="normal2"/>
-                            <label for="tll_notif_${uuid}_2">ノーマル2</label>
-                            <input type="radio" id="tll_notif_${uuid}_4" name="tll_notif_${uuid}"
-                                class="__opt_tll_notif" value="list"/>
-                            <label for="tll_notif_${uuid}_4">リスト</label>
-                        </td>
-                    </tr></tbody>
-                </table>
+                <table class="tl_layout_options"><tbody>
+                    <tr>
+                        <th class="default">通常</th>
+                        <th class="btrn">ブースト/リノート</th>
+                    </tr>
+                    <tr>
+                        <td><select class="__cmb_tll_default">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                        <td><select class="__cmb_tll_btrn">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th class="media">メディア</th>
+                        <th class="notification">通知</th>
+                    </tr>
+                    <tr>
+                        <td><select class="__cmb_tll_media">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                            <option value="media">メディア</option>
+                            <option value="gallery">ギャラリー</option>
+                            <option value="ignore">無視</option>
+                        </select></td>
+                        <td><select class="__cmb_tll_notif">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                    </tr>
+                    <tr><td colspan="2">
+                        <button type="button" class="__on_layout_close" class="close_button">×</button>
+                    </td></tr>
+                </tbody></table>
                 <ul class="__ui_tl_sortable"></ul>
             </div>
         `))
@@ -423,11 +394,11 @@ class GroupPref {
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
         if (this.pref?.tl_layout == 'multi') { // タイムラインレイアウト: マルチ
-            jqelm.find(`input.__opt_tll_default[value="${this.pref.multi_layout_option.default}"]`).prop("checked", true)
-            jqelm.find(`input.__opt_tll_btrn[value="${this.pref.multi_layout_option.reblog}"]`).prop("checked", true)
-            jqelm.find(`input.__opt_tll_media[value="${this.pref.multi_layout_option.media}"]`).prop("checked", true)
-            jqelm.find(`input.__opt_tll_notif[value="${this.pref.multi_layout_option.notification}"]`).prop("checked", true)
-        }
+            jqelm.find(`.__cmb_tll_default>option[value="${this.pref.multi_layout_option.default}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_btrn>option[value="${this.pref.multi_layout_option.reblog}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_media>option[value="${this.pref.multi_layout_option.media}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_notif>option[value="${this.pref.multi_layout_option.notification}"]`).prop("selected", true)
+        } else jqelm.find("button.__open_multi_tl_layout").prop("disabled", true)
         // タイムラインの設定値をDOMと共に生成
         this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create()))
 
@@ -457,6 +428,18 @@ class GroupPref {
         $(`#${this.id}>ul>li`).eq(index).remove()
         // タイムラインの連番を再生成
         $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
+        ColumnPref.setButtonPermission()
+    }
+
+    /**
+     * #StaticMethod
+     * タイムラインレイアウトを変更したときのイベントメソッド
+     * 
+     * @param target イベントが発火したコンボボックスのjQueryオブジェクト
+     */
+    static changeLayoutEvent(target) {
+        const button = target.closest(".group_option").find("button.__open_multi_tl_layout")
+        button.prop("disabled", target.find("option:selected").val() != 'multi')
         ColumnPref.setButtonPermission()
     }
 }
@@ -838,10 +821,10 @@ class ColumnPref {
                 let multi_layout = null
                 // タイムラインレイアウトがマルチの場合はマルチレイアウト設定を保存
                 if ($(gp_elm).find(".__cmb_tl_layout").val() == 'multi') multi_layout = {
-                    'default': $(gp_elm).find('input.__opt_tll_default:checked').val(),
-                    'reblog': $(gp_elm).find('input.__opt_tll_btrn:checked').val(),
-                    'media': $(gp_elm).find('input.__opt_tll_media:checked').val(),
-                    'notification': $(gp_elm).find('input.__opt_tll_notif:checked').val()
+                    'default': $(gp_elm).find('.__cmb_tll_default').val(),
+                    'reblog': $(gp_elm).find('.__cmb_tll_btrn').val(),
+                    'media': $(gp_elm).find('.__cmb_tll_media').val(),
+                    'notification': $(gp_elm).find('.__cmb_tll_notif').val()
                 }
                 group_list.push({ // タイムライングループプリファレンス
                     // デフォルトグループ名は「Group XX」

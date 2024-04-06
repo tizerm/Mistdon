@@ -122,6 +122,24 @@ $(() => (async () => {
 
 /**
  * #LimitedMethod
+ * 同時投稿アカウントに応じてヘッダカラーを変更する.
+ */
+function separateHeaderColor() {
+    const current_color = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).pref.acc_color
+    const add_color = []
+    $("#header>#post_options ul.account_list input.__chk_add_account:checked:not(:disabled)")
+        .each((index, elm) => add_color.push(Account.get($(elm).val()).pref.acc_color))
+    if (add_color.length > 0) { // 複数のアカウントが選択されている場合はグラデーションにする
+        const color_str = add_color.reduce((rs, el) => `${rs},#${el}`, '')
+        $("#header>h1").css('background-image', `linear-gradient(0.25turn, #${current_color}${color_str}`)
+    } else $("#header>h1").css({ // 追加アカウントがない場合はカレントカラーで塗る
+        'background-image': 'none',
+        'background-color': `#${current_color}`
+    })
+}
+
+/**
+ * #LimitedMethod
  * リプライ/引用/編集元の投稿情報を削除する.
  */
 function deleteQuoteInfo() {

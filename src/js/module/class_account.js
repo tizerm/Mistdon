@@ -162,8 +162,11 @@ class Account {
         // 背景アイコンとアカウントカラーを設定
         $("#header>h1>.head_user").css('background-image',
             `url("resources/${this.platform == 'Mastodon' ? 'ic_mastodon.png' : 'ic_misskey.png'}"`
-        ).text(`${this.pref.username} - ${this.full_address}`)
-        $("#header>h1").css('background-color', `#${this.pref.acc_color}`)
+        )
+        $("#header>h1>.head_user>.username").text(this.pref.username)
+        $("#header>h1>.head_user>.channelname").empty()
+        $("#header>h1>.head_user>.useraddress").text(`- ${this.full_address}`)
+        separateHeaderColor()
 
         // 引用情報を削除
         deleteQuoteInfo()
@@ -1242,6 +1245,10 @@ class Account {
             if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') != this.full_address) return
             // チャンネルコンボボックスを生成
             $("#__cmb_post_to").prop('disabled', false).html(html)
+
+            // チャンネル名をヘッダに設定
+            const channel_name = channels?.find(c => this.pref.default_channel == c.id)?.name
+            if (channel_name) $("#header>h1>.head_user>.channelname").text(`#${channel_name}`)
         } catch (err) {
             console.log(err)
 

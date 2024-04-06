@@ -1038,13 +1038,6 @@
 /*=== Profile Column Layout ======================================================================*/
 
 .user_header { background-color: #999999; }
-.ff_pop_user {
-    display: none;
-    position: absolute;
-    z-index: 8;
-    border-radius: 6px;
-    border: solid 2px #cccccc;
-}
 .column_profile {
     width: 420px;
     position: relative;
@@ -1064,8 +1057,7 @@
                 }
             }
             > a {
-                position: relative;
-                top: 6px;
+                transform: translate(-2px, 2px);
                 padding: 0px;
                 margin: 0px;
                 > img {

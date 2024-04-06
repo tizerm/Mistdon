@@ -271,18 +271,19 @@
     $("#__on_submit").on("click", e => {
         if (!Preference.IGNORE_DIALOG && $("#post_options .media_list>li:not(.__initial_message)").length > 0
             && Preference.GENERAL_PREFERENCE.enable_media_confirm) {
-            /*
             dialog({
                 type: 'confirm',
-                title: "絵文字キャッシュ取得",
-                text: `登録アカウントすべてのカスタム絵文字のキャッシュを更新します。<br/>
-                    よろしいですか？<br/>
-                    (Misskeyのサーバーに新しいカスタム絵文字が追加されたときに実行するのをおすすめします。)`,
+                title: "画像投稿",
+                text: `対象のアカウントでメディア付きの投稿をします。<br/>よろしいですか？`,
                 accept: () => { // OKボタン押下時の処理
-                    Emojis.clearCache()
-                    Account.cacheEmojis()
+                    Preference.IGNORE_DIALOG = true
+                    $("#__txt_postarea").blur()
+                    $("#__on_submit").click()
                 }
-            })//*/
+            })
+            // ダイアログフラグをリセット
+            Preference.IGNORE_DIALOG = false
+            return
         }
         // 投稿処理
         Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).post({
@@ -378,12 +379,34 @@
         e => $(e.target).closest(".option_close").hide().prev().show())
 
     /**
+     * #Event #Change
+     * 投稿アカウント: アカウントアイコン(チェック変更時).
+     * => 同時投稿アカウントに応じてヘッダカラーをセパレートする
+     */
+    $(document).on("change", "#header>#post_options ul.account_list input.__chk_add_account", e => separateHeaderColor())
+
+    /**
      * #Event #Dblclick
      * 投稿アカウント: アカウントアイコン(ダブルクリック).
      * => メインの投稿先をそのアカウントに切り替え
      */
     $(document).on("dblclick", "#header>#post_options ul.account_list input.__chk_add_account+label",
         e => Account.get($(e.target).closest("li").find("input.__chk_add_account").val()).setPostAccount())
+
+    /**
+     * #Event #Change
+     * CW/公開/投稿先: 投稿チャンネルコンボボックス(変更時).
+     * => ヘッダのチャンネル名を変える
+     */
+    $("#__cmb_post_to").on("change", e => {
+        const value = $(e.target).val()
+        if (value == "__default") { // 通常投稿の場合はチャンネル表示を削除
+            $("#header>h1>.head_user>.channelname").empty()
+            return
+        }
+        const name = $(e.target).find(`option[value="${value}"]`).text()
+        $("#header>h1>.head_user>.channelname").text(`#${name}`)
+    })
 
     /**
      * #Event
@@ -701,7 +724,10 @@
      */
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+        if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
+            User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
+                .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error"))
+        else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合

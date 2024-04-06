@@ -168,29 +168,31 @@
                         text-align: center;
 
                         > select.__cmb_tl_layout { width: 96px; }
-                        > button.__open_multi_tl_layout>img {
-                            width: 18px;
-                            height: 18px;
+                        > button.__open_multi_tl_layout {
+                            vertical-align: text-bottom;
+                            > img {
+                                width: 24px;
+                                height: 24px;
+                            }
                         }
                     }
                     > table.tl_layout_options {
+                        background-color: rgba(34,34,34,0.8);
                         display: none;
-                        background-color: rgba(34,34,34,0.92);
-                        border-radius: 6px;
                         z-index: 1;
                         position: absolute;
                         top: 60px;
                         left: 0px;
                         width: 100%;
-                        font-size: 11px;
-                        & td { vertical-align: top; }
-                        & label {
-                            display: block;
-                            margin: 2px 0px;
-                            padding: 2px 4px;
-                            font-size: 11px;
-                            text-align: center;
+                        font-size: 12px;
+                        & th {
+                            border-radius: 8px;
+                            &.default      { background-color: #3562cc; }
+                            &.btrn         { background-color: #408a08; }
+                            &.media        { background-color: #cc355d; }
+                            &.notification { background-color: #a8880a; }
                         }
+                        & button.__on_layout_close { width: 100%; }
                     }
                     > ul {
                         margin: 0px;
