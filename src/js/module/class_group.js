@@ -292,8 +292,15 @@ class Group {
         this.color_timer_id = setInterval(() => (async () => $(`#${this.id}>ul>li`).each((index, elm) => {
             const post = this.getStatus($(elm))
             const element = $(elm).is(".chat_timeline") ? $(elm).find(".content") : $(elm)
-            element.css('border-left-color', post.relative_time.color)
-            $(elm).find(".created_at").text(post.relative_time.both)
+
+            try { // TODO: debug
+                element.css('border-left-color', post.relative_time.color)
+                $(elm).find(".created_at").text(post.date_text)
+            } catch (err) {
+                console.log(err)
+                console.log(element.attr("id"))
+                console.log(this)
+            }
         }))(), 60000) // 1分おきに実行
     }
 

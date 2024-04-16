@@ -9,6 +9,7 @@ class Instance {
     constructor(data) {
         this.platform = data.platform
         this.host = data.host
+
         switch (data.platform) {
             case 'Mastodon': // Mastodon
                 this.name = data.json.title

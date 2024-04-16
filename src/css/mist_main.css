@@ -280,6 +280,17 @@
                     height: 190px;
                     background-color: rgba(168,72,96,0.8);
                     border: dashed 4px #cccccc;
+                    > .initial_dust {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 180px;
+                        height: 180px;
+                        background-image: url("../resources/ic_dust.png");
+                        background-position: center center;
+                        background-repeat: no-repeat;
+                    }
                 }
             }
             > .refernced_post {

@@ -454,20 +454,43 @@
             /*=== Poll Info ======================================================================*/
             > .post_poll {
                 margin: 2px;
-                > .options>button.__on_poll_vote {
-                    display: inline-block;
-                    background-color: rgba(62,82,96,0.8);
-                    border: solid 1px #cccccc;
-                    border-radius: 6px;
-                    width: calc(50% - 4px);
-                    margin: 0px;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    font-size: 12px;
-                    font-weight: normal;
-                    &:hover     { background-color: rgba(62,96,82,0.8); }
-                    &[disabled] { background-color: rgba(34,34,34,0.8); }
+                > .options {
+                    text-align: center;
+                    > button, > input.__chk_multi_vote+label {
+                        display: inline-block;
+                        background-color: rgba(62,82,96,0.8);
+                        background-image: none;
+                        border: solid 1px #cccccc;
+                        border-radius: 8px;
+                        margin: 0px;
+                        padding: 2px 0px;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        font-size: 12px;
+                        font-weight: normal;
+                        text-align: center;
+                        &:hover {
+                            background-color: #bbbbbb;
+                            color: #333333;
+                        }
+                    }
+                    > input.__chk_multi_vote:checked+label {
+                        background-color: rgba(96,62,62,0.8);
+                        background-image: url("../resources/ic_check.png");
+                        background-position: center left;
+                        background-repeat: no-repeat;
+                        background-size: 24px 24px;
+                        &:hover {
+                            background-color: #888888;
+                            color: #ffffff;
+                        }
+                    }
+                    > button.__on_poll_vote, > input.__chk_multi_vote+label { width: calc(50% - 6px); }
+                    > button.__on_poll_multi_votes {
+                        width: calc(100% - 4px);
+                        display: block;
+                    }
                 }
                 > .poll_info {
                     text-align: right;

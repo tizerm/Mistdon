@@ -31,9 +31,11 @@ class Status {
                 this.notif_type = this.type == 'notification' ? json.type : null
                 this.allow_context = !(this.type == 'notification' && json.type == "follow")
                 original_date = json.created_at
-                this.reblog = json.reblog ? true : false // ブーストフラグ
-                this.reblog_by = this.reblog ? json.account.acct : null // ブースト元ユーザー
-                this.reblog_by_icon = this.reblog ? json.account.avatar : null // ブースト元ユーザーアイコン
+                // ブーストフラグとブースト関係の専用項目
+                this.reblog = json.reblog ? true : false
+                this.reblog_by = this.reblog ? json.account.acct : null
+                this.reblog_by_icon = this.reblog ? json.account.avatar : null
+                this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(json.reblog.created_at)) : null
 
                 // ブーストの場合はブースト先を参照データに設定
                 data = this.reblog ? json.reblog : json
@@ -73,6 +75,16 @@ class Status {
                     platform: 'Mastodon',
                     emojis: data.status?.emojis ?? data.emojis
                 })
+
+                if (this.content) this.content_length = $($.parseHTML(this.content // カスタム絵文字は4文字、URLは20字扱い
+                    .replace(new RegExp( // URLはマークアップを強引に20字に落とすことで対応します
+                        '<a href="https?://[^ 　\n]+".*?rel="nofollow noopener noreferrer".*?><span class="invisible">https?://.*?</span><span class="ellipsis">.+?</span>.*?</a>',
+                        'g'), '12345678901234567890')
+                    .replace(new RegExp( // Misskey用のURLマークアップ
+                        '<a href="https?://[^ 　\n]+".*?rel="nofollow noopener noreferrer".*?>https?://.+?</a>',
+                        'g'), '12345678901234567890')
+                    .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234'))).text().length
+                else this.content_length = 0
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
@@ -120,10 +132,12 @@ class Status {
                 if (this.notif_type == 'achievementEarned') return // TODO: 実績は一旦除外
 
                 original_date = json.createdAt
-                this.reblog = json.renote && !json.text // リノートフラグ
+                // リノートフラグとリノート関係の専用項目
+                this.reblog = json.renote && !json.text
                 this.reblog_by = this.reblog ? json.user.username
-                    + (json.user.host ? ('@' + json.user.host) : '') : null // リノート元ユーザー
-                this.reblog_by_icon = this.reblog ? json.user?.avatarUrl : null // リノート元ユーザーアイコン
+                    + (json.user.host ? ('@' + json.user.host) : '') : null
+                this.reblog_by_icon = this.reblog ? json.user?.avatarUrl : null
+                this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(json.renote.createdAt)) : null
 
                 // リノートの場合はリノート先を参照データに設定
                 data = this.reblog ? json.renote : json
@@ -169,12 +183,18 @@ class Status {
                     this.content = data.note?.text
                     data = data?.note ?? data
                 } else this.content = data.text // それ以外は通常の本文テキストを参照
-                if (this.content) this.content = this.content
-                    .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
-                    .replace(new RegExp('>', 'g'), '&gt;')
-                    .replace(new RegExp('https?://[^ 　\n]+', 'g'), // MisskeyはURLをリンクをリンクとして展開する
-                        match => `<a href="${match}">${match}</a>`)
-                    .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
+
+                if (this.content) { // 投稿本文の整形と字数計測
+                    this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
+                        .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
+                        .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234').length
+                    this.content = this.content
+                        .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
+                        .replace(new RegExp('>', 'g'), '&gt;')
+                        .replace(new RegExp('https?://[^ 　\n]+', 'g'), // MisskeyはURLをリンクをリンクとして展開する
+                            match => `<a href="${match}">${match}</a>`)
+                        .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
+                } else this.content_length = 0
 
                 this.quote_flg = data.renote && data.text
                 this.emojis = new Emojis({
@@ -252,6 +272,11 @@ class Status {
         Status.DETAIL_TIMELINE = { "__extended_timeline": "detail_post" }
     }
 
+    // Getter: 日付ラベルテキスト
+    get date_text() {
+        if (this.reblog) return `${this.relative_time.both} from ${this.reblog_origin_time.both}`
+        else return this.relative_time.both
+    }
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() {
         return this.from_timeline?.pref?.timeline_type == 'channel'
@@ -268,12 +293,6 @@ class Status {
         return $($.parseHTML(this.content)).text()
             .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
             .replace(new RegExp('>', 'g'), '&gt;')
-    }
-    // Getter: 本文の文章の部分の文字数を抜き出す
-    get content_length() {
-        return this.content_text
-            .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '$$')
-            .replace(new RegExp('https?://[^ 　\n]+', 'g'), '$$').length
     }
 
     /**
@@ -667,15 +686,11 @@ class Status {
             html += '</div>'
         }
         if (this.poll_options) { // 投票
-            let options = ''
-            this.poll_options.forEach(elm => options += `
-                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
-            `)
             const label_limit = this.poll_unlimited // 投票期限テキスト
                 ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
             html /* 投票ブロック */ += `
                 <div class="post_poll">
-                    <div class="options">${options}</div>
+                    <div class="options">${this.poll_buttons}</div>
                     <div class="poll_info">${label_limit}</div>
                 </div>
             `
@@ -806,7 +821,7 @@ class Status {
         }
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${this.relative_time.both}</a>
+                <a class="created_at __on_datelink">${this.date_text}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -871,7 +886,7 @@ class Status {
                         @${this.user.id}
                     </a>
                 </span>
-                <a class="created_at __on_datelink">${this.relative_time.both}</a>
+                <a class="created_at __on_datelink">${this.date_text}</a>
             </div>
             <div class="content">
         `
@@ -932,17 +947,12 @@ class Status {
                 </div>
             `
         }
-        if (this.poll_options) { // 投票
-            let options = ''
-            this.poll_options.forEach(elm => options += `
-                <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
-            `)
-            html /* 投票ブロック */ += `
-                <div class="post_poll">
-                    <div class="options">${options}</div>
-                </div>
-            `
-        }
+        if (this.poll_options) html /* 投票ブロック */ += `
+            <div class="post_poll">
+                <div class="options">${this.poll_buttons}</div>
+            </div>
+        `
+
         if (this.platform == 'Misskey' && this.quote_flg) {
             const content = !this.popout_flg && !this.detail_flg // 文字数制限
                 && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat ? `
@@ -1182,7 +1192,7 @@ class Status {
         `
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
-                <a class="created_at __on_datelink">${this.relative_time.both}</a>
+                <a class="created_at __on_datelink">${this.date_text}</a>
         `
 
         if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
@@ -1266,11 +1276,11 @@ class Status {
      * #Method
      * この投稿のアンケートに対して投票する
      * 
+     * @param target_index 投票対象の項目のインデクス配列
      * @param target_elm 票を入れるボタンのjQueryオブジェクト
      */
-    async vote(target_elm) {
-        const notification = Notification.progress(`${target_elm.text()} に投票しています...`)
-        const index = target_elm.index()
+    async vote(target_index, target_elm) {
+        const notification = Notification.progress('投票しています...')
         let response = null
         try { // 投票リクエストを送信
             switch (this.platform) {
@@ -1279,22 +1289,22 @@ class Status {
                         type: "POST",
                         url: `https://${this.from_account.pref.domain}/api/v1/polls/${this.poll_id}/votes`,
                         headers: { "Authorization": `Bearer ${this.from_account.pref.access_token}` },
-                        data: { "choices": [index] }
+                        data: { "choices": target_index }
                     })
                     break
                 case 'Misskey': // Misskey
-                    const request_param = {
-                        "i": this.from_account.pref.access_token,
-                        "noteId": this.status_id,
-                        "choice": index
-                    }
-                    response = await $.ajax({
-                        type: "POST",
-                        url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify(request_param)
-                    })
+                    for (const idx of target_index) // Misskeyの場合は複数投票の数だけRequestを繰り返す
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${this.from_account.pref.domain}/api/notes/polls/vote`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.from_account.pref.access_token,
+                                "noteId": this.status_id,
+                                "choice": Number(idx)
+                            })
+                        })
                     break
                 default:
                     break
@@ -1331,6 +1341,26 @@ class Status {
             notification.error("投票に失敗しました.")
             console.log(err)
         }
+    }
+
+    // Getter: 投票ボタンを生成
+    get poll_buttons() {
+        let options = ''
+        if (this.poll_multiple) { // 複数回答
+            const uuid = crypto.randomUUID()
+            this.poll_options.forEach((elm, idx) => options += `
+                <input type="checkbox" id="__chk_vote_${uuid}_${idx}"
+                    name="__chk_multi_vote" class="__chk_multi_vote" value="${idx}"/>
+                <label for="__chk_vote_${uuid}_${idx}">${elm.text}</label>
+            `)
+            options += `
+                <button type="button" class="__on_poll_multi_votes"${this.poll_expired ? ' disabled' : ''}>投票</button>
+            `
+        } else this.poll_options.forEach(elm => options /* 単体回答 */ += `
+            <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
+        `)
+
+        return options
     }
 
     // Getter: 投票結果のグラフのjQueryオブジェクトを返却する

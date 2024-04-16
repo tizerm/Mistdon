@@ -686,15 +686,32 @@
 
     /**
      * #Event
-     * アンケートの投票ボタン.
+     * アンケートの投票ボタン(単体).
      * => 押した内容で投票して中間結果を表示する
      */
     $(document).on("click", ".__on_poll_vote", e => {
+        const vote_target = [$(e.target).index()] // 単体投票の場合は単一配列
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
             Column.get($(e.target).closest("td"))
                 .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus($(e.target).closest("li")).vote($(e.target))
-        else Status.TEMPORARY_CONTEXT_STATUS.vote($(e.target)) // ポップアップの場合は一時保存から取得
+                .getStatus($(e.target).closest("li")).vote(vote_target, $(e.target))
+        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_target, $(e.target)) // ポップアップの場合は一時保存から取得
+    })
+
+    /**
+     * #Event
+     * アンケートの投票ボタン(複数).
+     * => チェックした内容で投票して中間結果を表示する
+     */
+    $(document).on("click", ".__on_poll_multi_votes", e => {
+        const vote_targets = []
+        $(e.target).closest(".post_poll").find("input.__chk_multi_vote:checked")
+            .each((index, elm) => vote_targets.push($(elm).val()))
+        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
+            Column.get($(e.target).closest("td"))
+                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                .getStatus($(e.target).closest("li")).vote(vote_targets, $(e.target))
+        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_targets, $(e.target)) // ポップアップの場合は一時保存から取得
     })
 
     /**
