@@ -217,6 +217,7 @@ class Account {
             }
             poll = {
                 options: options,
+                multiple: arg.option_obj.find('#__chk_poll_multiple').prop('checked'),
                 expire_sec: expire_sec > 0 ? expire_sec : null
             }
         }
@@ -269,6 +270,7 @@ class Account {
                     // アンケートがある場合はアンケートを生成
                     if (poll) request_param.poll = {
                         "options": poll.options,
+                        "multiple": poll.multiple,
                         "expires_in": poll.expire_sec
                     }
                     // 添付メディアがある場合はメディアIDを追加
@@ -315,6 +317,7 @@ class Account {
                      // アンケートがある場合はアンケートを生成
                     if (poll) request_param.poll = {
                         "choices": poll.options,
+                        "multiple": poll.multiple,
                         "expiredAfter": poll.expire_sec * 1000
                     }
                     // リプライの場合はリプライ先ノートIDを設定

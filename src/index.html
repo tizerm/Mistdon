@@ -183,12 +183,12 @@
                     <li><input type="text"
                         class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
                 </ul>
-                <button type="button" id="__on_poll_add_item"
-                    class="icon_label_set"><img src="resources/ic_add32.png" alt="追加"/>
-                    <span>追加</span></button>
-                <button type="button" id="__on_poll_remove_item"
-                    class="icon_label_set"><img src="resources/ic_rem32.png" alt="削除"/>
-                    <span>削除</span></button>
+                <button type="button" id="__on_poll_add_item" title="追加"
+                    class="poll_option_button"><img src="resources/ic_add32.png" alt="追加"/></button>
+                <button type="button" id="__on_poll_remove_item" title="削除"
+                    class="poll_option_button"><img src="resources/ic_rem32.png" alt="削除"/></button>
+                <input type="checkbox" id="__chk_poll_multiple"/>
+                <label for="__chk_poll_multiple" title="複数回答可能にする"><span>マルチ<span></label>
                 <div class="poll_expire">
                     <input type="number" id="__txt_poll_expire_time" class="__ignore_keyborad" placeholder="投票期限"/>
                     <select id="__cmb_expire_unit">

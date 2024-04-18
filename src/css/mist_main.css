@@ -206,9 +206,17 @@
                 flex-basis: 156px;
                 > ul.poll_options {
                     overflow-y: auto;
-                    height: calc(100% - 82px);
+                    height: calc(100% - 84px);
                     &::-webkit-scrollbar { width: 8px; }
                 }
+                .poll_option_button {
+                    vertical-align: text-bottom;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                    }
+                }
+                #__chk_poll_multiple+label { font-size: 13px; }
                 .__txt_poll_option { width: calc(100% - 8px); }
                 #__txt_poll_expire_time { width: 82px; }
                 + .option_close { background-color: #428571; }

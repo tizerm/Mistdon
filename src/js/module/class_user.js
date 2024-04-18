@@ -817,6 +817,11 @@ class User {
                 target: target_elm.find(".posts"),
                 bind: (data, target) => {
                     data.forEach(p => target.append(p.element))
+                    if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
+                        Emojis.replaceDomAsync(target.find(".username"), this.host) // ユーザー名
+                        Emojis.replaceDomAsync(target.find(".label_cw"), this.host) // CWテキスト
+                        Emojis.replaceDomAsync(target.find(".main_content"), this.host) // 本文
+                    }
                     // max_idとして取得データの最終IDを指定
                     return data.pop().id
                 },
