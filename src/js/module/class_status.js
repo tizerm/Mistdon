@@ -274,8 +274,29 @@ class Status {
 
     // Getter: 日付ラベルテキスト
     get date_text() {
-        if (this.reblog) return `${this.relative_time.both} from ${this.reblog_origin_time.both}`
-        else return this.relative_time.both
+        switch (Preference.GENERAL_PREFERENCE.time_format) {
+            case 'absolute': // 絶対表記
+                if (this.reblog && Preference.GENERAL_PREFERENCE.reblog_time_format != 'quoted') {
+                    if (Preference.GENERAL_PREFERENCE.reblog_time_format == 'origin') // 元の投稿
+                        return this.reblog_origin_time.day_abs
+                    else return `${this.relative_time.day_abs} from ${this.reblog_origin_time.day_abs}`
+                } else return this.relative_time.day_abs
+                break
+            case 'relative': // 相対表記
+                if (this.reblog && Preference.GENERAL_PREFERENCE.reblog_time_format != 'quoted') {
+                    if (Preference.GENERAL_PREFERENCE.reblog_time_format == 'origin') // 元の投稿
+                        return this.reblog_origin_time.week_rel
+                    else return `${this.relative_time.week_rel} from ${this.reblog_origin_time.week_rel}`
+                } else return this.relative_time.week_rel
+                break
+            default: // 両方
+                if (this.reblog && Preference.GENERAL_PREFERENCE.reblog_time_format != 'quoted') {
+                    if (Preference.GENERAL_PREFERENCE.reblog_time_format == 'origin') // 元の投稿
+                        return this.reblog_origin_time.both
+                    else return `${this.relative_time.both} from ${this.reblog_origin_time.both}`
+                } else return this.relative_time.both
+                break
+        }
     }
     // Getter: 取得元アカウントのアカウントカラー
     get account_color() {
@@ -638,9 +659,9 @@ class Status {
         }
 
         // 投稿識別アイコン
-        if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
-            html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
-        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+        if (this.reply_to) html /* リプライ/ツリーの場合 */ += `
+            <img src="resources/ic_reply.png" class="visibilityicon"/>
+        `; else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
             // 連合なしのノートはアイコン表示(チャンネルは除外)
             html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
@@ -713,7 +734,7 @@ class Status {
                 <div class="hidden_content">
                     ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
                 </div>
-                <div class="hidden_text">(長いので省略されています)</div>
+                <div class="hidden_text">(長いので省略)</div>
             `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             html += '</div>'
         }
@@ -857,6 +878,8 @@ class Status {
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
+        // リプライ/ツリーの投稿はクラスをつける
+        if (this.reply_to) jqelm.closest('li').addClass('replied_post')
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
@@ -892,9 +915,11 @@ class Status {
             </div>
             <div class="content">
         `
-        if (this.reply_to) // リプライ/ツリーの場合も識別アイコンを表示
-            html += '<img src="resources/ic_reply.png" class="visibilityicon"/>'
-        else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
+
+        // 投稿識別アイコン
+        if (this.reply_to) html /* リプライ/ツリーの場合 */ += `
+            <img src="resources/ic_reply.png" class="visibilityicon"/>
+        `; else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
             // 連合なしのノートはアイコン表示(チャンネルは除外)
             html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
         else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
@@ -973,7 +998,7 @@ class Status {
                 <div class="hidden_content">
                     ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
                 </div>
-                <div class="hidden_text">(長いので省略されています)</div>
+                <div class="hidden_text">(長いので省略)</div>
             `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             html += '</div>'
         }
@@ -1016,6 +1041,8 @@ class Status {
         if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && self_flg) jqelm.closest('li').addClass('self_post')
+        // リプライ/ツリーの投稿はクラスをつける
+        if (this.reply_to) jqelm.closest('li').addClass('replied_post')
         // BTRNにはクラスをつける
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         // 時間で色分け
@@ -1695,8 +1722,10 @@ class Status {
      * この投稿をノーマルレイアウトでポップアップするウィンドウを生成
      * 
      * @param target この投稿のjQueryオブジェクト(座標決定に使用)
+     * @param e マウスイベント
+     * @param is_reply リプライをホバーする場合はtrue
      */
-    createExpandWindow(target) {
+    createExpandWindow(target, e, is_reply) {
         // 強制的に通常表示にする
         this.detail_flg = false
         this.popout_flg = true
@@ -1705,23 +1734,33 @@ class Status {
 
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
-        $("#pop_expand_post>ul").html(this.element)
+        $("#pop_expand_post>ul").html(is_reply ? this.chat_elm : this.element)
             .css('width', `${target.closest('ul').outerWidth()}px`)
         // リアクション絵文字はリモートから直接取得
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
-        if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
+        if (is_reply) { // リプライの場合は直上にドロップで表示
             $("#pop_expand_post").css({
                 'top': 'auto',
-                'bottom': Math.round(window.innerHeight - pos.top - 48),
+                'bottom': Math.round(window.innerHeight - pos.top),
                 'left': pos.left - 12
             })
-        else $("#pop_expand_post").css({
-            'bottom': 'auto',
-            'top': pos.top - 24,
-            'left': pos.left - 12
-        })
-        $("#pop_expand_post").show(...Preference.getAnimation("POP_FOLD"))
+            $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
+        } else { // それ以外のポップアップの場合はマウスカーソルの位置から逆算する
+            const mouse_y = e.pageY
+            if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
+                $("#pop_expand_post").css({
+                    'top': 'auto',
+                    'bottom': Math.round(window.innerHeight - mouse_y - 48),
+                    'left': pos.left - 12
+                })
+            else $("#pop_expand_post").css({
+                'bottom': 'auto',
+                'top': mouse_y - 24,
+                'left': pos.left - 12
+            })
+            $("#pop_expand_post").show(...Preference.getAnimation("POP_FOLD"))
+        }
     }
 
     /**

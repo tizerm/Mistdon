@@ -746,13 +746,13 @@
                 .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error"))
         else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).createExpandWindow(target_li)
+                .getStatus(target_li).createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createExpandWindow(target_li)
+            Trend.getStatus(target_li).createExpandWindow(target_li, e, false)
         else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li))
+            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li, e, false))
     })
 
     /**
@@ -764,13 +764,13 @@
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).quote.createExpandWindow(target_li)
+                .getStatus(target_li).quote.createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).quote.createExpandWindow(target_li)
+            Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
         else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li))
+            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li, e, false))
     })
 
     /**
@@ -780,6 +780,31 @@
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li",
         e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
+
+    /**
+     * #Event #Mouseenter
+     * リプライ付きの投稿本体に対してホバー.
+     * => 直前のリプライを表示
+     */
+    if (Preference.GENERAL_PREFERENCE.enable_pop_prev_reply) $(document).on("mouseenter",
+        "li.replied_post:not(.chat_timeline), li.replied_post.chat_timeline>.content", e => {
+            const target_li = $(e.target).closest("li")
+            let target_post = null
+            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+                target_post = Column.get($(e.target).closest("td"))
+                    .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
+            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+                target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
+
+            if (target_post) { // 対象の投稿が取得できたらそこからタイムライン上のリプライ元を探す
+                const target_timeline = target_post.from_timeline
+                const replied_key = target_timeline.status_key_map.get(target_post.reply_to)
+                const replied_post = target_timeline.parent_group.status_map.get(replied_key)
+
+                // 存在したらリプライ先を表示
+                replied_post?.createExpandWindow(target_li, e, true)
+            }
+        })
 
     /**
      * #Event #Mouseenter
@@ -932,6 +957,10 @@
      */
     $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
         if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0) return
+
+        // ポップアップが表示されている場合は消去
+        if ($("#pop_expand_post").is(':visible') && $(e.relatedTarget).closest("#pop_expand_post").length == 0)
+            $("#pop_expand_post").hide() // 位置がおかしくなるので即座に消す
 
         // アクションバーに移動した場合は消さない
         if ($(e.relatedTarget).closest("#pop_expand_action").length > 0) return

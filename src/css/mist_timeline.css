@@ -530,8 +530,17 @@
                     white-space: nowrap;
                     text-overflow: ellipsis;
                 }
+                > .hidden_text {
+                    border-left: solid 4px #ffffff;
+                    border-top-right-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                    padding-left: 12px;
+                    background-color: #bbbbbb;
+                    color: #333333;
+                    font-weight: bold;
+                }
                 &:hover {
-                background-color: rgba(76,76,76,0.98);
+                    background-color: rgba(76,76,76,0.98);
                     border-left-color: #ffffff;
                     cursor: pointer;
                 }

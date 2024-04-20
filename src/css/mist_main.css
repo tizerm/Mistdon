@@ -714,7 +714,7 @@
     /*=== Post Expand Window Layout ==============================================================*/
     > #pop_expand_post {
         display: none;
-        z-index: 42;
+        z-index: 64;
         position: absolute;
 
         & ul {

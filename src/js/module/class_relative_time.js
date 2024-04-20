@@ -47,6 +47,11 @@ class RelativeTime {
         else return undefined
     }
 
+    // Getter: フォーマットした相対時間を返却、ただし7日以上経ったら絶対表記
+    get week_rel() {
+        return this.relative ?? this.absolute
+    }
+
     // Getter: 絶対時間と相対時間を両方返却
     get both() {
         const relative = this.relative

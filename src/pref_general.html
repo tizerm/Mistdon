@@ -98,6 +98,12 @@
                         title="投稿にマウスオーバーしたときに表示されるリプライ/ブースト/リノートなどが手軽に行えるアクションパレットを使用するか設定します。"/>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_use_prev_relpy"/>
+                        <label for="__chk_gen_use_prev_relpy">簡易直前リプライを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="リプライやツリーの投稿に対してマウスオーバーしたときに、タイムライン上に返信対象の投稿がある場合に表示するかどうか設定します。タイムライン上にない場合はオンにしても表示しません。"/>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_use_notified_impression"/>
                         <label for="__chk_gen_use_notified_impression">通知タイムラインで累計反応数を表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
@@ -192,6 +198,49 @@
                     <li>
                         <input type="checkbox" id="__chk_gen_expand_media_profile"/>
                         <label for="__chk_gen_expand_media_profile">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>時間表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="タイムライン上の投稿の時間表記を絶対表記か相対表記か選択します。両方にすることもできます。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format1" name="__opt_gen_time_format" class="__opt_gen_time_format" value="absolute"/>
+                        <label for="__opt_gen_time_format1">絶対表記</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format2" name="__opt_gen_time_format" class="__opt_gen_time_format" value="relative"/>
+                        <label for="__opt_gen_time_format2">相対表記</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format3" name="__opt_gen_time_format" class="__opt_gen_time_format" value="both"/>
+                        <label for="__opt_gen_time_format3">絶対表記+相対表記</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>ブースト/リノートの時間表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ブースト/リノートの投稿の時間表記を「ブーストされた時間」か「元の投稿の時間」か選択します。両方にすることもできます。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format1"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="origin"/>
+                        <label for="__opt_gen_reblog_time_format1">元の投稿の投稿時間を表示</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format2"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="quoted"/>
+                        <label for="__opt_gen_reblog_time_format2">ブースト/リノートされた時間を表示</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format3"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="both"/>
+                        <label for="__opt_gen_reblog_time_format3">両方の時間を表示</label>
                     </li>
                 </ul>
             </dd>

@@ -268,7 +268,7 @@
                     }
                     break
                 default:
-                    // Alt+1～9(+テンキー): 追加アカウントをトグル
+                    // Alt+1～9(+テンキー): N番目のアカウントに切り替え
                     const key_num = 49 <= e.keyCode && e.keyCode <= 57
                     const ten_num = 97 <= e.keyCode && e.keyCode <= 105
                     if (key_num || ten_num) {
@@ -277,9 +277,9 @@
                         else if (ten_num) number = e.keyCode - 96 // テンキー
 
                         element = $('#header>#post_options input.__chk_add_account+label').eq(number - 1)
-                        // Ctrl+Alt+1～9(+テンキー): N番目のアカウントに切り替え
-                        if (event.ctrlKey || event.metaKey) element.dblclick()
-                        else element.click()
+                        // Ctrl+Alt+1～9(+テンキー): 追加アカウントをトグル
+                        if (event.ctrlKey || event.metaKey) element.click()
+                        else element.dblclick()
                         return false
                     }
                     break
