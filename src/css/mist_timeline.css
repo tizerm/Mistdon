@@ -393,10 +393,7 @@
                 }
                 > .hidden_content {
                     margin-bottom: 4px;
-                    font-size: 12px;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
+                    font-size: 11px;
                 }
             }
 

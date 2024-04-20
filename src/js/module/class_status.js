@@ -574,6 +574,7 @@ class Status {
             case 'multi': // マルチレイアウト
                 return this.mix_element
             default: // デフォルト(ノーマル)
+                this.mini_normal = pref == 'normal2'
                 return this.element
         }
     }
@@ -661,7 +662,7 @@ class Status {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
             html /* ユーザーアカウント情報(ノーマル2を使っている場合は専用のクラスを付ける) */ += `
-                <div class="user${this.from_group?.pref?.tl_layout == 'normal2' ? ' prof_normal2' : ''}">
+                <div class="user${this.mini_normal ? ' prof_normal2' : ''}">
                     <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                     <span class="userid">
@@ -674,15 +675,17 @@ class Status {
         }
         { // 投稿本文領域
             html += '<div class="content">'
-            const over_content = !this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
-                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default
-            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
             if (this.cw_text) html /* CWテキスト */ += `
                 <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
-            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
+            `; if (!this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default) html += `
+                <div class="hidden_content">
+                    ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
+                </div>
+                <div class="content_length_limit label_limitover">省略: ${this.content_length}字</div>
+            `; else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
             html += '</div>'
         }
         if (this.poll_options) { // 投票
@@ -696,13 +699,6 @@ class Status {
             `
         }
         if (this.platform == 'Misskey' && this.quote_flg) {
-            const content = !this.popout_flg && !this.detail_flg // 文字数制限
-                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default ? `
-                <div class="hidden_content">
-                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default)}...
-                </div>
-                <div class="hidden_text">(長いので省略されています)</div>
-            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
@@ -711,9 +707,15 @@ class Status {
                         <span>${this.quote.user.username}</span>
                         <span>@${this.quote.user.id}</span>
                     </div>
-                    ${content}
-                </div>
             `
+            if (!this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default) html += `
+                <div class="hidden_content">
+                    ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
+            html += '</div>'
         }
         if (this.reaction_emoji) { // リアクション絵文字がある場合
             let alias = null
@@ -910,14 +912,17 @@ class Status {
             }
         }
         { // 投稿本文領域
-            const over_content = !this.profile_post_flg && !this.detail_flg // 文字数制限
-                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat
-            if (over_content) html += `<div class="content_length_limit label_limitover">(${this.content_length}文字)</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
             if (this.cw_text) html /* CWテキスト */ += `
                 <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
-            `; if (over_content) html += `<div class="hidden_content">${this.content_text}</div>`
+            `; if (!this.profile_post_flg && !this.detail_flg // 文字数制限
+                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat) html += `
+                <div class="hidden_content">
+                    ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
+                </div>
+                <div class="content_length_limit label_limitover">省略: ${this.content_length}字</div>
+            `
             else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
         }
 
@@ -954,13 +959,6 @@ class Status {
         `
 
         if (this.platform == 'Misskey' && this.quote_flg) {
-            const content = !this.popout_flg && !this.detail_flg // 文字数制限
-                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat ? `
-                <div class="hidden_content">
-                    ${this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat)}...
-                </div>
-                <div class="hidden_text">(長いので省略されています)</div>
-            ` : `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
             html /* 引用ノート(Misskeyのみ) */ += `
@@ -969,9 +967,15 @@ class Status {
                         <span>${this.quote.user.username}</span>
                         <span>@${this.quote.user.id}</span>
                     </div>
-                    ${content}
-                </div>
             `
+            if (!this.popout_flg && !this.detail_flg // 文字数制限
+                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat) html += `
+                <div class="hidden_content">
+                    ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
+                </div>
+                <div class="hidden_text">(長いので省略されています)</div>
+            `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
+            html += '</div>'
         }
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
@@ -1703,6 +1707,7 @@ class Status {
         const pos = target.offset()
         $("#pop_expand_post>ul").html(this.element)
             .css('width', `${target.closest('ul').outerWidth()}px`)
+        // リアクション絵文字はリモートから直接取得
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
         if (window.innerHeight / 2 < pos.top) // ウィンドウの下の方にある場合は下から展開
