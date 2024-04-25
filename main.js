@@ -10,6 +10,7 @@ const crypto = require('crypto')
 const fs = require('fs')
 const http = require('http')
 const stateKeeper = require('electron-window-state')
+const FeedParser = require('feedparser')
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 // アプリ保持用設定データの管理
@@ -757,24 +758,6 @@ async function readWindowPref() {
     return pref_window
 }
 
-/**
- * #IPC
- * ウィンドウ設定をJSONファイルとして書き込む
- * 変更がない場合は何もしない
- * 
- * @param event イベント
- * @param json_data 書き込むJSONデータ
- */
-async function writeWindowPref(event, data) {
-    // 変更がなかったらなにもしない
-    if (JSON.stringify(data) == JSON.stringify(pref_window)) return
-
-    const content = await overwriteFile('app_prefs/window_pref.json', data)
-    console.log('@INF: finish write app_prefs/window_pref.json')
-
-    pref_window = JSON.parse(content)
-}
-
 /*====================================================================================================================*/
 
 /**
@@ -958,6 +941,44 @@ async function ajax(arg) {
 /*====================================================================================================================*/
 
 /**
+ * #IPC #feedparser
+ * MistdonのGitHubからリリース情報を取得して最新版のバージョンを返す.
+ * 
+ * @return 最新バージョンの情報を乗っけたオブジェクト
+ */
+async function fetchVersion() {
+    // feedparserでJSONとして返却する処理を事前に関数化
+    const parseFeed = (res) => new Promise((resolve, reject) => {
+        let parser = new FeedParser()
+        parser.on('readable', () => {
+            const feed = parser.read()
+            const version = feed.link.substring(feed.link.lastIndexOf('v'))
+            resolve({
+                title: feed.title,
+                link: feed.link,
+                version: version,
+                // フィードの最新バージョンがこのバージョンと同じならフラグを立てる
+                lastest: version == `v${app.getVersion()}`
+            })
+        })
+        parser.on('error', (err) => {
+            console.log('Feed parse error.')
+            reject(err)
+        })
+        res.body.pipe(parser)
+    })
+
+    // fetchでGitHubのReleaseのRSSフィードをリクエストする
+    const response = await fetch('https://github.com/tizerm/Mistdon/releases.atom')
+
+    // ステータスコードがエラーの場合はエラーを投げる
+    if (!response.ok) throw new Error(`Feed GET Error HTTP Status: ${response.status}`)
+
+    // 読み込みイベントを待ってフィードの内容を取得
+    return await parseFeed(response)
+}
+
+/**
  * #Utils #Electron
  * リンクを外部ブラウザで開く
  * 
@@ -1081,7 +1102,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-draft', overwriteDraft)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)
-    ipcMain.on('write-window-pref', writeWindowPref)
+    ipcMain.handle('fetch-version', fetchVersion)
     ipcMain.on('open-oauth', openOAuthSession)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)

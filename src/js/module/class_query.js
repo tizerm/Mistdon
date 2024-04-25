@@ -12,6 +12,11 @@ class Query {
         if (query.indexOf('#') == 0) this.hashtag = query.substring(1)
     }
 
+    // Getter: 検索文字列がURLかどうか判定
+    get is_url() { return this.query.match(new RegExp('^https?://', 'g')) }
+    // Getter: 検索文字列がアカウントアドレスかどうか判定
+    get is_address() { return this.query.match(new RegExp('^@[a-zA-Z_]+@.+$', 'g')) }
+
     // スタティックマップを初期化(非同期)
     static {
         Query.SEARCH_PREF_TIMELINE = {
@@ -64,7 +69,23 @@ class Query {
             </div>
         `)
 
+        // クエリオブジェクトを生成
         const query = new Query($("#pop_ex_timeline #__txt_search_query").val())
+        if (query.is_url) { // URLの場合Mastodon/Misskeyの投稿URLか判定する
+            const post = await Status.getStatus(query.query)
+            if (post) { // 投稿が取得できたら投稿ウィンドウを表示
+                post.createDetailWindow()
+                $('#__on_search_close').click()
+                return
+            }
+        } else if (query.is_address) { // ユーザーアドレスの場合は取得できるユーザー情報か判定する
+            const user = await User.getByAddress(query.query)
+            if (user) { // ユーザーが取得できたらユーザープロフィールウィンドウを表示
+                user.createDetailWindow()
+                $('#__on_search_close').click()
+                return
+            }
+        }
         // すべてのアカウントから検索処理を実行してバインド
         const promises = []
         Account.each(account => promises.push(query.search(account)))

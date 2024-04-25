@@ -1172,6 +1172,47 @@
             }
         }
     }
+
+    /*=== Lastest Release Notification Layout ====================================================*/
+    > #pop_lastest_release {
+        display: none;
+        position: absolute;
+        left: 72px;
+        bottom: 6px;
+        background-color: rgba(82,66,62,0.683);
+        border: solid 2px #cccccc;
+        border-radius: 16px;
+        padding-left: 96px;
+        padding-right: 32px;
+        z-index: 81;
+        > h3 {
+            margin: 6px 12px;
+            padding: 0px;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-size: 24px;
+        }
+        > a.dl_link {
+            display: block;
+            margin: 4px;
+            padding: 2px;
+            border-radius: 8px;
+            background-color: #4461a6;
+            color: #ffffff;
+            text-align: center;
+            font-weight: bold;
+        }
+        > button.window_close_button {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            margin: 0px;
+            padding: 0px;
+            > img {
+                height: 28px;
+                width: auto;
+            }
+        }
+    }
 }
 
 /*=== Grouping Preferance ========================================================================*/

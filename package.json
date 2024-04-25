@@ -1,7 +1,7 @@
 {
   "name": "Mistdon",
-  "version": "0.9.9",
-  "description": "This is Electron base Mastodon and Misskey client.",
+  "version": "0.5.1",
+  "description": "The integrated Mastodon and Misskey client application.",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -29,6 +29,7 @@
     "@electron-forge/publisher-github": "^6.4.2",
     "electron-squirrel-startup": "^1.0.0",
     "electron-window-state": "^5.0.3",
+    "feedparser": "^2.2.10",
     "node-fetch": "^2.7.0"
   }
 }

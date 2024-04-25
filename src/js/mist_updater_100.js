@@ -49,5 +49,14 @@
             accept: () => location.reload()
         })
     }
+
+    // GitHubのバージョン情報を取得
+    const version = await window.accessApi.fetchVersion()
+    if (version.lastest) $("#pop_lastest_release").remove()
+    else { // 起動しているのが最新バージョンでない場合は最新バージョン通知を表示
+        $("#pop_lastest_release .version").text(version.version)
+        $("#pop_lastest_release .dl_link").attr('href', version.link)
+        $("#pop_lastest_release").show()
+    }
 })())
 
