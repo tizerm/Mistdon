@@ -477,7 +477,8 @@
     $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
 
     /**
-     * #Event #Dragenter     * 添付メディア: 外部ファイラーからファイルをドラッグ.
+     * #Event #Dragenter
+     * 添付メディア: 外部ファイラーからファイルをドラッグ.
      * => ファイル添付モーダルを表示
      */
     document.addEventListener("dragenter", e => {
@@ -496,9 +497,9 @@
     $("#modal_drop_files>.dropbox").get(0).addEventListener("dragleave", e => {
         e.preventDefault()
         // 内部の要素に移動した場合は発火しない
-        if (!$(e.relatedTarget).is("#modal_drop_files")) return
+        if (e.relatedTarget && !$(e.relatedTarget).is("#modal_drop_files")) return
         // 再発火の可能性をおさえるため遅めにフェードアウトする(これは設定で無効化しない)
-        $("#modal_drop_files").hide("fade", 800)
+        $("#modal_drop_files").hide("fade", 750)
     })
 
     /**
@@ -609,7 +610,7 @@
      * ユーザーアドレス.
      * => リモートのユーザー情報を右ウィンドウに表示
      */
-    $(document).on("click", ".__lnk_userdetail, .usericon", e => User.getByAddress($(e.target).attr("name"))
+    $(document).on("click", ".__lnk_userdetail, .usericon", e => User.getByAddress($(e.currentTarget).attr("name"))
         .then(user => user.createDetailWindow())
         .catch(jqXHR => toast("ユーザーの取得でエラーが発生しました.", "error")))
 

@@ -1,6 +1,6 @@
 ﻿$(() => (async () => {
+    // v0.3.2以下のカラム設定のアップコンバート
     const pref = await window.accessApi.readPrefCols()
-
     if (pref[0].timelines) {
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
@@ -49,6 +49,17 @@
             accept: () => location.reload()
         })
     }
+
+    // v0.5.1以下のアカウント設定のアップコンバート
+    const accounts = await window.accessApi.readPrefAccs()
+    if ([...accounts.values()].some(acc => !acc.client_id)) dialog({
+        type: 'alert',
+        title: "設定ファイル確認",
+        text: `v0.5.1以下で使用していたMisskeyアカウントがあります。<br/>
+            v1.0.0から追加されたメディア添付機能を使用するには再認証をする必要があります。<br/>
+            お手数ですが一度アカウントの認証を解除してから再度アカウント登録をお願いいたします。`,
+        accept: () => {}
+    })
 
     // GitHubのバージョン情報を取得
     const version = await window.accessApi.fetchVersion()

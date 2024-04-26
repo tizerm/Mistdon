@@ -15,7 +15,7 @@ class Query {
     // Getter: 検索文字列がURLかどうか判定
     get is_url() { return this.query.match(new RegExp('^https?://', 'g')) }
     // Getter: 検索文字列がアカウントアドレスかどうか判定
-    get is_address() { return this.query.match(new RegExp('^@[a-zA-Z_]+@.+$', 'g')) }
+    get is_address() { return this.query.match(new RegExp('^@[a-zA-Z0-9_]+@.+$', 'g')) }
 
     // スタティックマップを初期化(非同期)
     static {

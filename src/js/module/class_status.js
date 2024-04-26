@@ -682,8 +682,47 @@ class Status {
         if (!this.profile_post_flg || this.reblog) {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-            html /* ユーザーアカウント情報(ノーマル2を使っている場合は専用のクラスを付ける) */ += `
-                <div class="user${this.mini_normal ? ' prof_normal2' : ''}">
+            // ユーザーアカウント情報
+            if (this.mini_normal) { // ノーマル2レイアウトの場合
+                html += `
+                    <div class="user prof_normal2">
+                        <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
+                    case 'both_prename': // ユーザーネーム+ユーザーID
+                        html += `
+                            <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                            <span class="userid">
+                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
+                            </span>
+                        `
+                        break
+                    case 'both_preid': // ユーザーID+ユーザーネーム
+                        html += `
+                            <span class="userid">
+                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
+                            </span>
+                            <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                        `
+                        break
+                    case 'id': // ユーザーIDのみ
+                        html += `
+                            <span class="userid">
+                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
+                            </span>
+                        `
+                        break
+                    case 'name': // ユーザーネームのみ
+                        html += `
+                            <h4 class="username">
+                                <a class="__lnk_userdetail" name="@${this.user.full_address}">${target_emojis.replace(this.user.username)}</a>
+                            </h4>`
+                        break
+                    default:
+                        break
+                }
+                html += '</div>'
+            } else html /* ノーマルレイアウトの場合 */ += `
+                <div class="user">
                     <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                     <span class="userid">
@@ -901,14 +940,36 @@ class Status {
         if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
 
         const self_flg = `@${this.user.full_address}` == this.from_account?.full_address
-        let target_emojis = null
+        let target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="chat_timeline">`
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                 <span class="userid">
                     <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                        @${this.user.id}
+        `; switch (Preference.GENERAL_PREFERENCE.chat_name_format) {
+            case 'both_prename': // ユーザーネーム+ユーザーID
+                html += `
+                    <span class="inner_name">${target_emojis.replace(this.user.username)}</span>
+                    <span class="inner_id">@${this.user.id}</span>
+                `
+                break
+            case 'both_preid': // ユーザーID+ユーザーネーム
+                html += `
+                    <span class="inner_id">@${this.user.id}</span>
+                    <span class="inner_name">${target_emojis.replace(this.user.username)}</span>
+                `
+                break
+            case 'id': // ユーザーIDのみ
+                html += `<span class="inner_id">@${this.user.id}</span>`
+                break
+            case 'name': // ユーザーネームのみ
+                html += `<span class="inner_name">${target_emojis.replace(this.user.username)}</span>`
+                break
+            default:
+                break
+        }
+        html /* ユーザーアカウント情報 */ += `
                     </a>
                 </span>
                 <a class="created_at __on_datelink">${this.date_text}</a>

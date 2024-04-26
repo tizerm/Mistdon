@@ -15,7 +15,7 @@
     "url": "https://github.com/tizerm/Mistdon.git"
   },
   "author": "tizerm",
-  "license": "MIT",
+  "license": "LGPL",
   "devDependencies": {
     "@electron-forge/cli": "^6.4.1",
     "@electron-forge/maker-deb": "^6.4.1",

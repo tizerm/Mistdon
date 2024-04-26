@@ -30,7 +30,7 @@ class Preference {
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
                     "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
                     "enable_action_palette"         : true,     // 簡易アクションパレット
-                    "enable_pop_prev_reply"         : true,     // 簡易リプライ表示
+                    "enable_pop_prev_reply"         : false,    // 簡易リプライ表示
                     "enable_notified_impression"    : true,     // 通知欄のインプレッション表示
                     "enable_media_confirm"          : true,     // メディア投稿確認
                     "enable_animation"              : true,     // アニメーション
@@ -49,6 +49,8 @@ class Preference {
                         "profile_cw"                : false,    // プロフィール: CW
                         "profile_media"             : false     // プロフィール: メディア
                     },
+                    "normal_name_format"            : "both",   // ノーマル2の名前表記
+                    "chat_name_format"              : "id",     // チャットの名前表記
                     "time_format"                   : "both",   // 時間表記
                     "reblog_time_format"            : "origin", // BTRNの時間表記
                     "tl_cache_limit": {                         // TLキャッシュ件数
@@ -253,7 +255,9 @@ class Preference {
         $("#__chk_gen_expand_cw_profile").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw)
         $("#__chk_gen_expand_media_profile").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_media)
 
-        // 時間表記
+        // 表記系オプション
+        $(`input.__opt_gen_normal_name_format[value="${Preference.GENERAL_PREFERENCE.normal_name_format}"]`).prop("checked", true)
+        $(`input.__opt_gen_chat_name_format[value="${Preference.GENERAL_PREFERENCE.chat_name_format}"]`).prop("checked", true)
         $(`input.__opt_gen_time_format[value="${Preference.GENERAL_PREFERENCE.time_format}"]`).prop("checked", true)
         $(`input.__opt_gen_reblog_time_format[value="${Preference.GENERAL_PREFERENCE.reblog_time_format}"]`).prop("checked", true)
 
@@ -331,8 +335,10 @@ class Preference {
                 "profile_cw"                : $("#__chk_gen_expand_cw_profile").prop("checked"),
                 "profile_media"             : $("#__chk_gen_expand_media_profile").prop("checked")
             },
-            "time_format"                   : $(`input.__opt_gen_time_format:checked`).val(),
-            "reblog_time_format"            : $(`input.__opt_gen_reblog_time_format:checked`).val(),
+            "normal_name_format"            : $("input.__opt_gen_normal_name_format:checked").val(),
+            "chat_name_format"              : $("input.__opt_gen_chat_name_format:checked").val(),
+            "time_format"                   : $("input.__opt_gen_time_format:checked").val(),
+            "reblog_time_format"            : $("input.__opt_gen_reblog_time_format:checked").val(),
             "tl_cache_limit": {             // TLキャッシュ件数
                 "default"                   : $("#__txt_gen_tlcache_default").val(),
                 "chat"                      : $("#__txt_gen_tlcache_chat").val(),
@@ -357,7 +363,7 @@ class Preference {
                 "shift"                     : $("#__txt_gen_keyscroll_shift").val(),
             },
             "background": {                 // 背景
-                "type"                      : $(`input.__opt_gen_background:checked`).val(),
+                "type"                      : $("input.__opt_gen_background:checked").val(),
                 "color"                     : $("#__txt_gen_background_color").val(),
                 "mitlin_version"            : $("#__cmb_gen_backmitlin_type").val(),
                 "file_path"                 : $("#__hdn_gen_bgfile").val().replace(/\\/g, '/')

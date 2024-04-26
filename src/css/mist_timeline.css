@@ -734,8 +734,9 @@
                     display: inline-block;
                     font-size: 11px;
                     position: absolute;
-                    top: -13px;
+                    top: -15px;
                     left: 8px;
+                    .inline_emoji { height: 14px; }
                 }
                 > .created_at {
                     font-family: Arial, "メイリオ", sans-selif;
