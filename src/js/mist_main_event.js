@@ -81,7 +81,7 @@
         const jqelm = $($.parseHTML(`
             <div class="help_col">
                 <h2>キーボードショートカット早見表</h2>
-                <div class="help_content"></div>
+                <div class="help_content shortcut_list"></div>
                 <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
