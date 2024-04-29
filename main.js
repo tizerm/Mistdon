@@ -204,6 +204,7 @@ async function openOAuthSession(event, json_data) {
                 'redirect_url': redirect_url,
                 'post_maxlength': json_data.post_maxlength
             }
+
             // OAuth認証画面を開く
             openExternalBrowser(null, `https://${host}/oauth/authorize?client_id=${client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
             break
@@ -244,6 +245,9 @@ async function openOAuthSession(event, json_data) {
  */
 async function authorizeMastodon(auth_code) {
     try {
+        // SkyBridgeからくるAuthCodeはデコードされてないのでデコードしてから使う
+        const decode_code = decodeURIComponent(auth_code)
+
         const token = await ajax({ // OAuth認証を開始
             method: "POST",
             url: `https://${oauth_session.domain}/oauth/token`,
@@ -253,29 +257,33 @@ async function authorizeMastodon(auth_code) {
                 "client_secret": oauth_session.client_secret,
                 "redirect_uri": oauth_session.redirect_url,
                 "grant_type": "authorization_code",
-                "code": auth_code
+                "code": decode_code
             }
         })
         const access_token = token.body.access_token
 
-        // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得(Promise返却)
-        const user_data = await ajax({
-            method: "GET",
-            url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
-            headers: { 'Authorization': `Bearer ${access_token}` }
-        })
+        let user_data = null
+        try { // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得
+            user_data = await ajax({
+                method: "GET",
+                url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
+                headers: { 'Authorization': `Bearer ${access_token}` }
+            })
+        } catch (err) {
+            console.log(err)
+        }
 
         // JSONを生成(あとでキャッシュに入れるので)
         const write_json = {
             'domain': oauth_session.domain,
             'platform': 'Mastodon',
-            'user_id': user_data.body.username,
-            'username': user_data.body.display_name,
+            'user_id': user_data?.body?.username,
+            'username': user_data?.body?.display_name,
             'socket_url': `wss://${oauth_session.domain}/api/v1/streaming`,
             'client_id': oauth_session.client_id,
             'client_secret': oauth_session.client_secret,
             'access_token': access_token,
-            'avatar_url': user_data.body.avatar,
+            'avatar_url': user_data?.body?.avatar,
             'post_maxlength': oauth_session.post_maxlength,
             // アカウントカラーは初期値グレー
             'acc_color': '808080'

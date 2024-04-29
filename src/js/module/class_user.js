@@ -103,9 +103,10 @@ class User {
         User.DETAIL_TIMELINE = { "parent_column": null }
     }
 
+    // Getter: SkyBridge判定
+    get is_skybridge() { return this.host == 'skybridge.fly.dev' }
     // Getter: 取得元アカウントのカスタム絵文字
     get host_emojis() { return this.authorized?.emojis }
-
     // Getter: ユーザーキャッシュを認識するためのキー
     get user_key() { return `user_${this.user_uuid}` }
 
@@ -283,7 +284,7 @@ class User {
         let instance = ''
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                html += `<img src="resources/${this.is_skybridge ? 'ic_bluesky' : 'ic_mastodon'}.png" class="instance_icon"/>`
                 bookmarks = `
                     <a class="__on_show_bookmark" title="ブックマーク"
                         ><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>

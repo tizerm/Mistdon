@@ -21,6 +21,8 @@ class Account {
 
     // Getter: プラットフォーム
     get platform() { return this.pref.platform }
+    // Getter: SkyBridge判定
+    get is_skybridge() { return this.pref.domain == 'skybridge.fly.dev' }
     // Getter: WebSocket接続URL
     get socket_url() {
         let url = null
@@ -160,9 +162,11 @@ class Account {
         $(`#header>#post_options #__on_open_drive`).prop("disabled", this.platform == 'Mastodon')
 
         // 背景アイコンとアカウントカラーを設定
-        $("#header>h1>.head_user").css('background-image',
-            `url("resources/${this.platform == 'Mastodon' ? 'ic_mastodon.png' : 'ic_misskey.png'}"`
-        )
+        if (this.platform == 'Misskey') $("#header>h1>.head_user")
+            .css('background-image', 'url("resources/ic_misskey.png")')
+        else $("#header>h1>.head_user").css('background-image',
+            `url("resources/${this.is_skybridge ? 'ic_bluesky' : 'ic_mastodon'}.png")`)
+
         $("#header>h1>.head_user>.username").text(this.pref.username)
         $("#header>h1>.head_user>.channelname").empty()
         $("#header>h1>.head_user>.useraddress").text(`- ${this.full_address}`)
