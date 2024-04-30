@@ -857,46 +857,36 @@
      * #Event
      * 簡易アクションバー: リプライ.
      */
-    $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_reply',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_reply", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_reply', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event
      * 簡易アクションバー: ブースト/リノート.
      */
-    $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_reblog',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_reblog", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_reblog', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event
      * 簡易アクションバー: 引用.
      */
-    $(document).on("click", ".__short_quote", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_quote',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_quote", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_quote', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event
      * 簡易アクションバー: お気に入り.
      */
-    $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_favorite',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_fav", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_favorite', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event
      * 簡易アクションバー: ブックマーク.
      */
-    $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_bookmark',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_bookmark", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_bookmark', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event
@@ -946,10 +936,8 @@
      * #Event
      * 簡易アクションバー: 他のリアクションを送る.
      */
-    $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account.reaction({
-        target_mode: '__menu_reaction',
-        target_url: Status.TEMPORARY_ACTION_STATUS.uri
-    }))
+    $(document).on("click", ".__short_other_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account
+        .reaction('__menu_reaction', null, Status.TEMPORARY_ACTION_STATUS))
 
     /**
      * #Event #Mouseleave
@@ -1214,10 +1202,7 @@
     $(document).on("click", "#pop_context_menu>.ui_menu>li ul.account_menu>li", e => {
         const target_account = Account.get($(e.target).closest("li").attr("name"))
         $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
-        target_account.reaction({
-            target_mode: $(e.target).closest("ul").attr("id"),
-            target_url: $("#pop_context_menu").attr("name")
-        })
+        target_account.reaction($(e.target).closest("ul").attr("id"), $("#pop_context_menu").attr("name"), null)
     })
 
     /**

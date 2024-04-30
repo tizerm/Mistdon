@@ -368,57 +368,66 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントからブースト/リノート/お気に入り処理を実行
      * 
-     * @param arg パラメータオブジェクト
+     * @param mode リアクションモード
+     * @param url 対象の投稿URL
+     * @param obj 対象のStatusオブジェクト(直接取得できる場合)
      */
-    async reaction(arg) {
+    async reaction(mode, url, obj) {
         let response = null
         let target_post = null
-        const notification = Notification.progress("対象の投稿を取得中です...")
-        try { // ターゲットの投稿データを取得
-            switch (this.platform) {
-                case 'Mastodon': // Mastodon
-                    response = await $.ajax({ // 検索から投稿を取得
-                        type: "GET",
-                        url: `https://${this.pref.domain}/api/v2/search`,
-                        dataType: "json",
-                        headers: { "Authorization": `Bearer ${this.pref.access_token}` },
-                        data: {
-                            "q": arg.target_url,
-                            "type": "statuses",
-                            "resolve": true
-                        }
-                    })
-                    response = response.statuses[0]
-                    break
-                case 'Misskey': // Misskey
-                    response = await $.ajax({
-                        type: "POST",
-                        url: `https://${this.pref.domain}/api/ap/show`,
-                        dataType: "json",
-                        headers: { "Content-Type": "application/json" },
-                        data: JSON.stringify({
-                            "i": this.pref.access_token,
-                            "uri": arg.target_url
+        let notification = null
+        if (obj) { // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用
+            if (!['__menu_reply', '__menu_quote', '__menu_reaction'].includes(mode))
+                notification = Notification.progress("実行中です...")
+            target_post = obj
+        } else { // URL参照の場合はターゲットの投稿データを取得
+            notification = Notification.progress("対象の投稿を取得中です...")
+            try {
+                switch (this.platform) {
+                    case 'Mastodon': // Mastodon
+                        response = await $.ajax({ // 検索から投稿を取得
+                            type: "GET",
+                            url: `https://${this.pref.domain}/api/v2/search`,
+                            dataType: "json",
+                            headers: { "Authorization": `Bearer ${this.pref.access_token}` },
+                            data: {
+                                "q": url,
+                                "type": "statuses",
+                                "resolve": true
+                            }
                         })
-                    })
-                    response = response.object
-                    break
-                default:
-                    break
+                        response = response.statuses[0]
+                        break
+                    case 'Misskey': // Misskey
+                        response = await $.ajax({
+                            type: "POST",
+                            url: `https://${this.pref.domain}/api/ap/show`,
+                            dataType: "json",
+                            headers: { "Content-Type": "application/json" },
+                            data: JSON.stringify({
+                                "i": this.pref.access_token,
+                                "uri": url
+                            })
+                        })
+                        response = response.object
+                        break
+                    default:
+                        break
+                }
+                // 取得できなかったらなにもしない
+                if (!response) throw new Error('response is empty.')
+                // 取得できた場合はtarget_jsonからStatusインスタンスを生成
+                target_post = new Status(response, History.HISTORY_PREF_TIMELINE, this)
+            } catch (err) {
+                console.log(err)
+                notification.error("投稿の取得でエラーが発生しました.")
+                return
             }
-            // 取得できなかったらなにもしない
-            if (!response) throw new Error('response is empty.')
-            // 取得できた場合はtarget_jsonからStatusインスタンスを生成
-            target_post = new Status(response, History.HISTORY_PREF_TIMELINE, this)
-        } catch (err) {
-            console.log(err)
-            notification.error("投稿の取得でエラーが発生しました.")
-            return
         }
 
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                switch (arg.target_mode) {
+                switch (mode) {
                     case '__menu_reply': // リプライ
                         target_post.createReplyWindow()
                         notification.done()
@@ -461,7 +470,7 @@ class Account {
                 }
                 break
             case 'Misskey': // Misskey
-                switch (arg.target_mode) {
+                switch (mode) {
                     case '__menu_reply': // リプライ
                         target_post.createReplyWindow()
                         notification.done()

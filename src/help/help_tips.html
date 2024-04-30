@@ -16,7 +16,17 @@
 <article id="main">
     <ul class="tips">
         <li><span class="prefix">Tips</span>
+            左上のアプリアイコンがミトリンのアニメーションに変わっているときは、何らかのタスクが実行中の証。ホバーすると内容を確認できる。</li>
+        <li><span class="prefix">Tips</span>
             「アカウント認証」からアカウントそれぞれに色をつけることができる。複数アカウント使用時に色で判別しやすくなる。</li>
+        <li><span class="prefix">Tips</span>
+            Misskeyのアカウントは「アカウント認証」で切り替えた時のデフォルトチャンネルとローカル設定をできる。</li>
+        <li><span class="prefix">Tips</span>
+            アカウント追加で"skybridge.fly.dev"と入力するとBlueskyアカウントを追加できる。詳細はヘルプにて。</li>
+        <li><span class="prefix">Tips</span>
+            SkyBridgeのタイムラインはリアルタイム更新に対応していない。タイムラインを更新するときはF5で。</li>
+        <li><span class="prefix">Tips</span>
+            Misskeyは認証解除ができない。認証情報削除後Webでトークンを破棄する必要がある。詳細はヘルプにて。</li>
         <li><span class="prefix">Tips</span>
             メイン画面はカラム→タイムライングループ→タイムラインの3階層から成っている。カラムは横に、グループは縦に分割される。</li>
         <li><span class="prefix">Tips</span>
@@ -32,9 +42,15 @@
         <li><span class="prefix">Tips</span>
             「検索」で検索フォームの先頭に「#」を入力するとハッシュタグ検索になる。全文検索より精度/検索範囲が広い。</li>
         <li><span class="prefix">Tips</span>
+            「検索」でMastodonとMisskeyの投稿URLを直接入力すると詳細表示ウィンドウを開くことができる。</li>
+        <li><span class="prefix">Tips</span>
+            「検索」でユーザーアドレスを直接入力するとユーザープロフィールウィンドウを開くことができる。</li>
+        <li><span class="prefix">Tips</span>
             「検索」では認証しているすべてのアカウントから検索を実行して統合する。インスタンスによって検索範囲がまちまちなため。</li>
         <li><span class="prefix">Tips</span>
-            「送信履歴」から最近の投稿の削除、最近のお気に入りやブースト/リノートなどの解除ができる。</li>
+            「トレンド」では認証しているすべてのアカウントから話題の投稿とハッシュタグを取得して統合する。Fediverse全体のトレンドを俯瞰して見られる。</li>
+        <li><span class="prefix">Tips</span>
+            「送信履歴」から最近の投稿の削除/編集、最近のお気に入りやブースト/リノートなどの解除ができる。</li>
         <li><span class="prefix">Tips</span>
             「すべての認証アカウントのプロフィール表示」では投稿の削除とお気に入り/ブックマークの閲覧が有効になる。</li>
         <li><span class="prefix">Tips</span>
@@ -42,7 +58,7 @@
         <li><span class="prefix">Tips</span>
             閲覧注意設定の画像は、自動展開する場合でも必ず閲覧注意だとわかるラベルが表示されている。リモートへ流す時の参考に。</li>
         <li><span class="prefix">Tips</span>
-            投稿先で「ローカル」を指定するとリモートのインスタンスに配信されなくなる。Misskey専用の機能。</li>
+            Misskeyアカウントで「ローカル」をオンにするとリモートのインスタンスに配信されなくなる。</li>
         <li><span class="prefix">Tips</span>
             カーソル(&gt;_)のついているカラムはキーボードで操作ができる。カーソル移動は←a→dとEnterキー。</li>
         <li><span class="prefix">Tips</span>
@@ -58,7 +74,17 @@
         <li><span class="prefix">Tips</span>
             F1キーでヘルプを開くことができる。このTipsより詳しい使い方が記載されている。</li>
         <li><span class="prefix">Tips</span>
-            F4キーで詳細表示やリプライ時などに表示される右の拡張ウィンドウを閉じることができる。</li>
+            F4キーで右の拡張ウィンドウや左の絵文字ウィンドウを閉じることができる。</li>
+        <li><span class="prefix">Tips</span>
+            Ctrl(Command)+F4キーで現在表示中のポップアップウィンドウをすべて閉じることができる。</li>
+        <li><span class="prefix">Tips</span>
+            Ctrl(Command)+Bキーで現在表示中のポップアップウィンドウをすべて透過表示にできる。閉じたくはないが後ろのタイムラインが見たいときに。</li>
+        <li><span class="prefix">Tips</span>
+            遡りウィンドウ、ユーザープロフィールウィンドウ、詳細表示ウィンドウ、インスタンスウィンドウは複数開くことができる。</li>
+        <li><span class="prefix">Tips</span>
+            投稿フォーム左右の各種ボタンは全体設定で非表示にできる。アプリの幅を非常に狭くして使用する場合はどうぞ。</li>
+        <li><span class="prefix">Tips</span>
+            下書きにはメディアは保存できない。スクリーンショットなどを直接貼り付けていた場合は注意しよう。</li>
         <li><span class="prefix">Tips</span>
             nキーで投稿本文フォームにフォーカスできる。bキーの場合はCWフォームにフォーカスする。</li>
         <li><span class="prefix">Tips</span>
@@ -68,17 +94,43 @@
         <li><span class="prefix">Tips</span>
             投稿本文フォームにフォーカス中にAlt(Option)+↑↓で投稿先のアカウントを変更できる。</li>
         <li><span class="prefix">Tips</span>
+            投稿本文フォームにフォーカス中にAlt(Option)+←→で公開範囲を変更できる。</li>
+        <li><span class="prefix">Tips</span>
+            投稿本文フォームにフォーカス中にCtrl(Command)+Alt(Option)+↑↓で投稿先のチャンネルを変更できる。</li>
+        <li><span class="prefix">Tips</span>
+            投稿本文フォームにフォーカス中にCtrl(Command)+Alt(Option)+Backspaceで投稿内容をリセットして白紙に戻すことができる。</li>
+        <li><span class="prefix">Tips</span>
+            投稿本文フォームにフォーカス中にCtrl(Command)+Sで入力中の内容を下書きに保存することができる。添付メディアは保存できない。</li>
+        <li><span class="prefix">Tips</span>
             投稿本文入力中に「:」を入力するとカスタム絵文字サジェストモードになる。Spaceで選択しEnterで確定。</li>
         <li><span class="prefix">Tips</span>
             投稿本文入力中に「:」を入力した後、カスタム絵文字を入力したくない場合は、何も入力せずにSpaceを押すとウィンドウが閉じる。</li>
         <li><span class="prefix">Tips</span>
             カスタム絵文字サジェストモードでCtrl(Command)+1～9で最近使った絵文字一覧から絵文字を確定できる。</li>
         <li><span class="prefix">Tips</span>
+            投稿オプションの投稿アカウントから追加で投稿したいアカウントを選択できる。ダブルクリックでアカウント切り替え。</li>
+        <li><span class="prefix">Tips</span>
+            エクスプローラからファイルをドラッグ＆ドロップすることで投稿にファイルを添付することができる。</li>
+        <li><span class="prefix">Tips</span>
+            添付したファイルはドラッグ＆ドロップで並び替え、クリックで閲覧注意設定ができる。取り消しは左のゴミ箱へ。</li>
+        <li><span class="prefix">Tips</span>
+            リプライ/引用/編集を取り消したい場合はリセットボタンで。Ctrl(Command)+Alt(Option)+Backspaceでも可。</li>
+        <li><span class="prefix">Tips</span>
             画像を拡大表示中に←a→d、もしくは↑w↓sで、同一投稿に画像が複数ある場合に前後の画像へ移動できる。</li>
         <li><span class="prefix">Tips</span>
             Ctrl(Command)+zで直前に投稿した内容を削除してもう一度フォームに展開する。投稿先を間違えた時などに。</li>
         <li><span class="prefix">Tips</span>
             Ctrl(Command)+vで直前に投稿した内容をコピーしてフォームに展開する。複数のアカウントに投稿したいときに。</li>
+        <li><span class="prefix">Tips</span>
+            Ctrl(Command)+eで直前に投稿した内容を編集モードにしてフォームに展開する。Mastodon専用の機能。</li>
+        <li><span class="prefix">Tips</span>
+            タイムラインに表示される投稿の左にあるカラーバーは時間経過とともに変色する。投稿直後は赤で、時間とともに寒色へ変化していく。</li>
+        <li><span class="prefix">Tips</span>
+            投稿本文の文字数が一定以上になると自動的に内容が省略される。何文字で省略するかは全体設定で設定できる。</li>
+        <li><span class="prefix">Tips</span>
+            投稿本文の文字数による自動省略機能では、URLは20字、カスタム絵文字は4字として取り扱う。</li>
+        <li><span class="prefix">Tips</span>
+            投稿日時の表示形式は全体設定で絶対表記か相対表記か変更できる。絶対表記は24時間以内の場合は年月日が省略される。</li>
         <li><span class="prefix">Tips</span>
             タイムラインレイアウト「ノーマル」は標準的な表示形式。詳細表示した場合もこの形式になる。</li>
         <li><span class="prefix">Tips</span>
@@ -88,17 +140,23 @@
         <li><span class="prefix">Tips</span>
             タイムラインレイアウト「リスト」は投稿が1行で表示されるようになる。気になる投稿だけピックアップで見たいときに。</li>
         <li><span class="prefix">Tips</span>
+            タイムラインレイアウト「メディア」は1枚画像が幅いっぱいに表示される。画像を優先して見たいときに。</li>
+        <li><span class="prefix">Tips</span>
             タイムラインレイアウト「ギャラリー」は通常投稿を無視して画像だけが流れるようになる。投稿者情報も省略される。</li>
         <li><span class="prefix">Tips</span>
-            タイムラインレイアウトがチャットかリストの場合は、投稿をクリックするとノーマルレイアウトでポップアップ表示される。</li>
+            タイムラインレイアウト「マルチ」は投稿の種類によってレイアウトを個別に指定することができる。</li>
+        <li><span class="prefix">Tips</span>
+            タイムラインレイアウトがリストの場合は、投稿をクリックするとノーマルレイアウトでポップアップ表示される。</li>
         <li><span class="prefix">Tips</span>
             タイムラインレイアウトがリストの場合は、投稿をクリック長押しすることで詳細表示が一発で開ける。</li>
         <li><span class="prefix">Tips</span>
             投稿を右クリックするとコンテキストメニューが表示される。ブースト/リノートやリアクションはここから。</li>
         <li><span class="prefix">Tips</span>
+            範囲指定リノートでは「連合先に流さないリノート」「ローカルタイムラインに流さないリノート」「チャンネル宛のリノート」が可能。</li>
+        <li><span class="prefix">Tips</span>
             ブースト/リノート/ブックマーク/お気に入り/リアクション/リプライは任意のアカウントから実行できる。</li>
         <li><span class="prefix">Tips</span>
-            ノーマルとチャットレイアウトの投稿にマウスを乗っけると、その投稿を表示したタイムラインのアカウントからブースト/リノートなどが素早く実行できる。</li>
+            リストレイアウト以外の投稿にマウスを乗っけると、その投稿を表示したタイムラインのアカウントからブースト/リノートなどが素早く実行できる。</li>
         <li><span class="prefix">Tips</span>
             アンケートは投稿を受信したアカウントからしか投票できない。不正票はやめよう！</li>
         <li><span class="prefix">Tips</span>
@@ -111,6 +169,10 @@
             投稿のユーザーアイコンをクリックすることでもユーザーの詳細情報を開ける。</li>
         <li><span class="prefix">Tips</span>
             ユーザーの詳細情報のヘッダかプロフィールブロックを右クリックすると、フォロー/ミュート/ブロックができる。</li>
+        <li><span class="prefix">Tips</span>
+            ユーザーの詳細情報のプラットフォームアイコンをクリックすると、そのユーザーのインスタンスの詳細情報が表示できる。</li>
+        <li><span class="prefix">Tips</span>
+            インスタンスの詳細情報のup/mは「アクティブユーザー1人当たり1ヶ月にこれだけの投稿をする」という意味。大きいインスタンスほどユーザーが活発。</li>
         <li><span class="prefix">Tips</span>
             ユーザーの詳細情報のフォロー/フォロワー数をクリックすると、フォロー/フォロワー一覧が表示される。</li>
         <li><span class="prefix">Tips</span>
@@ -131,6 +193,10 @@
             タイムラインの取得や自動更新接続がエラーで失敗した場合、対象のグループトップに(！)が表示される。</li>
         <li><span class="prefix">Tips</span>
             グループトップ右の「Xp/h」はPost per Hour。このグループに直近1時間でいくつ投稿があったかを示している。</li>
+        <li><span class="prefix">Tips</span>
+            一部のUIアニメーションは全体設定で切ることができる。どうしても動作が重い場合は試してみよう。</li>
+        <li><span class="prefix">Tips</span>
+            全体設定でアプリの背景を変更できる。単色や、ミトリンや、自分で用意した画像を背景に使うこともできる。</li>
         <li><span class="prefix">Tips</span>
             ミトリンはFediverseに棲むウサギのオバケ。右半分はMastodonを、左半分はMisskeyを司っている。</li>
     </ul>
