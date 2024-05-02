@@ -103,7 +103,9 @@ $(() => (async () => {
             const rest_promises = []
             gp.eachTimeline(tl => {
                 rest_promises.push(tl.getTimeline())
-                tl.setSocketParam()
+                // WebSocket接続が無効な場合は自動更新タイマーをセット
+                if (tl.pref.disable_websocket) tl.initAutoReloader()
+                else tl.setSocketParam()
             })
             // タイムラインをDOMにバインド
             gp.onLoadTimeline(rest_promises)

@@ -219,7 +219,8 @@
 .timeline {
     > .col_loading {
         position: absolute;
-        top: calc(50% - 128px);
+        top: 50%;
+        transform: translate(0%, -50%);
         padding: 24px;
         right: 0px;
         left: 0px;

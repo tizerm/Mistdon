@@ -29,7 +29,7 @@ class Status {
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null
-                this.allow_context = !(this.type == 'notification' && json.type == "follow")
+                this.allow_context = !(this.type == 'notification' && ['follow', 'follow_request'].includes(json.type))
                 original_date = json.created_at
                 // ブーストフラグとブースト関係の専用項目
                 this.reblog = json.reblog ? true : false
@@ -66,7 +66,8 @@ class Status {
                 this.allow_reblog = this.visibility == 'public' || this.visibility == 'unlisted'
                 this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
-                if (this.notif_type && this.notif_type != 'follow') { // 本文(通知の場合はstatusから)
+                if (this.notif_type && !['follow', 'follow_request'].includes(this.notif_type)) {
+                     // 本文(通知の場合はstatusから)
                     this.content = data.status?.content
                     data = data.status
                 } else this.content = data.content
@@ -128,7 +129,7 @@ class Status {
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
-                this.allow_context = !(this.type == 'notification' && json.type == "follow")
+                this.allow_context = !(this.type == 'notification' && json.type == 'follow')
                 if (this.notif_type == 'achievementEarned') return // TODO: 実績は一旦除外
 
                 original_date = json.createdAt
@@ -646,6 +647,12 @@ class Status {
                         </div>
                     `
                     break
+                case 'follow_request': // フォローリクエスト
+                    html += `
+                        <div class="label_head label_follow">
+                            <span>Followe Requested by @${this.user.id}</span>
+                        </div>
+                    `
                 default: // リプライの場合はヘッダ書かない
                     break
             }
@@ -1131,7 +1138,8 @@ class Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CW時はCWのみ */ += `
                     <span class="main_content label_cw">${target_emojis.replace(this.cw_text)}</span>
-        `; else if (notif_flg && this.notif_type == 'follow') html /* フォローの場合はユーザーアドレス */ += `
+        `; else if (notif_flg && ['follow', 'follow_request'].includes(this.notif_type))
+            html /* フォローの場合はユーザーアドレス */ += `
                     <span class="main_content">@${this.user.full_address}</span>
         `; else html /* 本文(マークアップを無視して1行だけ) */ += `
                     <span class="main_content">${target_emojis.replace(this.content_text)}</span>
@@ -1197,7 +1205,8 @@ class Status {
                     else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
                     jqelm.find('.notif_footer').prepend(alias)
                     break
-                case 'follow': // フォロー通知
+                case 'follow':
+                case 'follow_request': // フォロー通知
                     jqelm.closest('li').addClass('self_post')
                     jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
                     break
@@ -1850,7 +1859,8 @@ class Status {
                         title = `${this.from_account.full_address}: ${this.user.username}からブースト`
                         body = this.content
                         break
-                    case 'follow': // フォロー通知
+                    case 'follow':
+                    case 'follow_request': // フォロー通知
                         title = `${this.from_account.full_address}: ${this.user.username}からフォロー`
                         body = this.user.profile
                         break

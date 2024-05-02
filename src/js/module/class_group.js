@@ -217,10 +217,10 @@ class Group {
                 .text(++this.unread)
             this.counter++
             if (remove_flg) this.removeStatus(ul.find("li:last-child"), false)
-        })
 
-        // 通知が来た場合は通知ウィンドウに追加
-        if (post.type == 'notification') window.accessApi.notification(post.notification)
+            // 通知が来た場合は通知ウィンドウに追加
+            if (post.type == 'notification') window.accessApi.notification(post.notification)
+        })
     }
 
     /**

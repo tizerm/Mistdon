@@ -518,7 +518,9 @@ async function writePrefCols(event, json_data) {
                     'socket_param': socket_param,
                     'exclude_reblog': tl.exclude_reblog,
                     'expand_cw': tl.expand_cw,
-                    'expand_media': tl.expand_media
+                    'expand_media': tl.expand_media,
+                    'disable_websocket': tl.disable_websocket,
+                    'reload_span': tl.reload_span
                 })
             })
             gp_list.push({ // グループプリファレンス

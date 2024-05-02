@@ -80,6 +80,9 @@ class TimelinePref {
                         <label for="xcw_${uuid}">デフォルトでCWを展開</label><br/>
                         <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"/>
                         <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
+                        <input type="checkbox" id="dws_${uuid}" class="__chk_disabled_websocket"/>
+                        <label for="dws_${uuid}">リアルタイム更新を無効化する</label>
+                        <input type="number" class="__txt_tl_reload_span tooltip" max="999" min="1" title="無効化時の自動更新間隔"/>分
                     </div>
                 </div>
             </li>
@@ -126,6 +129,10 @@ class TimelinePref {
             jqelm.find(".__chk_expand_cw").prop("checked", true)
         if (this.pref?.expand_media) // デフォルトで閲覧注意メディアを展開
             jqelm.find(".__chk_expand_media").prop("checked", true)
+        if (this.pref?.disable_websocket) { // リアルタイム更新を無効化する
+            jqelm.find(".__chk_disabled_websocket").prop("checked", true)
+            jqelm.find(".__txt_tl_reload_span").val(this.pref?.reload_span)
+        }
 
         // 初期値が存在しない(追加)場合は初期表示設定
         if (!this.pref) {
@@ -802,6 +809,7 @@ class ColumnPref {
                 $(gp_elm).find("ul>li").each((tl_index, tl_elm) => { // タイムラインイテレータ
                     // アカウントコンボボックスの値を取得
                     const account_address = $(tl_elm).find(".__cmb_tl_account").val()
+                    const disable_websocket = $(tl_elm).find(".__chk_disabled_websocket").prop("checked")
                     tl_list.push({ // タイムラインプリファレンス
                         'key_address': account_address,
                         'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
@@ -815,7 +823,9 @@ class ColumnPref {
                         'channel_color': $(tl_elm).find(".__txt_channel_color").val(),
                         'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
                         'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
-                        'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
+                        'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked"),
+                        'disable_websocket': disable_websocket,
+                        'reload_span': disable_websocket ? ($(tl_elm).find(".__txt_tl_reload_span").val() || 5) : null
                     })
                 })
                 let multi_layout = null

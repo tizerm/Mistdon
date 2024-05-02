@@ -175,6 +175,20 @@ class Timeline {
 
     /**
      * #Method
+     * タイムライン自動更新タイマーをセットする
+     */
+    async initAutoReloader() {
+        if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
+        this.reload_timer_id = setInterval(() => (async () => {
+            // 最新のタイムラインを取得
+            const recent = await this.getTimeline(null)
+            // 逆から順にタイムラインに追加
+            recent.reverse().forEach(post => this.parent_group.prepend(post))
+        })(), this.pref.reload_span * 60000)
+    }
+
+    /**
+     * #Method
      * このタイムラインから外部インスタンスにWebSocket接続する
      * 
      * @param arg パラメータオブジェクト
