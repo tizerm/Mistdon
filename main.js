@@ -897,7 +897,7 @@ function jsonToMap(json_data, key_func) {
 function readResource(filepath) {
     let content = null
     try {
-        content = fs.readFileSync(filepath, 'utf8')
+        content = fs.readFileSync(filepath)
     } catch(err) {
         console.log('!ERR: file read failed.')
     }
@@ -1018,6 +1018,12 @@ function notification(event, arg) {
  * OAuth認証用サーバー起動処理.
  */
 const bootServer = (win) => {
+    const types = new Map()
+    types.set('.html', "text/html")
+    types.set('.css', "text/css")
+    types.set('.png', "image/png")
+    types.set('.jpg', "image/jpg")
+
     // サーバー設定
     const server = http.createServer((request, response) => (async () => {
         // リクエストURLを取得
@@ -1042,12 +1048,15 @@ const bootServer = (win) => {
                 win.loadFile('src/auth.html')
             } catch (err) { // 認証中にエラーが発生したらエラー画面
                 console.log(`!Server Error: ${err}`)
+                const content = readResource('src/server/error.html')
                 response.writeHead(500, { "Content-Type": "text/html" })
-                response.end("<h2>認証に失敗しました...</h2>", "utf-8")
+                response.end(content, "utf-8")
             }
-        } else {
-            response.writeHead(200, { "Content-Type": "text/html" })
-            response.end('test', "utf-8")
+        } else { // スタティックリソースに対するリダイレクトの場合
+            const content = readResource(`src${url}`)
+            const content_type = types.get(url.substring(url.lastIndexOf('.'))) ?? "application/octet-stream"
+            response.writeHead(200, { "Content-Type": content_type })
+            response.end(content, "utf-8")
         }
     })())
 

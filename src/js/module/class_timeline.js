@@ -299,7 +299,7 @@ class Timeline {
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
                     data.forEach(p => this.ref_group.addStatus(p, () => target.append(p.timeline_element)))
                     // max_idとして取得データの最終IDを指定
-                    return data.pop().id
+                    return data.pop()?.id
                 },
                 load: async max_id => this.getTimeline(max_id)
             })

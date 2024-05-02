@@ -96,7 +96,7 @@ class History {
             bind: (data, target) => {
                 data.forEach(p => target.append(p.element))
                 // loadのっけた最終インデクスを参照
-                return data.pop().max_id
+                return data.pop()?.max_id
             },
             load: async max_id => await History.load(stack, max_id)
         })

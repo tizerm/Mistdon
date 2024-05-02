@@ -393,7 +393,7 @@ class Media {
                 bind: (data, target) => {
                     data.forEach(m => target.append(m.li_element))
                     // max_idとして取得データの最終IDを指定
-                    return data.pop().id
+                    return data.pop()?.id
                 },
                 load: async max_id => Media.getRecentMedia(address, null, max_id)
             })
@@ -429,7 +429,7 @@ class Media {
                 bind: (data, target) => {
                     data.forEach(m => target.append(m.li_element))
                     // max_idとして取得データの最終IDを指定
-                    return data.pop().id
+                    return data.pop()?.id
                 },
                 load: async max_id => Media.getRecentMedia(address, id, max_id)
             })

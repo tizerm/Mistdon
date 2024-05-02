@@ -619,7 +619,7 @@ class User {
             let next_id = null
             // Headerのlinkからページング処理のnext_idを抽出
             if (response.link) next_id = response.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
-            else next_id = response.body.pop().id // 特殊ページング以外は普通に投稿IDをnext_idとする
+            else next_id = response.body.pop()?.id // 特殊ページング以外は普通に投稿IDをnext_idとする
             return {
                 datas: posts,
                 max_id: next_id
@@ -708,7 +708,7 @@ class User {
             let next_id = null
             // Headerのlinkからページング処理のnext_idを抽出
             if (response.link) next_id = response.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
-            else next_id = response.body[response.body.length - 1].id // 特殊ページング以外は普通に投稿IDをnext_idとする
+            else next_id = response.body[response.body.length - 1]?.id // 特殊ページング以外は普通に投稿IDをnext_idとする
             return {
                 datas: response.body,
                 max_id: next_id
@@ -824,7 +824,7 @@ class User {
                         Emojis.replaceDomAsync(target.find(".main_content"), this.host) // 本文
                     }
                     // max_idとして取得データの最終IDを指定
-                    return data.pop().id
+                    return data.pop()?.id
                 },
                 load: async max_id => this.getPost(account, false, max_id)
             })
@@ -897,7 +897,7 @@ class User {
             bind: (data, target) => {
                 data.datas.forEach(post => target.append(post.element))
                 // Headerを経由して取得されたmax_idを返却
-                return data.max_id
+                return data?.max_id
             },
             load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
         })
@@ -934,7 +934,7 @@ class User {
             bind: (data, target) => {
                 data.datas.forEach(u => target.append(u.inline_nametag))
                 // Headerを経由して取得されたmax_idを返却
-                return data.max_id
+                return data?.max_id
             },
             load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
         })
@@ -966,7 +966,7 @@ class User {
             bind: (data, target) => {
                 data.forEach(p => target.append(p.gallery_elm))
                 // max_idとして取得データの最終IDを指定
-                return data.pop().id
+                return data.pop()?.id
             },
             load: async max_id => this.getPost(account, true, max_id)
         })

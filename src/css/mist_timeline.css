@@ -9,13 +9,22 @@
     &::-webkit-scrollbar { height: 8px; }
     > .__initial_message {
         z-index: 8;
-        padding: 24px;
-        margin: 24px;
-        background-color: rgba(255,255,255,0.08);
-        border-radius: 12px;
+        position: relative;
+        height: calc(100vh - 112px);
+        width: calc(100vw - 72px);
         text-align: center;
-        color: #ffffff;
-        font-size: 16px;
+        color: #cccccc;
+        font-size: 18px;
+        font-weight: bold;
+        > .inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(34,34,34,0.683);
+            padding: 24px;
+            border-radius: 18px;
+        }
     }
     .col_action>a:hover>img,
     .gp_action>a:hover>img {

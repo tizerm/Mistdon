@@ -9,7 +9,12 @@ $(() => (async () => {
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
         $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
-        $("#header>h1").text('認証されているアカウントがありません。 - Mistdon')
+        $("#header>h1").html(`
+            <div class="head_user">
+                <span class="username">認証されているアカウントがありません。</span>
+                <span class="useraddress">- Mistdon</span>
+            </div>
+        `)
     } else { // 投稿ユーザーリストを作って先頭のアカウントをセット
         $("#pop_postuser>ul").html(Account.createPostAccountList())
         $("#post_options .additional_users ul").html(Account.createAdditionalPostAccountList())
@@ -18,10 +23,14 @@ $(() => (async () => {
     if (Column.isEmpty()) { // カラムが未登録(この場合はストップする)
         $("#columns").prepend(`
             <div class="__initial_message">
-                アカウントの認証 <img src="resources/ic_auth.png" class="ic_inline"/>
-                とカラムの設定 <img src="resources/ic_pref.png" class="ic_inline"/>
-                からはじめよう！<br/>
-                わからないときは左下の？をクリックするかF1キーでヘルプを表示できます。
+                <div class="inner">
+                    <img src="resources/illust/mitlin_error.png" class="initial_image"/><br/>
+                    カラムが設定されていません。<br/>
+                    アカウントの認証 <img src="resources/ic_auth.png" class="ic_inline"/>
+                    とカラムの設定 <img src="resources/ic_pref.png" class="ic_inline"/>
+                    からはじめよう！<br/>
+                    わからないときは左下の？をクリックするかF1キーでヘルプを表示できます。
+                </div>
             </div>
         `)
         return
