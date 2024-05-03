@@ -1452,7 +1452,7 @@ class Account {
                     <tr>${template_html}</tr>
                 </tbody></table>
             </div>
-            <button type="button" id="__on_search_close" class="close_button">×</button>
+            <button type="button" id="__on_alluser_close" class="close_button">×</button>
         `).show(...Preference.getAnimation("WINDOW_FOLD"))
 
         // それぞれのアカウントのユーザー情報を取得してバインド

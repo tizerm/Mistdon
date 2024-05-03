@@ -23,7 +23,10 @@ class Media {
                 this.id = json.id
                 this.type = json.type
                 this.url = json.url
-                this.thumbnail = json.thumbnailUrl
+                // サムネイル設定
+                if (this.type.match(/audio/)) this.thumbnail = 'resources/illust/ic_recode.jpg'
+                else if (json.thumbnailUrl) this.thumbnail = json.thumbnailUrl
+                else this.thumbnail = 'resources/illust/mitlin_404.jpg'
                 this.sensitive = json.isSensitive
                 this.width = json.properties.width
                 this.height = json.properties.height
@@ -53,6 +56,17 @@ class Media {
                 Media.loadImage(file, preview_elm, uuid)
             else if (file.type.match(/video/)) // 動画ファイル
                 Media.loadVideoThumbnail(file, preview_elm, uuid)
+            else { // それ以外のメディア
+                const thumbnail = file.type.match(/audio/) ? 'resources/illust/ic_recode.jpg' : 'resources/illust/mitlin_404.jpg'
+                preview_elm.append(`
+                    <li>
+                        <input type="checkbox" id="__chk_attach_${uuid}"
+                            name="__chk_attach_sensitive" class="__chk_attach_sensitive"/>
+                        <label for="__chk_attach_${uuid}"><img src="${thumbnail}" class="__img_attach" name="${uuid}"/
+                            ><div class="check_mask"></div></label>\
+                    </li>
+                `)
+            }
             // 添付メディアマップに追加
             Media.ATTACH_MEDIA.set(uuid, file)
         })
@@ -327,12 +341,16 @@ class Media {
         let html = `<li>
             <input type="checkbox" id="__chk_drive_${this.id}"
                 name="__chk_drive_media" class="__chk_drive_media" value="${this.id}"/>
-            <label for="__chk_drive_${this.id}"${this.sensitive ? ' class="warn_sensitive"' : ''}
-                ><img src="${this.thumbnail}"/><div class="check_mask"></div></label>
+            <label for="__chk_drive_${this.id}"><img src="${this.thumbnail}"/><div class="check_mask"></div></label>
         </li>`
 
+        const jqelm = $($.parseHTML(html))
+        // センシティブとビデオ判定
+        if (this.sensitive) jqelm.find('label').addClass("warn_sensitive")
+        else if (this.type.match(/video/)) jqelm.find('label').addClass("label_video")
+
         // 生成したHTMLをjQueryオブジェクトとして返却
-        return $($.parseHTML(html))
+        return jqelm
     }
 
     /**
@@ -398,7 +416,7 @@ class Media {
                 load: async max_id => Media.getRecentMedia(address, null, max_id)
             })
         })
-        $("#pop_dirve_window").show(...Preference.getAnimation("SLIDE_DOWN"))
+        $("#pop_dirve_window").show(...Preference.getAnimation("FADE_STD"))
     }
 
     /**

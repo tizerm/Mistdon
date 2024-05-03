@@ -602,6 +602,7 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
         setColorPalette($(`#columns>table #${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
+        $(`#columns>table #${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**

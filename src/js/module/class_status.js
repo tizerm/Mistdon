@@ -807,7 +807,7 @@ class Status {
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                         class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail}" class="media_preview"/>
+                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
                     </a>
                 `
             })
@@ -1084,7 +1084,7 @@ class Status {
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                         class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail}" class="media_preview"/>
+                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
                     </a>
                 `
             })
@@ -1147,10 +1147,13 @@ class Status {
         html += '</div>'
         if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
             const media = this.medias[0]
+            let thumbnail = media.thumbnail
+            if (this.sensitive) thumbnail = 'resources/ic_warn.png'
+            else if (!thumbnail) thumbnail = 'resources/illust/mitlin_404.jpg'
             html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
                 <div class="list_media">
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
-                        <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
+                        <img src="${thumbnail}" class="media_preview"/>
                     </a>
                 </div>
             `
@@ -1268,7 +1271,7 @@ class Status {
                 `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                         class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail}" class="media_preview"/>
+                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
                     </a>
                 `
             })
@@ -1337,14 +1340,20 @@ class Status {
     get gallery_elm() {
         // メディアごとにタイルブロックを生成
         let html = ''
-        this.medias.forEach(media => html /* name属性にURLを設定 */ += `
-            <li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">
-                <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                    class="__on_media_expand${media.sensitive ? ' warn_sensitive' : ''}">
-                    <img src="${!this.from_timeline?.pref?.expand_media && media.sensitive ? 'resources/illust/ic_unauth.jpg' : media.thumbnail}" class="media_preview"/>
-                </a>
-            </li>
-        `)
+        this.medias.forEach(media => {
+            let thumbnail = media.thumbnail
+            if (!this.from_timeline?.pref?.expand_media && media.sensitive) thumbnail = 'resources/illust/mitlin_nsfw.jpg'
+            else if (media.type == 'audio') thumbnail = 'resources/illust/ic_recode.jpg'
+            else if (!thumbnail) thumbnail = 'resources/illust/mitlin_404.jpg'
+            html /* name属性にURLを設定 */ += `
+                <li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">
+                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                        class="__on_media_expand${media.sensitive ? ' warn_sensitive' : ''}">
+                        <img src="${thumbnail}" class="media_preview"/>
+                    </a>
+                </li>
+            `
+        })
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         return $($.parseHTML(html))
@@ -1619,7 +1628,7 @@ class Status {
                         `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
                             <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                                 class="__on_media_expand ${img_class}">
-                                <img src="${media.thumbnail}" class="media_preview"/>
+                                <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
                             </a>
                         `
                     })
@@ -1645,12 +1654,17 @@ class Status {
                 <li name="${this.uri}">
                     <video src="${media.url}" class="expanded_media" preload controls loop></video>
                 </li>
-            `); else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
+            `); else if (media.type == 'audio') /* オーディオ */ $("#modal_expand_image>#expand_image_box").append(`
+                <li name="${this.uri}">
+                    <audio controls src="${media.url}" class="expanded_media" preload="none"></audio>
+                </li>
+            `);
+            else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}"><img src="${media.url}" class="expanded_media"/></li>
             `)
             // サムネイルリスト
             $("#modal_expand_image>#expand_thumbnail_list").append(`
-                <li name="${media.url}"><img src="${media.thumbnail}"/></li>
+                <li name="${media.url}"><img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}"/></li>
             `)
         })
         const target_media = index >= 0
@@ -1658,7 +1672,7 @@ class Status {
             : $(`#modal_expand_image>#expand_image_box>li>.expanded_media[src="${url}"]`)
         target_media.show()
         // 動画の場合は自動再生
-        if (target_media.is("video")) target_media.get(0).play()
+        if (target_media.is("video") || target_media.is("audio")) target_media.get(0).play()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
         $("#modal_expand_image").show(...Preference.getAnimation("FADE_STD"))
     }

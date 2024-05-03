@@ -433,13 +433,16 @@
                 }
                 &[type="video"], &[type="gifv"] {
                     &::after {
-                        content: url("../resources/ic_video.png");
+                        content: "";
+                        background-image: url("../resources/ic_video.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
                         z-index: 1;
                         position: absolute;
-                        top: 4px;
-                        right: 4px;
-                        width: 48px;
-                        height: 48px;
+                        top: 2px;
+                        right: 2px;
+                        width: 32px;
+                        height: 32px;
                     }
                 }
                 &.img_grid_single { width: 100%; }
@@ -990,6 +993,20 @@
                     padding-top: 100%;
                     display: block;
                 }
+                &[type="video"], &[type="gifv"] {
+                    &::after {
+                        content: "";
+                        background-image: url("../resources/ic_video.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
+                        z-index: 1;
+                        position: absolute;
+                        top: 2px;
+                        right: 2px;
+                        width: 32px;
+                        height: 32px;
+                    }
+                }
                 > img {
                     border-radius: 8px;
                     width: 100%;
@@ -1001,12 +1018,15 @@
                     vertical-align: text-bottom;
                 }
                 &.warn_sensitive::after {
-                    content: url("../resources/ic_warn.png");
+                    content: "";
                     z-index: 1;
                     position: absolute;
                     top: 0px;
                     right: 0px;
                     background-color: rgba(161,0,0,0.75);
+                    background-image: url("../resources/ic_warn.png");
+                    background-repeat: no-repeat;
+                    background-size: 32px 32px;
                     width: 32px;
                     height: 32px;
                     border-radius: 16px;

@@ -665,7 +665,8 @@
      */
     $(document).on("click", "#modal_expand_image", e => {
         if ($(e.target).is("video")) return // 動画の場合はなにもしない
-        $("#modal_expand_image").hide(...Preference.getAnimation("FADE_STD"), () => $("#modal_expand_image video").remove())
+        $("#modal_expand_image").hide(...Preference.getAnimation("FADE_STD"),
+            () => $("#modal_expand_image video, #modal_expand_image audio").remove())
     })
 
     /**
@@ -1362,5 +1363,17 @@
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
-    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("SLIDE_DOWN")))
+    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
+
+    /**
+     * #Event
+     * すべての認証アカウントのプロフィール表示: 閉じるボタン.
+     * => キャッシュを消してからウィンドウを閉じる
+     */
+    $(document).on("click", "#__on_alluser_close", e => {
+        // ユーザーキャッシュをすべてクリア
+        $("#pop_ex_timeline td.column_profile").each((index, elm) => User.deleteCache($(elm)))
+        $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP"))
+    })
+
 })

@@ -90,7 +90,13 @@
                 position: absolute;
             }
         }
-        > .submit_button { width: 74px; }
+        > .submit_button {
+            width: 74px;
+            > #__on_submit>img {
+                width: 72px;
+                height: 72px;
+            }
+        }
         > .additional_buttons {
             width: 113px;
             > * { margin: -1px; }
@@ -257,7 +263,7 @@
                         }
                         & input[type="checkbox"]:checked+label>.check_mask {
                             background-color: rgba(159,58,51,0.5);
-                            background-image: url("../resources/ic_nsfw.png");
+                            background-image: url("../resources/ic_warn.png");
                             background-size: 96px 96px;
                         }
                         &.ui-sortable-placeholder {
@@ -267,12 +273,15 @@
                             height: 132px;
                         }
                         &.warn_sensitive::after {
-                            content: url("../resources/ic_warn.png");
+                            content: "";
                             z-index: 1;
                             position: absolute;
                             top: 0px;
                             right: 0px;
                             background-color: rgba(161,0,0,0.75);
+                            background-image: url("../resources/ic_warn.png");
+                            background-repeat: no-repeat;
+                            background-size: 32px 32px;
                             width: 32px;
                             height: 32px;
                             border-radius: 16px;
@@ -814,16 +823,22 @@
             > li {
                 display: inline-block;
                 margin: 0px;
-                padding: 4px 12px;
+                padding: 12px;
                 border-radius: 12px;
                 background-color: rgba(76,76,76,0.683);
-                width: 180px;
-                height: calc(100% - 18px);
-                font-size: 14px;
+                background-image: url("../resources/ic_folder.png");
+                background-position: center left 8px;
+                background-repeat: no-repeat;
+                background-size: 32px 32px;
+                padding-left: 48px;
+                width: 160px;
+                height: calc(100% - 32px);
+                font-size: 16px;
                 font-family: Arial, "メイリオ", sans-selif;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+                &[name="__root"] { background-image: url("../resources/ic_top.png"); }
                 &:hover {
                     background-color: rgba(76,76,76,0.92);
                     cursor: pointer;
@@ -862,13 +877,28 @@
                         object-fit: cover;
                         vertical-align: text-bottom;
                     }
+                    &.label_video::after {
+                        content: "";
+                        background-image: url("../resources/ic_video.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
+                        z-index: 1;
+                        position: absolute;
+                        top: 2px;
+                        right: 2px;
+                        width: 32px;
+                        height: 32px;
+                    }
                     &.warn_sensitive::after {
-                        content: url("../resources/ic_warn.png");
+                        content: "";
                         z-index: 1;
                         position: absolute;
                         top: 0px;
                         right: 0px;
                         background-color: rgba(161,0,0,0.75);
+                        background-image: url("../resources/ic_warn.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
                         width: 32px;
                         height: 32px;
                         border-radius: 16px;

@@ -8,7 +8,7 @@ $(() => (async () => {
     await window.accessApi.readCustomEmojis()
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)
-        $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/ic_unauth.jpg')
+        $("#header>#head_postarea .__lnk_postuser>img").attr('src', 'resources/illust/mitlin_404.jpg')
         $("#header>h1").html(`
             <div class="head_user">
                 <span class="username">認証されているアカウントがありません。</span>
