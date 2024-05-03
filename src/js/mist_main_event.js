@@ -52,12 +52,6 @@
 
     /**
      * #Event
-     * クリップボタン.
-     */
-    $("#navi .navi_clips").on("click", e => Clip.createClipWindow())
-
-    /**
-     * #Event
      * 絵文字キャッシュクリアボタン.
      */
     $("#navi .navi_reset_emoji").on("click", e => dialog({
@@ -1308,16 +1302,6 @@
      * => 各サーバーで注目の投稿を一覧表示する
      */
     $(document).on("click", "#pop_ex_timeline>.trend_timeline>.__on_get_features", e => Trend.bindFeatures())
-
-    /**
-     * #Event
-     * クリップウィンドウ: クリップ項目クリック.
-     * => 対象のクリップの投稿を表示する
-     */
-    $(document).on("click", "#pop_ex_timeline>.clip_timeline ul.clip_list>li", e => {
-        const target_li = $(e.target).closest("li")
-        Clip.loadClip(target_li.attr("name"), target_li.attr("id"))
-    })
 
     /**
      * #Event

@@ -1014,33 +1014,6 @@
             }
         }
 
-        /*=== Clip Timeline Layout ===============================================================*/
-        > .clip_timeline {
-            & ul.clip_list {
-                height: 320px;
-                > li {
-                    > .content>.main_content {
-                        overflow: hidden;
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                    }
-                    &:hover {
-                        background-color: rgba(76,76,76,0.683);
-                        cursor: pointer;
-                    }
-                }
-            }
-            .clip_description {
-                background-color: rgba(56,56,56,0.683);
-                border-radius: 12px;
-                padding: 6px 12px;
-                height: 120px;
-                overflow-y: auto;
-                font-size: 13px;
-            }
-            & ul.clip_ul { height: calc(100vh - 580px); }
-        }
-
         /*=== Trend Timeline Layout ==============================================================*/
         > .trend_timeline {
             > a.__on_get_features {

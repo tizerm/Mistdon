@@ -20,7 +20,6 @@ class Preference {
                         "trend"                     : true,     // トレンド
                         "history"                   : true,     // 送信履歴
                         "profile"                   : true,     // 認証アカウントプロフィール
-                        "clip"                      : true,     // クリップ
                         "emoji_cache"               : true,     // 絵文字キャッシュ
                         "help_keyborad"             : true,     // ショートカット早見表
                         "help"                      : true      // ヘルプ
@@ -42,8 +41,6 @@ class Preference {
                         "trend_media"               : false,    // トレンド: メディア
                         "history_cw"                : false,    // 送信履歴: CW
                         "history_media"             : false,    // 送信履歴: メディア
-                        "clip_cw"                   : false,    // クリップ: CW
-                        "clip_media"                : false,    // クリップ: メディア
                         "detail_cw"                 : false,    // 詳細表示: CW
                         "detail_media"              : false,    // 詳細表示: メディア
                         "profile_cw"                : false,    // プロフィール: CW
@@ -224,7 +221,6 @@ class Preference {
         $("#__chk_gen_navi_trend").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.trend)
         $("#__chk_gen_navi_history").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.history)
         $("#__chk_gen_navi_profile").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.profile)
-        $("#__chk_gen_navi_clip").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.clip)
         $("#__chk_gen_navi_emoji").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.emoji_cache)
         $("#__chk_gen_navi_help_keyborad").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help_keyborad)
         $("#__chk_gen_navi_help").prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
@@ -248,8 +244,6 @@ class Preference {
         $("#__chk_gen_expand_media_trend").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.trend_media)
         $("#__chk_gen_expand_cw_history").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.history_cw)
         $("#__chk_gen_expand_media_history").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.history_media)
-        $("#__chk_gen_expand_cw_clip").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.clip_cw)
-        $("#__chk_gen_expand_media_clip").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.clip_media)
         $("#__chk_gen_expand_cw_detail").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.detail_cw)
         $("#__chk_gen_expand_media_detail").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.detail_media)
         $("#__chk_gen_expand_cw_profile").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw)
@@ -306,7 +300,6 @@ class Preference {
                 "trend"                     : $("#__chk_gen_navi_trend").prop("checked"),
                 "history"                   : $("#__chk_gen_navi_history").prop("checked"),
                 "profile"                   : $("#__chk_gen_navi_profile").prop("checked"),
-                "clip"                      : $("#__chk_gen_navi_clip").prop("checked"),
                 "emoji_cache"               : $("#__chk_gen_navi_emoji").prop("checked"),
                 "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
                 "help"                      : $("#__chk_gen_navi_help").prop("checked")
@@ -328,8 +321,6 @@ class Preference {
                 "trend_media"               : $("#__chk_gen_expand_media_trend").prop("checked"),
                 "history_cw"                : $("#__chk_gen_expand_cw_history").prop("checked"),
                 "history_media"             : $("#__chk_gen_expand_media_history").prop("checked"),
-                "clip_cw"                   : $("#__chk_gen_expand_cw_clip").prop("checked"),
-                "clip_media"                : $("#__chk_gen_expand_media_clip").prop("checked"),
                 "detail_cw"                 : $("#__chk_gen_expand_cw_detail").prop("checked"),
                 "detail_media"              : $("#__chk_gen_expand_media_detail").prop("checked"),
                 "profile_cw"                : $("#__chk_gen_expand_cw_profile").prop("checked"),
@@ -400,11 +391,6 @@ class Preference {
         History.HISTORY_PREF_TIMELINE.pref = {
             "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.history_cw,
             "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.history_media
-        }
-        // クリップタイムライン
-        Clip.CLIP_PREF_TIMELINE.pref = {
-            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.clip_cw,
-            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.clip_media
         }
         // 詳細表示タイムライン
         Status.DETAIL_TIMELINE.pref = {
