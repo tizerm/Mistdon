@@ -368,8 +368,8 @@ class Status {
      * @param url ステータスURL
      */
     static async getStatus(url) {
-        if (url.indexOf('/') < 0) {
-            toast("詳細表示のできない投稿です.", "error")
+        if (url.indexOf('/') < 0) { // URLの様式になっていない場合は無視
+            Notification.error("詳細表示のできない投稿です.")
             return
         }
         const notification = Notification.progress("投稿の取得中です...")
@@ -390,16 +390,34 @@ class Status {
             domain = spl_url[spl_url.length - 3]
         }
 
+        try { // URL解析した情報からステータス取得処理を呼び出し
+            const post = await Status.getStatusById(domain, platform, id)
+            notification.done()
+            return post
+        } catch (err) {
+            notification.error(err)
+        }
+    }
+
+    /**
+     * #StaticMethod
+     * IDから投稿データを取得する.
+     * 
+     * @param host 取得対象のインスタンスホスト
+     * @param platform 取得対象のインスタンスプラットフォーム
+     * @param id 投稿ID
+     */
+    static async getStatusById(host, platform, id) {
         let response = null
         try { // リモートの投稿を直接取得
-            const authed_account = Account.getByDomain(domain)
+            const authed_account = Account.getByDomain(host)
             switch (platform) {
                 case 'Mastodon': // Mastodon
                     let header = {}
                     if (authed_account) header = { "Authorization": `Bearer ${authed_account.pref.access_token}` }
                     response = await $.ajax({
                         type: "GET",
-                        url: `https://${domain}/api/v1/statuses/${id}`,
+                        url: `https://${host}/api/v1/statuses/${id}`,
                         dataType: "json",
                         headers: header
                     })
@@ -409,24 +427,22 @@ class Status {
                     if (authed_account) query_param.i = authed_account.pref.access_token
                     response = await $.ajax({
                         type: "POST",
-                        url: `https://${domain}/api/notes/show`,
+                        url: `https://${host}/api/notes/show`,
                         dataType: "json",
                         headers: { "Content-Type": "application/json" },
                         data: JSON.stringify(query_param)
                     })
                     break
                 default:
-                    notification.error("詳細表示のできない投稿です.")
-                    return
+                    return Promise.reject("詳細表示のできない投稿です.")
             }
-            notification.done()
             return new Status(response, Status.DETAIL_TIMELINE, { // accountには最低限の情報だけ入れる
                 "platform": platform,
-                "pref": { "domain": domain }
+                "pref": { "domain": host }
             })
         } catch (err) {
             console.log(err)
-            notification.error("投稿の取得に失敗しました.")
+            return Promise.reject("投稿の取得に失敗しました.")
         }
     }
 
@@ -1563,6 +1579,39 @@ class Status {
         $("#post_options ul.refernce_post").html(this.element)
         $("#post_options #__hdn_edit_id").val(this.id)
         enabledAdditionalAccount(false)
+
+        $("#__txt_postarea").focus()
+    }
+
+    /**
+     * #Method
+     * この投稿と同じ内容を本文投稿フォームに展開する.
+     * (削除して再編集が呼び出された時用のメソッド)
+     */
+    reEditWithDelete() {
+        // クリックイベントは先に実行
+        $("#post_options .refernced_post+.option_close .__on_option_open").click()
+
+        // アカウントを編集対象に変更
+        Account.get(`@${this.user.full_address}`).setPostAccount()
+
+        // 投稿本文とCWテキストをフォームに展開
+        this.getRenderContent().then(text => $("#__txt_postarea").val(text))
+        if (this.cw_text) $("#__txt_content_warning").val(this.cw_text)
+
+        // メディアがある場合はアップ済みのメディアを初期添付
+        if (this.medias.length > 0) $('#header>#post_options .attached_media>ul.media_list').html(Media.getAttachElement(this))
+
+        // 返信先と引用先をを参照する
+        const host = this.from_timeline?.host ?? this.from_account.pref.domain
+        if (this.reply_to) Status.getStatusById(host, this.platform, this.reply_to).then(post => {
+            $("#post_options ul.refernce_post").html(post.element)
+            $("#post_options #__hdn_reply_id").val(post.id)
+        }).catch(err => Notification.error(err))
+        if (this.quote_flg) Status.getStatusById(host, this.platform, this.quote.id).then(post => {
+            $("#post_options ul.refernce_post").html(post.element)
+            $("#post_options #__hdn_quote_id").val(post.id)
+        }).catch(err => Notification.error(err))
 
         $("#__txt_postarea").focus()
     }

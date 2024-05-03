@@ -145,9 +145,7 @@ class Account {
      * このアカウントを投稿先アカウントに設定
      */
     setPostAccount() {
-        // 変わってなかったらなにもしない
-        if ($("#header>#head_postarea .__lnk_postuser>img").attr('name') == this.full_address) return
-
+        const is_same_account = $("#header>#head_postarea .__lnk_postuser>img").attr('name') == this.full_address
         // アカウントを変えて追加投稿情報を消去
         Account.CURRENT_ACCOUNT = this
         $("#header>#head_postarea .__lnk_postuser>img").attr({
@@ -158,6 +156,10 @@ class Account {
             .prop("checked", false).prop("disabled", false)
         $(`#header>#post_options ul.account_list input.__chk_add_account[value="${this.full_address}"]`)
             .prop("disabled", true)
+
+        // アカウントが変わってなかったら以降省略
+        if (is_same_account) return
+
         // Mastodonの場合はドライブ参照ボタンを無効化
         $(`#header>#post_options #__on_open_drive`).prop("disabled", this.platform == 'Mastodon')
 

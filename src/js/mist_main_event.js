@@ -317,11 +317,7 @@
      * #Event
      * 直前の投稿を削除して編集ボタン.
      */
-    $("#__on_last_delete_paste").on("click", e => History.popIf(last => {
-        last.post.from_account.setPostAccount()
-        last.post.getRenderContent().then(text => $("#__txt_postarea").val(text))
-        $("#__txt_content_warning").val(last.post.cw_text)
-    }, true))
+    $("#__on_last_delete_paste").on("click", e => History.popIf(last => last.post.reEditWithDelete(), true))
 
     /**
      * #Event
