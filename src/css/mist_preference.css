@@ -20,43 +20,40 @@
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {
-    /*=== Extend Column (Help Window) ============================================================*/
-    > #pop_extend_column>.pref_col {
-        width: 480px;
-        > h2 {
-            border-top-left-radius: 18px;
-            border-bottom-left-radius: 18px;
-            background-color: #738c83;
-            font-family: Arial, "メイリオ", sans-selif;
-            font-size: 20px;
-            color: #ffffff;
-            margin: 0px;
-            padding: 12px 24px;
-        }
+    /*=== Internal Extend Timeline Window Layout =================================================*/
+    .pref_window.ex_window {
+        z-index: 31;
+        width: min(480px,100vw);
+        height: min(960px,100vh);
+        right: 0px;
+        top: 72px;
         > .pref_content {
             overflow-y: auto;
             background-color: rgba(34,34,34,0.5);
             padding: 0px 8px 12px;
             font-size: 13px;
-            height: calc(100vh - 240px);
+            height: calc(100% - 102px);
 
             &::-webkit-scrollbar { width: 8px; }
-            & h5 {
-                margin: 12px 0px 8px -24px;
-                padding: 0px 12px;
-                font-size: 14px;
-                font-weight: bold;
-                border-bottom: solid 1px #aaaaaa;
-            }
             & dt {
-                padding: 0px 12px;
-                margin-bottom: 12px;
-                font-size: 16px;
+                padding: 4px 18px;
+                margin: 16px -6px;
+                font-size: 18px;
                 font-weight: bold;
-                border-left: solid 12px #aaaaaa;
+                border-bottom: solid 2px #aaaaaa;
+            }
+            & h5 {
+                padding: 4px 18px;
+                margin: 16px -6px;
+                font-size: 16px;
                 border-bottom: solid 1px #aaaaaa;
             }
-            & dd { margin-bottom: 24px; }
+            & dd {
+                margin-bottom: 8px;
+                margin-left: 8px;
+                padding-left: 12px;
+                border-left: solid 4px #aaaaaa;
+            }
             & th, & td {
                 margin: 1px;
                 border-radius: 6px;
@@ -78,6 +75,11 @@
                     list-style-type: none;
                 }
             }
+        }
+        > .footer>button {
+            display: inline-block;
+            width: calc(50% - 4px);
+            height: 48px;
         }
     }
 }

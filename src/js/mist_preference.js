@@ -83,6 +83,9 @@
     $("#on_general_pref").on("click", e => Preference.openGeneralPrefConfig())
     // 全体設定-保存して閉じるボタンイベント
     $(document).on("click", "#__on_pref_save", e => Preference.saveGeneralPreference())
-    // 全体設定-保存せずに閉じるボタンイベント
-    $(document).on("click", "#__on_pref_close", e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150))
+    // 全体設定-ウィンドウ閉じるボタンイベント
+    $(document).on("click", "#pop_multi_window .window_close_button, #__on_pref_close", e => {
+        const target_window = $(e.target).closest(".ex_window")
+        target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
+    })
 })

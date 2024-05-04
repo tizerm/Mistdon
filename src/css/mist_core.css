@@ -423,6 +423,52 @@ audio { height: 30px; }
             > .help_content.shortcut_list { height: calc(100vh - 132px); }
         }
     }
+
+    /*=== Internal Extend Timeline Window Layout =================================================*/
+    .ex_window {
+        display: none;
+        position: absolute;
+        top: 18px;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        border: solid 2px #bbbbbb;
+        background-color: rgba(34,34,34,0.683);
+        color: #fff;
+        > h2 {
+            background-color: #87995f;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            margin: 0px;
+            padding: 8px 16px;
+            padding-right: 72px;
+            font-size: 18px;
+            font-family: Arial, "メイリオ", sans-selif;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: move;
+        }
+        > .window_buttons {
+            > button.window_close_button, > label.window_opacity_button {
+                position: absolute;
+                top: 4px;
+                margin: 0px;
+                padding: 0px;
+                > img {
+                    height: 28px;
+                    width: auto;
+                }
+            }
+            > button.window_close_button  { right: 6px; }
+            > label.window_opacity_button { right: 42px; }
+        }
+        &:has(input.__window_opacity:checked) {
+            opacity: 0.12;
+            transition: opacity 0.2s;
+            &:hover { opacity: 1.0; }
+        }
+    }
+
     /*=== Color Palette ==========================================================================*/
     > #pop_palette {
         position: absolute;

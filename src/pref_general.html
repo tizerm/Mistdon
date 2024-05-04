@@ -47,10 +47,6 @@
                         <label for="__chk_gen_navi_profile">すべての認証アカウントのプロフィール表示</label>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_navi_clip"/>
-                        <label for="__chk_gen_navi_clip">クリップ(Misskey)</label>
-                    </li>
-                    <li>
                         <input type="checkbox" id="__chk_gen_navi_emoji"/>
                         <label for="__chk_gen_navi_emoji">カスタム絵文字キャッシュ更新</label>
                     </li>
@@ -90,6 +86,12 @@
                         <label for="__chk_gen_hide_additional_account">投稿オプションの投稿アカウントをデフォルトで閉じる</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="オンにすると投稿フォームにフォーカスしたときに現れる投稿オプションの投稿アカウントが閉じた状態で初期表示されます。複数のアカウントに同じ投稿を流さない人向け。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_emoji_suggester"/>
+                        <label for="__chk_gen_use_emoji_suggester">カスタム絵文字サジェスターを使用する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="投稿フォームで「:」を入力したときにカスタム絵文字の変換候補を出すウィンドウを表示するか設定します。"/>
                     </li>
                     <li>
                         <input type="checkbox" id="__chk_gen_use_action_palette"/>
@@ -165,17 +167,6 @@
                     <li>
                         <input type="checkbox" id="__chk_gen_expand_media_history"/>
                         <label for="__chk_gen_expand_media_history">閲覧注意メディア (NSFW)</label>
-                    </li>
-                </ul>
-                <h5>クリップ</h5>
-                <ul class="selector_list">
-                    <li>
-                        <input type="checkbox" id="__chk_gen_expand_cw_clip"/>
-                        <label for="__chk_gen_expand_cw_clip">CW (Contents Warning)</label>
-                    </li>
-                    <li>
-                        <input type="checkbox" id="__chk_gen_expand_media_clip"/>
-                        <label for="__chk_gen_expand_media_clip">閲覧注意メディア (NSFW)</label>
                     </li>
                 </ul>
                 <h5>詳細表示</h5>

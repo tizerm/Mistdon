@@ -32,12 +32,13 @@
         /*=== Main Window Shortcut Key Event =====================================================================*/
 
         let col = null
+        const is_control = event.ctrlKey || event.metaKey
         switch (e.keyCode) {
             case 78: // n: 投稿テキストボックスにフォーカス
                 $("#__txt_postarea").focus()
                 return false
             case 66: // b: CWテキストボックスにフォーカス
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     // Ctrl+B: マルチウィンドウをすべて透過
                     // ひとつでも透過済みのウィンドウがある場合はすべての透過を解除する
                     if ($("#pop_multi_window>.ex_window>.window_buttons>input.__window_opacity:checked").length > 0)
@@ -48,45 +49,55 @@
                 $("#__txt_content_warning").focus()
                 return false
             case 46: // Ctrl+Del: 直前の投稿を削除する
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__on_last_delete").click()
                     return false
                 }
                 break
             case 90: // Ctrl+Z: 直前の投稿を削除して再展開する
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__on_last_delete_paste").click()
                     $("#__txt_postarea").focus()
                     return false
                 }
                 break
             case 86: // Ctrl+V: 直前の投稿をコピーして再展開する
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__on_on_last_copy").click()
                     $("#__txt_postarea").focus()
                     return false
                 }
                 break
             case 84: // Ctrl+T: 直前の投稿につなげる
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__on_last_replychain").click()
                     return false
                 }
                 break
             case 69: // Ctrl+E: 直前の投稿を編集する
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__on_last_edit").click()
                     return false
                 }
                 break
             case 82: // Ctrl+R: 下書き一覧を開く
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#__open_draft").click()
                     return false
                 }
                 break
+            case 74: // Ctrl+J: カスタム絵文字パレットを開く
+                if (is_control) {
+                    if (event.altKey) { // Ctrl+Alt+J: カスタムキャッシュを更新
+                        $("#navi .navi_reset_emoji").click()
+                        return false
+                    }
+                    $("#__open_emoji_palette").click()
+                    return false
+                }
+                break
             case 115: // F4: 右に表示される拡張カラムを閉じる
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     // Ctrl+F4: マルチウィンドウをすべて閉じる
                     $("#pop_multi_window>.ex_window>.window_buttons>.window_close_button").click()
                     return false
@@ -98,7 +109,7 @@
             case 65:
             case 37: // a, <-: カーソルを左に移動
                 col = Column.disposeCursor()
-                if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
+                if ((is_control) && event.shiftKey) {
                     // Ctrl+Shift+A: カーソル移動先のカラムを開く
                     col.prev.open()
                 } else if (event.shiftKey) {
@@ -113,7 +124,7 @@
             case 68:
             case 39: // d, ->: カーソルを右に移動
                 col = Column.disposeCursor()
-                if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
+                if ((is_control) && event.shiftKey) {
                     // Ctrl+Shift+D: カーソル移動先のカラムを開く
                     col.next.open()
                 } else if (event.shiftKey) {
@@ -129,7 +140,7 @@
             case 38: // w, ↑: カーソルのカラムを上にスクロール
                 col = Group.getCursor()
                 // Ctrl+W: 先頭まで移動
-                if (event.ctrlKey || event.metaKey) col.scroll(0)
+                if (is_control) col.scroll(0)
                 // Shift+W: 通常より多めにスクロールする
                 else if (event.shiftKey) col.scroll(-Preference.GENERAL_PREFERENCE.scroll_speed.shift)
                 else col.scroll(-Preference.GENERAL_PREFERENCE.scroll_speed.default)
@@ -142,38 +153,38 @@
                 else col.scroll(Preference.GENERAL_PREFERENCE.scroll_speed.default)
                 return false
             case 70: // f: カーソルカラムの可変幅表示をトグルする
-                if (event.ctrlKey || event.metaKey) { // Ctrl+F: 検索
+                if (is_control) { // Ctrl+F: 検索
                     $("#navi .navi_search").click()
                     return false
                 }
                 Column.getCursor().toggleFlex()
                 return false
             case 80: // Ctrl+P: トレンド
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#navi .navi_trend").click()
                     return false
                 }
                 break
             case 72: // Ctrl+H: 送信履歴
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#navi .navi_history").click()
                     return false
                 }
                 break
             case 77: // Ctrl+M: すべてのアカウントプロフィールを表示
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#navi .navi_show_profile").click()
                     return false
                 }
                 break
             case 75: // Ctrl+K: クリップ
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     $("#navi .navi_clips").click()
                     return false
                 }
                 break
             case 116: // F5: カーソルのカラムをリロードする
-                if (event.ctrlKey || event.metaKey) {
+                if (is_control) {
                     // Ctrl+F5: 画面そのものを読み込みなおす(ブラウザリロード)
                     location.reload()
                     return false
@@ -211,6 +222,7 @@
     /*=== Article Textarea Shortcut Key Events ===================================================================*/
 
     $("#header>#head_postarea").keydown(e => {
+        const is_control = event.ctrlKey || event.metaKey
         if (event.altKey) { // Altキー併用ショートカット
             let element = null
             let index = null
@@ -229,7 +241,7 @@
                     return false
                 case 87:
                 case 38: // Alt+W, ↑: 前のアカウント
-                    if (event.ctrlKey || event.metaKey) { // Ctrl+Alt+W: 前のチャンネル
+                    if (is_control) { // Ctrl+Alt+W: 前のチャンネル
                         element = $('#header>#post_options select#__cmb_post_to')
                         index = element.find('option:checked').prev().val()
                         if (index) {
@@ -243,7 +255,7 @@
                     return
                 case 83:
                 case 40: // Alt+S, ↓: 次のアカウント
-                    if (event.ctrlKey || event.metaKey) { // Ctrl+Alt+S: 次のチャンネル
+                    if (is_control) { // Ctrl+Alt+S: 次のチャンネル
                         element = $('#header>#post_options select#__cmb_post_to')
                         index = element.find('option:checked').next().val()
                         if (index) {
@@ -262,7 +274,7 @@
                     $('#header>#post_options input#__chk_local_only').click()
                     return false
                 case 8: // Ctrl+Alt+Backspace: 入力中の内容をリセット
-                    if (event.ctrlKey || event.metaKey) {
+                    if (is_control) {
                         $('#__on_reset_option').click()
                         return false
                     }
@@ -278,7 +290,7 @@
 
                         element = $('#header>#post_options input.__chk_add_account+label').eq(number - 1)
                         // Ctrl+Alt+1～9(+テンキー): 追加アカウントをトグル
-                        if (event.ctrlKey || event.metaKey) element.click()
+                        if (is_control) element.click()
                         else element.dblclick()
                         return false
                     }
@@ -287,7 +299,7 @@
         } else {
             switch (e.keyCode) {
                 case 13: // Enter
-                    if (event.ctrlKey || event.metaKey) { // Ctrl+Enter: 投稿(自動フォーカスアウト)
+                    if (is_control) { // Ctrl+Enter: 投稿(自動フォーカスアウト)
                         $("#header #__on_submit").click()
                         $(e.target).blur()
                         return false
@@ -297,8 +309,14 @@
                     }
                     break
                 case 83: // Ctrl+S: 下書きに保存
-                    if (event.ctrlKey || event.metaKey) {
+                    if (is_control) {
                         $("#__on_save_draft").click()
+                        return false
+                    }
+                    break
+                case 74: // Ctrl+J: カスタム絵文字パレットを開く
+                    if (is_control) {
+                        $("#__open_emoji_palette").click()
                         return false
                     }
                     break

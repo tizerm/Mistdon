@@ -28,6 +28,7 @@ class Preference {
                     "enable_post_button"            : true,     // 投稿ボタン
                     "enable_last_edit_button"       : true,     // 直前編集ボタン
                     "hide_additional_account"       : false,    // 投稿アカウントを自動で閉じる
+                    "enable_emoji_suggester"        : true,     // カスタム絵文字サジェスター
                     "enable_action_palette"         : true,     // 簡易アクションパレット
                     "enable_pop_prev_reply"         : false,    // 簡易リプライ表示
                     "enable_notified_impression"    : true,     // 通知欄のインプレッション表示
@@ -173,25 +174,44 @@ class Preference {
      * 全体設定ウィンドウを生成して表示.
      */
     static openGeneralPrefConfig() {
-        // ヘルプウィンドウのDOM生成
-        const jqelm = $($.parseHTML(`
-            <div class="pref_col">
-                <h2>全体設定</h2>
-                <div class="pref_content"></div>
-                <button type="button" id="__on_pref_save" class="close_button">保存して閉じる</button>
-                <button type="button" id="__on_pref_close" class="close_button">保存せずに閉じる</button>
-            </div>
-        `))
-        $("#pop_extend_column").html(jqelm)
+        const window_key = 'singleton_pref_window'
+        if ($(`#${window_key}`).length > 0) return // 既に開いている場合は何もしない
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="pref_window ex_window">
+                    <h2><span>全体設定</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_pref"/>
+                        <label for="__window_opacity_pref" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="pref_content"></div>
+                    <div class="footer">
+                        <button type="button" id="__on_pref_save" class="close_button">OK</button>
+                        <button type="button" id="__on_pref_close" class="close_button">キャンセル</button>
+                    </div>
+                </div>
+            `,
+            color: '42809e',
+            drag_only_x: false,
+            resizable: true,
+            resize_only_y: false
+        })
+
+        // テンプレート内容をウィンドウにバインド
         $.ajax({
             url: "pref_general.html",
             cache: false
         }).then(data => {
             $.each($.parseHTML(data), (index, value) => {
-                if ($(value).is("#main")) $("#pop_extend_column .pref_content").html($(value))
+                if ($(value).is("#main")) $(`#${window_key} .pref_content`).html($(value))
             })
             Preference.setPreference()
-            $("#pop_extend_column .tooltip_help").tooltip({
+            $(`#${window_key} .pref_content .tooltip_help`).tooltip({
                 position: {
                     my: "center top",
                     at: "center bottom"
@@ -205,7 +225,6 @@ class Preference {
                     duration: 80
                 }
             })
-            $("#pop_extend_column").show("slide", { direction: "right" }, 150)
         })
     }
 
@@ -230,6 +249,7 @@ class Preference {
         $("#__chk_gen_use_post_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
         $("#__chk_gen_use_additional_button").prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
         $("#__chk_gen_hide_additional_account").prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
+        $("#__chk_gen_use_emoji_suggester").prop("checked", Preference.GENERAL_PREFERENCE.enable_emoji_suggester)
         $("#__chk_gen_use_action_palette").prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_use_prev_relpy").prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_notified_impression").prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
@@ -308,6 +328,7 @@ class Preference {
             "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
             "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
+            "enable_emoji_suggester"        : $("#__chk_gen_use_emoji_suggester").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
@@ -368,7 +389,7 @@ class Preference {
             title: "全体設定",
             text: "全体設定を保存しました。",
             // サブウィンドウを閉じる
-            accept: () => $("#pop_extend_column").hide()
+            accept: () => $("#pop_multi_window").empty()
         })
     }
 
