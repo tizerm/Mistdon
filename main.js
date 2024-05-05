@@ -11,7 +11,7 @@ const fs = require('fs')
 const http = require('http')
 const stateKeeper = require('electron-window-state')
 const FeedParser = require('feedparser')
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require('node-fetch')
 
 // アプリ保持用設定データの管理
 var pref_accounts = null
@@ -897,7 +897,7 @@ function jsonToMap(json_data, key_func) {
 function readResource(filepath) {
     let content = null
     try {
-        content = fs.readFileSync(filepath)
+        content = fs.readFileSync(path.join(__dirname, filepath))
     } catch(err) {
         console.log('!ERR: file read failed.')
     }
@@ -1050,6 +1050,7 @@ const bootServer = (win) => {
                 console.log(`!Server Error: ${err}`)
                 const content = readResource('src/server/error.html')
                 response.writeHead(500, { "Content-Type": "text/html" })
+                //response.end("Internal Server Error<br/>" + err.toString(), "utf-8")
                 response.end(content, "utf-8")
             }
         } else { // スタティックリソースに対するリダイレクトの場合
