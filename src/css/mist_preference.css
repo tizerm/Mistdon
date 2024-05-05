@@ -24,9 +24,9 @@
     .pref_window.ex_window {
         z-index: 31;
         width: min(480px,100vw);
-        height: min(960px,100vh);
+        height: min(960px,calc(100vh - 48px));
         right: 0px;
-        top: 72px;
+        top: 32px;
         > .pref_content {
             overflow-y: auto;
             background-color: rgba(34,34,34,0.5);
