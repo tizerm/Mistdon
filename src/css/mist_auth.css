@@ -19,7 +19,7 @@ input[type="text"] {
     > #account_list {
         position: absolute;
         top: 0px;
-        left: 0px;
+        left: -4px;
         width: 340px;
         text-align: center;
 
@@ -32,13 +32,27 @@ input[type="text"] {
             display: block;
             font-size: 13px;
         }
+        > .col_loading {
+            position: absolute;
+            top: 50%;
+            transform: translate(0%, -50%);
+            padding: 24px;
+            right: 0px;
+            left: 0px;
+            background-color: rgba(62,62,62,0.92);
+            border-radius: 12px;
+            text-align: center;
+            color: #dddddd;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-size: 14px;
+        }
         > h2 {
             border-radius: 18px;
             background-color: #638042;
             text-align: center;
             color: #ffffff;
             margin: 0px;
-            padding: 6px 24px;
+            padding: 4px 24px;
         }
         > ul {
             margin: 0px;
@@ -48,10 +62,10 @@ input[type="text"] {
             overflow-x: hidden;
             &::-webkit-scrollbar { width: 8px; }
             > li {
-                background-color: rgba(67,67,67,0.95);
+                background-color: rgba(67,67,67,0.92);
                 border-radius: 18px;
                 list-style-type: none;
-                margin: 6px;
+                margin: 4px;
                 padding: 8px 12px;
                 text-align: left;
 
@@ -60,12 +74,13 @@ input[type="text"] {
                     border-top-right-radius: 18px;
                     background-color: #808080;
                     background-image: url("../resources/ic_sort_y.png");
-                    background-position: right 12px bottom 5px;
+                    background-position: right 12px center;
                     background-repeat: no-repeat;
                     font-size: 18px;
+                    font-family: Arial, "メイリオ", sans-selif;
                     color: #ffffff;
-                    margin: -8px -12px 12px;
-                    padding: 8px 32px;
+                    margin: -8px -12px 8px;
+                    padding: 6px 32px;
                     cursor: move;
                 }
                 > .user {
@@ -87,13 +102,20 @@ input[type="text"] {
                         text-overflow: ellipsis;
                     }
                     > .userid {
+                        font-family: Arial, "メイリオ", sans-selif;
                         color: #cccccc;
                         font-size: 14px;
                     }
                 }
                 > .option {
-                    margin: 8px 12px;
-                    font-size: 14px;
+                    margin: 8px 16px;
+                    padding: 0px;
+                    font-size: 13px;
+                    > li {
+                        list-style-type: none;
+                        margin: 0px;
+                        padding: 0px;
+                    }
                 }
                 > .foot_button {
                     text-align: right;
@@ -117,44 +139,77 @@ input[type="text"] {
         top: 0px;
         right: 16px;
         text-align: center;
-        width: calc(100vw - 440px);
+        width: calc(100vw - 428px);
 
         > h2 {
             border-radius: 18px;
             background-color: #42718a;
             color: #ffffff;
             margin: 0px;
-            padding: 6px 24px;
+            padding: 4px 24px;
         }
         > #transition_section {
             position: relative;
             border-radius: 24px;
-            background-color: rgba(48,48,48,0.9);
-            margin: 24px 0px;
+            background-color: rgba(48,48,48,0.92);
+            margin-top: 24px;
             width: 100%;
-            height: calc(100vh - 148px);
+            height: calc(100vh - 124px);
+            & button {
+                border-radius: 8px;
+                border: solid 2px #cccccc;
+                font-family: Arial, "メイリオ", sans-selif;
+                font-size: 18px;
+                margin: 6px 12px;
+                padding: 4px 32px;
+            }
         }
         #select_platform {
             position: absolute;
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(255,255,255,0.08);
             border-radius: 16px;
-            margin: 24px;
+            margin: 18px;
             padding: 32px 12px;
-            top: calc(50vh - 256px);
+            top: 50%;
+            transform: translate(0%, -50%);
             right: 0px;
             left: 0px;
-
-            > .platform_selector>button {
-                border-radius: 8px;
-                border: solid 2px #ffffff;
-                margin: 16px 12px;
-                padding: 0px;
-                > img { margin-bottom: -4px; }
+            > .instance_box {
+                border-radius: 12px;
+                background-color: rgba(255,255,255,0.1);
+                font-size: 16px;
+                font-family: Arial, "メイリオ", sans-selif;
+                margin: 6px;
+                padding: 8px 24px;
+                > input { width: calc(100% - 96px); }
+            }
+            > .instance_info {
+                background-color: rgba(255,255,255,0.08);
+                background-size: auto 64px;
+                background-position: center center;
+                background-repeat: no-repeat;
+                border-radius: 12px;
+                margin: 6px;
+                padding: 6px 2px;
+                font-weight: bold;
+                font-size: 15px;
+                text-align: center;
+                > .inline_emoji {
+                    display: inline-block;
+                    height: 24px;
+                    width: auto;
+                    vertical-align: text-bottom;
+                }
+            }
+            > .bottom_auth_warn {
+                display: block;
+                color: #ffd561;
             }
         }
         .platform_section {
             position: absolute;
-            top: calc(50vh - 280px);
+            top: 50%;
+            transform: translate(0%, -50%);
             padding: 24px;
             right: 0px;
             left: 0px;
@@ -186,9 +241,6 @@ input[type="text"] {
                 background-color: rgba(255,255,255,0.1);
                 border-radius: 16px;
                 padding: 24px 12px;
-            }
-            > .auth_form {
-                display: none;
             }
         }
     }

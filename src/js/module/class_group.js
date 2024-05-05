@@ -2,7 +2,7 @@
  * #Class
  * タイムライングループを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Group {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -20,7 +20,8 @@ class Group {
         this.unread = 0
         this.counter = 0
         this.ppm_que = []
-        this.timer_id = null
+        this.speed_timer_id = null
+        this.color_timer_id = null
         this.search_flg = false
 
         // タイムラインはインスタンスを作って管理
@@ -33,11 +34,6 @@ class Group {
     get id() { return this.pref.group_id }
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
-
-    static DEFAULT_TIMELINE_LIMIT = 200 // タイムラインに表示できる限界量(通常値)
-    static LIST_TIMELINE_LIMIT = 500 // カラムのタイムラインに表示できる限界量(リスト値)
-    static SCROLL = 200         // wsスクロールでスクロールするピクセル量
-    static SHIFT_SCROLL = 800   // シフトwsスクロールでスクロールするピクセル量
 
     /**
      * #Method
@@ -88,16 +84,23 @@ class Group {
             </td>
         `))
 
+        let box_color = null
         if (this.parent_column.pref.multi_group) {
-            // 複数のタイムライングループを持つカラムの場合は色とタイムラインの高さを設定
-            jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
+            // 複数のタイムライングループを持つカラムの場合はタイムラインの高さを設定
             jqelm.closest(".tl_group_box").css("height", `${this.height}%`)
-            jqelm.find("ul").css("height", 'calc(100% - 20px)')
+            jqelm.find("ul").css("height", 'calc(100% - 26px)')
+            box_color = this.pref.gp_color
         } else { // 単一タイムライングループの場合はヘッダを非表示
-            jqelm.find(".group_head").css("background-color", `#${this.parent_column.pref.col_color}`)
             jqelm.find(".ic_group_cursor").hide()
             jqelm.find(".group_head>h4").hide()
+            box_color = this.parent_column.pref.col_color
         }
+        // カラー設定
+        jqelm.find(".group_head").css("background-color", `#${box_color}`)
+        jqelm.find("ul").css({
+            "border-left-color": `#${box_color}`,
+            "border-bottom-color": `#${box_color}`
+        })
 
         return jqelm
     }
@@ -150,10 +153,13 @@ class Group {
                 $(`#${this.id}>.col_loading`).remove()
                 // ソートが終わったらタイムラインをDOMに反映
                 postlist.forEach(post => this.append(post))
-                // 流速タイマーをセット(検索のときはセットしない)
-                if (!this.search_flg) this.initSpeedAnalyzer()
+
+                if (!this.search_flg) { // 流速タイマーをセット(検索のときはセットしない)
+                    this.initSpeedAnalyzer()
+                    this.initColorTimer()
+                }
             } else { // すべてのカラムの取得に失敗した場合
-                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_error.png')
+                $(`#${this.id}>.col_loading>img`).attr('src', 'resources/illust/il_err2.png')
                 $(`#${this.id}>.col_loading>.loading_text`)
                     .text(`${this.pref.label_head}のタイムラインの取得に失敗しました……。`)
             }
@@ -180,22 +186,41 @@ class Group {
      */
     prepend(post) {
         const ul = $(`#${this.id}>ul`)
-        const limit = this.pref.tl_layout == 'list' ? Group.LIST_TIMELINE_LIMIT : Group.DEFAULT_TIMELINE_LIMIT
+        let limit = null
+        switch (this.pref.tl_layout) {
+            case 'chat': // チャット
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.chat
+                break
+            case 'list': // リスト
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.list
+                break
+            case 'media': // メディア
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.media
+                break
+            case 'gallery': // ギャラリー
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.gallery
+                break
+            default: // デフォルト(ノーマル)
+                limit = Preference.GENERAL_PREFERENCE.tl_cache_limit.default
+                break
+        }
 
         // 重複している投稿を除外する
         this.addStatus(post, () => {
             // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            if (ul.find("li").length >= limit) this.removeStatus(ul.find("li:last-child"))
+            let remove_flg = false
+            if (ul.find("li").length >= limit) remove_flg = true
             ul.prepend(post.timeline_element)
-            ul.find('li:first-child').hide().show("slide", { direction: "up" }, 180)
+            ul.find('li:first-child').hide().show(...Preference.getAnimation("TIMELINE_APPEND"))
             // 未読カウンターを上げる
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                 .text(++this.unread)
             this.counter++
-        })
+            if (remove_flg) this.removeStatus(ul.find("li:last-child"), false)
 
-        // 通知が来た場合は通知ウィンドウに追加
-        if (post.type == 'notification') window.accessApi.notification(post.notification)
+            // 通知が来た場合は通知ウィンドウに追加
+            if (post.type == 'notification') window.accessApi.notification(post.notification)
+        })
     }
 
     /**
@@ -241,14 +266,14 @@ class Group {
      * タイムライン流速計測タイマーをセットする
      */
     async initSpeedAnalyzer() {
-        if (!this.timer_id) clearInterval(this.timer_id) // 実行中の場合は一旦削除
-        this.timer_id = setInterval(() => (async () => {
+        if (!this.speed_timer_id) clearInterval(this.speed_timer_id) // 実行中の場合は一旦削除
+        this.speed_timer_id = setInterval(() => (async () => {
             const ppm = this.counter
             this.counter = 0 // 先にカウンターを0にリセット
             this.ppm_que.push(ppm)
             if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
             // pph(post per hour)を計算
-            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
+            const pph = floor(this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length), 1)
             const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
 
             // バインド
@@ -260,17 +285,60 @@ class Group {
 
     /**
      * #Method
+     * 投稿時間カラーラベルを再設定するタイマーをセットする
+     */
+    async initColorTimer() {
+        if (!this.color_timer_id) clearInterval(this.color_timer_id) // 実行中の場合は一旦削除
+        this.color_timer_id = setInterval(() => (async () => $(`#${this.id}>ul>li`).each((index, elm) => {
+            const post = this.getStatus($(elm))
+            const element = $(elm).is(".chat_timeline") ? $(elm).find(".content") : $(elm)
+
+            try { // TODO: debug
+                element.css('border-left-color', post.relative_time.color)
+                $(elm).find(".created_at").text(post.date_text)
+            } catch (err) {
+                console.log(err)
+                console.log(element.attr("id"))
+                console.log(this)
+            }
+        }))(), 60000) // 1分おきに実行
+    }
+
+    /**
+     * #Method
      * 引数のjQueryオブジェクトに該当する投稿データを画面から消去する
+     * (キャッシュ破棄のためにDOMから要素を参照するようにしているのでこういうめんどくさい実装になってます)
      * 
      * @param jqelm 消去対象の投稿のjQueryオブジェクト
      */
-    removeStatus(jqelm) {
+    removeStatus(jqelm, delay) {
         const key = jqelm.attr("id")
         const post = this.status_map.get(key)
+
         post.from_timeline.status_key_map.delete(post.status_id)
         this.status_map.delete(post.status_key)
         // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
-        jqelm.parent().find(`li[id="${key}"]`).remove()
+        const del_elm = jqelm.parent().find(`li[id="${key}"]`)
+        if (delay) // 遅延削除する場合は一旦時間をかけてフェードさせてから削除する
+            del_elm.hide(...Preference.getAnimation("TIMELINE_DELETE"), () => del_elm.remove())
+        // 遅延削除しない場合は即座にelementを削除
+        else del_elm.remove()
+    }
+
+    /**
+     * #Method
+     * 引数のjQueryオブジェクトに該当する投稿データを編集後の内容に書き換える
+     * 
+     * @param status_key 投稿ステータスのユニークキー
+     * @param post 編集後の投稿Statusオブジェクト
+     */
+    updateStatus(status_key, post) {
+        const jqelm = this.getStatusElement(status_key)
+        const pre_post = this.status_map.get(status_key)
+        const key = jqelm.attr("id")
+
+        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
+        pre_post.update(post, jqelm.parent().find(`li[id="${key}"]`))
     }
 
     /**
@@ -318,13 +386,14 @@ class Group {
      * @param to スクロールする量(0をセットで先頭まで移動)
      */
     scroll(to) {
+        const to_num = Number(to) // 全体設定からだと文字列として扱われるのでパース
         const target = $(`#${this.id}>ul`)
         // 引数が0の場合は先頭までスクロール
-        if (to == 0) {
+        if (to_num == 0) {
             target.scrollTop(0)
             return
         }
-        let pos = target.scrollTop() + to
+        const pos = target.scrollTop() + to_num
         target.scrollTop(pos > 0 ? pos : 0)
     }
 

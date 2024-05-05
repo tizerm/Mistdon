@@ -2,7 +2,7 @@
  * #Class
  * カラムを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Column {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -166,49 +166,6 @@ class Column {
     }
 
     /**
-     * #StaticMethod
-     * カラムのボタンにツールチップを設定する
-     */
-    static tooltip() {
-        // カラムオプションにツールチップ表示
-        $("td .col_action, .tl_group_box .gp_action").tooltip({
-            position: {
-                my: "center top",
-                at: "center bottom"
-            },
-            show: {
-                effect: "slideDown",
-                duration: 100
-            },
-            hide: {
-                effect: "slideUp",
-                duration: 100
-            }
-        });
-    }
-
-    /**
-     * #Method
-     * タイムライン流速計測タイマーをセットする
-     */
-    async initSpeedAnalyzer() {
-        if (!this.timer_id) clearInterval(this.timer_id) // 実行中の場合は一旦削除
-        this.timer_id = setInterval(() => (async () => {
-            const ppm = this.counter
-            this.counter = 0 // 先にカウンターを0にリセット
-            this.ppm_que.push(ppm)
-            if (this.ppm_que.length > 60) this.ppm_que.shift() // 1時間過ぎたら先頭から削除
-            // pph(post per hour)を計算
-            const pph = Math.round((this.ppm_que.reduce((pv, cv) => pv + cv) * (60 / this.ppm_que.length)) * 10) / 10
-            const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
-
-            const target = $(`#${this.id}`)
-            target.find(".col_head h6").html(insert_text)
-            target.prev().find("h2 .speed").html(insert_text)
-        })(), 60000) // 1分おきに実行
-    }
-
-    /**
      * #Method
      * このカラムにカーソルを設定
      */
@@ -251,7 +208,7 @@ class Column {
             // Open⇒Close
             if ($(".column_td:visible").length <= 1) {
                 // 全部のカラムを閉じようとしたら止める
-                toast("すべてのカラムを閉じることはできません。", "error")
+                Notification.info("すべてのカラムを閉じることはできません.")
                 return
             }
             // 自身を閉じて左隣の短縮カラムを表示

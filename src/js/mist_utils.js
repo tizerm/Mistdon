@@ -1,37 +1,99 @@
 ﻿/**
  * #Ajax
- * fetchでHeaderの取得も可能なAjaxメソッド
+ * fetchでHeaderの取得も可能なAjaxメソッド.
  * 
  * @param arg パラメータオブジェクト
  */
 async function ajax(arg) {
     try {
         let response = null
-        if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
-            const param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
-            const url = `${arg.url}?${param.substring(1)}`
-            response = await fetch(url, {
-                method: arg.method,
-                mode: "cors",
-                headers: arg.headers
-            })
-        } else response = await fetch(arg.url, {
+        let url = arg.url
+        let param = {
             method: arg.method,
             mode: "cors",
-            headers: arg.headers,
-            body: arg.data
-        })
+            headers: arg.headers
+        }
+        if (arg.data) { // Request Parameterが存在する場合
+            if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
+                const query_param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
+                url += `?${query_param.substring(1)}`
+            } else param.body = arg.data
+        }
+
+        // fetchでHTTP Requestを送信
+        response = await fetch(url, param)
 
         // ステータスコードがエラーの場合はエラーを投げる
         if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
 
+        // responseをjsonとheaderとHTTP Statusに分けて返却
         return {
             headers: response.headers,
+            status: response.status,
             body: await response.json()
         }
     } catch (err) {
         return Promise.reject(err)
     }
+}
+
+/**
+ * #Ajax
+ * fetchでファイルの送信も可能なAjaxメソッド.
+ * 
+ * @param arg パラメータオブジェクト
+ */
+async function sendFileRequest(arg) {
+    try {
+        // dataからmultipart/form-dataを生成
+        const mpfd = new FormData()
+        Object.keys(arg.data).forEach(key => mpfd.append(key, arg.data[key]))
+
+        // fetchでHTTP Requestを送信
+        const response = await fetch(arg.url, {
+            method: "POST",
+            mode: "cors",
+            headers: arg.headers,
+            body: mpfd
+        })
+
+        // ステータスコードがエラーの場合はエラーを投げる
+        if (!response.ok) {
+            response.json().then(data => console.log(data))
+            throw new Error(`HTTP Status: ${response.status}`)
+        }
+
+        // HTTP 202 | 206が返ってきた場合はまだアップロード中
+        return {
+            headers: response.headers,
+            body: await response.json(),
+            progress: response.status == '202' || response.status == '206'
+        }
+    } catch (err) {
+        return Promise.reject(err)
+    }
+}
+
+/**
+ * #Util
+ * 指定した時間待機する.
+ * 
+ * @param msec 待機時間(ミリセカンド)
+ */
+async function sleep(msec) {
+    return new Promise(resolve => setTimeout(resolve, msec))
+}
+
+/**
+ * #Util
+ * 指定したスケールで切り捨てる.
+ * 
+ * @param num 切り捨て対象
+ * @param scale 切り捨てるスケール
+ */
+function floor(num, scale) {
+    const pow = Math.pow(10, scale)
+    return Math.trunc(num * pow) / pow
 }
 
 /**

@@ -2,7 +2,7 @@
  * #Class
  * カスタム絵文字を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Emojis {
     // コンストラクタ: パラメータを使って初期化(ファイルとJSON両対応)
@@ -141,28 +141,43 @@ class Emojis {
         const host = arg.host
         let text = arg.text
         if (!text) return ""
+        // 対象のホストが認証アカウントにあるか検索
+        const auth = Account.getByDomain(host)
 
         // 文章中に存在するショートコードを抽出
         const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+:', 'g'))
         if (!shortcodes) return text // 絵文字がない場合はそのまま返却
-        const emoji_promises = []
-        shortcodes.map(code => code.substring(1, code.length -1))
-            .forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
-                    type: "POST",
-                    url: `https://${host}/api/emoji`,
-                    dataType: "json",
-                    headers: { "Content-Type": "application/json" },
-                    data: JSON.stringify({ "name": code })
-                }).then(data => { return {
-                    shortcode: `:${data.name}:`,
-                    url: data.url
-                }})))
-        // 取得に成功したショートコードを抜き出して置換処理を実行
-        return await Promise.allSettled(emoji_promises).then(results => {
-            return results.filter(res => res.status == 'fulfilled').map(res => res.value)
-                .reduce((str, emoji) => str.replace(
-                    new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
-        })
+
+        if (auth) { // 対象のホストが認証アカウントにある場合はキャッシュから置換処理を実行
+            const emoji_map = auth.emojis.emoji_map
+            return shortcodes.reduce((str, code) => {
+                const emoji = emoji_map.get(code)
+                return str.replace(
+                    new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`)
+            }, text)
+        } else { // 認証アカウント外のインスタンスの場合は現地のAPIから絵文字を取得
+            const emoji_promises = []
+            shortcodes.map(code => code.substring(1, code.length -1))
+                .forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
+                        type: "POST",
+                        url: `https://${host}/api/emoji`,
+                        dataType: "json",
+                        headers: { "Content-Type": "application/json" },
+                        data: JSON.stringify({ "name": code })
+                    }).then(data => {
+                        console.log(`Emoji Requested: ${data.name}`)
+                        return {
+                            shortcode: `:${data.name}:`,
+                            url: data.url
+                        }
+                    })))
+            // 取得に成功したショートコードを抜き出して置換処理を実行
+            return await Promise.allSettled(emoji_promises).then(results => {
+                return results.filter(res => res.status == 'fulfilled').map(res => res.value)
+                    .reduce((str, emoji) => str.replace(
+                        new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
+            })
+        }
     }
 
     /**
@@ -237,7 +252,7 @@ class Emojis {
         $("#pop_emoji_suggester>.recent_emoji_list").empty()
         $("#pop_emoji_suggester>.suggest_emoji_list").empty()
         // 絵文字履歴を表示する
-        target_account.emoji_history.map(code => target_account.emojis.get(code)).forEach(
+        target_account.emoji_history.map(code => target_account.emojis.get(code)).filter(f => f).forEach(
             emoji => $("#pop_emoji_suggester>.recent_emoji_list").append(`
                 <li>
                     <a class="__on_emoji_suggest_append" name="${emoji.shortcode}">

@@ -1,50 +1,70 @@
-# This is Electron base Mastodon and Misskey client.
-<h3>開発コードネーム: MMchan</h3>
-
+<h1 align="center">
+    <img src="github_resource/mistdon_logo.png" alt="attach:cat" alt="Mistdon"/>
+</h1>
+<p align="right">
+    <img src="https://img.shields.io/badge/-JavaScript-F7DF1E.svg?logo=javascript&style=social" alt="JavaScript"/>
+    <img src="https://img.shields.io/badge/-Node.js-339933.svg?logo=node.js&style=social" alt="node.js"/>
+    <img src="https://img.shields.io/badge/-Electron-47848F.svg?logo=electron&style=social" alt="Electron"/>
+    <img src="https://img.shields.io/badge/-jQuery-0769AD.svg?logo=jquery&style=social" alt="jQuery"/><br/>
+    <img src="https://img.shields.io/github/v/release/tizerm/Mistdon?include_prereleases&color=9898dd" alt="release"/>
+    <img src="https://img.shields.io/badge/License-LGPL-b0d44d" alt="License"/>
+    <img src="https://img.shields.io/badge/Contact-%40tizerm%40misskey.dev-738c83" alt="Contact"/>
+</p>
 <p>
-Electronを使って開発しているMastodonとMisskeyがいっぺんに見られるFediverseクライアントです。<br/>
-ついにベータリリースできました！<br/>
-右側のReleaseからダウンロードしてください。
+    MistdonはMastodonとMisskeyの統合Fediverseクライアントです。<br/>
+    MastodonやMisskeyの複数のインスタンスにアカウントを持つユーザーが、複数のアカウントを閲覧/管理するのが煩わしくならないように設計されています。<br/>
+    また、MastodonインスタンスのSkyBridgeに接続すればBlueskyアカウントを扱うことも可能です(※一部機能制限があります)。<br/>
+    もちろん、アカウントをひとつしか持っていない方や、Mastodonのみ、Misskeyのみ使用する方でもお使いいただけます。
+</p>
+<p>
+    MistdonであなたのFediverseライフがよりよいものになれば幸いです。
+</p>
+<h2>
+    特徴的な機能
+</h2>
+<img src="github_resource/mitlin_right.png" alt="attach:cat" alt="Mistdon" align="right"/>
+<h3>MastodonとMisskeyのネイティブ対応</h3>
+<p>
+    Mastodonクライアントは数がありますが、MastodonとMisskeyはAPIの互換性がないため、MastodonクライアントからMisskeyのアカウントを使用することは基本的にできません。<br/>
+    MistdonはMastodonとMisskey両方のAPIにネイティブ対応することで、両方のプラットフォームのアカウントをひとつのアプリケーションで管理できるようにすることを可能にしています。
+</p>
+<h3>インスタンスをまたいだ機能の簡略化</h3>
+<p>
+    通常MastodonもMisskeyも、あるインスタンスから見えている投稿を別のインスタンスからブースト/リノート/お気に入りなどをしたりするのに、投稿URLをコピーして検索するという煩雑な手順を踏まなければなりません。<br/>
+    Mistdonはその手順を内部的に自動化することで、右クリックからアカウントを選択するだけで別のインスタンスのアカウントから手軽に行うことができます。
+</p>
+<h3>リモートAPIへの直接的なアクセス</h3>
+<p>
+    通常リモートインスタンスの投稿を特定のインスタンスから見た時は、インプレッション数やユーザーアイコンなどの情報が不完全なことが多いです。<br/>
+    Mistdonは投稿やユーザーを詳細表示するときに、リモート先のAPIを直接呼び出して情報を取得するため、情報が欠落することがありません。<br/>
+    もちろんそこから自分のインスタンスへのブースト/リノート/お気に入りなども右クリックから簡単に行えます。
+</p>
+<h3>縦と横に広がるマルチカラムタイムライン</h3>
+<p>
+    複数のタイムラインを、横と縦それぞれに並べることで、画面内に複数のアカウントのタイムラインを俯瞰的に表示することができます。<br/>
+    また、ひとつのタイムラインに複数のタイムラインを混在させることができ、例えばアカウントAのタイムラインとアカウントBのタイムラインを同じタイムライン内に時系列順に表示させることもできます。
+</p>
+<h2>
+    インストールガイド
+</h2>
+<p>
+    右のReleaseのリンクから最新バージョンのZIPをダウンロードして任意のフォルダに解凍してお使いください。<br/>
+    設定ファイルはユーザーフォルダに保存されているため、アップデート時に設定ファイルをコピーしたりする必要はありません。
+</p>
+<h2>
+    バグ報告など
+</h2>
+<p>
+    使用感やバグ報告などをハッシュタグ「#Mistdon」でFediverse上に投稿してもらえると助かります！<br/>
+    所属インスタンスの関係ですべては拾いきれないかもしれませんが、できる限り拾っていきたいと思います。<br/>
+    より深刻なバグだと感じた場合はIssueに投稿してもらえると確実に確認できるので助かります。
+</p>
+<h2>
+    License
+</h2>
+<p>
+    Copyright (C) 2023-2024 tizerm@misskey.dev<br/>
+    This program is free software: you can redistribute it and/or modify it under the terms of LGPL.<br/>
+    See also: https://www.gnu.org/licenses/
 </p>
 
-<h3>Change Log</h3>
-
-<p>
-2023/12/29 v0.5.1 (beta)<br/>
-・主な機能はカスタム絵文字履歴、アンケート、タイムライン遡りなど<br/>
-・詳細はReleaseを見てね……<br/>
-<br/>
-2023/12/02 v0.4.2 (beta)<br/>
-・各種バグフィックス、Misskeyのチャンネル機能搭載など<br/>
-<br/>
-2023/11/26 v0.4.1 (beta)<br/>
-・三次元タイムライン、タイムラインレイアウト、送信履歴機能など<br/>
-・非常に改修が多岐にわたるので詳細はReleaseを見てね……<br/>
-<br/>
-2023/10/20 v0.3.2 (beta)<br/>
-・流速機能、Misskey v11の絵文字対応、初期画面対応など<br/>
-<br/>
-2023/10/15 v0.3.1 (beta)<br/>
-・主な機能はユーザー詳細表示、CW自動展開など<br/>
-・詳細はReleaseを見てね……<br/>
-<br/>
-2023/10/08 v0.2.1 (beta)<br/>
-・主な機能はカスタム絵文字、動画再生、詳細表示など<br/>
-・詳細はReleaseを見てね……<br/>
-<br/>
-2023/09/29 v0.1.1 (beta)<br/>
-・ベータバージョン正式リリース<br/>
-・詳細はReleaseを見てね……<br/>
-<br/>
-2023/08/29 v0.0.3 (alpha)<br/>
-・WebSocket通信が切断されたときに通知を出し自動で再接続するよう修正<br/>
-・画像拡大表示に対応 サムネイルクリックで拡大表示できます どっかクリックすると閉じる<br/>
-<br/>
-2023/08/28 v0.0.2 (alpha)<br/>
-・任意のアカウントからリプライ機能の追加<br/>
-・投稿、ブーストなどの送信系処理実行時に左上に通知が出るように<br/>
-・カラムにトップへ移動ボタンを追加<br/>
-<br/>
-2023/08/27 v0.0.1 (alpha)<br/>
-・アルファバージョン正式リリース<br/>
-</p>

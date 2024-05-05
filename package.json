@@ -1,7 +1,7 @@
 {
   "name": "Mistdon",
-  "version": "0.5.1",
-  "description": "This is Electron base Mastodon and Misskey client.",
+  "version": "1.0.0",
+  "description": "The integrated client application of Mastodon and Misskey.",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -15,7 +15,7 @@
     "url": "https://github.com/tizerm/Mistdon.git"
   },
   "author": "tizerm",
-  "license": "MIT",
+  "license": "LGPL",
   "devDependencies": {
     "@electron-forge/cli": "^6.4.1",
     "@electron-forge/maker-deb": "^6.4.1",
@@ -28,6 +28,8 @@
   "dependencies": {
     "@electron-forge/publisher-github": "^6.4.2",
     "electron-squirrel-startup": "^1.0.0",
-    "electron-window-state": "^5.0.3"
+    "electron-window-state": "^5.0.3",
+    "feedparser": "^2.2.10",
+    "node-fetch": "^2.7.0"
   }
 }

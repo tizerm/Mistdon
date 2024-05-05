@@ -8,18 +8,27 @@ const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron')
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
+const http = require('http')
 const stateKeeper = require('electron-window-state')
+const FeedParser = require('feedparser')
+const fetch = require('node-fetch')
 
 // アプリ保持用設定データの管理
 var pref_accounts = null
 var pref_columns = null
+var pref_general = null
 var pref_window = null
 var pref_emojis = new Map()
 var cache_history = null
+var cache_draft = null
 var cache_emoji_history = null
+var oauth_session = null
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
+
+// ハードウェアアクセラレーション無効化
+app.disableHardwareAcceleration()
 
 /*====================================================================================================================*/
 
@@ -30,7 +39,7 @@ const is_mac = process.platform === 'darwin'
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefAccs() {
+async function readPrefAccs() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_accounts) {
         console.log('@INF: use app_prefs/auth.json cache.')
@@ -64,6 +73,7 @@ async function writePrefMstdAccs(event, json_data) {
         'client_secret': json_data.client_secret,
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }
@@ -93,6 +103,7 @@ async function writePrefMskyAccs(event, json_data) {
     const i = crypto.createHash("sha256")
         .update(json_data.access_token + json_data.app_secret, "utf8")
         .digest("hex")
+
     // JSONを生成(あとでキャッシュに入れるので)
     const write_json = {
         'domain': json_data.domain,
@@ -100,10 +111,11 @@ async function writePrefMskyAccs(event, json_data) {
         'user_id': json_data.user.username,
         'username': json_data.user.name,
         'socket_url': `wss://${json_data.domain}/streaming`,
-        'client_id': null,
-        'client_secret': json_data.app_secret,
+        'client_id': '__app_auth',
+        'client_secret': json_data.access_token,
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
+        'post_maxlength': json_data.post_maxlength,
         // アカウントカラーは初期値グレー
         'acc_color': '808080'
     }
@@ -135,6 +147,9 @@ async function writePrefAccColor(event, json_data) {
     json_data.forEach(pref => {
         let account = pref_accounts.get(pref.key_address)
         account.acc_color = pref.acc_color
+        account.default_local = pref.default_local
+        account.default_channel = pref.default_channel
+        account.post_maxlength = pref.post_maxlength
         // ユーザー情報を更新できる場合は更新
         if (pref.user_id) account.user_id = pref.user_id
         if (pref.username) account.username = pref.username
@@ -151,12 +166,199 @@ async function writePrefAccColor(event, json_data) {
 
 /**
  * #IPC
+ * OAuthの認証セッションを開始する.
+ * セッション情報をキャッシュしてOAuth認証画面を開く.
+ * 
+ * @param event イベント
+ * @param json_data 認証セッションに必要な情報オブジェクト
+ */
+async function openOAuthSession(event, json_data) {
+    const host = json_data.host
+    let permission = null
+    let redirect_url = null
+    let client_id = null
+    switch (json_data.platform) {
+        case 'Mastodon': // Mastodon
+            // 権限とリダイレクトURLを設定
+            permission = ["read", "write", "follow", "push"].join(" ")
+            redirect_url = 'http://localhost:3100/oauth/mastodon'
+
+            const client_info = await ajax({ // クライアントIDの取得
+                method: "POST",
+                url: `https://${host}/api/v1/apps`,
+                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                data: {
+                    "client_name": "Mistdon",
+                    "redirect_uris": redirect_url,
+                    "scopes": permission,
+                    "website": "https://github.com/tizerm/Mistdon"
+                }
+            })
+            client_id = client_info.body.client_id
+
+            // クライアントIDを取得できたらサーバーから参照する情報をキャッシュ
+            oauth_session = {
+                'domain': host,
+                'client_id': client_id,
+                'client_secret': client_info.body.client_secret,
+                'redirect_url': redirect_url,
+                'post_maxlength': json_data.post_maxlength
+            }
+
+            // OAuth認証画面を開く
+            openExternalBrowser(null, `https://${host}/oauth/authorize?client_id=${client_id}&scope=${encodeURIComponent(permission)}&response_type=code&redirect_uri=${redirect_url}`)
+            break
+        case 'Misskey': // Misskey
+            // 権限とリダイレクトURLを設定
+            permission = ["read:account", "write:notes", "write:blocks",
+                "read:drive", "write:drive", "read:favorites", "write:favorites",
+                "read:following", "write:following", "write:mutes", "read:notifications",
+                "read:reactions", "write:reactions", "write:votes",
+                "read:channels", "write:channels"].join(",")
+            redirect_url = 'http://localhost:3100/oauth/misskey'
+            const session_id = crypto.randomUUID()
+
+            // サーバーから参照する情報をキャッシュ
+            oauth_session = {
+                'domain': host,
+                'scope': permission,
+                'redirect_url': redirect_url,
+                'session_id': session_id,
+                'post_maxlength': json_data.post_maxlength
+            }
+
+            // MiAuth認証画面を開く
+            openExternalBrowser(null, `https://${host}/miauth/${session_id}?name=Mistdon&callback=${encodeURIComponent(redirect_url)}&permission=${encodeURIComponent(permission)}`)
+            break
+        default:
+            break
+    }
+    console.log('@INF: OAuth Session stored.')
+}
+
+/**
+ * #ServerMethod
+ * MastodonのOAuth認証情報作成処理.
+ * サーバーから認証コードを受け取ってアクセストークンを取得する.
+ * 
+ * @param auth_code サーバーに渡された認証コード
+ */
+async function authorizeMastodon(auth_code) {
+    try {
+        // SkyBridgeからくるAuthCodeはデコードされてないのでデコードしてから使う
+        const decode_code = decodeURIComponent(auth_code)
+
+        const token = await ajax({ // OAuth認証を開始
+            method: "POST",
+            url: `https://${oauth_session.domain}/oauth/token`,
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            data: {
+                "client_id": oauth_session.client_id,
+                "client_secret": oauth_session.client_secret,
+                "redirect_uri": oauth_session.redirect_url,
+                "grant_type": "authorization_code",
+                "code": decode_code
+            }
+        })
+        const access_token = token.body.access_token
+
+        let user_data = null
+        try { // 認証に成功した場合そのアクセストークンを使って認証アカウントの情報を取得
+            user_data = await ajax({
+                method: "GET",
+                url: `https://${oauth_session.domain}/api/v1/accounts/verify_credentials`,
+                headers: { 'Authorization': `Bearer ${access_token}` }
+            })
+        } catch (err) {
+            console.log(err)
+        }
+
+        // JSONを生成(あとでキャッシュに入れるので)
+        const write_json = {
+            'domain': oauth_session.domain,
+            'platform': 'Mastodon',
+            'user_id': user_data?.body?.username,
+            'username': user_data?.body?.display_name,
+            'socket_url': `wss://${oauth_session.domain}/api/v1/streaming`,
+            'client_id': oauth_session.client_id,
+            'client_secret': oauth_session.client_secret,
+            'access_token': access_token,
+            'avatar_url': user_data?.body?.avatar,
+            'post_maxlength': oauth_session.post_maxlength,
+            // アカウントカラーは初期値グレー
+            'acc_color': '808080'
+        }
+        // ファイルに書き込み
+        const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+        // キャッシュを更新
+        if (!pref_accounts) {
+            // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        } else {
+            pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
+        }
+    } catch (err) { // 認証失敗時
+        console.log(err)
+        return Promise.reject(err)
+    }
+}
+
+/**
+ * #ServerMethod
+ * MisskeyのOAuth認証情報作成処理.
+ * セッション情報からアクセストークンリクエストを送ってトークンを取得する.
+ * 
+ * @param session セッションコード
+ */
+async function authorizeMisskey(session) {
+    try {
+        const token = await ajax({ // Token取得APIをリクエスト
+            method: "POST",
+            url: `https://${oauth_session.domain}/api/miauth/${session}/check`
+        })
+        const access_token = token.body.token
+        const user_data = token.body.user
+
+        // JSONを生成(あとでキャッシュに入れるので)
+        const write_json = {
+            'domain': oauth_session.domain,
+            'platform': 'Misskey',
+            'user_id': user_data.username,
+            'username': user_data.name,
+            'socket_url': `wss://${oauth_session.domain}/streaming`,
+            'client_id': '__mi_auth',
+            'client_secret': null,
+            'access_token': access_token,
+            'avatar_url': user_data.avatarUrl,
+            'post_maxlength': oauth_session.post_maxlength,
+            // アカウントカラーは初期値グレー
+            'acc_color': '808080'
+        }
+        // ファイルに書き込み
+        const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+        // キャッシュを更新
+        if (!pref_accounts) {
+            // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        } else {
+            pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
+        }
+    } catch (err) { // 認証失敗時
+        console.log(err)
+        return Promise.reject(err)
+    }
+}
+
+/**
+ * #IPC
  * 保存してあるカラム設定情報を読み込む
  * アプリケーションキャッシュがあるばあいはそちらを優先
  * 
  * @return アカウント認証情報(マップで返却)
  */
-function readPrefCols() {
+async function readPrefCols() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_columns) {
         console.log('@INF: use app_prefs/columns.json cache.')
@@ -243,7 +445,7 @@ async function writePrefCols(event, json_data) {
                                 break
                         }
                         socket_url = `wss://${host}/api/v1/streaming`
-                        break;
+                        break
                     case 'Misskey': // Misskey
                         // タイムラインタイプによって設定値を変える
                         switch (tl.timeline_type) {
@@ -251,16 +453,19 @@ async function writePrefCols(event, json_data) {
                                 rest_url = `https://${host}/api/notes/timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'homeTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'local': // ローカルタイムライン
                                 rest_url = `https://${host}/api/notes/local-timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'localTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'federation': // 連合タイムライン
                                 rest_url = `https://${host}/api/notes/global-timeline`
                                 query_param = {}
                                 socket_param = { 'channel': 'globalTimeline' }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'list': // リスト
                                 rest_url = `https://${host}/api/notes/user-list-timeline`
@@ -269,6 +474,7 @@ async function writePrefCols(event, json_data) {
                                     'channel': 'userList',
                                     'params': { 'listId': tl.list_id }
                                 }
+                                if (tl.exclude_reblog) query_param.withRenotes = false
                                 break
                             case 'channel': // チャンネル
                                 rest_url = `https://${host}/api/channels/timeline`
@@ -312,7 +518,9 @@ async function writePrefCols(event, json_data) {
                     'socket_param': socket_param,
                     'exclude_reblog': tl.exclude_reblog,
                     'expand_cw': tl.expand_cw,
-                    'expand_media': tl.expand_media
+                    'expand_media': tl.expand_media,
+                    'disable_websocket': tl.disable_websocket,
+                    'reload_span': tl.reload_span
                 })
             })
             gp_list.push({ // グループプリファレンス
@@ -323,6 +531,7 @@ async function writePrefCols(event, json_data) {
                 'multi_user': multi_account_flg,
                 'multi_timeline': tl_list.length > 1,
                 'tl_layout': gp.tl_layout,
+                'multi_layout_option': gp.multi_layout_option,
                 'gp_color': gp.gp_color,
                 // 最後のグループだけは高さを自動決定するためnullにする
                 'gp_height': index < col.groups.length - 1 ? gp.gp_height : null,
@@ -349,12 +558,49 @@ async function writePrefCols(event, json_data) {
 
 /**
  * #IPC
+ * 保存してある全体設定情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 全体設定情報
+ */
+async function readGeneralPref() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_general) {
+        console.log('@INF: use app_prefs/general_pref.json cache.')
+        return pref_general
+    }
+    const content = readFile('app_prefs/general_pref.json')
+    if (!content) return null // ファイルが見つからなかったらnullを返却
+
+    pref_general = JSON.parse(content)
+    console.log('@INF: read app_prefs/general_pref.json.')
+    return pref_general
+}
+
+/**
+ * #IPC
+ * 全体設定を設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
+async function writeGeneralPref(event, json_data) {
+    // 絵文字キャッシュデータを書き込み
+    const content = await overwriteFile('app_prefs/general_pref.json', json_data)
+    console.log('@INF: write app_prefs/general_pref.json.')
+    // キャッシュを更新
+    pref_general = JSON.parse(content)
+}
+
+/**
+ * #IPC
  * 保存してあるカスタム絵文字のキャッシュを読み込む
  * アプリケーションキャッシュがあるばあいはそちらを優先
  * 
  * @return カスタム絵文字キャッシュ情報(マップで返却)
  */
-function readCustomEmojis() {
+async function readCustomEmojis() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_emojis.size > 0) {
         console.log('@INF: use app_prefs/emojis/ cache.')
@@ -384,6 +630,44 @@ async function writeCustomEmojis(event, data) {
     console.log(`@INF: write app_prefs/emojis/${data.host}.json.`)
     // キャッシュを更新
     pref_emojis.set(data.host, data.emojis)
+}
+
+/**
+ * #IPC
+ * 保存してある下書き情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 下書き情報
+ */
+async function readDraft() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (cache_draft) {
+        console.log('@INF: use app_prefs/draft.json cache.')
+        return cache_draft
+    }
+    const content = readFile('app_prefs/draft.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        cache_draft = []
+        return cache_draft
+    }
+    cache_draft = JSON.parse(content)
+    console.log('@INF: read app_prefs/draft.json.')
+    return cache_draft
+}
+
+/**
+ * #IPC
+ * 下書きを設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param json_data 書き込むJSONデータ
+ */
+async function overwriteDraft(event, data) {
+    const content = await overwriteFile('app_prefs/draft.json', data)
+    console.log('@INF: finish write app_prefs/draft.json')
+
+    cache_draft = JSON.parse(content)
 }
 
 /**
@@ -482,24 +766,6 @@ async function readWindowPref() {
     pref_window = JSON.parse(content)
     console.log('@INF: read app_prefs/window_pref.json.')
     return pref_window
-}
-
-/**
- * #IPC
- * ウィンドウ設定をJSONファイルとして書き込む
- * 変更がない場合は何もしない
- * 
- * @param event イベント
- * @param json_data 書き込むJSONデータ
- */
-async function writeWindowPref(event, data) {
-    // 変更がなかったらなにもしない
-    if (JSON.stringify(data) == JSON.stringify(pref_window)) return
-
-    const content = await overwriteFile('app_prefs/window_pref.json', data)
-    console.log('@INF: finish write app_prefs/window_pref.json')
-
-    pref_window = JSON.parse(content)
 }
 
 /*====================================================================================================================*/
@@ -620,7 +886,107 @@ function jsonToMap(json_data, key_func) {
     return map;
 }
 
+/**
+ * #Utils #Node.js
+ * 汎用リソース読み込みメソッド(同期).
+ * アプリケーション内部のリソースファイルを読み込むのに使用.
+ * 
+ * @param filepath 読み込むディレクトリのパス
+ * @return 読み込んだファイルのデータ
+ */
+function readResource(filepath) {
+    let content = null
+    try {
+        content = fs.readFileSync(path.join(__dirname, filepath))
+    } catch(err) {
+        console.log('!ERR: file read failed.')
+    }
+    return content
+}
+
+/**
+ * #Utils #node-fetch
+ * Ajax実行メソッド.
+ * node-fetchによるfetchと同じロジックでAjax通信を行う.
+ * 
+ * @param arg パラメータオブジェクト
+ * @return レスポンスオブジェクト
+ */
+async function ajax(arg) {
+    try {
+        let response = null
+        let url = arg.url
+        let param = {
+            method: arg.method,
+            headers: arg.headers
+        }
+        if (arg.data) { // Request Parameterが存在する場合
+            if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
+                const query_param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
+                url += `?${query_param.substring(1)}`
+            } else { // POSTはパラメータをURLSearchParamsにセットする
+                const post_params = new URLSearchParams()
+                Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
+                param.body = post_params
+            }
+        }
+
+        // fetchでHTTP Requestを送信
+        response = await fetch(url, param)
+
+        // ステータスコードがエラーの場合はエラーを投げる
+        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
+
+        // responseをjsonとheaderとHTTP Statusに分けて返却
+        return {
+            headers: response.headers,
+            status: response.status,
+            body: await response.json()
+        }
+    } catch (err) {
+        return Promise.reject(err)
+    }
+}
+
 /*====================================================================================================================*/
+
+/**
+ * #IPC #feedparser
+ * MistdonのGitHubからリリース情報を取得して最新版のバージョンを返す.
+ * 
+ * @return 最新バージョンの情報を乗っけたオブジェクト
+ */
+async function fetchVersion() {
+    // feedparserでJSONとして返却する処理を事前に関数化
+    const parseFeed = (res) => new Promise((resolve, reject) => {
+        let parser = new FeedParser()
+        parser.on('readable', () => {
+            const feed = parser.read()
+            const version = feed.link.substring(feed.link.lastIndexOf('v'))
+            resolve({
+                title: feed.title,
+                link: feed.link,
+                version: version,
+                // フィードの最新バージョンがこのバージョンと同じならフラグを立てる
+                lastest: version == `v${app.getVersion()}`
+            })
+        })
+        parser.on('error', (err) => {
+            console.log('Feed parse error.')
+            reject(err)
+        })
+        res.body.pipe(parser)
+    })
+
+    // fetchでGitHubのReleaseのRSSフィードをリクエストする
+    const response = await fetch('https://github.com/tizerm/Mistdon/releases.atom')
+
+    // ステータスコードがエラーの場合はエラーを投げる
+    if (!response.ok) throw new Error(`Feed GET Error HTTP Status: ${response.status}`)
+
+    // 読み込みイベントを待ってフィードの内容を取得
+    return await parseFeed(response)
+}
 
 /**
  * #Utils #Electron
@@ -648,6 +1014,59 @@ function notification(event, arg) {
 /*====================================================================================================================*/
 
 /**
+ * #Main #Node.js
+ * OAuth認証用サーバー起動処理.
+ */
+const bootServer = (win) => {
+    const types = new Map()
+    types.set('.html', "text/html")
+    types.set('.css', "text/css")
+    types.set('.png', "image/png")
+    types.set('.jpg', "image/jpg")
+
+    // サーバー設定
+    const server = http.createServer((request, response) => (async () => {
+        // リクエストURLを取得
+        const url = request.url
+        console.log(url)
+        if (url.match(new RegExp('^/oauth/', 'g'))) { // OAuth認証リダイレクトの場合
+            try { // GETパラメータを取得
+                const param = url.substring(url.indexOf('?') + 1).split('&')
+                    .reduce((map, p) => map.set(...p.split('=')), new Map())
+                if (param.size == 0) throw new Error('400')
+
+                // サーバーサイドのOAuth認証処理を実行
+                if (url.match(new RegExp('/mastodon', 'g'))) // Mastodon
+                    await authorizeMastodon(param.get('code'))
+                else if (url.match(new RegExp('/misskey', 'g'))) // Misskey
+                    await authorizeMisskey(param.get('session'))
+
+                // 認証処理が成功した場合は成功画面を返却してElectronの画面を再読み込み
+                const content = readResource('src/server/accept.html')
+                response.writeHead(200, { "Content-Type": "text/html" })
+                response.end(content, "utf-8")
+                win.loadFile('src/auth.html')
+            } catch (err) { // 認証中にエラーが発生したらエラー画面
+                console.log(`!Server Error: ${err}`)
+                const content = readResource('src/server/error.html')
+                response.writeHead(500, { "Content-Type": "text/html" })
+                //response.end("Internal Server Error<br/>" + err.toString(), "utf-8")
+                response.end(content, "utf-8")
+            }
+        } else { // スタティックリソースに対するリダイレクトの場合
+            const content = readResource(`src${url}`)
+            const content_type = types.get(url.substring(url.lastIndexOf('.'))) ?? "application/octet-stream"
+            response.writeHead(200, { "Content-Type": content_type })
+            response.end(content, "utf-8")
+        }
+    })())
+
+    // サーバー起動
+    server.listen(3100)
+    console.log('OAuth Server boot success. http://localhost:3100/')
+}
+
+/**
  * #Main #Electron
  * メインウィンドウ生成処理
  */
@@ -662,7 +1081,7 @@ const createWindow = () => {
         width: windowState.width,
         height: windowState.height,
         webPreferences: {
-            devTools: false,
+            devTools: !app.isPackaged,
             icon: './path/to/icon.png',
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
@@ -670,8 +1089,11 @@ const createWindow = () => {
     })
 
     // 最初に表示するページを指定
-    win.setMenuBarVisibility(false)
+    win.setMenuBarVisibility(!app.isPackaged)
     win.loadFile('src/index.html')
+
+    // 認証サーバー起動
+    bootServer(win)
 
     windowState.manage(win)
 }
@@ -685,7 +1107,9 @@ app.whenReady().then(() => {
     // IPC通信で呼び出すメソッド定義
     ipcMain.handle('read-pref-accs', readPrefAccs)
     ipcMain.handle('read-pref-cols', readPrefCols)
+    ipcMain.handle('read-general-pref', readGeneralPref)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
+    ipcMain.handle('read-draft', readDraft)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.handle('read-window-pref', readWindowPref)
@@ -693,10 +1117,13 @@ app.whenReady().then(() => {
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
+    ipcMain.on('write-general-pref', writeGeneralPref)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
+    ipcMain.on('write-draft', overwriteDraft)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)
-    ipcMain.on('write-window-pref', writeWindowPref)
+    ipcMain.handle('fetch-version', fetchVersion)
+    ipcMain.on('open-oauth', openOAuthSession)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
 

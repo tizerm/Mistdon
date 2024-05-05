@@ -4,104 +4,234 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta
         http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
+        content="default-src 'self'; img-src * data:; media-src * data:; connect-src *; script-src 'self'; style-src 'nonce-8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f'"
     />
     <meta
         http-equiv="X-Content-Security-Policy"
-        content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
+        content="default-src 'self'; img-src * data:; media-src * data:; connect-src *; script-src 'self'; style-src 'nonce-8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f'"
     />
-    <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_main.css"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_timeline.css"/>
+    <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_core.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_main.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_timeline.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="js/mm_ui.js"></script>
-    <script type="text/javascript" src="js/mm_help.js"></script>
-    <script type="text/javascript" src="js/mm_utils.js"></script>
+    <script type="text/javascript" src="js/mist_ui.js"></script>
+    <script type="text/javascript" src="js/mist_help.js"></script>
+    <script type="text/javascript" src="js/mist_utils.js"></script>
+    <script type="text/javascript" src="js/module/class_relative_time.js"></script>
+    <script type="text/javascript" src="js/module/class_notification.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
+    <script type="text/javascript" src="js/module/class_media.js"></script>
 
-    <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1) -->
-    <script type="text/javascript" src="js/mm_updater_032.js"></script>
+    <!-- 設定ファイルのアップコンバータ(v0.3.2 => v0.4.1 => v1.0.0) -->
+    <script type="text/javascript" src="js/mist_updater_100.js"></script>
 
     <script type="text/javascript" src="js/module/class_timeline.js"></script>
     <script type="text/javascript" src="js/module/class_group.js"></script>
     <script type="text/javascript" src="js/module/class_column.js"></script>
+    <script type="text/javascript" src="js/module/class_draft.js"></script>
     <script type="text/javascript" src="js/module/class_history.js"></script>
+    <script type="text/javascript" src="js/module/class_instance.js"></script>
+    <script type="text/javascript" src="js/module/class_trend.js"></script>
     <script type="text/javascript" src="js/module/class_query.js"></script>
     <script type="text/javascript" src="js/module/class_preference.js"></script>
-    <script type="text/javascript" src="js/mm_keybind.js"></script>
-    <script type="text/javascript" src="js/mm_emoji_suggester.js"></script>
-    <script type="text/javascript" src="js/mm_main.js"></script>
-    <script type="text/javascript" src="js/mm_event.js"></script>
+    <script type="text/javascript" src="js/mist_main_keybind.js"></script>
+    <script type="text/javascript" src="js/mist_emoji_suggester.js"></script>
+    <script type="text/javascript" src="js/mist_main_load.js"></script>
+    <script type="text/javascript" src="js/mist_main_event.js"></script>
 
+    <!-- コミットするnonce値は仮打ち -->
+    <style nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"></style>
     <title>Mistdon - The Integrated Mastodon and Misskey Client</title>
 </head>
 <body>
 <nav id="navi">
     <ul id="top_navi">
-        <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
-        <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
-        <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
-        <li><a class="navi_search" title="検索(ハッシュタグ検索)"><img src="resources/ic_search.png" alt="検索"/></a></li>
-        <li><a class="navi_history" title="送信履歴"><img src="resources/ic_history.png" alt="送信履歴"/></a></li>
-        <li><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"
-                ><img src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
-        <li><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"
-                ><img src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
+        <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
+        <li class="li_home"><a href="index.html" title="ホーム"><img
+                src="resources/ic_home.png" alt="ホーム"/></a></li>
+        <li class="li_auth"><a href="auth.html" title="アカウント認証"><img
+                src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
+        <li><a href="preference.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
+        <li class="li_search"><a class="navi_search" title="検索(ハッシュタグ検索)"><img
+                src="resources/ic_search.png" alt="検索"/></a></li>
+        <li class="li_trend"><a class="navi_trend" title="トレンド"><img
+                src="resources/ic_trend.png" alt="トレンド"/></a></li>
+        <li class="li_history"><a class="navi_history" title="送信履歴"><img
+                src="resources/ic_history.png" alt="送信履歴"/></a></li>
+        <li class="li_profile"><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"><img
+                src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
+        <li class="li_emoji"><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"><img
+                src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
     <ul id="bottom_navi">
-        <li><a id="on_help_keybind" title="キーボードショートカット早見表"><img src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
-        <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
-        <!--<li><button type="button" class="__on_show_notifications">0</button></li>-->
+        <li class="li_keyborad"><a id="on_help_keybind" title="キーボードショートカット早見表"><img
+                src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
+        <li class="li_help"><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
     </ul>
-    <div id="pop_notification_console">
-    <!-- hidden: 通知ボックス -->
-    </div>
 </nav>
 <header id="header">
     <h1>
-        <span class="head_user">Mistdon - The Integrated Mastodon and Misskey Client</span>
+        <div class="head_user">
+            <span class="username">Mistdon - The Integrated Mastodon and Misskey Client</span>
+            <span class="channelname"></span>
+            <span class="useraddress"></span>
+        </div>
         <span class="head_tips">TIPS XXX: チップスの表示テスト</span>
     </h1>
     <div id="head_postarea">
-        <div class="left_block">
+        <div class="post_user">
             <a class="__lnk_postuser" title="投稿アカウント変更"><img src="{usericon}" class="posticon"/></a>
-            <div class="visibility_icon">
-                <a class="__lnk_visibility" title="公開">
-                    <img src="resources/ic_public.png" alt="公開" id="visibility_public" class="selected"/></a>
-                <a class="__lnk_visibility" title="未収載/ホーム">
-                    <img src="resources/ic_unlisted.png" alt="未収載/ホーム" id="visibility_unlisted"/></a>
-                <a class="__lnk_visibility" title="フォロワー限定">
-                    <img src="resources/ic_followers.png" alt="フォロワー限定" id="visibility_followers"/></a>
-                <a class="__lnk_visibility" title="ダイレクトメッセージ">
-                    <img src="resources/ic_direct.png" alt="ダイレクトメッセージ" id="visibility_direct"/></a>
-            </div>
-            <div class="cw_block">
-                <a id="on_custom_emoji" title="カスタム絵文字を使用"
-                    ><img src="resources/ic_emoji.png" alt="カスタム絵文字"/></a>
-                <input type="text" id="__txt_content_warning"
-                    class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
-                <button type="button" id="__on_post_to_misskey" title="投稿先(Misskey)"
-                    ><img src="resources/ic_public.png" name="__to_normal"/></button>
-            </div>
         </div>
-        <div class="right_block">
-            <textarea id="__txt_postarea" class="__ignore_keyborad __emoji_suggest"
-                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)"></textarea>
-            <div class="submit_buttons">
-                <a id="on_submit" title="投稿"><img src="resources/ic_post.png" alt="投稿"/></a>
-                <a id="on_last_delete" title="直前の投稿を削除"
-                    ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></a>
-                <a id="on_last_delete_paste" title="直前の投稿を削除して再編集"
-                    ><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></a>
-                <a id="on_last_copy" title="直前の投稿をコピー"
-                    ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></a>
-                <a id="on_last_replychain" title="直前の投稿につなげる"
-                    ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></a>
+        <div class="opt_buttons">
+            <button type="button" id="__open_draft" title="下書き一覧を開く"
+                ><img src="resources/ic_draft.png" alt="下書き一覧を開く"/></button>
+            <div id="post_length_graph">&nbsp;</div>
+            <button type="button" id="__open_post_option" title="投稿オプションを開く" class="__ignore_close_option"
+                ><img src="resources/ic_down.png" alt="投稿オプションを開く"/></button>
+            <button type="button" id="__open_emoji_palette" title="絵文字パレットを開く"
+                ><img src="resources/ic_emoji.png" alt="絵文字パレットを開く"/></button>
+        </div>
+        <div class="textbox_area">
+            <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
+                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+            <div id="__hdn_text_render"></div>
+        </div>
+        <div class="submit_button">
+            <button type="button" id="__on_submit" title="投稿"
+                ><img src="resources/ic_post.png" alt="投稿"/></button>
+        </div>
+        <div class="additional_buttons __ignore_close_option">
+            <button type="button" id="__on_last_delete" title="直前の投稿を削除"
+                ><img src="resources/ic_del.png" alt="直前の投稿を削除"/></button>
+            <button type="button" id="__on_last_delete_paste" title="直前の投稿を削除して再編集"
+                ><img src="resources/ic_undo.png" alt="直前の投稿を削除して再編集"/></button>
+            <button type="button" id="__on_last_edit" title="直前の投稿を編集(Mastodon専用)"
+                ><img src="resources/ic_undo_edit.png" alt="直前の投稿を編集(Mastodon専用)"/></button>
+            <button type="button" id="__on_save_draft" title="この投稿を下書きに保存"
+                ><img src="resources/ic_add_draft.png" alt="この投稿を下書きに保存"/></button>
+            <button type="button" id="__on_on_last_copy" title="直前の投稿をコピー"
+                ><img src="resources/ic_copy.png" alt="直前の投稿をコピー"/></button>
+            <button type="button" id="__on_last_replychain" title="直前の投稿につなげる"
+                ><img src="resources/ic_tree.png" alt="直前の投稿につなげる"/></button>
+        </div>
+    </div>
+    <div id="post_options" class="__ignore_close_option">
+        <div class="flex_section">
+            <div class="additional_users closeable_block">
+                <h5>投稿アカウント
+                    <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                        ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button>
+                </h5>
+                <ul class="account_list"></ul>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>投稿アカウント</h5>
+            </div>
+            <div class="publish_setting">
+                <h5>CW/公開/投稿先</h5>
+                <div class="visibility_box">
+                    <input type="radio" id="__opt_visibility1" name="__opt_visibility" value="public" checked/>
+                    <label for="__opt_visibility1" title="公開"><img
+                        src="resources/ic_public.png" alt="公開"/></label>
+                    <input type="radio" id="__opt_visibility2" name="__opt_visibility" value="unlisted"/>
+                    <label for="__opt_visibility2" title="未収載/ホーム"><img
+                        src="resources/ic_unlisted.png" alt="未収載/ホーム"/></label>
+                    <input type="radio" id="__opt_visibility3" name="__opt_visibility" value="followers"/>
+                    <label for="__opt_visibility3" title="フォロワー限定"><img
+                        src="resources/ic_followers.png" alt="フォロワー限定"/></label>
+                    <input type="radio" id="__opt_visibility4" name="__opt_visibility" value="direct"/>
+                    <label for="__opt_visibility4" title="ダイレクトメッセージ"><img
+                        src="resources/ic_direct.png" alt="ダイレクトメッセージ"/></label>
+                </div>
+                <div class="cw_box">
+                    <input type="text" id="__txt_content_warning" tabindex="2"
+                        class="__ignore_keyborad __emoji_suggest" placeholder="CWの場合入力"/>
+                </div>
+                <div class="misskey_to_box">
+                    <select id="__cmb_post_to" title="投稿先チャンネル">
+                        <option value="__default">通常投稿</option>
+                        <option value="__local">ローカル(連合しない)</option>
+                    </select>
+                    <input type="checkbox" id="__chk_local_only"/>
+                    <label for="__chk_local_only" title="ローカル(連合しない)"
+                        class="icon_label_set"><img src="resources/ic_local.png" alt="ローカル(連合しない)"/>
+                        <span>ローカル<span></label>
+                </div>
+                <div class="reset_box">
+                    <button type="button" id="__on_reset_option"
+                        class="icon_label_set"><img src="resources/ic_not.png" alt="リセット"/>
+                        <span>リセット</span></button>
+                </div>
+            </div>
+            <div class="poll_setting closeable_block">
+                <h5>アンケート
+                <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                    ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button></h5>
+                <ul class="poll_options">
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
+                    <li><input type="text"
+                        class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>
+                </ul>
+                <button type="button" id="__on_poll_add_item" title="追加"
+                    class="poll_option_button"><img src="resources/ic_add32.png" alt="追加"/></button>
+                <button type="button" id="__on_poll_remove_item" title="削除"
+                    class="poll_option_button"><img src="resources/ic_rem32.png" alt="削除"/></button>
+                <input type="checkbox" id="__chk_poll_multiple"/>
+                <label for="__chk_poll_multiple" title="複数回答可能にする"><span>マルチ<span></label>
+                <div class="poll_expire">
+                    <input type="number" id="__txt_poll_expire_time" class="__ignore_keyborad" placeholder="投票期限"/>
+                    <select id="__cmb_expire_unit">
+                        <option value="min">分</option>
+                        <option value="hour">時間</option>
+                        <option value="day">日</option>
+                    </select>
+                </div>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>アンケート</h5>
+            </div>
+            <div class="attached_media">
+                <h5>添付メディア</h5>
+                <ul class="media_list __ui_media_sortable">
+                    <li class="__initial_message">ドラッグ&amp;ドロップでメディアを追加します。</li>
+                </ul>
+                <div class="__attach_delete_box">
+                    <div class="initial_dust">&nbsp;</div>
+                </div>
+                <div class="media_option">
+                    <button type="button" id="__on_set_sensitive"
+                        class="icon_label_set"><img src="resources/ic_warn.png" alt="すべて閲覧注意にする"/>
+                        <span>すべて閲覧注意にする</span></button>
+                    <button type="button" id="__on_open_drive"
+                        class="icon_label_set"><img src="resources/ic_return.png" alt="ドライブから添付"/>
+                        <span>ドライブから添付</span></button>
+                </div>
+            </div>
+            <div class="refernced_post timeline closeable_block">
+                <h5>返信/引用/編集元
+                <button type="button" class="__on_option_close" title="閉じる(無効化)"
+                    ><img src="resources/ic_left.png" alt="閉じる(無効化)"/></button></h5>
+                <input type="hidden" id="__hdn_reply_id" value=""/>
+                <input type="hidden" id="__hdn_quote_id" value=""/>
+                <input type="hidden" id="__hdn_edit_id" value=""/>
+                <ul class="refernce_post">
+                    <li class="__initial_message">返信/引用元なし</li>
+                </ul>
+            </div>
+            <div class="option_close">
+                <button type="button" class="__on_option_open" title="表示(有効化)"
+                    ><img src="resources/ic_right.png" alt="表示(有効化)"/></button>
+                <h5>返信/引用元</h5>
             </div>
         </div>
     </div>
@@ -111,14 +241,18 @@
         <!-- hidden: ユーザー一覧 -->
         <ul class="ui_menu"></ul>
     </div>
-    <div id="pop_post_to">
-        <!-- hidden: 投稿先一覧 -->
-        <a name="__to_normal" class="__lnk_post_to to_normal">通常</a>
-        <a name="__to_local_only" class="__lnk_post_to to_local_only">ローカル</a>
-        <ul class="channel_menu"></ul>
+    <div id="pop_draft">
+        <!-- hidden: 下書き一覧 -->
+        <ul class="draft_menu"></ul>
     </div>
-    <div id="pop_toast">
-    <!-- hidden: トースト -->
+    <div id="pop_notification">
+    <!-- hidden: 通知 -->
+        <ul class="progress"></ul>
+        <ul class="pushed"></ul>
+    </div>
+    <div id="pop_notif_log">
+    <!-- hidden: 通知 -->
+        <ul></ul>
     </div>
     <div id="pop_dialog">
     <!-- hidden: ダイアログ -->
@@ -126,8 +260,8 @@
     <div id="pop_custom_emoji">
     <!-- hidden: カスタム絵文字一覧 -->
     </div>
-    <div id="pop_emoji_suggester">
-    <!-- hidden: カスタム絵文字サジェスター -->
+    <div id="pop_emoji_suggester" class="__ignore_close_option">
+        <!-- hidden: カスタム絵文字サジェスター -->
         <input type="hidden" class="target_account" value=""/>
         <input type="hidden" class="target_cursor" value=""/>
         <input type="hidden" class="target_elm_id" value=""/>
@@ -138,26 +272,30 @@
         <!-- hidden: 右クリックコンテキストメニュー -->
         <ul class="ui_menu">
             <li><div>リプライ/ツリー</div>
-                <ul id="__menu_reply"></ul>
+                <ul id="__menu_reply" class="account_menu"></ul>
             </li>
             <li><div>ブースト/リノート</div>
-                <ul id="__menu_reblog"></ul>
+                <ul id="__menu_reblog" class="account_menu"></ul>
             </li>
             <li><div>引用(Misskey)</div>
-                <ul id="__menu_quote" name="Misskey"></ul>
+                <ul id="__menu_quote" class="account_menu" name="Misskey"></ul>
+            </li>
+            <li><div>範囲指定リノート(Misskey)</div>
+                <ul id="__menu_limited_renote" class="limited_renote_menu" name="Misskey"></ul>
             </li>
             <li><div>お気に入り</div>
-                <ul id="__menu_favorite"></ul>
+                <ul id="__menu_favorite" class="account_menu"></ul>
             <li><div>リアクション(Misskey)</div>
-                <ul id="__menu_reaction" name="Misskey"></ul>
+                <ul id="__menu_reaction" class="account_menu" name="Misskey"></ul>
             </li>
             <li><div>ブックマーク(Mastodon)</div>
-                <ul id="__menu_bookmark" name="Mastodon"></ul>
+                <ul id="__menu_bookmark" class="account_menu" name="Mastodon"></ul>
             </li>
             <li class="__menu_post_detail"><div>詳細表示</div></li>
             <li class="__menu_post_url"><div>URLをコピー</div></li>
             <li class="__menu_post_open_browser"><div>ブラウザで開く</div></li>
             <li class="__menu_post_open_temporary"><div>ここから前に遡る</div></li>
+            <li class="__menu_post_edit ui-state-disabled" name="{user_id}"><div>編集(Mastodon)</div></li>
             <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
     </div>
@@ -165,63 +303,90 @@
         <!-- hidden: 右クリックコンテキストメニュー(ユーザー) -->
         <ul class="ui_menu">
             <li><div>フォロー</div>
-                <ul id="__menu_follow"></ul>
+                <ul id="__menu_follow" class="account_menu"></ul>
             </li>
             <li><div>ミュート</div>
-                <ul id="__menu_mute"></ul>
+                <ul id="__menu_mute" class="account_menu"></ul>
             </li>
             <li><div>ブロック</div>
-                <ul id="__menu_block"></ul>
+                <ul id="__menu_block" class="account_menu"></ul>
             </li>
         </ul>
     </div>
-    <div id="modal_expand_image">
+    <div id="modal_drop_files" class="pop_modal">
+        <!-- hidden: ファイルドロップモーダル -->
+        <div class="dropbox">
+            <div class="message">
+                <img src="resources/illust/mitlin_attach.png" class="drop_icon"/>
+                <span>ドラッグしたファイルを投稿に添付します。</span>
+            </div>
+        </div>
+    </div>
+    <div id="modal_expand_image" class="pop_modal">
         <!-- hidden: 画像拡大モーダル -->
         <ul id="expand_image_box" class="__context_posts"></ul>
         <ul id="expand_thumbnail_list"></ul>
     </div>
     <div id="pop_expand_post" class="timeline">
-        <ul class="__context_posts"></ul>
-    <!-- hidden: 投稿拡大ウィンドウ -->
+        <!-- hidden: 投稿拡大ウィンドウ -->
+        <ul class="expanded_post __context_posts"></ul>
     </div>
     <div id="pop_expand_action">
-    <!-- hidden: 追加アクションポップ -->
+        <!-- hidden: 追加アクションポップ -->
         <div class="std_action">
-            <a class="__short_reply" title="リプライ"><img src="resources/ic_cnt_rp.png" alt="リプライ"/></a>
-            <a class="__short_reblog" title="ブースト/リノート"><img src="resources/ic_cnt_rblg.png" alt="ブースト/リノート"/></a>
-            <a class="__short_quote" title="引用"><img src="resources/ic_quote.png" alt="引用"/></a>
-            <a class="__short_fav" title="お気に入り"><img src="resources/ic_cnt_fav.png" alt="お気に入り"/></a>
-            <a class="__short_bookmark" title="ブックマーク"><img src="resources/ic_bkm.png" alt="ブックマーク"/></a>
-            <a class="__short_open_reaction" title="最近のリアクションを開く"><img src="resources/ic_emoji.png" alt="最近のリアクションを開く"/></a>
-            <a class="__short_browser" title="ブラウザで開く"><img src="resources/ic_window.png" alt="ブラウザで開く"/></a>
-            <a class="__short_prepost" title="ここから遡る"><img src="resources/ic_return.png" alt="ここから遡る"/></a>
+            <button type="button" class="__short_reply" title="リプライ"><img
+                src="resources/ic_rpl.png" alt="リプライ"/></button>
+            <button type="button" class="__short_reblog" title="ブースト/リノート"><img
+                src="resources/ic_reblog.png" alt="ブースト/リノート"/></button>
+            <button type="button" class="__short_quote" title="引用"><img
+                src="resources/ic_quote.png" alt="引用"/></button>
+            <button type="button" class="__short_fav" title="お気に入り"><img
+                src="resources/ic_favorite.png" alt="お気に入り"/></button>
+            <button type="button" class="__short_bookmark" title="ブックマーク"><img
+                src="resources/ic_bkm.png" alt="ブックマーク"/></button>
+            <button type="button" class="__short_open_reaction" title="最近のリアクションを開く"><img
+                src="resources/ic_emoji.png" alt="最近のリアクションを開く"/></button>
+            <button type="button" class="__short_browser" title="ブラウザで開く"><img
+                src="resources/ic_window.png" alt="ブラウザで開く"/></button>
+            <button type="button" class="__short_prepost" title="ここから遡る"><img
+                src="resources/ic_return.png" alt="ここから遡る"/></button>
+            <button type="button" class="__short_impression" title="簡易インプレッション表示"><img
+                src="resources/ic_poll.png" alt="簡易インプレッション表示"/></button>
         </div>
         <div class="reactions">
             <div class="recent"></div>
             <a class="__short_other_reaction" title="その他のリアクション"><img src="resources/ic_add32.png" alt="その他のリアクション"/></a>
         </div>
-    </div>
-    <div id="pop_ex_timeline">
-    <!-- hidden: 拡張タイムライン(横付け) -->
-    </div>
-    <div id="pop_window_timeline" class="ui-widget-content">
-    <!-- hidden: 拡張タイムライン(ウィンドウ) -->
-        <h2>
-            <span>Window</span>
-            <input type="checkbox" id="__window_opacity"/>
-            <label for="__window_opacity">透過</label>
-            <button type="button" id="__on_pop_window_close">×</button>
-        </h2>
-        <div class="timeline">
-            <div class="col_loading">
-                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                <span class="loading_text">Now Loading...</span>
-            </div>
-            <ul class="__context_posts"></ul>
+        <div class="impressions">
+            <span class="impress_reply">0</span>
+            <span class="impress_reblog">0</span>
+            <span class="impress_fav">0</span>
         </div>
     </div>
+    <div id="pop_dirve_window" class="__ignore_close_option">
+        <!-- hidden: ドライブ表示ウィンドウ -->
+        <ul class="drive_folder_list"></ul>
+        <ul class="drive_media_list"></ul>
+        <div class="footer">
+            <button type="button" id="__on_drive_media_confirm" class="close_button">OK</button>
+            <button type="button" id="__on_drive_media_cancel" class="close_button">キャンセル</button>
+        </div>
+    </div>
+    <div id="pop_ex_timeline">
+        <!-- hidden: 拡張タイムライン(横付け) -->
+    </div>
+    <div id="pop_multi_window">
+        <!-- hidden: 複数ウィンドウ生成ボックス -->
+    </div>
     <div id="pop_extend_column">
-    <!-- hidden: 拡張カラム -->
+        <!-- hidden: 拡張カラム(横付け) -->
+    </div>
+    <div id="pop_lastest_release">
+        <!-- hidden: 最新バージョン通知 -->
+        <h3>Mistdon <span class="version">vx.x.x</span> Release!</h3>
+        <button type="button" class="window_close_button" title="閉じる"><img
+            src="resources/ic_not.png" alt="閉じる"/></button>
+        <a href="{github_link}" class="dl_link __lnk_external">GitHubからダウンロード</a>
     </div>
 </div>
 <section id="columns">

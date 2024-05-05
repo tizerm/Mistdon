@@ -2,7 +2,7 @@
  * #Class
  * タイムラインの設定値を管理するクラス(カラムに内包)
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class TimelinePref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -80,6 +80,9 @@ class TimelinePref {
                         <label for="xcw_${uuid}">デフォルトでCWを展開</label><br/>
                         <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"/>
                         <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
+                        <input type="checkbox" id="dws_${uuid}" class="__chk_disabled_websocket"/>
+                        <label for="dws_${uuid}">リアルタイム更新を無効化する</label>
+                        <input type="number" class="__txt_tl_reload_span tooltip" max="999" min="1" title="無効化時の自動更新間隔"/>分
                     </div>
                 </div>
             </li>
@@ -126,6 +129,10 @@ class TimelinePref {
             jqelm.find(".__chk_expand_cw").prop("checked", true)
         if (this.pref?.expand_media) // デフォルトで閲覧注意メディアを展開
             jqelm.find(".__chk_expand_media").prop("checked", true)
+        if (this.pref?.disable_websocket) { // リアルタイム更新を無効化する
+            jqelm.find(".__chk_disabled_websocket").prop("checked", true)
+            jqelm.find(".__txt_tl_reload_span").val(this.pref?.reload_span)
+        }
 
         // 初期値が存在しない(追加)場合は初期表示設定
         if (!this.pref) {
@@ -191,36 +198,8 @@ class TimelinePref {
     static async changeExternalHostEvent(target) {
         const domain = target.val()
         const info_dom = target.closest(".lbl_external_instance").find(".instance_info")
-        if (!domain) { // 空の場合はメッセージを初期化
-            info_dom.text("(URLを入力してください)")
-            return
-        }
-        // ロード待ち画面を生成
-        info_dom.html("&nbsp;").css('background-image', 'url("resources/illust/ani_wait.png")')
-
-        // インスタンス情報を取得
-        const instance = await Instance.get(domain)
-
-        info_dom.css('background-image', 'none')
-        if (!instance) { // 不正なインスタンスの場合はエラーメッセージを表示
-            info_dom.text("!不正なインスタンスです!")
-            return
-        }
-
-        // インスタンス名をセット
-        let img = null
-        switch (instance.platform) {
-            case 'Mastodon': // Mastodon
-                img = '<img src="resources/ic_mastodon.png" class="inline_emoji"/>'
-                break
-            case 'Misskey': // Misskey
-                img = '<img src="resources/ic_misskey.png" class="inline_emoji"/>'
-                break
-            default:
-                break
-        }
-        info_dom.html(`${img} ${instance.name}`)
-        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance.platform)
+        const instance = await Instance.showInstanceName(domain, info_dom)
+        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance?.platform)
     }
 
     /**
@@ -231,11 +210,10 @@ class TimelinePref {
      */
     static async changeTypeEvent(target) {
         const li_dom = target.closest("li")
-        let toast_uuid = null
+        let notification = null
         switch (target.val()) {
             case 'list': // リスト
-                toast_uuid = crypto.randomUUID()
-                toast("対象アカウントのリストを取得中です...", "progress", toast_uuid)
+                notification = Notification.progress("対象アカウントのリストを取得中です...")
 
                 Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
                     const list_id = li_dom.find(".__cmb_tl_list").attr("value")
@@ -247,19 +225,18 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
                     li_dom.find(".lbl_list").show()
                     li_dom.find(".lbl_channel").hide()
-                    toast(null, "hide", toast_uuid)
+                    notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // リストを持っていない
                         li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
                         li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                        toast("このアカウントにはリストがありません.", "error", toast_uuid)
+                        notification.error("このアカウントにはリストがありません.")
                     } else // それ以外は単にリストの取得エラー
-                        toast("リストの取得で問題が発生しました.", "error", toast_uuid)
+                        notification.error("リストの取得で問題が発生しました.")
                 })
                 break
             case 'channel': // チャンネル
-                toast_uuid = crypto.randomUUID()
-                toast("対象アカウントのお気に入りチャンネルを取得中です...", "progress", toast_uuid)
+                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
 
                 Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
                     const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
@@ -271,14 +248,14 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
                     li_dom.find(".lbl_channel").show()
                     li_dom.find(".lbl_list").hide()
-                    toast(null, "hide", toast_uuid)
+                    notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // お気に入りのチャンネルがない
                         li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
                         li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-                        toast("このアカウントがお気に入りしているチャンネルがありません.", "error", toast_uuid)
+                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
                     } else // それ以外は単にリストの取得エラー
-                        toast("チャンネルの取得で問題が発生しました.", "error", toast_uuid)
+                        notification.error("チャンネルの取得で問題が発生しました.")
                 })
                 break
             default: // リスト/チャンネル以外はウィンドウを閉じて終了
@@ -295,7 +272,7 @@ class TimelinePref {
  * #Class
  * タイムライングループの設定値を管理するクラス(カラムに内包)
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class GroupPref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -333,6 +310,7 @@ class GroupPref {
      * このカラムの設定DOMを生成してテーブルにアペンドする
      */
     create() {
+        const uuid = crypto.randomUUID()
         // カラム本体を空の状態でjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
             <div id="${this.id}" class="tl_group timeline ui-sortable">
@@ -349,6 +327,8 @@ class GroupPref {
                     </div>
                 </div>
                 <div class="group_option">
+                    <button type="button" class="__open_multi_tl_layout tooltip" title="マルチタイムラインレイアウトを編集"
+                        ><img src="resources/ic_return.png" alt="マルチタイムラインレイアウトを編集"/></button>
                     <select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
                         <option value="default">ノーマル</option>
                         <option value="normal2">ノーマル2</option>
@@ -356,9 +336,53 @@ class GroupPref {
                         <option value="list">リスト</option>
                         <option value="media">メディア</option>
                         <option value="gallery">ギャラリー</option>
+                        <option value="multi">マルチ</option>
                     </select>
                     色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
                 </div>
+                <table class="tl_layout_options"><tbody>
+                    <tr>
+                        <th class="default">通常</th>
+                        <th class="btrn">ブースト/リノート</th>
+                    </tr>
+                    <tr>
+                        <td><select class="__cmb_tll_default">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                        <td><select class="__cmb_tll_btrn">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th class="media">メディア</th>
+                        <th class="notification">通知</th>
+                    </tr>
+                    <tr>
+                        <td><select class="__cmb_tll_media">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                            <option value="media">メディア</option>
+                            <option value="gallery">ギャラリー</option>
+                            <option value="ignore">無視</option>
+                        </select></td>
+                        <td><select class="__cmb_tll_notif">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="list">リスト</option>
+                        </select></td>
+                    </tr>
+                    <tr><td colspan="2">
+                        <button type="button" class="__on_layout_close" class="close_button">×</button>
+                    </td></tr>
+                </tbody></table>
                 <ul class="__ui_tl_sortable"></ul>
             </div>
         `))
@@ -374,6 +398,12 @@ class GroupPref {
         }
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
+        if (this.pref?.tl_layout == 'multi') { // タイムラインレイアウト: マルチ
+            jqelm.find(`.__cmb_tll_default>option[value="${this.pref.multi_layout_option.default}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_btrn>option[value="${this.pref.multi_layout_option.reblog}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_media>option[value="${this.pref.multi_layout_option.media}"]`).prop("selected", true)
+            jqelm.find(`.__cmb_tll_notif>option[value="${this.pref.multi_layout_option.notification}"]`).prop("selected", true)
+        } else jqelm.find("button.__open_multi_tl_layout").prop("disabled", true)
         // タイムラインの設定値をDOMと共に生成
         this.timelines.forEach((tl, index) => jqelm.find("ul").append(tl.create()))
 
@@ -405,6 +435,18 @@ class GroupPref {
         $(`#${this.id}>ul>li`).each((index, elm) => $(elm).find(".tl_header_label").text(`Timeline ${index + 1}`))
         ColumnPref.setButtonPermission()
     }
+
+    /**
+     * #StaticMethod
+     * タイムラインレイアウトを変更したときのイベントメソッド
+     * 
+     * @param target イベントが発火したコンボボックスのjQueryオブジェクト
+     */
+    static changeLayoutEvent(target) {
+        const button = target.closest(".group_option").find("button.__open_multi_tl_layout")
+        button.prop("disabled", target.find("option:selected").val() != 'multi')
+        ColumnPref.setButtonPermission()
+    }
 }
 
 /*====================================================================================================================*/
@@ -413,7 +455,7 @@ class GroupPref {
  * #Class
  * カラムの設定値を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class ColumnPref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -558,6 +600,7 @@ class ColumnPref {
         ColumnPref.setButtonPermission()
         setColorPalette($(`#columns>table #${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
+        $(`#columns>table #${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**
@@ -624,9 +667,7 @@ class ColumnPref {
         $(`#${target_col.id}>.col_tl_groups>.tl_group:last-child .__txt_group_height`).val("")
         let total = 0
         for (let gp_elm of $(`#${target_col.id}>.col_tl_groups>.tl_group`).get()) {
-            console.log($(gp_elm).find('.__txt_group_height'))
             let height = $(gp_elm).find('.__txt_group_height').val()
-            console.log(height)
             if (!height) break
             else total += Number(height)
             if (total >= 99) {
@@ -665,9 +706,7 @@ class ColumnPref {
         $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
             let total = 0
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
-                console.log($(gp_elm).find('.__txt_group_height'))
                 let height = $(gp_elm).find('.__txt_group_height').val()
-                console.log(height)
                 if (!height) { // 最後のグループの場合
                     height = 100 - total
                     $(gp_elm).find('.__txt_group_height').val(height)
@@ -743,7 +782,7 @@ class ColumnPref {
      */
     static normalize() {
         // DOM要素から不正な空データを除外する
-        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 // タイムラインが存在しないグループは削除
                 if ($(gp_elm).find("ul>li").length == 0) $(gp_elm).remove()
@@ -762,13 +801,14 @@ class ColumnPref {
         ColumnPref.normalize()
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
-        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
             const group_list = []
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 const tl_list = []
                 $(gp_elm).find("ul>li").each((tl_index, tl_elm) => { // タイムラインイテレータ
                     // アカウントコンボボックスの値を取得
                     const account_address = $(tl_elm).find(".__cmb_tl_account").val()
+                    const disable_websocket = $(tl_elm).find(".__chk_disabled_websocket").prop("checked")
                     tl_list.push({ // タイムラインプリファレンス
                         'key_address': account_address,
                         'timeline_type': $(tl_elm).find(".__cmb_tl_type").val(),
@@ -782,9 +822,19 @@ class ColumnPref {
                         'channel_color': $(tl_elm).find(".__txt_channel_color").val(),
                         'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
                         'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
-                        'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked")
+                        'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked"),
+                        'disable_websocket': disable_websocket,
+                        'reload_span': disable_websocket ? ($(tl_elm).find(".__txt_tl_reload_span").val() || 5) : null
                     })
                 })
+                let multi_layout = null
+                // タイムラインレイアウトがマルチの場合はマルチレイアウト設定を保存
+                if ($(gp_elm).find(".__cmb_tl_layout").val() == 'multi') multi_layout = {
+                    'default': $(gp_elm).find('.__cmb_tll_default').val(),
+                    'reblog': $(gp_elm).find('.__cmb_tll_btrn').val(),
+                    'media': $(gp_elm).find('.__cmb_tll_media').val(),
+                    'notification': $(gp_elm).find('.__cmb_tll_notif').val()
+                }
                 group_list.push({ // タイムライングループプリファレンス
                     // デフォルトグループ名は「Group XX」
                     'label_head': $(gp_elm).find(".__txt_group_head").val() || `Group ${gp_index + 1}`,
@@ -792,7 +842,8 @@ class ColumnPref {
                     // デフォルトグループカラーは#777777(グレー)
                     'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
                     'gp_height': $(gp_elm).find(".__txt_group_height").val(),
-                    'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val()
+                    'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val(),
+                    'multi_layout_option': multi_layout
                 })
             })
             col_list.push({ // カラムプリファレンス

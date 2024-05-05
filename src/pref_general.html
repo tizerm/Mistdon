@@ -1,0 +1,426 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <meta
+        http-equiv="X-Content-Security-Policy"
+        content="default-src 'self'; img-src *; connect-src *; script-src 'self'"
+    />
+    <title>Mistdon General Preference</title>
+</head>
+<body>
+<article id="main">
+    <article id="general_preference">
+        <dl>
+            <dt>メニュー表示設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="左のナビゲーションメニューに表示する項目を設定します。オフにすると表示されなくなりますが、ショートカットキーからの実行は可能です。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_home"/>
+                        <label for="__chk_gen_navi_home">ホーム</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_auth"/>
+                        <label for="__chk_gen_navi_auth">アカウント認証</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_search"/>
+                        <label for="__chk_gen_navi_search">検索</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_trend"/>
+                        <label for="__chk_gen_navi_trend">トレンド</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_history"/>
+                        <label for="__chk_gen_navi_history">送信履歴</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_profile"/>
+                        <label for="__chk_gen_navi_profile">すべての認証アカウントのプロフィール表示</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_emoji"/>
+                        <label for="__chk_gen_navi_emoji">カスタム絵文字キャッシュ更新</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_help_keyborad"/>
+                        <label for="__chk_gen_navi_help_keyborad">キーボードショートカット早見表</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_navi_help"/>
+                        <label for="__chk_gen_navi_help">ヘルプ</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>個別オプション</dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_tool_button"/>
+                        <label for="__chk_gen_use_tool_button">ツールボタンを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると下書き/投稿オプション/絵文字パレット/文字数メーターを表示します。オフの場合でも文字数メーター以外の機能はショートカットキーから実行可能です。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_post_button"/>
+                        <label for="__chk_gen_use_post_button">投稿ボタンを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると投稿ボタンを表示します。オフにした場合Ctrl+Enterでしか投稿ができなくなるので注意してください。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_additional_button"/>
+                        <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_hide_additional_account"/>
+                        <label for="__chk_gen_hide_additional_account">投稿オプションの投稿アカウントをデフォルトで閉じる</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると投稿フォームにフォーカスしたときに現れる投稿オプションの投稿アカウントが閉じた状態で初期表示されます。複数のアカウントに同じ投稿を流さない人向け。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_emoji_suggester"/>
+                        <label for="__chk_gen_use_emoji_suggester">カスタム絵文字サジェスターを使用する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="投稿フォームで「:」を入力したときにカスタム絵文字の変換候補を出すウィンドウを表示するか設定します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_action_palette"/>
+                        <label for="__chk_gen_use_action_palette">簡易アクションパレットを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="投稿にマウスオーバーしたときに表示されるリプライ/ブースト/リノートなどが手軽に行えるアクションパレットを使用するか設定します。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_prev_relpy"/>
+                        <label for="__chk_gen_use_prev_relpy">簡易直前リプライを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="リプライやツリーの投稿に対してマウスオーバーしたときに、タイムライン上に返信対象の投稿がある場合に表示するかどうか設定します。タイムライン上にない場合はオンにしても表示しません。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_notified_impression"/>
+                        <label for="__chk_gen_use_notified_impression">通知タイムラインで累計反応数を表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると通知タイムラインのブースト/リノート/お気に入り/リアクション通知に対して累計のインプレッション数が表示されるようになります。ただし、リアルタイム更新で新たに通知が来た場合、同じ投稿の既にある通知の数は変わりません。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_show_media_confirm"/>
+                        <label for="__chk_gen_show_media_confirm">メディア投稿時に確認ウィンドウを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとメディアを添付した投稿をする際に確認ウィンドウが表示されます。閲覧注意設定の確認や、送信するインスタンスの間違いが重大な画像を投稿することが多い場合はオンにするのをおすすめします。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_animation"/>
+                        <label for="__chk_gen_animation">メイン画面のアニメーションを有効にする</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="メイン画面でUIのアニメーションを行うか設定します。動作が重いと感じるときはオフにしてみてください。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_show_tips"/>
+                        <label for="__chk_gen_show_tips">TIPSを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="タイトルヘッダにTIPSを表示します。オンにすると30秒おきにMistdonの簡潔な操作説明のTIPSが流れてきます。"/>
+                    </li>
+                </ul>
+            </dd>
+            <dt>メインタイムライン以外の自動展開設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ユーザープロフィールやトレンド、検索欄など、一時的に生成するタイムラインでCWや閲覧注意メディアを自動展開するか設定します。チェックをオンにした場合は自動的に展開します。"/>
+            </dt>
+            <dd>
+                <h5>検索</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_search"/>
+                        <label for="__chk_gen_expand_cw_search">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_search"/>
+                        <label for="__chk_gen_expand_media_search">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>トレンド</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_trend"/>
+                        <label for="__chk_gen_expand_cw_trend">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_trend"/>
+                        <label for="__chk_gen_expand_media_trend">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>送信履歴</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_history"/>
+                        <label for="__chk_gen_expand_cw_history">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_history"/>
+                        <label for="__chk_gen_expand_media_history">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>詳細表示</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_detail"/>
+                        <label for="__chk_gen_expand_cw_detail">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_detail"/>
+                        <label for="__chk_gen_expand_media_detail">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+                <h5>ユーザープロフィール</h5>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_cw_profile"/>
+                        <label for="__chk_gen_expand_cw_profile">CW (Contents Warning)</label>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_expand_media_profile"/>
+                        <label for="__chk_gen_expand_media_profile">閲覧注意メディア (NSFW)</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>ノーマル2レイアウトの名前表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ノーマル2レイアウトの時のユーザー名のフォーマットを選択します。両方表示する際はどちらを先に表示するかを選択できます。ノーマルレイアウトとメディアレイアウトは両方表示で固定です。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_normal_name_format1"
+                            name="__opt_gen_normal_name_format" class="__opt_gen_normal_name_format" value="both_prename"/>
+                        <label for="__opt_gen_normal_name_format1">ユーザーネーム+ユーザーID</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_normal_name_format2"
+                            name="__opt_gen_normal_name_format" class="__opt_gen_normal_name_format" value="both_preid"/>
+                        <label for="__opt_gen_normal_name_format2">ユーザーID+ユーザーネーム</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_normal_name_format3"
+                            name="__opt_gen_normal_name_format" class="__opt_gen_normal_name_format" value="id"/>
+                        <label for="__opt_gen_normal_name_format3">ユーザーIDのみ</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_normal_name_format4"
+                            name="__opt_gen_normal_name_format" class="__opt_gen_normal_name_format" value="name"/>
+                        <label for="__opt_gen_normal_name_format4">ユーザー名のみ</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>チャットレイアウトの名前表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="チャットレイアウトの時のユーザー名のフォーマットを選択します。このレイアウトの場合は両方表示すると極端に見づらくなる可能性が高いので注意してください。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_chat_name_format1"
+                            name="__opt_gen_chat_name_format" class="__opt_gen_chat_name_format" value="both_prename"/>
+                        <label for="__opt_gen_chat_name_format1">ユーザーネーム+ユーザーID</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_chat_name_format2"
+                            name="__opt_gen_chat_name_format" class="__opt_gen_chat_name_format" value="both_preid"/>
+                        <label for="__opt_gen_chat_name_format2">ユーザーID+ユーザーネーム</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_chat_name_format3"
+                            name="__opt_gen_chat_name_format" class="__opt_gen_chat_name_format" value="id"/>
+                        <label for="__opt_gen_chat_name_format3">ユーザーIDのみ</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_chat_name_format4"
+                            name="__opt_gen_chat_name_format" class="__opt_gen_chat_name_format" value="name"/>
+                        <label for="__opt_gen_chat_name_format4">ユーザー名のみ</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>時間表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="タイムライン上の投稿の時間表記を絶対表記か相対表記か選択します。両方にすることもできます。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format1" name="__opt_gen_time_format" class="__opt_gen_time_format" value="absolute"/>
+                        <label for="__opt_gen_time_format1">絶対表記</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format2" name="__opt_gen_time_format" class="__opt_gen_time_format" value="relative"/>
+                        <label for="__opt_gen_time_format2">相対表記</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_time_format3" name="__opt_gen_time_format" class="__opt_gen_time_format" value="both"/>
+                        <label for="__opt_gen_time_format3">絶対表記+相対表記</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>ブースト/リノートの時間表記
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ブースト/リノートの投稿の時間表記を「ブーストされた時間」か「元の投稿の時間」か選択します。両方にすることもできます。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format1"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="origin"/>
+                        <label for="__opt_gen_reblog_time_format1">元の投稿の投稿時間を表示</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format2"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="quoted"/>
+                        <label for="__opt_gen_reblog_time_format2">ブースト/リノートされた時間を表示</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_reblog_time_format3"
+                            name="__opt_gen_reblog_time_format" class="__opt_gen_reblog_time_format" value="both"/>
+                        <label for="__opt_gen_reblog_time_format3">両方の時間を表示</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>タイムライングループのキャッシュ件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の画面に表示する最大の投稿数です。これを超えると古い順から消えていきます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_tlcache_default" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_tlcache_chat" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>リスト</th>
+                        <td><input type="text" id="__txt_gen_tlcache_list" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>メディア</th>
+                        <td><input type="text" id="__txt_gen_tlcache_media" size="6" maxlength="3"/>件</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen_tlcache_gallery" size="6" maxlength="3"/>件</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>画像サムネイルの高さ制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の画像サムネイルの高さの限界値を設定します。基本的に正方形でトリミングされますが、横幅がこの値を超える場合は高さはここで設定した値になります。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_default" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_chat" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>メディア</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_media" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>ギャラリー</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_gallery" size="6" maxlength="3"/>px</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>コンテンツ文字数制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の投稿本文の表示できる限界値を設定します。この文字数を超えると省略表示になり、ポップアップ呼び出しボタンが現れます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_content_limit_default" size="6" maxlength="4"/>文字</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_content_limit_chat" size="6" maxlength="4"/>文字</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>送信履歴の最大保存件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="投稿履歴とアクティビティ履歴の最大保存件数を設定します。これを超えると古い順から履歴から消えていきます。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_history_limit" size="6" maxlength="3"/>件
+            </dd>
+            <dt>リアクション履歴の最大保存件数
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各Misskeyアカウントごとのリアクション履歴の最大保存件数を設定します。これを超えると古い順から履歴から消えていきます。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_reaction_history_limit" size="6" maxlength="3"/>個
+            </dd>
+            <dt>キーボードスクロールのスクロール量設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="キーボードの↑↓(ws)を押したときにスクロールする量をpxで指定します。Shift同時押し時のスクロール量も設定できます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>通常スクロール</th>
+                        <td><input type="text" id="__txt_gen_keyscroll_normal" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>シフトスクロール</th>
+                        <td><input type="text" id="__txt_gen_keyscroll_shift" size="6" maxlength="3"/>px</td>
+                    </tr>
+                </tbody></table>
+            </dd>
+            <dt>背景
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="背景を好きなように変更できます。あまり明るすぎると一部UIが見づらくなる場合がありますのでご了承ください。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_background1" name="__opt_gen_background" class="__opt_gen_background" value="mono_color"/>
+                        <label for="__opt_gen_background1">単色カラー</label>
+                        #<input type="text" id="__txt_gen_background_color" class="__pull_color_palette" size="6"/>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_background3" name="__opt_gen_background" class="__opt_gen_background" value="mitlin"/>
+                        <label for="__opt_gen_background3">ミトリン</label>
+                        <select id="__cmb_gen_backmitlin_type">
+                            <option value="ver011">Mitlin v0.1.1</option>
+                            <option value="ver031">Mitlin v0.3.1</option>
+                            <option value="ver041">Mitlin v0.4.1</option>
+                            <option value="ver051">Mitlin v0.5.1</option>
+                            <option value="ver100">Mitlin v1.0.0</option>
+                        </select>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_background2" name="__opt_gen_background" class="__opt_gen_background" value="select_image"/>
+                        <label for="__opt_gen_background2">指定の画像</label>
+                        <input type="file" id="__file_gen_background" accept="image/png, image/jpeg"/>
+                        <input type="hidden" id="__hdn_gen_bgfile" value=""/>
+                    </li>
+                </ul>
+            </dd>
+        </dl>
+    </article>
+</article>
+</body>
+</html>

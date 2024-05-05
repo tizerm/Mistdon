@@ -1,0 +1,13 @@
+﻿body {
+    background-color: #222222;
+    color: #cccccc;
+    text-align: center;
+}
+#main {
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+}
+h3 { font-size: 24px; }
+

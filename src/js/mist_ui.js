@@ -5,32 +5,9 @@
 ]
 
 $(() => {
-    // 背景をランダムに変更
-    const back_rand = Math.random()
-    if (back_rand < 0.15)  // Mitlin v0.1.1
-        $("body").css("background-image", 'url("resources/illust/mitlin_back1.jpg")');
-    else if (back_rand < 0.3)  // Mitlin v0.3.1
-        $("body").css("background-image", 'url("resources/illust/mitlin_back2.jpg")');
-    else if (back_rand < 0.6)  // Mitlin v0.4.1
-        $("body").css("background-image", 'url("resources/illust/mitlin_back3.jpg")');
-    else // Mitlin v0.5.1
-        $("body").css("background-image", 'url("resources/illust/mitlin_back4.jpg")');
-
     // ナビゲーションメニューホバー時にツールチップ表示
-    $("#navi").tooltip({
-        position: {
-            my: "left+15 bottom+2",
-            at: "right center"
-        },
-        show: {
-            effect: "slide",
-            duration: 80
-        },
-        hide: {
-            effect: "slide",
-            duration: 80
-        }
-    });
+    $("#navi").tooltip(Preference.getUIPref("RIGHT", "UI_DROP_ANIMATION"))
+
     // 外部表示リンククリックイベント
     $(document).on("click", ".__lnk_external", e => {
         const url = $(e.target).closest("a").attr("href");
@@ -188,42 +165,7 @@ function popContextMenu(e, id) {
         'top': `${e.pageY - 8}px`,
         'left': `${e.pageX - 8}px`
     });
-    $(`#${id}`).show("slide", { direction: "left" }, 100);
-}
-
-/**
- * #Renderer #jQuery
- * トーストを表示
- * 
- * @param text 表示する文章
- * @param type トーストのタイプ
- * @param progress_id トーストを一意に認識するためのID
- */
-function toast(text, type, progress_id) {
-    const toast_block = $("#pop_toast");
-    if (type != 'progress' && progress_id) {
-        // progressモード以外でIDが渡ってきた場合は対象toastを削除
-        const target_toast = toast_block.find(`#${progress_id}`);
-        target_toast.hide("slide", { direction: "up" }, 120, () => target_toast.remove());
-    }
-    // hideの場合はそのまま終了
-    if (type == 'hide') return;
-    // トーストを画面に追加
-    if (type == 'progress' && progress_id) 
-        toast_block.append(`<span id="${progress_id}">${text}</span>`);
-    else toast_block.append(`<span>${text}</span>`);
-    const added = toast_block.find("span:last-child");
-    if (type != 'progress') {
-        // 実行中トースト以外は3秒後に消去する
-        if (type == 'error') {
-            added.addClass("toast_error");
-            //prependNotification(text, true);
-        } else added.addClass("toast_done");
-        // 3秒後に隠して要素自体を削除
-        (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()
-    } else added.addClass("toast_progress");
-    // 追加アニメーション
-    added.hide().show("slide", { direction: "up" }, 80);
+    $(`#${id}`).show(...Preference.getAnimation("WINDOW_FOLD"))
 }
 
 /**
@@ -235,19 +177,14 @@ function toast(text, type, progress_id) {
 function dialog(arg) {
     const dialog_elm = $("#pop_dialog");
     dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
+    const animation_pref = Preference.getUIPref(null, "UI_DIALOG_ANIMATION")
     if (arg.type == 'alert') dialog_elm.dialog({ // アラート
         resizable: false,
         draggable: false,
         width: 400,
         modal: true,
-        show: {
-            effect: "bounce",
-            duration: 120
-        },
-        hide: {
-            effect: "puff",
-            duration: 120
-        },
+        show: animation_pref?.show,
+        hide: animation_pref?.hide,
         close: (event, ui) => { // ダイアログを閉じた後になにか処理がある場合はコールバック実行
             dialog_elm.dialog("destroy");
             if (arg.accept) arg.accept();
@@ -258,14 +195,8 @@ function dialog(arg) {
         draggable: false,
         width: 400,
         modal: true,
-        show: {
-            effect: "bounce",
-            duration: 120
-        },
-        hide: {
-            effect: "puff",
-            duration: 120
-        },
+        show: animation_pref?.show,
+        hide: animation_pref?.hide,
         close: (event, ui) => dialog_elm.dialog("destroy"),
         buttons: {
             "OK": () => { // ダイアログを閉じてコールバック関数を実行
@@ -277,3 +208,42 @@ function dialog(arg) {
     });
 }
 
+/**
+ * #Renderer #jQuery
+ * 複数展開可能なウィンドウを生成.
+ * 
+ * @param arg 設定オブジェクト
+ */
+function createWindow(arg) {
+    // すでに開いているウィンドウの数を算出
+    const window_num = $("#pop_multi_window>.ex_window").length
+
+    // 初期HTMLをバインド
+    $("#pop_multi_window").append(arg.html)
+    $(`#${arg.window_key}>h2`).css('background-color', `#${arg.color}`)
+
+    // Draggableにする(横方向にしか移動不可にするならパラメータ指定)
+    $(`#${arg.window_key}`).draggable({
+        handle: "h2",
+        axis: arg.drag_only_x ? "x" : false
+    })
+
+    // リサイズ可能にする場合はResizableにする
+    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: arg.resize_only_y ? "n, s" : "all" })
+
+    // ヘッダボタンにツールチップを設定
+    $(`#${arg.window_key}>.window_buttons`).tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
+
+    // 開いているウィンドウの数だけ初期配置をズラす
+    $(`#${arg.window_key}`).css('right', `${window_num * 48}px`).mousedown()
+    $(`#${arg.window_key}`).show(...Preference.getAnimation("WINDOW_FOLD"))
+}
+
+/**
+ * #Renderer
+ * ランダムでカラーパレットの色を取得する.
+ */
+function getRandomColor() {
+    const index = Math.floor(Math.random() * color_palette.length)
+    return color_palette[index]
+}

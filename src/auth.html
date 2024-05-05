@@ -11,25 +11,30 @@
         content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_core.css"/>
-    <link rel="stylesheet" type="text/css" href="css/mm_auth.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_core.css"/>
+    <link rel="stylesheet" type="text/css" href="css/mist_auth.css"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="js/mm_ui.js"></script>
-    <script type="text/javascript" src="js/mm_help.js"></script>
+    <script type="text/javascript" src="js/mist_ui.js"></script>
+    <script type="text/javascript" src="js/mist_help.js"></script>
+    <script type="text/javascript" src="js/module/class_relative_time.js"></script>
+    <script type="text/javascript" src="js/module/class_notification.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
     <script type="text/javascript" src="js/module/class_account.js"></script>
-    <script type="text/javascript" src="js/mm_auth.js"></script>
+    <script type="text/javascript" src="js/module/class_instance.js"></script>
+    <script type="text/javascript" src="js/module/class_preference.js"></script>
+    <script type="text/javascript" src="js/mist_auth.js"></script>
     <title>Mistdon - アカウントの追加と管理</title>
 </head>
 <body>
 <nav id="navi">
     <ul>
+        <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
-        <li><a href="pref_col.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
+        <li><a href="preference.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
     </ul>
     <ul id="bottom_navi">
         <li><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
@@ -39,8 +44,10 @@
     <h1>アカウントの追加と管理 - Mistdon</h1>
 </header>
 <div id="pop">
-    <div id="pop_toast">
-    <!-- hidden: トースト -->
+    <div id="pop_notification">
+    <!-- hidden: 通知 -->
+        <ul class="progress"></ul>
+        <ul class="pushed"></ul>
     </div>
     <div id="pop_dialog">
     <!-- hidden: ダイアログ -->
@@ -55,7 +62,7 @@
 <section id="content">
     <div id="account_list">
         <h2>アカウント一覧</h2>
-        <button type="button" id="on_save_color">色と順番を保存</button>
+        <button type="button" id="on_save_account_info">アカウント設定を保存</button>
         <span>※ドメイン名をドラッグ&amp;ドロップすると<br/>並び替えができます。</span>
         <ul class="__ui_sortable"><!-- jQueryでバインディング処理をします --></ul>
     </div>
@@ -63,23 +70,20 @@
         <h2>アカウントの追加</h2>
         <div id="transition_section">
             <div id="select_platform">
-                <span id="top_text">追加するアカウントのプラットフォームを選択してください。</span>
-                <div class="platform_selector">
-                    <button type="button" id="on_platform_mastodon"><img src="resources/illust/il_btn_mstd.png" alt="Mastodon"/></button>
-                    <button type="button" id="on_platform_misskey"><img src="resources/illust/il_btn_msky.png" alt="Misskey"/></button>
-                </div>
+                <span id="top_text">
+                追加したいアカウントのインスタンス(サーバー)のURLを入力してください。<br/>
+                MastodonとMisskeyどちらのインスタンスでもOKです(自動判別します)。</span>
+                <div class="instance_box">https://<input type="text" id="txt_instance_domain" name="txt_instance_domain"/>/</div>
+                <input type="hidden" class="__hdn_instance_platform" value="null"/>
+                <div class="instance_info">(URLを入力してください)</div>
+                <button type="button" id="on_auth_instance_oauth" disabled>OAuth認証</button>
+                <button type="button" id="on_auth_instance" disabled>旧方式で認証</button>
+                <strong class="bottom_auth_warn">
+                    ※OAuth,MiAuth認証をオススメしますがエラーが出る場合は右の旧方式認証をお使いください。
+                </strong>
             </div>
             <div id="form_mastodon" class="platform_section">
                 <h3>Mastodonアカウントの追加</h3>
-                <div class="instance_form">
-                    <span id="top_text">
-                    追加したいアカウントのインスタンス(サーバー)の<br/>
-                    URLを入力してください。</span>
-                    <div class="instance_box">https://<input type="text" id="txt_mst_instance_domain" name="txt_mst_instance_domain" size="50"/>/</div>
-                    <div id="lbl_mst_instance_name">(Instance Name)</div>
-                    <button type="button" id="on_mst_auth_instance">認証</button><br/>
-                    <button type="button" class="__on_return">前に戻る</button>
-                </div>
                 <div class="auth_form">
                     <span id="top_text">
                     別画面に表示されたコードを入力(コピペ)してください
@@ -87,35 +91,23 @@
                     <input type="hidden" id="hdn_client_id" name="hdn_client_id"/>
                     <input type="hidden" id="hdn_client_secret" name="hdn_client_secret"/>
                     <input type="text" id="txt_mst_auth_code" name="txt_mst_auth_code" size="80"/><br/>
-                    <button type="button" id="on_mst_auth_token">登録</button><br/>
-                    <button type="button" class="__on_instance_return">前に戻る</button>
-                    <button type="button" class="__on_return_top">最初に戻る</button>
+                    <button type="button" id="on_mst_auth_token">登録</button>
+                    <button type="button" class="on_close_auth">キャンセル</button>
                 </div>
             </div>
             <div id="form_misskey" class="platform_section">
                 <h3>Misskeyアカウントの追加</h3>
-                <div class="instance_form">
-                    <span id="top_text">
-                    追加したいアカウントのインスタンス(サーバー)の<br/>
-                    URLを入力してください。</span>
-                    <div class="instance_box">https://<input type="text" id="txt_msk_instance_domain" name="txt_msk_instance_domain" size="50"/>/</div>
-                    <div id="lbl_msk_instance_name">(Instance Name)</div>
-                    <button type="button" id="on_msk_auth_instance">認証</button><br/>
-                    <button type="button" class="__on_return">前に戻る</button>
-                </div>
                 <div class="auth_form">
                     <span id="top_text">
                     別画面で認証ボタンを押して完了してから下のボタンを押してください。
                     </span><br/>
                     <input type="hidden" id="hdn_app_secret" name="hdn_app_secret"/>
                     <input type="hidden" id="hdn_app_token" name="hdn_app_token"/>
-                    <button type="button" id="on_msk_auth_token">登録</button><br/>
-                    <button type="button" class="__on_instance_return">前に戻る</button>
-                    <button type="button" class="__on_return_top">最初に戻る</button>
+                    <button type="button" id="on_msk_auth_token">登録</button>
+                    <button type="button" class="on_close_auth">キャンセル</button>
                 </div>
             </div>
         </div>
-        <a href="index.html" class="close_link">認証をやめて戻る</a>
     </div>
 </section>
 </body>
