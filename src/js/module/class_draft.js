@@ -63,6 +63,7 @@ class Draft {
             const expire_time = Number(arg.option_obj.find('#__txt_poll_expire_time').val() || '0')
             poll = {
                 options: options,
+                multiple: arg.option_obj.find('#__chk_poll_multiple').prop('checked'),
                 expire_time: expire_time > 0 ? expire_time : null,
                 expire_unit: arg.option_obj.find('#__cmb_expire_unit').val()
             }
@@ -84,7 +85,7 @@ class Draft {
         Draft.list.unshift(draft)
 
         // 下書きをファイルに書き出し
-        await window.accessApi.overwriteDraft(Draft.list.map(elm => elm.json))
+        await Draft.writeFile()
         Notification.info('下書きに保存しました.')
         $("#__on_reset_option").click()
     }
@@ -95,13 +96,66 @@ class Draft {
      * 
      * @param index 下書きのインデクス
      */
-    static loadDraft(index) {
+    static async loadDraft(index) {
+        // 下書きを読み出してフォームをリセット
         const draft = Draft.list.splice(index, 1)[0]
         $("#__on_reset_option").click()
-        Account.get(draft.account).setPostAccount()
+
+        // アカウントをセットして下書き内容を展開
+        const account = Account.get(draft.account)
+        account.setPostAccount()
         $("#__txt_postarea").val(draft.content)
         if (draft.cw) $("#__txt_content_warning").val(draft.cw)
+
+        // 公開範囲を設定
+        $(`#post_options input[name="__opt_visibility"][value="${draft.visibility}"]`).prop("checked", true)
+
+        // 投票データがあるなら投票データを展開
+        if (draft.poll) {
+            // 一旦投票項目は空にする
+            $('#post_options .poll_options').empty()
+            draft.poll.options.forEach(elm => { // 投票項目をバインド
+                $("#post_options .poll_options").append(
+                    '<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>')
+                $("#post_options .poll_options>li:last-child>input.__txt_poll_option").val(elm)
+            })
+
+            $('#post_options #__chk_poll_multiple').prop("checked", draft.poll.multiple)
+            $('#post_options #__txt_poll_expire_time').val(draft.poll.expire_time)
+            $('#post_options #__cmb_expire_unit').val(draft.poll.expire_unit)
+            $("#post_options .poll_setting+.option_close .__on_option_open").click()
+        }
+
+        // 返信先と引用先をを参照する
+        const host = account.pref.domain
+        if (draft.reply_id) Status.getStatusById(host, account.platform, draft.reply_id).then(post => {
+            $("#post_options ul.refernce_post").html(post.element)
+            $("#post_options #__hdn_reply_id").val(post.id)
+            $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        }).catch(err => Notification.error(err))
+        if (draft.quote_id) Status.getStatusById(host, account.platform, draft.quote_id).then(post => {
+            $("#post_options ul.refernce_post").html(post.element)
+            $("#post_options #__hdn_quote_id").val(post.id)
+            $("#post_options .refernced_post+.option_close .__on_option_open").click()
+        }).catch(err => Notification.error(err))
+
         $("#__txt_postarea").focus()
+
+        // 下書きをファイルから下書きを削除
+        Draft.writeFile()
+
+        ;(async () => { // チャンネルとローカル設定はアカウント切り替えタイミングの関係で一番最後に非同期で実行
+            $('#post_options #__cmb_post_to').val(draft.channel)
+            $('#post_options #__chk_local_only').prop("checked", draft.local)
+        })()
+    }
+
+    /**
+     * #StaticMethod
+     * 現在の下書きリストキャッシュで下書きを更新.
+     */
+    static async writeFile() {
+        await window.accessApi.overwriteDraft(Draft.list.map(elm => elm.json))
     }
 
     // Getter: 下書きを一覧に表示する際の項目DOM

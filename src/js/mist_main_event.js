@@ -265,10 +265,17 @@
     $("#__on_submit").on("click", e => {
         if (!Preference.IGNORE_DIALOG && $("#post_options .media_list>li:not(.__initial_message)").length > 0
             && Preference.GENERAL_PREFERENCE.enable_media_confirm) {
+            // メディア付きの投稿を確認する
+            const account_list = [$("#header>#head_postarea .__lnk_postuser>img").attr("name")]
+            $("#post_options input.__chk_add_account:checked").each((index, elm) => account_list.push($(elm).val()))
+            const account_label = account_list.reduce((rs, el) => `${rs}<br/>${el}`, '')
             dialog({
                 type: 'confirm',
                 title: "画像投稿",
-                text: `対象のアカウントでメディア付きの投稿をします。<br/>よろしいですか？`,
+                text: `
+                    以下のアカウントに対してメディア付きの投稿をします。<br/>
+                    よろしいですか？<br/>${account_label}
+                `,
                 accept: () => { // OKボタン押下時の処理
                     Preference.IGNORE_DIALOG = true
                     $("#__txt_postarea").blur()

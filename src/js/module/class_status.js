@@ -1602,6 +1602,36 @@ class Status {
         // メディアがある場合はアップ済みのメディアを初期添付
         if (this.medias.length > 0) $('#header>#post_options .attached_media>ul.media_list').html(Media.getAttachElement(this))
 
+        // アンケートが存在する場合はアンケートの内容を再展開
+        if (this.poll_options) {
+            // 一旦投票項目は空にする
+            $('#post_options .poll_options').empty()
+            this.poll_options.forEach(elm => { // 投票項目をバインド
+                $("#post_options .poll_options").append(
+                    '<li><input type="text" class="__txt_poll_option __ignore_keyborad" placeholder="回答"/></li>')
+                $("#post_options .poll_options>li:last-child>input.__txt_poll_option").val(elm.text)
+            })
+
+            $('#post_options #__chk_poll_multiple').prop("checked", this.poll_multiple)
+            // 投票期限の単位と時間を再計算
+            const expire_msec = this.poll_expired_time.getTime() - Date.now()
+            let time = null
+            let unit = null
+            if (expire_msec / 3600000 < 1) { // 単位: 分
+                time = Math.round(expire_msec / 60000)
+                unit = 'min'
+            } else if (expire_msec / 86400000 < 1) { // 単位: 時間
+                time = Math.round(expire_msec / 3600000)
+                unit = 'hour'
+            } else { // 単位: 日
+                time = Math.round(expire_msec / 86400000)
+                unit = 'day'
+            }
+            $('#post_options #__txt_poll_expire_time').val(time)
+            $('#post_options #__cmb_expire_unit').val(unit)
+            $("#post_options .poll_setting+.option_close .__on_option_open").click()
+        }
+
         // 返信先と引用先をを参照する
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
         if (this.reply_to) Status.getStatusById(host, this.platform, this.reply_to).then(post => {

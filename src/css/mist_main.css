@@ -418,7 +418,10 @@
         > ul.draft_menu {
             margin: 0px;
             padding: 0px;
-            width: 360px;
+            width: min(420px,calc(100vw - 64px));
+            height: calc(100vh - 118px);
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
             > li {
                 background-color: rgba(56,56,56,0.88);
                 list-style-type: none;
