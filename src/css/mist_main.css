@@ -1140,6 +1140,9 @@
         left: 72px;
         bottom: 6px;
         background-color: rgba(82,66,62,0.683);
+        background-image: url("../resources/illust/il_info2.png");
+        background-position: center left -36px;
+        background-repeat: no-repeat;
         border: solid 2px #cccccc;
         border-radius: 16px;
         padding-left: 96px;

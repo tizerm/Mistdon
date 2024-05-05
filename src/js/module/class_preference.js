@@ -77,7 +77,7 @@ class Preference {
                     "background": {                             // 背景
                         "type"                      : "mitlin", // 背景タイプ
                         "color"                     : "222222", // 背景色
-                        "mitlin_version"            : "ver041", // 背景にするミトリンの種類
+                        "mitlin_version"            : "ver100", // 背景にするミトリンの種類
                         "file_path"                 : null      // 背景に設定する背景画像パス
                     }
                 }
@@ -466,6 +466,15 @@ class Preference {
                 })
                 break
             case 'mitlin': // ミトリン
+                // v1.0.0のミトリンのみフル尺で画面に表示
+                if (Preference.GENERAL_PREFERENCE.background?.mitlin_version == 'ver100') {
+                    $("body").css({
+                        "background-image": `url("resources/illust/mistdon_back_v100.jpg")`,
+                        "background-position": 'center center',
+                        "background-size": 'cover'
+                    })
+                    break
+                }
                 let mitlin_url = null
                 switch (Preference.GENERAL_PREFERENCE.background?.mitlin_version) {
                     case 'ver011':
