@@ -125,20 +125,16 @@
                 dialog({ // MisskeyはDOM上から消すだけ
                     type: 'confirm',
                     title: "アカウント認証情報削除",
-                    text: "このアカウントの認証情報をMistdonから削除します。<br/>よろしいですか？",
+                    text: `
+                        このアカウントの認証情報をMistdonから削除します。<br/>
+                        よろしいですか？<br/><br/>
+                        ※Misskeyアカウントのため、Misskey側のアクセストークンを削除することはできません。<br/>
+                        詳細はヘルプの「アカウント管理/認証画面」＞「アカウント一覧」＞「認証解除」を参照ください。
+                    `,
                     // OKボタン押下時の処理
                     accept: () => {
                         target_li.remove()
-                        dialog({
-                            type: 'alert',
-                            title: "アカウント認証情報削除",
-                            text: `アカウントの認証情報を削除しました。<br/>
-                                Misskeyはサードパーティアプリからアプリの認証解除ができないため、<br/>
-                                認証情報を完全に削除する場合は、ブラウザで対象のサーバーを開き、<br/>
-                                設定 -> API -> アクセストークンの管理からMistdonのアプリ情報を削除してください。`,
-                            // OKボタンを押してから画面をリロード
-                            accept: () => $("#on_save_account_info").click()
-                        })
+                        $("#on_save_account_info").click()
                     }
                 })
                 break

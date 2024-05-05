@@ -500,7 +500,7 @@
     > #pop_custom_emoji {
         display: none;
         z-index: 61;
-        width: min(400px,100vw);
+        width: min(400px,calc(100vw - 64px));
         position: absolute;
         top: 198px;
         left: 64px;

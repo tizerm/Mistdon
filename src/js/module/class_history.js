@@ -87,8 +87,14 @@ class History {
      */
     static async preload(target, stack) {
         const load_stack = await History.load(stack, null)
+        if (!load_stack) { // 履歴データがまだない場合は専用メッセージを出す
+            target.prev().find("img").attr('src', 'resources/illust/il_err2.png')
+            target.prev().find(".loading_text").text('まだなにもありません.')
+            return
+        }
         // ロード画面を消去
         target.prev().remove()
+
         // スクロールローダーを生成
         createScrollLoader({
             data: load_stack,
@@ -113,6 +119,9 @@ class History {
         const start = max_index ?? 0
         const end = start + 20
         const load_stack = stack.slice(start, end)
+        // ヒストリデータがこれ以上存在しない場合はnullを返却
+        if (load_stack.length == 0) return null
+
         // ステータス情報を全部取得
         for (const elm of load_stack) await elm.getStatus()
         // 最後のデータに最終インデクスをのっける

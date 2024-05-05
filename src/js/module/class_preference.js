@@ -47,7 +47,7 @@ class Preference {
                         "profile_cw"                : false,    // プロフィール: CW
                         "profile_media"             : false     // プロフィール: メディア
                     },
-                    "normal_name_format"            : "both",   // ノーマル2の名前表記
+                    "normal_name_format"            : "both_prename", // ノーマル2の名前表記
                     "chat_name_format"              : "id",     // チャットの名前表記
                     "time_format"                   : "both",   // 時間表記
                     "reblog_time_format"            : "origin", // BTRNの時間表記
