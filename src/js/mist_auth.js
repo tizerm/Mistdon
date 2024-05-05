@@ -5,8 +5,23 @@
         // 保険用にアカウント情報とカラム情報が読めてなかったら一時停止
         if (!await window.accessApi.readPrefAccs()) return
 
-        // アカウント情報をもとにアカウントリストを生成
-        $("#content>#account_list>ul").html(await Account.createAccountPrefList())
+        ;(async () => { // アカウント情報をもとにアカウントリストを生成(非同期実行)
+            $("#content>#account_list>ul").before(`
+                <div class="col_loading">
+                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                    <span class="loading_text">Now Loading...</span>
+                </div>
+            `)
+            const html = await Account.createAccountPrefList()
+            $("#content>#account_list>.col_loading").remove()
+            $("#content>#account_list>ul").html(html)
+
+            // アカウントカラー初期設定
+            $(".__txt_acc_color").each((index, elm) => {
+                const target = $(elm)
+                target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`)
+            })
+        })()
         $(".__ui_sortable").sortable({
             axis: "y",
             delay: 100,
@@ -17,11 +32,6 @@
         })
         setColorPalette()
 
-        // アカウントカラー初期設定
-        $(".__txt_acc_color").each((index, elm) => {
-            const target = $(elm)
-            target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`)
-        })
     })()
 
     /*=== Authorize Window Events ================================================================================*/
@@ -42,8 +52,7 @@
      * => アカウントの追加設定を保存する
      */
     $("#on_save_account_info").on("click", e => (async () => {
-        const toast_uuid = crypto.randomUUID()
-        toast("アカウント設定を保存中です...", "progress", toast_uuid)
+        const notification = Notification.progress("アカウント設定を保存中です...")
 
         const param_json = []
         // awaitを使えるようにforでループする
@@ -69,7 +78,7 @@
         }
         // アカウントカラーをファイルに書き込み
         await window.accessApi.writePrefAccColor(param_json)
-        toast("アカウント設定を保存しました.", "done", toast_uuid)
+        notification.done("アカウント設定を保存しました.")
         dialog({
             type: 'alert',
             title: "アカウント設定",

@@ -152,8 +152,10 @@ class User {
                 platform: info.platform,
                 host: host
             })
-        }).catch(jqXHR => notification.error(`ユーザーIDの取得でエラーが発生しました. 
-            サポート外のプラットフォームの可能性があります.`))
+        }).catch(jqXHR => notification.error(`
+            ユーザーIDの取得でエラーが発生しました. 
+            サポート外のプラットフォームの可能性があります.
+        `))
 
     }
 

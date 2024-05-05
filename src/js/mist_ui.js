@@ -170,41 +170,6 @@ function popContextMenu(e, id) {
 
 /**
  * #Renderer #jQuery
- * トーストを表示
- * 
- * @param text 表示する文章
- * @param type トーストのタイプ
- * @param progress_id トーストを一意に認識するためのID
- */
-function toast(text, type, progress_id) {
-    const toast_block = $("#pop_toast");
-    if (type != 'progress' && progress_id) {
-        // progressモード以外でIDが渡ってきた場合は対象toastを削除
-        const target_toast = toast_block.find(`#${progress_id}`);
-        target_toast.hide("slide", { direction: "up" }, 120, () => target_toast.remove());
-    }
-    // hideの場合はそのまま終了
-    if (type == 'hide') return;
-    // トーストを画面に追加
-    if (type == 'progress' && progress_id) 
-        toast_block.append(`<span id="${progress_id}">${text}</span>`);
-    else toast_block.append(`<span>${text}</span>`);
-    const added = toast_block.find("span:last-child");
-    if (type != 'progress') {
-        // 実行中トースト以外は3秒後に消去する
-        if (type == 'error') {
-            added.addClass("toast_error");
-            //prependNotification(text, true);
-        } else added.addClass("toast_done");
-        // 3秒後に隠して要素自体を削除
-        (async () => setTimeout(() => added.hide("slide", { direction: "up" }, 120, () => added.remove()), 3000))()
-    } else added.addClass("toast_progress");
-    // 追加アニメーション
-    added.hide().show("slide", { direction: "up" }, 80);
-}
-
-/**
- * #Renderer #jQuery
  * ダイアログを表示
  * 
  * @param arg 設定オブジェクト

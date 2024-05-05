@@ -32,6 +32,20 @@ input[type="text"] {
             display: block;
             font-size: 13px;
         }
+        > .col_loading {
+            position: absolute;
+            top: 50%;
+            transform: translate(0%, -50%);
+            padding: 24px;
+            right: 0px;
+            left: 0px;
+            background-color: rgba(62,62,62,0.92);
+            border-radius: 12px;
+            text-align: center;
+            color: #dddddd;
+            font-family: Arial, "メイリオ", sans-selif;
+            font-size: 14px;
+        }
         > h2 {
             border-radius: 18px;
             background-color: #638042;

@@ -17,6 +17,8 @@
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mist_ui.js"></script>
     <script type="text/javascript" src="js/mist_help.js"></script>
+    <script type="text/javascript" src="js/module/class_relative_time.js"></script>
+    <script type="text/javascript" src="js/module/class_notification.js"></script>
     <script type="text/javascript" src="js/module/class_emojis.js"></script>
     <script type="text/javascript" src="js/module/class_user.js"></script>
     <script type="text/javascript" src="js/module/class_status.js"></script>
@@ -29,6 +31,7 @@
 <body>
 <nav id="navi">
     <ul>
+        <li><a id="__on_notification"><img src="resources/illust/icon.png" alt="Mistdon"/></a></li>
         <li><a href="index.html" title="ホーム"><img src="resources/ic_home.png" alt="ホーム"/></a></li>
         <li><a href="auth.html" title="アカウント認証"><img src="resources/ic_auth.png" alt="アカウント認証"/></a></li>
         <li><a href="preference.html" title="設定"><img src="resources/ic_pref.png" alt="設定"/></a></li>
@@ -41,8 +44,10 @@
     <h1>アカウントの追加と管理 - Mistdon</h1>
 </header>
 <div id="pop">
-    <div id="pop_toast">
-    <!-- hidden: トースト -->
+    <div id="pop_notification">
+    <!-- hidden: 通知 -->
+        <ul class="progress"></ul>
+        <ul class="pushed"></ul>
     </div>
     <div id="pop_dialog">
     <!-- hidden: ダイアログ -->

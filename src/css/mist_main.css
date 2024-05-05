@@ -468,52 +468,6 @@
         }
     }
 
-    /*=== Notifications Layout ===================================================================*/
-    > #pop_notification {
-        z-index: 76;
-        position: absolute;
-        top: 108px;
-        left: 64px;
-
-        > ul {
-            margin: 0px;
-            padding: 0px;
-            > li {
-                list-style-type: none;
-                margin: 4px 0px;
-                > span {
-                    display: inline-block;
-                    border-top-right-radius: 16px;
-                    border-bottom-right-radius: 16px;
-                    border: solid 2px #cccccc;
-                    border-left-style: none;
-                    padding: 8px 24px;
-                    padding-left: 108px;
-                    background-color: rgba(34,34,34,0.8);
-                    background-position: left bottom 35%;
-                    background-repeat: no-repeat;
-                    background-size: 96px auto;
-                    font-size: 16px;
-                    font-weight: bold;
-                }
-                > .progress  {
-                    background-image: url("../resources/illust/ani_wait.png");
-                }
-                > .info  {
-                    background-image: url("../resources/illust/il_info2.png");
-                }
-                > .done  {
-                    background-color: rgba(34,60,72,0.8);
-                    background-image: url("../resources/illust/il_done2.png");
-                }
-                > .error {
-                    background-image: url("../resources/illust/il_err2.png");
-                }
-            }
-        }
-        > ul.progress { display: none; }
-    }
-
     
     /*=== Notification Log Layout ================================================================*/
     > #pop_notif_log {

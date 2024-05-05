@@ -208,7 +208,7 @@ class Column {
             // Open⇒Close
             if ($(".column_td:visible").length <= 1) {
                 // 全部のカラムを閉じようとしたら止める
-                toast("すべてのカラムを閉じることはできません。", "error")
+                Notification.info("すべてのカラムを閉じることはできません.")
                 return
             }
             // 自身を閉じて左隣の短縮カラムを表示

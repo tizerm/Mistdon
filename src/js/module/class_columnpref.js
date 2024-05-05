@@ -210,11 +210,10 @@ class TimelinePref {
      */
     static async changeTypeEvent(target) {
         const li_dom = target.closest("li")
-        let toast_uuid = null
+        let notification = null
         switch (target.val()) {
             case 'list': // リスト
-                toast_uuid = crypto.randomUUID()
-                toast("対象アカウントのリストを取得中です...", "progress", toast_uuid)
+                notification = Notification.progress("対象アカウントのリストを取得中です...")
 
                 Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
                     const list_id = li_dom.find(".__cmb_tl_list").attr("value")
@@ -226,19 +225,18 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
                     li_dom.find(".lbl_list").show()
                     li_dom.find(".lbl_channel").hide()
-                    toast(null, "hide", toast_uuid)
+                    notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // リストを持っていない
                         li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
                         li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                        toast("このアカウントにはリストがありません.", "error", toast_uuid)
+                        notification.error("このアカウントにはリストがありません.")
                     } else // それ以外は単にリストの取得エラー
-                        toast("リストの取得で問題が発生しました.", "error", toast_uuid)
+                        notification.error("リストの取得で問題が発生しました.")
                 })
                 break
             case 'channel': // チャンネル
-                toast_uuid = crypto.randomUUID()
-                toast("対象アカウントのお気に入りチャンネルを取得中です...", "progress", toast_uuid)
+                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
 
                 Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
                     const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
@@ -250,14 +248,14 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
                     li_dom.find(".lbl_channel").show()
                     li_dom.find(".lbl_list").hide()
-                    toast(null, "hide", toast_uuid)
+                    notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // お気に入りのチャンネルがない
                         li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
                         li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-                        toast("このアカウントがお気に入りしているチャンネルがありません.", "error", toast_uuid)
+                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
                     } else // それ以外は単にリストの取得エラー
-                        toast("チャンネルの取得で問題が発生しました.", "error", toast_uuid)
+                        notification.error("チャンネルの取得で問題が発生しました.")
                 })
                 break
             default: // リスト/チャンネル以外はウィンドウを閉じて終了
