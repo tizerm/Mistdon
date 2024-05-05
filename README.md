@@ -22,6 +22,7 @@
 <h2>
     特徴的な機能
 </h2>
+<img src="github_resource/mitlin_right.png" alt="attach:cat" alt="Mistdon" align="right"/>
 <h3>MastodonとMisskeyのネイティブ対応</h3>
 <p>
     Mastodonクライアントは数がありますが、MastodonとMisskeyはAPIの互換性がないため、MastodonクライアントからMisskeyのアカウントを使用することは基本的にできません。<br/>
@@ -49,6 +50,14 @@
 <p>
     右のReleaseのリンクから最新バージョンのZIPをダウンロードして任意のフォルダに解凍してお使いください。<br/>
     設定ファイルはユーザーフォルダに保存されているため、アップデート時に設定ファイルをコピーしたりする必要はありません。
+</p>
+<h2>
+    バグ報告など
+</h2>
+<p>
+    使用感やバグ報告などをハッシュタグ「#Mistdon」でFediverse上に投稿してもらえると助かります！<br/>
+    所属インスタンスの関係ですべては拾いきれないかもしれませんが、できる限り拾っていきたいと思います。<br/>
+    より深刻なバグだと感じた場合はIssueに投稿してもらえると確実に確認できるので助かります。
 </p>
 <h2>
     License
