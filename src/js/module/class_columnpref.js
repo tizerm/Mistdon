@@ -2,7 +2,7 @@
  * #Class
  * タイムラインの設定値を管理するクラス(カラムに内包)
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class TimelinePref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -272,7 +272,7 @@ class TimelinePref {
  * #Class
  * タイムライングループの設定値を管理するクラス(カラムに内包)
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class GroupPref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
@@ -455,7 +455,7 @@ class GroupPref {
  * #Class
  * カラムの設定値を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class ColumnPref {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化

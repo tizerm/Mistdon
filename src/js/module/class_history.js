@@ -2,7 +2,7 @@
  * #Class
  * 送信履歴モジュール
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class History {
     // コンストラクタ: Statusオブジェクトから履歴データを生成

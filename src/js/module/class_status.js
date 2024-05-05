@@ -2,7 +2,7 @@
  * #Class
  * 投稿、通知データを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Status {
     // コンストラクタ: APIから来たステータスデータを受け取って生成

@@ -2,7 +2,7 @@
  * #Class
  * (他人の)アカウント情報を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class User {
     // コンストラクタ: APIから来たユーザーデータを受け取って生成

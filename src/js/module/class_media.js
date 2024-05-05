@@ -2,7 +2,7 @@
  * #Class
  * メディアファイルを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Media {
     // コンストラクタ: APIから来たユーザーデータを受け取って生成

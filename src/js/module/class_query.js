@@ -2,7 +2,7 @@
  * #Class
  * 検索クエリモジュール
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Query {
     // コンストラクタ: 検索文字列からクエリオブジェクトを生成

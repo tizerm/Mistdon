@@ -2,7 +2,7 @@
  * #Class
  * トレンドモジュール
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Trend {
     // コンストラクタ: クリップエンティティからクリップオブジェクトを生成

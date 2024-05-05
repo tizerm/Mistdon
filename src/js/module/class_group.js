@@ -2,7 +2,7 @@
  * #Class
  * タイムライングループを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Group {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化

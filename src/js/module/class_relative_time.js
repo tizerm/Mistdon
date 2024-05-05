@@ -2,7 +2,7 @@
  * #Class
  * 相対時間を算出するための時間クラス.
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class RelativeTime {
     // コンストラクタ: Dateオブジェクトから生成

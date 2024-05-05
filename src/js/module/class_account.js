@@ -2,7 +2,7 @@
  * #Class
  * アカウント情報を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Account {
     // コンストラクタ: 設定ファイルにあるアカウント設定値を使って初期化

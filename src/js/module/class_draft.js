@@ -2,7 +2,7 @@
  * #Class
  * 下書きモジュール
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Draft {
     // コンストラクタ: 下書きオブジェクトからクラスオブジェクトを生成

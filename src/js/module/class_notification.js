@@ -2,7 +2,7 @@
  * #Class
  * メイン画面のタスク通知を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Notification {
     // コンストラクタ: 通知メッセージから通知オブジェクトを生成

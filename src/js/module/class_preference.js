@@ -2,7 +2,7 @@
  * #Class
  * アプリケーションの全体設定を管理する静的クラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Preference {
     constructor() {}

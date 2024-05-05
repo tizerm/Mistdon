@@ -2,7 +2,7 @@
  * #Class
  * カラムを管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Column {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化

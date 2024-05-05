@@ -2,7 +2,7 @@
  * #Class
  * インスタンス情報を保持するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Instance {
     // コンストラクタ: パラメータを使って初期化(ファイルとJSON両対応)

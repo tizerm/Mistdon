@@ -2,7 +2,7 @@
  * #Class
  * カスタム絵文字を管理するクラス
  *
- * @author tizerm@mofu.kemo.no
+ * @author @tizerm@misskey.dev
  */
 class Emojis {
     // コンストラクタ: パラメータを使って初期化(ファイルとJSON両対応)
