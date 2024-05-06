@@ -378,7 +378,9 @@ class Account {
         let response = null
         let target_post = null
         let notification = null
-        if (obj) { // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用
+        const target_url = url ?? obj.uri
+        if (obj && obj.type != 'notification') {
+            // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用(通知は除外)
             if (!['__menu_reply', '__menu_quote', '__menu_reaction'].includes(mode))
                 notification = Notification.progress("実行中です...")
             target_post = obj
@@ -393,7 +395,7 @@ class Account {
                             dataType: "json",
                             headers: { "Authorization": `Bearer ${this.pref.access_token}` },
                             data: {
-                                "q": url,
+                                "q": target_url,
                                 "type": "statuses",
                                 "resolve": true
                             }
@@ -408,7 +410,7 @@ class Account {
                             headers: { "Content-Type": "application/json" },
                             data: JSON.stringify({
                                 "i": this.pref.access_token,
-                                "uri": url
+                                "uri": target_url
                             })
                         })
                         response = response.object

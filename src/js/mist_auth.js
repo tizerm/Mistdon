@@ -21,6 +21,9 @@
                 const target = $(elm)
                 target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`)
             })
+
+            // カラーパレット設定
+            setColorPalette()
         })()
         $(".__ui_sortable").sortable({
             axis: "y",
@@ -30,8 +33,6 @@
             revert: 50,
             tolerance: "pointer"
         })
-        setColorPalette()
-
     })()
 
     /*=== Authorize Window Events ================================================================================*/
@@ -43,7 +44,7 @@
      */
     $(document).on("blur", ".__txt_acc_color", e => {
         const target = $(e.target)
-        target.closest("li").find("h3").css("background-color", `#${target.val()}`)
+        target.closest("li.account_box").find("h3").css("background-color", `#${target.val()}`)
     })
 
     /**

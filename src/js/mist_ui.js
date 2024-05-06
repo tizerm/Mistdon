@@ -144,6 +144,10 @@ function setColorPalette(target) {
         $("body *").removeClass("__target_color_button __target_color_box");
         palette_dom.hide("slide", { direction: "up" }, 50);
     });
+    $(document).on("blur", ".__pull_color_palette", e => {
+        const target = $(e.target);
+        target.next().css("background-color", `#${target.val()}`);
+    });
 }
 
 /**

@@ -41,6 +41,7 @@ class Status {
                 data = this.reblog ? json.reblog : json
                 this.uri = json.status?.url ?? data.url // 投稿URL(前はリプライ時のURL)
                 this.id = data.id // 投稿ID
+                this.notif_id = json.status?.id // 通知のID
 
                 this.use_emoji_cache = false // Mastodonの場合絵文字キャッシュは使わない
 
@@ -179,9 +180,11 @@ class Status {
                 this.cw_text = data.cw // CWテキスト
                 if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
                     this.content = data.note.renote.text
+                    this.notif_id = data.note.renote.id // 通知のID
                     data = data.note.renote
                 } else if (this.notif_type) { // リノート以外の通知の場合は本文を対象ノートにする
                     this.content = data.note?.text
+                    this.notif_id = data.note?.id // 通知のID
                     data = data?.note ?? data
                 } else this.content = data.text // それ以外は通常の本文テキストを参照
 
