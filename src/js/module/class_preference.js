@@ -33,6 +33,7 @@ class Preference {
                     "enable_pop_prev_reply"         : false,    // 簡易リプライ表示
                     "enable_notified_impression"    : true,     // 通知欄のインプレッション表示
                     "enable_media_confirm"          : true,     // メディア投稿確認
+                    "disable_disconnect_pop"        : false,    // 一時切断通知
                     "enable_animation"              : true,     // アニメーション
                     "enable_tips"                   : true,     // TIPS表示
                     "auto_expand": {                            // 自動展開
@@ -254,6 +255,7 @@ class Preference {
         $("#__chk_gen_use_prev_relpy").prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_notified_impression").prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
         $("#__chk_gen_show_media_confirm").prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
+        $("#__chk_gen_disable_disconnect_notification").prop("checked", Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
         $("#__chk_gen_animation").prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
         $("#__chk_gen_show_tips").prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
 
@@ -333,6 +335,7 @@ class Preference {
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
+            "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
             "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
             "auto_expand": {                // 自動展開
