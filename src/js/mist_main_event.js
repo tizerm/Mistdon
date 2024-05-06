@@ -923,7 +923,7 @@
      */
     $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
         e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
-            id: Status.TEMPORARY_ACTION_STATUS.id,
+            id: Status.TEMPORARY_ACTION_STATUS.notif_id ?? Status.TEMPORARY_ACTION_STATUS.id,
             shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
             success: () => $("#pop_expand_action").hide()
         }))

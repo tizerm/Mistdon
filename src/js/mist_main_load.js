@@ -123,7 +123,10 @@ $(() => (async () => {
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({
         openFunc: () => {},
-        closeFunc: () => Notification.info(`${account.full_address}との接続が一時的に切断されました.`),
+        closeFunc: () => { // 一時切断でポップアップを表示しない設定の場合は表示しない
+            if (!Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
+                Notification.info(`${account.full_address}との接続が一時的に切断されました.`)
+        },
         reconnect: true
     }))
     // カラムにツールチップを設定

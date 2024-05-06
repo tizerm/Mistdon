@@ -168,7 +168,10 @@ class Timeline {
             send_param: send_param,
             messageFunc: message_callback,
             openFunc: () => {},
-            closeFunc: () => Notification.info(`${this.host}との接続が切断されました。`),
+            closeFunc: () => { // 一時切断でポップアップを表示しない設定の場合は表示しない
+                if (!Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
+                    Notification.info(`${this.host}との接続が一時的に切断されました.`)
+            },
             reconnect: true
         })
     }
