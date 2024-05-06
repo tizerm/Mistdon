@@ -56,10 +56,19 @@
         const notification = Notification.progress("アカウント設定を保存中です...")
 
         const param_json = []
+        const profile_update = $("#__chk_update_profile").prop("checked")
         // awaitを使えるようにforでループする
         for (const elm of $("#content>#account_list>ul>li").get()) {
-            const userinfo = await Account.get($(elm).find(".userid").text()).getInfo()
-            let maxlength = 500
+            const account = Account.get($(elm).find(".userid").text())
+            let userinfo = null
+            // チェックが入っている場合はユーザープロフィールを更新
+            if (profile_update) userinfo = await account.getInfo()
+            else userinfo = { // 更新しない場合は設定オブジェクトをそのまま生成
+                user_id: account.pref.user_id,
+                username: account.pref.username,
+                avatar_url: account.pref.avatar_url
+            }
+            let maxlength = account.pref.post_maxlength
             try { // サーバーごとの投稿文字数上限を設定
                 const instance = await userinfo.getInstance()
                 maxlength = instance.post_maxlength

@@ -28,6 +28,7 @@ input[type="text"] {
             border-radius: 6px;
             border: solid 1px #ffffff;
         }
+        > label[for="__chk_update_profile"] { font-size: 14px; }
         > span {
             display: block;
             font-size: 13px;
@@ -57,7 +58,7 @@ input[type="text"] {
         > ul {
             margin: 0px;
             padding: 0px;
-            height: calc(100vh - 152px);
+            height: calc(100vh - 192px);
             overflow-y: auto;
             overflow-x: hidden;
             &::-webkit-scrollbar { width: 8px; }
