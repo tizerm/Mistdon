@@ -623,7 +623,7 @@
      * 本文のリンク.
      * => 外部ブラウザでリンクを開く
      */
-    $(document).on("click", ".content>.main_content a, .prof_field a", e => {
+    $(document).on("click", ".content>.main_content a, .post_quote>.main_content a, .prof_field a", e => {
         const url = $(e.target).closest("a").attr("href")
         window.accessApi.openExternalBrowser(url)
         // リンク先に飛ばないようにする
