@@ -891,7 +891,7 @@ class User {
         target_td.find(".user_bookmark_elm").show()
 
         // ブックマークデータを取得してローダーを生成
-        const response = await this.getBookmarks(Account.get(this.full_address), type, null)
+        const response = await this.getBookmarks(this.authorized, type, null)
         target_td.find(".col_loading").remove()
         createScrollLoader({ // スクロールローダーを生成
             data: response,
@@ -901,7 +901,7 @@ class User {
                 // Headerを経由して取得されたmax_idを返却
                 return data?.max_id
             },
-            load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
+            load: async max_id => this.getBookmarks(this.authorized, type, max_id)
         })
     }
 
@@ -973,5 +973,62 @@ class User {
             load: async max_id => this.getPost(account, true, max_id)
         })
     }
+
+    /**
+     * #Method
+     * このユーザーのブックマークタイムラインを生成.
+     * マルチウィンドウとして展開する
+     *
+     * @param type お気に入り/ブックマーク/リアクションのどれかを指定
+     * @param layout タイムラインレイアウトを指定
+     */
+    createBookmarkWindow(type, layout) {
+        // 一意認識用のUUIDを生成
+        const window_key = `bookmark_window_${this.user_uuid}`
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="timeline_window ex_window">
+                    <h2><span>${this.full_address}</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${this.user_uuid}"/>
+                        <label for="__window_opacity_${this.user_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="timeline">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
+                        </div>
+                        <ul class="scrollable_tl __context_posts"></ul>
+                    </div>
+                </div>
+            `,
+            color: this.authorized.pref.acc_color,
+            drag_only_x: false,
+            resizable: true,
+            resize_only_y: false
+        })
+
+        // ブックマークタイムラインを取得
+        this.getBookmarks(this.authorized, type, null).then(body => {
+            // ロード画面を削除
+            $(`#${window_key}>.timeline>.col_loading`).remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.datas.forEach(p => target.append(p.getLayoutElement(layout)))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data?.max_id
+                },
+                load: async max_id => this.getBookmarks(this.authorized, type, max_id)
+            })
+        })
+    }
+
 }
 

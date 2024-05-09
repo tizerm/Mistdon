@@ -295,10 +295,10 @@ class Timeline {
         // 参照した投稿からタイムラインを取得
         this.getTimeline(ref_id).then(body => {
             // ロード画面を削除
-            $(`#timeline_window_${this.__timeline_uuid}>.timeline>.col_loading`).remove()
+            $(`#${window_key}>.timeline>.col_loading`).remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $(`#timeline_window_${this.__timeline_uuid}>.timeline>ul`),
+                target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
                     data.forEach(p => this.ref_group.addStatus(p, () => target.append(p.timeline_element)))
                     // max_idとして取得データの最終IDを指定
