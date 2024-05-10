@@ -1383,46 +1383,6 @@ class Account {
 
     /**
      * #StaticMethod
-     * 拡張ブックマーク設定ウィンドウを表示
-     */
-    static createExtraBookmarkOption() {
-        let options = ''
-        Account.map.forEach((v, k) => options += `<option value="${k}">${v.pref.username} - ${k}</option>`)
-        $("#pop_mini_window").html(`
-            <div class="ex_bookmark_option">
-                <select id="__cmb_ex_bookmark_account">${options}</select>
-                <input type="radio" id="__opt_ex_bookmark_type1"
-                    name="__opt_ex_bookmark_type" class="__opt_ex_bookmark_type" checked value="Favorite_Mastodon"/>
-                <label for="__opt_ex_bookmark_type1">お気に入り</label>
-                <input type="radio" id="__opt_ex_bookmark_type2"
-                    name="__opt_ex_bookmark_type" class="__opt_ex_bookmark_type" value="Bookmark"/>
-                <label for="__opt_ex_bookmark_type2">ブックマーク</label>
-                <input type="checkbox" id="__chk_ex_bookmark_cw" class="__chk_ex_bookmark_cw"
-                    ${Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw ? 'checked' : ''}/>
-                <label for="__chk_ex_bookmark_cw">CW展開</label><br/>
-                <input type="checkbox" id="__chk_ex_bookmark_media" class="__chk_ex_bookmark_media"
-                    ${Preference.GENERAL_PREFERENCE.auto_expand?.profile_media ? 'checked' : ''}/>
-                <label for="__chk_ex_bookmark_media">メディア展開</label><br/>
-                <p>タイムラインレイアウト:
-                    <select id="__cmb_ex_bookmark_layout">
-                        <option value="default">ノーマル</option>
-                        <option value="normal2">ノーマル2</option>
-                        <option value="chat">チャット</option>
-                        <option value="list">リスト</option>
-                        <option value="media">メディア</option>
-                        <option value="gallery">ギャラリー</option>
-                    </select>
-                </p>
-            </div>
-            <div class="footer">
-                <button type="button" id="__on_ex_bookmark_confirm" class="close_button">OK</button>
-                <button type="button" id="__on_ex_bookmark_cancel" class="close_button">キャンセル</button>
-            </div>
-        `).show(...Preference.getAnimation("LEFT_DROP"))
-    }
-
-    /**
-     * #StaticMethod
      * アカウント認証画面のアカウントリストのDOMを返却
      */
     static async createAccountPrefList() {

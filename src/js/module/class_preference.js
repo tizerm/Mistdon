@@ -398,6 +398,21 @@ class Preference {
 
     /**
      * #StaticMethod
+     * ブックマーク/お気に入り機能の初期値設定.
+     */
+    static initBookmarkPref() {
+        // アカウントコンボ初期設定
+        let options = ''
+        Account.map.forEach((v, k) => options += `<option value="${k}">${v.pref.username} - ${k}</option>`)
+        $("#__cmb_ex_bookmark_account").html(options)
+
+        // 展開チェック初期設定
+        $("#__chk_ex_bookmark_cw").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw)
+        $("#__chk_ex_bookmark_media").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_media)
+    }
+
+    /**
+     * #StaticMethod
      * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
      */
     static setAlternateTimelinePref() {

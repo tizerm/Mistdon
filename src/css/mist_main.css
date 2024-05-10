@@ -1091,7 +1091,7 @@
     }
 
     /*=== General Mini Option Window Layout ======================================================*/
-    > #pop_mini_window {i
+    .ex_mini_window {
         display: none;
         position: absolute;
         left: 72px;
@@ -1100,20 +1100,23 @@
         border: solid 2px #cccccc;
         border-radius: 12px;
         z-index: 49;
-        > .footer>button {
-            display: inline-block;
-            width: calc(50% - 4px);
-            height: 48px;
-        }
-        > .ex_bookmark_option {
-            width: min(360px,calc(100vw - 64px));
-            padding: 8px;
-            font-size: 14px;
-            & select#__cmb_ex_bookmark_account { width: 100%; }
-            & label {
+        > .footer {
+            margin: -4px;
+            > button {
                 display: inline-block;
-                width: calc(50% - 48px);
+                width: calc(50% - 4px);
+                height: 48px;
             }
+        }
+    }
+    > #pop_bookmark_option {
+        width: min(360px,calc(100vw - 64px));
+        padding: 8px;
+        font-size: 14px;
+        & select#__cmb_ex_bookmark_account { width: 100%; }
+        & label {
+            display: inline-block;
+            width: calc(50% - 48px);
         }
     }
 

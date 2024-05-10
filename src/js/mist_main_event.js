@@ -46,13 +46,13 @@
 
     /**
      * #Event
-     * 全体プロフィールボタン.
+     * 拡張ブックマーク/お気に入りボタン.
      */
-    $("#navi .navi_show_bookmark").on("click", e => Account.createExtraBookmarkOption())
+    $("#navi .navi_show_bookmark").on("click", e => $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP")))
 
     /**
      * #Event
-     * 拡張ブックマーク/お気に入りボタン.
+     * 全体プロフィールボタン.
      */
     $("#navi .navi_show_profile").on("click", e => Account.createProfileTimeline())
 
@@ -1255,6 +1255,13 @@
 
     /**
      * #Event #Contextmenu
+     * 投稿系メニュー: 別レイアウトで遡る.
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_layout>li",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow($(e.target).closest("li").attr("name")))
+
+    /**
+     * #Event #Contextmenu
      * 投稿系メニュー: 編集.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_edit",
@@ -1352,7 +1359,7 @@
      * ブックマーク/お気に入り: OKボタン.
      * => ブックマークを展開
      */
-    $(document).on("click", "#pop_mini_window #__on_ex_bookmark_confirm",
+    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm",
         e => Account.get($("#__cmb_ex_bookmark_account").val()).getInfo().then(user => user.createBookmarkWindow(
             $("input.__opt_ex_bookmark_type:checked").val(), $("#__cmb_ex_bookmark_layout").val())))
 
@@ -1364,7 +1371,7 @@
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
-    $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_mini_window").hide(...Preference.getAnimation("LEFT_DROP")))
+    $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",
         e => $("#pop_lastest_release").hide(...Preference.getAnimation("LEFT_DROP"), () => $("#pop_lastest_release").remove()))
 

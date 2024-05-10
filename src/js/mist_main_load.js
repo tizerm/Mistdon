@@ -93,6 +93,8 @@ $(() => (async () => {
     if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
         $("#header>#post_options .additional_users .__on_option_close").click()
     enabledAdditionalAccount(true)
+    Preference.initBookmarkPref()
+
     // 一時タイムライン設定を反映
     Preference.setAlternateTimelinePref()
 

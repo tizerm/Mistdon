@@ -1932,10 +1932,15 @@ class Status {
     /**
      * #Method
      * この投稿よりも前のタイムラインを取得するウィンドウを生成
+     * 
+     * @param layout タイムラインレイアウト
      */
-    openScrollableWindow() {
+    openScrollableWindow(layout) {
        // 参照元のタイムラインを使って新たにタイムラインオブジェクトを生成
-        const scroll_tl = new Timeline(this.from_timeline?.pref, new Group(this.from_group?.pref, null))
+        let scroll_tl = new Timeline( // グループの設定はディープコピーする(レイアウトの書き換えが元に影響するため)
+            this.from_timeline?.pref, new Group(structuredClone(this.from_group?.pref), null))
+        // タイムラインレイアウトが指定されている場合は変更
+        if (layout) scroll_tl.ref_group.pref.tl_layout = layout
         scroll_tl.createScrollableTimeline(this.id)
     }
 
