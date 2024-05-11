@@ -255,11 +255,12 @@ class Timeline {
 
     /**
      * #Method
-     * 対象の投稿IDからこのタイムラインの設定で遡りウィンドウを生成
+     * タイムラインウィンドウを生成する汎用メソッド.
      * 
      * @param ref_id 起点にする投稿ID
+     * @param loaderFunction スクロールローダーを生成するコールバック関数
      */
-    createScrollableTimeline(ref_id) {
+    createScrollableWindow(ref_id, loaderFunction) {
         // 一意認識用のUUIDを生成
         this.__timeline_uuid = crypto.randomUUID()
         const timeline_key = `timeline_${this.__timeline_uuid}`
@@ -292,22 +293,32 @@ class Timeline {
             resize_only_y: false
         })
 
-        // 参照した投稿からタイムラインを取得
-        this.getTimeline(ref_id).then(body => {
+        // スクロールローダーを生成してマップに登録
+        loaderFunction(this, ref_id, window_key)
+        Timeline.TIMELINE_WINDOW_MAP.set(timeline_key, this)
+    }
+
+    /**
+     * #Method
+     * 対象の投稿IDからこのタイムラインの設定で遡りウィンドウを生成
+     * 
+     * @param id 起点にする投稿ID
+     */
+    createScrollableTimeline(id) {
+        this.createScrollableWindow(id, (tl, ref_id, window_key) => tl.getTimeline(ref_id).then(body => {
             // ロード画面を削除
-            $(`#timeline_window_${this.__timeline_uuid}>.timeline>.col_loading`).remove()
+            $(`#${window_key}>.timeline>.col_loading`).remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $(`#timeline_window_${this.__timeline_uuid}>.timeline>ul`),
+                target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.forEach(p => this.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
                     // max_idとして取得データの最終IDを指定
                     return data.pop()?.id
                 },
-                load: async max_id => this.getTimeline(max_id)
+                load: async max_id => tl.getTimeline(max_id)
             })
-        })
-        Timeline.TIMELINE_WINDOW_MAP.set(timeline_key, this)
+        }))
     }
 
     /**

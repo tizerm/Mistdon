@@ -70,7 +70,11 @@ class Status {
                 if (this.notif_type && !['follow', 'follow_request'].includes(this.notif_type)) {
                      // 本文(通知の場合はstatusから)
                     this.content = data.status?.content
-                    data = data.status
+                    if (data.status) data = data.status
+                    else { // TODO: statusがnullになる場合は一旦表示をやめる
+                        this.__internal_error = true
+                        return
+                    }
                 } else this.content = data.content
                 this.emojis = new Emojis({
                     host: host,
@@ -312,6 +316,7 @@ class Status {
         return this.mute_exclude
             || (this.from_timeline?.pref?.exclude_reblog && this.reblog)
             || (this.from_group?.pref?.tl_layout == 'gallery' && this.medias.length == 0)
+            || this.__internal_error
     }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
     get content_text() {
@@ -1932,10 +1937,15 @@ class Status {
     /**
      * #Method
      * この投稿よりも前のタイムラインを取得するウィンドウを生成
+     * 
+     * @param layout タイムラインレイアウト
      */
-    openScrollableWindow() {
+    openScrollableWindow(layout) {
        // 参照元のタイムラインを使って新たにタイムラインオブジェクトを生成
-        const scroll_tl = new Timeline(this.from_timeline?.pref, new Group(this.from_group?.pref, null))
+        let scroll_tl = new Timeline( // グループの設定はディープコピーする(レイアウトの書き換えが元に影響するため)
+            this.from_timeline?.pref, new Group(structuredClone(this.from_group?.pref), null))
+        // タイムラインレイアウトが指定されている場合は変更
+        if (layout) scroll_tl.ref_group.pref.tl_layout = layout
         scroll_tl.createScrollableTimeline(this.id)
     }
 

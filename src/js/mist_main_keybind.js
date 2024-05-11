@@ -177,9 +177,9 @@
                     return false
                 }
                 break
-            case 75: // Ctrl+K: クリップ
+            case 89: // Ctrl+Y: ブックマーク/お気に入り
                 if (is_control) {
-                    $("#navi .navi_clips").click()
+                    $("#navi .navi_show_bookmark").click()
                     return false
                 }
                 break

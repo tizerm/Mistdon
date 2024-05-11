@@ -896,7 +896,6 @@
             border: solid 1px #888888;
             color: #ffffff;
         }
-        #__on_search { display: none; }
 
         /*=== Accounts Timeline Layout ===========================================================*/
         > .account_timeline {
@@ -907,6 +906,64 @@
             &::-webkit-scrollbar { height: 8px; }
         }
         &:has(>.account_timeline) { z-index: 30; }
+
+        /*=== Search Timeline Layout =============================================================*/
+        > .search_timeline {
+            > .search_options {
+                #__txt_search_query { width: calc(100% - 64px); }
+                & label {
+                    width: calc(50% - 48px);
+                    font-size: 14px;
+                }
+                & p { margin: 8px 0px; }
+            }
+            & ul.search_ul { height: calc(100vh - 248px); }
+        }
+
+        /*=== Trend Timeline Layout ==============================================================*/
+        > .trend_timeline {
+            > a.__on_get_features {
+                display: block;
+                background-color: #3562cc;
+                margin: 4px;
+                padding: 6px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                &:hover {
+                    background-color: #36466e;
+                    cursor: pointer;
+                }
+            }
+            > ul.trend_tags {
+                margin: 0px;
+                padding: 0px 6px;
+                height: 200px;
+                overflow-y: auto;
+                &::-webkit-scrollbar { width: 8px; }
+                > li {
+                    display: inline-block;
+                    list-style-type: none;
+                    border-radius: 6px;
+                    margin: 0px;
+                    padding: 0px 8px;
+                    padding-top: 2px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 13px;
+                    font-weight: bold;
+                    vertical-align: middle;
+                    height: 22px;
+                    border: solid 1px #444444;
+                    > span { vertical-align: middle; }
+                    &:hover {
+                        border-color: #dddddd;
+                        cursor: pointer;
+                    }
+                }
+            }
+            & ul.trend_ul { height: calc(100vh - 400px); }
+        }
 
         /*=== History Timeline Layout ============================================================*/
         > .history_timeline {
@@ -969,51 +1026,6 @@
                 &.reaction_history>.col_head { background-color: #408a08; }
                 &.post_history>.col_head     { background-color: #3562cc; }
             }
-        }
-
-        /*=== Trend Timeline Layout ==============================================================*/
-        > .trend_timeline {
-            > a.__on_get_features {
-                display: block;
-                background-color: #3562cc;
-                margin: 4px;
-                padding: 6px;
-                border-radius: 12px;
-                font-size: 16px;
-                font-weight: bold;
-                text-align: center;
-                &:hover {
-                    background-color: #36466e;
-                    cursor: pointer;
-                }
-            }
-            > ul.trend_tags {
-                margin: 0px;
-                padding: 0px 6px;
-                height: 200px;
-                overflow-y: auto;
-                &::-webkit-scrollbar { width: 8px; }
-                > li {
-                    display: inline-block;
-                    list-style-type: none;
-                    border-radius: 6px;
-                    margin: 0px;
-                    padding: 0px 8px;
-                    padding-top: 2px;
-                    font-family: Arial, "メイリオ", sans-selif;
-                    font-size: 13px;
-                    font-weight: bold;
-                    vertical-align: middle;
-                    height: 22px;
-                    border: solid 1px #444444;
-                    > span { vertical-align: middle; }
-                    &:hover {
-                        border-color: #dddddd;
-                        cursor: pointer;
-                    }
-                }
-            }
-            & ul.trend_ul { height: calc(100vh - 400px); }
         }
     }
 
@@ -1090,6 +1102,36 @@
         }
     }
 
+    /*=== General Mini Option Window Layout ======================================================*/
+    .ex_mini_window {
+        display: none;
+        position: absolute;
+        left: 72px;
+        top: 192px;
+        background-color: rgba(34,34,34,0.88);
+        border: solid 2px #cccccc;
+        border-radius: 12px;
+        z-index: 49;
+        > .footer {
+            margin: -4px;
+            > button {
+                display: inline-block;
+                width: calc(50% - 4px);
+                height: 48px;
+            }
+        }
+    }
+    > #pop_bookmark_option {
+        width: min(360px,calc(100vw - 64px));
+        padding: 8px;
+        font-size: 14px;
+        & select#__cmb_ex_bookmark_account { width: 100%; }
+        & label {
+            display: inline-block;
+            width: calc(50% - 48px);
+        }
+    }
+
     /*=== Lastest Release Notification Layout ====================================================*/
     > #pop_lastest_release {
         display: none;
@@ -1160,7 +1202,6 @@
     width: min(480px,100vw);
 }
 #pop_extend_column>.reaction_col>h2,
-#pop_extend_column>.post_detail_col>h2,
 #pop_ex_timeline h2 {
     border-top-left-radius: 18px;
     border-bottom-left-radius: 18px;
@@ -1170,14 +1211,7 @@
     margin: 0px;
     padding: 12px 24px;
 }
-#pop_extend_column>.post_detail_col>h2,
-#pop_ex_timeline h2 {
-    background-color: #5e5e5e;
-}
-#pop_extend_column>.post_detail_col ul,
-#pop_ex_timeline .search_ul {
-    height: calc(100vh - 160px);
-}
+#pop_ex_timeline h2 { background-color: #5e5e5e; }
 #pop_extend_column>.reaction_col #__txt_reaction_search,
 #pop_custom_emoji #__txt_emoji_search,
 #pop_ex_timeline #__txt_search_query {

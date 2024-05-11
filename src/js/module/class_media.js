@@ -190,7 +190,7 @@ class Media {
         try {
             // アカウントをユーザー情報として取得
             const account = Account.get(address)
-            const user = await account.getInfo()
+            const user = await account.getUserCache()
             const medias = []
             switch (user.platform) {
                 case 'Mastodon': // Mastodon

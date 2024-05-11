@@ -65,6 +65,8 @@
                 src="resources/ic_history.png" alt="送信履歴"/></a></li>
         <li class="li_profile"><a class="navi_show_profile" title="すべての認証アカウントのプロフィールを表示"><img
                 src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
+        <li class="li_bookmark"><a class="navi_show_bookmark" title="ブックマーク/お気に入り"><img
+                src="resources/ic_favorite.png" alt="ブックマーク/お気に入り"/></a></li>
         <li class="li_emoji"><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"><img
                 src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
@@ -251,7 +253,7 @@
         <ul class="pushed"></ul>
     </div>
     <div id="pop_notif_log">
-    <!-- hidden: 通知 -->
+    <!-- hidden: 通知ログ -->
         <ul></ul>
     </div>
     <div id="pop_dialog">
@@ -295,6 +297,16 @@
             <li class="__menu_post_url"><div>URLをコピー</div></li>
             <li class="__menu_post_open_browser"><div>ブラウザで開く</div></li>
             <li class="__menu_post_open_temporary"><div>ここから前に遡る</div></li>
+            <li><div>別レイアウトで遡る</div>
+                <ul id="__menu_post_open_layout" class="other_layout_menu">
+                    <li name="default"><div>ノーマル</div></li>
+                    <li name="normal2"><div>ノーマル2</div></li>
+                    <li name="chat"><div>チャット</div></li>
+                    <li name="list"><div>リスト</div></li>
+                    <li name="media"><div>メディア</div></li>
+                    <li name="gallery"><div>ギャラリー</div></li>
+                </ul>
+            </li>
             <li class="__menu_post_edit ui-state-disabled" name="{user_id}"><div>編集(Mastodon)</div></li>
             <li class="__menu_post_del ui-state-disabled" name="{user_id}"><div>削除</div></li>
         </ul>
@@ -380,6 +392,36 @@
     </div>
     <div id="pop_extend_column">
         <!-- hidden: 拡張カラム(横付け) -->
+    </div>
+    <div id="pop_bookmark_option" class="ex_mini_window">
+        <!-- hidden: ブックマークオプション -->
+        <select id="__cmb_ex_bookmark_account"></select>
+        <p>
+            <input type="radio" id="__opt_ex_bookmark_type1"
+                name="__opt_ex_bookmark_type" class="__opt_ex_bookmark_type" checked value="Favorite_Mastodon"/>
+            <label for="__opt_ex_bookmark_type1">お気に入り</label>
+            <input type="radio" id="__opt_ex_bookmark_type2"
+                name="__opt_ex_bookmark_type" class="__opt_ex_bookmark_type" value="Bookmark"/>
+            <label for="__opt_ex_bookmark_type2">ブックマーク</label>
+            <input type="checkbox" id="__chk_ex_bookmark_cw" class="__chk_ex_bookmark_cw"/>
+            <label for="__chk_ex_bookmark_cw">CW展開</label>
+            <input type="checkbox" id="__chk_ex_bookmark_media" class="__chk_ex_bookmark_media"/>
+            <label for="__chk_ex_bookmark_media">メディア展開</label><br/>
+        </p>
+        <p>タイムラインレイアウト:
+            <select id="__cmb_ex_bookmark_layout">
+                <option value="default">ノーマル</option>
+                <option value="normal2">ノーマル2</option>
+                <option value="chat">チャット</option>
+                <option value="list">リスト</option>
+                <option value="media">メディア</option>
+                <option value="gallery">ギャラリー</option>
+            </select>
+        </p>
+        <div class="footer">
+            <button type="button" id="__on_ex_bookmark_confirm" class="close_button">OK</button>
+            <button type="button" id="__on_ex_bookmark_cancel" class="close_button">キャンセル</button>
+        </div>
     </div>
     <div id="pop_lastest_release">
         <!-- hidden: 最新バージョン通知 -->

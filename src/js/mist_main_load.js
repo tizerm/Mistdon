@@ -82,6 +82,7 @@ $(() => (async () => {
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
+    if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.clip) $("#navi .li_clips").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
     if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
@@ -93,6 +94,8 @@ $(() => (async () => {
     if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
         $("#header>#post_options .additional_users .__on_option_close").click()
     enabledAdditionalAccount(true)
+    Preference.initBookmarkPref()
+
     // 一時タイムライン設定を反映
     Preference.setAlternateTimelinePref()
 

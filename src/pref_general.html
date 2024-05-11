@@ -47,6 +47,10 @@
                         <label for="__chk_gen_navi_profile">すべての認証アカウントのプロフィール表示</label>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_navi_bookmark"/>
+                        <label for="__chk_gen_navi_bookmark">ブックマーク/お気に入り</label>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_navi_emoji"/>
                         <label for="__chk_gen_navi_emoji">カスタム絵文字キャッシュ更新</label>
                     </li>
@@ -348,6 +352,13 @@
                         <td><input type="text" id="__txt_gen_imageheight_limit_gallery" size="6" maxlength="3"/>px</td>
                     </tr>
                 </tbody></table>
+            </dd>
+            <dt>ギャラリーレイアウトのサムネイル幅制限
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="ギャラリーレイアウト時のサムネイルの横幅の限界値を設定します。カラム幅変更などで横幅がこの値を超えると横方向の分割数が増えます(最大で18)。"/>
+            </dt>
+            <dd>
+                <input type="text" id="__txt_gen_imagewidth_limit" size="6" maxlength="3"/>px
             </dd>
             <dt>コンテンツ文字数制限
                 <img src="resources/ic_help.png" class="tooltip_help"

@@ -46,6 +46,26 @@
 
     /**
      * #Event
+     * 拡張ブックマーク/お気に入りボタン.
+     */
+    $("#navi .navi_show_bookmark").on("click", e => {
+        // 先頭がMisskeyアカウントだったときのために強制的にチェンジイベントを発火
+        $("#pop_bookmark_option #__cmb_ex_bookmark_account").change()
+        const mouse_y = e.pageY
+        if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
+            $("#pop_bookmark_option").css({
+                'top': 'auto',
+                'bottom': Math.round(window.innerHeight - mouse_y - 24)
+            })
+        else $("#pop_bookmark_option").css({
+            'bottom': 'auto',
+            'top': mouse_y - 24
+        })
+        $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP"))
+    })
+
+    /**
+     * #Event
      * 全体プロフィールボタン.
      */
     $("#navi .navi_show_profile").on("click", e => Account.createProfileTimeline())
@@ -623,7 +643,7 @@
      * 本文のリンク.
      * => 外部ブラウザでリンクを開く
      */
-    $(document).on("click", ".content>.main_content a, .prof_field a", e => {
+    $(document).on("click", ".content>.main_content a, .post_quote>.main_content a, .prof_field a", e => {
         const url = $(e.target).closest("a").attr("href")
         window.accessApi.openExternalBrowser(url)
         // リンク先に飛ばないようにする
@@ -1249,6 +1269,13 @@
 
     /**
      * #Event #Contextmenu
+     * 投稿系メニュー: 別レイアウトで遡る.
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_layout>li",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow($(e.target).closest("li").attr("name")))
+
+    /**
+     * #Event #Contextmenu
      * 投稿系メニュー: 編集.
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_edit",
@@ -1342,6 +1369,39 @@
     })
 
     /**
+     * #Event #Change
+     * ブックマーク/お気に入り: アカウント変更時.
+     * => ブックマークとリアクションを切り替える
+     */
+    $(document).on("change", "#pop_bookmark_option #__cmb_ex_bookmark_account", e => {
+        if (Account.get($("#__cmb_ex_bookmark_account").val()).platform == 'Misskey') { // Misskey
+            $("#__opt_ex_bookmark_type1").attr("value", "Favorite_Misskey")
+            $("#__opt_ex_bookmark_type2").attr("value", "Reaction")
+            $("#__opt_ex_bookmark_type2+label").text("リアクション")
+        } else { // Mastodon
+            $("#__opt_ex_bookmark_type1").attr("value", "Favorite_Mastodon")
+            $("#__opt_ex_bookmark_type2").attr("value", "Bookmark")
+            $("#__opt_ex_bookmark_type2+label").text("ブックマーク")
+        }
+    })
+
+    /**
+     * #Event
+     * ブックマーク/お気に入り: OKボタン.
+     * => ブックマークを展開
+     */
+    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
+        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
+            type: $("input.__opt_ex_bookmark_type:checked").val(),
+            layout: $("#__cmb_ex_bookmark_layout").val(),
+            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
+            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
+        }))
+        // ミニウィンドウを閉じる
+        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
+
+    /**
      * #Event
      * 各種ウィンドウの閉じるボタン.
      */
@@ -1349,6 +1409,7 @@
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
+    $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",
         e => $("#pop_lastest_release").hide(...Preference.getAnimation("LEFT_DROP"), () => $("#pop_lastest_release").remove()))
 

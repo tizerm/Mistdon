@@ -542,11 +542,11 @@ class User {
      * #Method
      * このユーザーのお気に入り/ブックマーク/リアクション履歴一覧を取得する
      * 
-     * @param account このユーザーのアカウントオブジェクト
      * @param type お気に入り/ブックマーク/リアクションか指定
      * @param max_id 前のページの最後の投稿のページングID
+     * @param tl バインド対象のタイムラインオブジェクト
      */
-    async getBookmarks(account, type, max_id) {
+    async getBookmarks(type, max_id, tl) {
         let response = null
         let query_param = null
         try {
@@ -557,7 +557,7 @@ class User {
                     response = await ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
                         method: "GET",
                         url: `https://${this.host}/api/v1/favourites`,
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                        headers: { "Authorization": `Bearer ${this.authorized.pref.access_token}` },
                         data: query_param
                     })
                     response = {
@@ -567,7 +567,7 @@ class User {
                     break
                 case 'Favorite_Misskey': // お気に入り(Misskey)
                     query_param = {
-                        "i": account.pref.access_token,
+                        "i": this.authorized.pref.access_token,
                         "limit": 40
                     }
                     if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
@@ -586,7 +586,7 @@ class User {
                     response = await ajax({ // response Headerが必要なのでfetchを使うメソッドを呼ぶ
                         method: "GET",
                         url: `https://${this.host}/api/v1/bookmarks`,
-                        headers: { "Authorization": `Bearer ${account.pref.access_token}` },
+                        headers: { "Authorization": `Bearer ${this.authorized.pref.access_token}` },
                         data: query_param
                     })
                     response = {
@@ -596,7 +596,7 @@ class User {
                     break
                 case 'Reaction': // リアクション(Misskey)
                     query_param = {
-                        "i": account.pref.access_token,
+                        "i": this.authorized.pref.access_token,
                         "userId": this.id,
                         "limit": 40
                     }
@@ -617,7 +617,7 @@ class User {
             if (response.body.length == 0) throw new Error('empty')
 
             const posts = []
-            response.body.forEach(p => posts.push(new Status(p.note ?? p, User.DETAIL_TIMELINE, account)))
+            response.body.forEach(p => posts.push(new Status(p.note ?? p, tl ?? User.DETAIL_TIMELINE, this.authorized)))
             let next_id = null
             // Headerのlinkからページング処理のnext_idを抽出
             if (response.link) next_id = response.link.match(/max_id=(?<id>[0-9]+)>/)?.groups.id
@@ -641,12 +641,11 @@ class User {
      * #Method
      * このユーザーのフォロー/フォロワー一覧を取得する
      * 
-     * @param account このユーザーのアカウントオブジェクト
      * @param type フォローかフォロワーか指定
      * @param max_id 前のページの最後のユーザーのページングID
      */
-    async getFFUsers(account, type, max_id) {
-        const platform = account?.platform ?? this.platform
+    async getFFUsers(type, max_id) {
+        const platform = this.authorized?.platform ?? this.platform
         let api_url = null
         let query_param = null
         let response = null
@@ -891,7 +890,7 @@ class User {
         target_td.find(".user_bookmark_elm").show()
 
         // ブックマークデータを取得してローダーを生成
-        const response = await this.getBookmarks(Account.get(this.full_address), type, null)
+        const response = await this.getBookmarks(type, null)
         target_td.find(".col_loading").remove()
         createScrollLoader({ // スクロールローダーを生成
             data: response,
@@ -901,7 +900,7 @@ class User {
                 // Headerを経由して取得されたmax_idを返却
                 return data?.max_id
             },
-            load: async max_id => this.getBookmarks(Account.get(this.full_address), type, max_id)
+            load: async max_id => this.getBookmarks(type, max_id)
         })
     }
 
@@ -928,7 +927,7 @@ class User {
         target_td.find(".user_ff_elm").show()
 
         // ユーザーデータを取得してローダーを生成
-        const response = await this.getFFUsers(Account.get(this.full_address), type, null)
+        const response = await this.getFFUsers(type, null)
         target_td.find(".col_loading").remove()
         createScrollLoader({ // スクロールローダーを生成
             data: response,
@@ -938,7 +937,7 @@ class User {
                 // Headerを経由して取得されたmax_idを返却
                 return data?.max_id
             },
-            load: async max_id => this.getFFUsers(Account.get(this.full_address), type, max_id)
+            load: async max_id => this.getFFUsers(type, max_id)
         })
     }
 
@@ -972,6 +971,39 @@ class User {
             },
             load: async max_id => this.getPost(account, true, max_id)
         })
+    }
+
+    /**
+     * #Method
+     * このユーザーのブックマークタイムラインを生成.
+     * マルチウィンドウとして展開する
+     *
+     * @param arg パラメータオブジェクト
+     */
+    createBookmarkWindow(arg) {
+        // ブックマーク用のタイムラインオブジェクトを生成
+        const bookmark_tl = new Timeline({
+            "host": this.host,
+            "color": this.authorized?.pref.acc_color,
+            "expand_cw": arg.expand_cw,
+            "expand_media": arg.expand_media,
+        }, new Group({ "tl_layout": arg.layout }, null))
+
+        // タイムラインオブジェクトからウィンドウとローダーを生成
+        bookmark_tl.createScrollableWindow(null, (tl, ref_id, window_key) => this.getBookmarks(arg.type, ref_id, tl).then(body => {
+            // ロード画面を削除
+            $(`#${window_key}>.timeline>.col_loading`).remove()
+            createScrollLoader({ // スクロールローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.datas.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    // Headerを経由して取得されたmax_idを返却
+                    return data?.max_id
+                },
+                load: async max_id => this.getBookmarks(arg.type, max_id, tl)
+            })
+        }))
     }
 }
 
