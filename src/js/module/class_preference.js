@@ -419,11 +419,6 @@ class Preference {
      * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
      */
     static setAlternateTimelinePref() {
-        // 検索タイムライン
-        Query.SEARCH_PREF_TIMELINE.pref = {
-            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.search_cw,
-            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.search_media
-        }
         // トレンドタイムライン
         Trend.TREND_PREF_TIMELINE.pref = {
             "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,

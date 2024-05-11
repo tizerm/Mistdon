@@ -17,17 +17,6 @@ class Query {
     // Getter: 検索文字列がアカウントアドレスかどうか判定
     get is_address() { return this.query.match(new RegExp('^@[a-zA-Z0-9_]+@.+$', 'g')) }
 
-    // スタティックマップを初期化(非同期)
-    static {
-        Query.SEARCH_PREF_TIMELINE = {
-            "parent_group": new Group({
-                "group_id": "__search_timeline",
-                "tl_layout": "default",
-                "multi_user": true
-            }, null)
-        }
-    }
-
     /**
      * #StaticMethod
      * 検索欄を表示する画面を表示
@@ -40,7 +29,25 @@ class Query {
                 <div class="search_options">
                     <input type="text" id="__txt_search_query" class="__ignore_keyborad"
                         placeholder="(Enterで検索 先頭に#を付けるとハッシュタグ検索になります)"/>
-                    <button type="button" id="__on_search">search</button>
+                    <button type="button" id="__on_search">検索</button>
+                    <p>
+                        <input type="checkbox" id="__chk_ex_search_cw" class="__chk_ex_search_cw"
+                            ${Preference.GENERAL_PREFERENCE.auto_expand?.search_cw ? 'checked' : ''}/>
+                        <label for="__chk_ex_search_cw">CW展開</label>
+                        <input type="checkbox" id="__chk_ex_search_media" class="__chk_ex_search_media"
+                            ${Preference.GENERAL_PREFERENCE.auto_expand?.search_media ? 'checked' : ''}/>
+                        <label for="__chk_ex_search_media">メディア展開</label><br/>
+                    </p>
+                    <p>タイムラインレイアウト:
+                        <select id="__cmb_ex_search_layout">
+                            <option value="default">ノーマル</option>
+                            <option value="normal2">ノーマル2</option>
+                            <option value="chat">チャット</option>
+                            <option value="list">リスト</option>
+                            <option value="media">メディア</option>
+                            <option value="gallery">ギャラリー</option>
+                        </select>
+                    </p>
                 </div>
                 <div id="__search_timeline" class="timeline">
                     <div class="col_loading">
@@ -86,12 +93,20 @@ class Query {
                 return
             }
         }
+        // 検索用のタイムラインオブジェクトを生成
+        const search_tl = new Timeline({
+            "expand_cw": $("#__chk_ex_search_cw").prop("checked"),
+            "expand_media": $("#__chk_ex_search_media").prop("checked"),
+        }, new Group({
+            "group_id": "__search_timeline",
+            "tl_layout": $("#__cmb_ex_search_layout").val(),
+            "multi_user": true
+        }, null))
         // すべてのアカウントから検索処理を実行してバインド
         const promises = []
-        Account.each(account => promises.push(query.search(account)))
-        const view_group = Query.SEARCH_PREF_TIMELINE.parent_group
-        view_group.status_map.clear()
-        view_group.onLoadTimeline(promises)
+        Account.each(account => promises.push(query.search(account, search_tl)))
+        search_tl.parent_group.status_map.clear()
+        search_tl.parent_group.onLoadTimeline(promises)
     }
 
     /**
@@ -99,8 +114,9 @@ class Query {
      * 引数のアカウントを使って検索処理を実行
      * 
      * @param account 検索処理を実行するアカウント
+     * @param tl 設定用のタイムラインオブジェクト
      */
-    async search(account) {
+    async search(account, tl) {
         let response = null
         try { // 検索文字列を渡して投稿を検索
             switch (account.platform) {
@@ -160,7 +176,7 @@ class Query {
                     break
             }
             const posts = []
-            response.forEach(p => posts.push(new Status(p, Query.SEARCH_PREF_TIMELINE, account)))
+            response.forEach(p => posts.push(new Status(p, tl, account)))
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
