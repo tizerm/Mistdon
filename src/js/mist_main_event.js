@@ -51,6 +51,16 @@
     $("#navi .navi_show_bookmark").on("click", e => {
         // 先頭がMisskeyアカウントだったときのために強制的にチェンジイベントを発火
         $("#pop_bookmark_option #__cmb_ex_bookmark_account").change()
+        const mouse_y = e.pageY
+        if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
+            $("#pop_bookmark_option").css({
+                'top': 'auto',
+                'bottom': Math.round(window.innerHeight - mouse_y - 24)
+            })
+        else $("#pop_bookmark_option").css({
+            'bottom': 'auto',
+            'top': mouse_y - 24
+        })
         $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP"))
     })
 
