@@ -65,6 +65,7 @@ class Preference {
                         "media"                     : 320,      // メディア
                         "gallery"                   : 240       // ギャラリー
                     },
+                    "gallery_width_limit"           : 240,      // ギャラリーの横幅制限
                     "contents_limit": {                         // 文字数制限
                         "default"                   : 250,      // ノーマル
                         "chat"                      : 140,      // チャット
@@ -290,6 +291,8 @@ class Preference {
         $("#__txt_gen_imageheight_limit_media").val(Preference.GENERAL_PREFERENCE.media_height_limit?.media)
         $("#__txt_gen_imageheight_limit_gallery").val(Preference.GENERAL_PREFERENCE.media_height_limit?.gallery)
 
+        $("#__txt_gen_imagewidth_limit").val(Preference.GENERAL_PREFERENCE.gallery_width_limit)
+
         // コンテンツの文字数制限
         $("#__txt_gen_content_limit_default").val(Preference.GENERAL_PREFERENCE.contents_limit?.default)
         $("#__txt_gen_content_limit_chat").val(Preference.GENERAL_PREFERENCE.contents_limit?.chat)
@@ -367,6 +370,7 @@ class Preference {
                 "media"                     : $("#__txt_gen_imageheight_limit_media").val(),
                 "gallery"                   : $("#__txt_gen_imageheight_limit_gallery").val(),
             },
+            "gallery_width_limit"           : $("#__txt_gen_imagewidth_limit").val(),
             "contents_limit": {             // 文字数制限
                 "default"                   : $("#__txt_gen_content_limit_default").val(),
                 "chat"                      : $("#__txt_gen_content_limit_chat").val(),
@@ -452,20 +456,37 @@ class Preference {
      * 全体設定の内容から永続適用CSSを生成.
      */
     static generateStylesheet() {
+        // ギャラリーレイアウトのコンテナクエリを定義
+        const width_limit = Number(Preference.GENERAL_PREFERENCE.gallery_width_limit)
+        let containers = ''
+        for (let i = 1; i <= 16; i++) containers += `
+            @container gallery (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
+                > li.gallery_timeline { width: calc(${100 / (i + 1)}% - 6px); }
+            }
+        `
         // CSSをバインド
         $('style').html(`
-            .timeline ul>li {
-                > .media a.__on_media_expand {
-                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+            .timeline ul {
+                > li {
+                    > .media a.__on_media_expand {
+                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                    }
+                    &.chat_timeline>.media a.__on_media_expand {
+                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                    }
+                    &.media_timeline>.media a.__on_media_expand {
+                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                    }
+                    &.gallery_timeline>a.__on_media_expand {
+                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                    }
                 }
-                &.chat_timeline>.media a.__on_media_expand {
-                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                @container gallery (width <= ${width_limit}px) {
+                    > li.gallery_timeline { width: calc(100% - 2px); }
                 }
-                &.media_timeline>.media a.__on_media_expand {
-                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
-                }
-                &.gallery_timeline>a.__on_media_expand {
-                    max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                ${containers}
+                @container gallery (width > ${width_limit * 17}px) {
+                    > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
                 }
             }
         `)

@@ -14,6 +14,8 @@ class Account {
         this.socket = null
         this.reconnect = false
         this.emoji_cache = null
+        this.channels_cache = null
+        this.user_cache = null
 
         this.emoji_history = []
         this.reaction_history = []
@@ -1108,6 +1110,21 @@ class Account {
 
     /**
      * #Method #Ajax
+     * このアカウントのユーザーオブジェクトキャッシュを取得する
+     * キャッシュが取れていない場合は取得メソッドを呼び出す
+     */
+    async getUserCache() {
+        // キャッシュがあればキャッシュを使用
+        if (this.user_cache) return this.user_cache
+
+        // キャッシュがない場合はキャッシュを取得して返す
+        const user = await this.getInfo()
+        this.user_cache = user
+        return user
+    }
+
+    /**
+     * #Method #Ajax
      * このアカウントのチャンネル一覧キャッシュを取得する
      * キャッシュが取れていない場合は取得メソッドを呼び出す
      */
@@ -1460,7 +1477,7 @@ class Account {
         `).show(...Preference.getAnimation("WINDOW_FOLD"))
 
         // それぞれのアカウントのユーザー情報を取得してバインド
-        Account.each(account => account.getInfo().then(user => {
+        Account.each(account => account.getUserCache().then(user => {
             user.addProfileUniqueId()
             user.bindDetail()
         }))

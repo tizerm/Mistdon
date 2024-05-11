@@ -48,7 +48,11 @@
      * #Event
      * 拡張ブックマーク/お気に入りボタン.
      */
-    $("#navi .navi_show_bookmark").on("click", e => $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP")))
+    $("#navi .navi_show_bookmark").on("click", e => {
+        // 先頭がMisskeyアカウントだったときのために強制的にチェンジイベントを発火
+        $("#pop_bookmark_option #__cmb_ex_bookmark_account").change()
+        $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP"))
+    })
 
     /**
      * #Event
@@ -1355,13 +1359,37 @@
     })
 
     /**
+     * #Event #Change
+     * ブックマーク/お気に入り: アカウント変更時.
+     * => ブックマークとリアクションを切り替える
+     */
+    $(document).on("change", "#pop_bookmark_option #__cmb_ex_bookmark_account", e => {
+        if (Account.get($("#__cmb_ex_bookmark_account").val()).platform == 'Misskey') { // Misskey
+            $("#__opt_ex_bookmark_type1").attr("value", "Favorite_Misskey")
+            $("#__opt_ex_bookmark_type2").attr("value", "Reaction")
+            $("#__opt_ex_bookmark_type2+label").text("リアクション")
+        } else { // Mastodon
+            $("#__opt_ex_bookmark_type1").attr("value", "Favorite_Mastodon")
+            $("#__opt_ex_bookmark_type2").attr("value", "Bookmark")
+            $("#__opt_ex_bookmark_type2+label").text("ブックマーク")
+        }
+    })
+
+    /**
      * #Event
      * ブックマーク/お気に入り: OKボタン.
      * => ブックマークを展開
      */
-    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm",
-        e => Account.get($("#__cmb_ex_bookmark_account").val()).getInfo().then(user => user.createBookmarkWindow(
-            $("input.__opt_ex_bookmark_type:checked").val(), $("#__cmb_ex_bookmark_layout").val())))
+    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
+        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
+            type: $("input.__opt_ex_bookmark_type:checked").val(),
+            layout: $("#__cmb_ex_bookmark_layout").val(),
+            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
+            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
+        }))
+        // ミニウィンドウを閉じる
+        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
 
     /**
      * #Event

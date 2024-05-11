@@ -973,6 +973,10 @@
         }
 
         /*=== Gallery Layout Style ===============================================================*/
+        &:has(li.gallery_timeline) {
+            container-type: inline-size;
+            container-name: gallery;
+        }
         > li.gallery_timeline {
             display: inline-block;
             position: relative;
@@ -1033,12 +1037,6 @@
                 }
             }
         }
-        > li>.label_head.label_reblog {
-            background-position: center right;
-            background-repeat: no-repeat;
-            background-size: 32px 32px;
-            padding-right: 42px;
-        }
 
         /*=== Filtered Toot Layout ===============================================================*/
         > li.filtered_timeline {
@@ -1065,6 +1063,13 @@
             background-position: center center;
             background-repeat: no-repeat;
             height: 32px;
+        }
+
+        > li>.label_head.label_reblog {
+            background-position: center right;
+            background-repeat: no-repeat;
+            background-size: 32px 32px;
+            padding-right: 42px;
         }
     }
     &.tl_group_box ul {
