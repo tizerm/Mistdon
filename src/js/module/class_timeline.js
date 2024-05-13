@@ -46,7 +46,7 @@ class Timeline {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
         if (!this.pref.external && !this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
-        let query_param = this.pref.query_param
+        let query_param = structuredClone(this.pref.query_param)
         query_param.limit = 30
         let response = null
         try {
