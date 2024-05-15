@@ -452,6 +452,7 @@ audio { height: 30px; }
                     width: 100%;
                     height: auto;
                 }
+                & a.__on_detail_hashtag { text-decoration: underline; }
             }
             > .help_navi+.help_content    { height: calc(100vh - 288px); }
             > .help_content.shortcut_list { height: calc(100vh - 132px); }
