@@ -75,6 +75,16 @@
                     list-style-type: none;
                 }
             }
+            .font_sample_box {
+                border: dashed 2px #cccccc;
+                padding: 4px 8px;
+                > p {
+                    margin: 4px 0px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+            }
         }
         > .footer>button {
             display: inline-block;

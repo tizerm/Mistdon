@@ -53,6 +53,16 @@ class Preference {
             "media"                     : pref?.tl_cache_limit?.media       ?? 80,  // メディア
             "gallery"                   : pref?.tl_cache_limit?.gallery     ?? 120  // ギャラリー
         },
+        this.font_size = {              // フォントサイズ
+            "default"                   : pref?.font_size?.default          ?? 13, // ノーマル
+            "default_omit"              : pref?.font_size?.default_omit     ?? 11, // ノーマル(省略)
+            "default_quote"             : pref?.font_size?.default_quote    ?? 11, // ノーマル(引用)
+            "chat"                      : pref?.font_size?.chat             ?? 13, // チャット
+            "chat_omit"                 : pref?.font_size?.chat_omit        ?? 11, // チャット(省略)
+            "chat_quote"                : pref?.font_size?.chat_quote       ?? 11, // チャット(引用)
+            "list"                      : pref?.font_size?.list             ?? 13, // リスト
+            "media"                     : pref?.font_size?.media            ?? 13 // メディア
+        },
         this.media_height_limit = {     // メディアの高さ制限
             "default"                   : pref?.media_height_limit?.default ?? 240, // ノーマル
             "chat"                      : pref?.media_height_limit?.chat    ?? 160, // チャット
@@ -283,6 +293,16 @@ class Preference {
         $("#__txt_gen_tlcache_media")   .val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.media)
         $("#__txt_gen_tlcache_gallery") .val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.gallery)
 
+        // 文字サイズ
+        $("#__txt_gen_fontsize_default")        .val(Preference.GENERAL_PREFERENCE.font_size?.default)
+        $("#__txt_gen_fontsize_default_omit")   .val(Preference.GENERAL_PREFERENCE.font_size?.default_omit)
+        $("#__txt_gen_fontsize_default_quote")  .val(Preference.GENERAL_PREFERENCE.font_size?.default_quote)
+        $("#__txt_gen_fontsize_chat")           .val(Preference.GENERAL_PREFERENCE.font_size?.chat)
+        $("#__txt_gen_fontsize_chat_omit")      .val(Preference.GENERAL_PREFERENCE.font_size?.chat_omit)
+        $("#__txt_gen_fontsize_chat_quote")     .val(Preference.GENERAL_PREFERENCE.font_size?.chat_quote)
+        $("#__txt_gen_fontsize_list")           .val(Preference.GENERAL_PREFERENCE.font_size?.list)
+        $("#__txt_gen_fontsize_media")          .val(Preference.GENERAL_PREFERENCE.font_size?.media)
+
         // メディア高さ制限
         $("#__txt_gen_imageheight_limit_default")   .val(Preference.GENERAL_PREFERENCE.media_height_limit?.default)
         $("#__txt_gen_imageheight_limit_chat")      .val(Preference.GENERAL_PREFERENCE.media_height_limit?.chat)
@@ -362,6 +382,16 @@ class Preference {
                 "list"                      : $("#__txt_gen_tlcache_list").val(),
                 "media"                     : $("#__txt_gen_tlcache_media").val(),
                 "gallery"                   : $("#__txt_gen_tlcache_gallery").val(),
+            },
+            "font_size": {                  // フォントサイズ
+                "default"                   : $("#__txt_gen_fontsize_default").val(),
+                "default_omit"              : $("#__txt_gen_fontsize_default_omit").val(),
+                "default_quote"             : $("#__txt_gen_fontsize_default_quote").val(),
+                "chat"                      : $("#__txt_gen_fontsize_chat").val(),
+                "chat_omit"                 : $("#__txt_gen_fontsize_chat_omit").val(),
+                "chat_quote"                : $("#__txt_gen_fontsize_chat_quote").val(),
+                "list"                      : $("#__txt_gen_fontsize_list").val(),
+                "media"                     : $("#__txt_gen_fontsize_media").val(),
             },
             "media_height_limit": {         // メディアの高さ制限
                 "default"                   : $("#__txt_gen_imageheight_limit_default").val(),
@@ -462,17 +492,66 @@ class Preference {
         $('style').html(`
             .timeline ul {
                 > li {
-                    > .media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                    &.normal_layout {
+                        > .content {
+                            *:not(.hidden_content) {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+                            }
+                            .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
+                            }
+                        }
+                        > .post_quote {
+                            > .main_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_quote}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                        }
                     }
-                    &.chat_timeline>.media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                    &.chat_timeline {
+                        > .content {
+                            *:not(.hidden_content) {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat}px;
+                            }
+                            .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
+                            }
+                        }
+                        > .post_quote {
+                            > .main_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_quote}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                        }
                     }
-                    &.media_timeline>.media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                    &.short_timeline>.content>.main_content {
+                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.list}px;
+                    }
+                    &.media_timeline {
+                        > .content {
+                            > .main_content, > a.expand_header {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.media}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                        }
                     }
                     &.gallery_timeline>a.__on_media_expand {
                         max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                    }
+                    &.short_userinfo>.content>.main_content {
+                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
                     }
                 }
                 @container gallery (width <= ${width_limit}px) {
@@ -481,6 +560,11 @@ class Preference {
                 ${containers}
                 @container gallery (width > ${width_limit * 17}px) {
                     > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
+                }
+            }
+            .column_profile {
+                > ul.profile_detail>li.profile_userinfo>.content>.main_content {
+                    font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
                 }
             }
         `)

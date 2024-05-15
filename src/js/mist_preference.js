@@ -32,6 +32,14 @@
 
     // 背景ファイル変更イベント
     $(document).on("change", "#__file_gen_background", e => $("#__hdn_gen_bgfile").val(e.target.files[0].path))
+    // 全体設定-フォントサイズボックスのフォーカスイベント
+    $(document).on("focus", "input.__gen_fontsize", e => $(".font_sample_box").css("font-size", `${$(e.target).val()}px`))
+    // 全体設定-フォントサイズボックスのキーボードイベント
+    let font_timer = 0
+    $(document).on("keyup", "input.__gen_fontsize", e => {
+        clearTimeout(font_timer)
+        font_timer = setTimeout(() => $(".font_sample_box").css("font-size", `${$(e.target).val()}px`), 500)
+    })
 
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", e => ColumnPref.addColumn())

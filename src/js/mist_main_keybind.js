@@ -153,7 +153,10 @@
                 else col.scroll(Preference.GENERAL_PREFERENCE.scroll_speed.default)
                 return false
             case 70: // f: カーソルカラムの可変幅表示をトグルする
-                if (is_control) { // Ctrl+F: 検索
+                if (is_control) {
+                    if (event.shiftKey) { // Ctrl+Shift+F: 可変幅設定をデフォルトに戻す
+                    }
+                    // Ctrl+F: 検索
                     $("#navi .navi_search").click()
                     return false
                 }

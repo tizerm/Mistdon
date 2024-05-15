@@ -150,6 +150,11 @@ class Column {
         // カラムの色と幅を変更
         $(`#${this.id}>.col_head`).css("background-color", `#${this.pref.col_color}`)
         $(`#${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
+
+        // デフォルトで可変幅にする場合はクラスを付与して幅を自動にする
+        if (this.pref.d_flex)  $(`#${this.id}`).addClass('flex_col').css("width", "auto")
+        else $(`#${this.id}`).css("width", `${this.pref.col_width}px`)
+
         $(`#${this.id}`).css("width", this.pref.d_flex ? "auto" : `${this.pref.col_width}px`)
 
         // デフォルトで閉じる場合は表示を反転
@@ -252,12 +257,12 @@ class Column {
         const img = target.find(".ic_column_flex")
         if (!this.flex) {
             // OFF⇒ON
-            target.css('width', 'auto')
+            target.addClass('flex_col').css('width', 'auto')
             img.attr('src', 'resources/ic_flex_on.png')
             this.flex = true
         } else {
             // ON⇒OFF
-            target.css('width', `${this.pref.col_width}px`)
+            target.removeClass('flex_col').css('width', `${this.pref.col_width}px`)
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
         }
