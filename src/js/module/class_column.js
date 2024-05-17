@@ -155,8 +155,6 @@ class Column {
         if (this.pref.d_flex)  $(`#${this.id}`).addClass('flex_col').css("width", "auto")
         else $(`#${this.id}`).css("width", `${this.pref.col_width}px`)
 
-        $(`#${this.id}`).css("width", this.pref.d_flex ? "auto" : `${this.pref.col_width}px`)
-
         // デフォルトで閉じる場合は表示を反転
         if (this.pref.d_hide) {
             $(`#columns>table #${this.id}`).hide()

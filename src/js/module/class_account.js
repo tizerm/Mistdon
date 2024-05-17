@@ -825,6 +825,9 @@ class Account {
      * @param arg パラメータ
      */
     async connect(arg) {
+        // WebSocket購読設定が存在しない場合は接続しない
+        if (this.socket_prefs.length == 0) return
+
         // WebSocket接続を開始
         this.socket = new WebSocket(this.socket_url)
         this.reconnect = arg.reconnect
