@@ -314,25 +314,20 @@ class User {
             default:
                 break
         }
-        html += `
+        html /* フォロー/フォロワー数(非公開の場合は非公開ラベルを出す) */ += `
             </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-        `
-        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
-        if (this.hide_ff) html += `
-            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
-        `; else html += `
-            <span class="count_follow counter ${this.hide_follow ? 'label_private' : 'label_follow'}"
-                title="${this.hide_follow ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
-                ${this.hide_follow ? '???' : this.count_follow}
-            </span>
-            <span class="count_follower counter ${this.hide_follower ? 'label_private' : 'label_follower'}"
-                title="${this.hide_follower ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
-                ${this.hide_follower ? '???' : this.count_follower}
-            </span>
-        `
-        html += '</div></li>'
+                <span class="count_follow counter ${this.hide_follow || this.hide_ff ? 'label_private' : 'label_follow'}"
+                    title="${this.hide_follow || this.hide_ff ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                    ${this.hide_follow || this.hide_ff ? '???' : this.count_follow}
+                </span>
+                <span class="count_follower counter ${this.hide_follower || this.hide_ff ? 'label_private' : 'label_follower'}"
+                    title="${this.hide_follower || this.hide_ff ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                    ${this.hide_follower || this.hide_ff ? '???' : this.count_follower}
+                </span>
+            </div>
+        </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -394,24 +389,23 @@ class User {
             default:
                 break
         }
-        html += `
+        html /* フォロー/フォロワー数(非公開の場合は非公開ラベルを出す) */ += `
             </div>
             <div class="content"><div class="main_content">
                 ${$($.parseHTML(this.profile)).text()}
             </div></div>
-        `
-        html += `
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-        `
-        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
-        if (this.hide_ff) html += `
-            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
-        `; else html += `
-            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-        `
-        html += '</div></li>'
+                <span class="count_follow counter ${this.hide_follow || this.hide_ff ? 'label_private' : 'label_follow'}"
+                    title="${this.hide_follow || this.hide_ff ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                    ${this.hide_follow || this.hide_ff ? '???' : this.count_follow}
+                </span>
+                <span class="count_follower counter ${this.hide_follower || this.hide_ff ? 'label_private' : 'label_follower'}"
+                    title="${this.hide_follower || this.hide_ff ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                    ${this.hide_follower || this.hide_ff ? '???' : this.count_follower}
+                </span>
+            </div>
+        </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
@@ -858,10 +852,10 @@ class User {
         if (!exist_pinned) target_elm.find(".pinned_block").remove()
 
         // ブロックの高さを計算
-        target_elm.find("ul.posts").css('height', `calc(100vh - ${340 + detail_height + pinned_height}px)`)
-        target_elm.find("ul.media_post").css('height', `calc(100vh - ${340 + detail_height}px)`)
-        target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${309 + detail_height}px)`)
-        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${520 + detail_height}px)`)
+        target_elm.find("ul.posts").css('height', `calc(100vh - ${320 + detail_height + pinned_height}px)`)
+        target_elm.find("ul.media_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
+        target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${290 + detail_height}px)`)
+        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${500 + detail_height}px)`)
     }
 
     /**

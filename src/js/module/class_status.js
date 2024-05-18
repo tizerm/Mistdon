@@ -1868,7 +1868,7 @@ class Status {
             color: getRandomColor(),
             resizable: true,
             drag_axis: false,
-            resize_axis: "n, s"
+            resize_axis: "all"
         })
 
         // 投稿内容をバインドして追加情報を非同期でバインド

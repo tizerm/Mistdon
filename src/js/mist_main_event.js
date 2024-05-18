@@ -1153,7 +1153,7 @@
             const post_id = $(e.target).closest("li").attr("id")
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
                 .removeClass("ui-state-disabled").attr("name", post_id.substring(post_id.indexOf('@')))
-        } else if ($(e.target).closest("table").is("#auth_account_table"))
+        } else if ($(e.target).closest(".allaccount_user").length > 0) // すべてのアカウント一覧
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
                 .removeClass("ui-state-disabled").attr("name", $(e.target).closest(".column_profile").attr("name"))
         else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")

@@ -897,16 +897,6 @@
             color: #ffffff;
         }
 
-        /*=== Accounts Timeline Layout ===========================================================*/
-        > .account_timeline {
-            opacity: 1.0;
-            background-color: rgba(34,34,34,0.683);
-            width: calc(100vw - 72px);
-            overflow-x: scroll;
-            &::-webkit-scrollbar { height: 8px; }
-        }
-        &:has(>.account_timeline) { z-index: 30; }
-
         /*=== Search Timeline Layout =============================================================*/
         > .search_timeline {
             > .search_options {
@@ -1045,6 +1035,10 @@
     .account_timeline.single_user.ex_window {
         width: min(480px,100vw);
         z-index: 32;
+        right: 0px;
+    }
+    .account_timeline.allaccount_user.ex_window {
+        z-index: 31;
         right: 0px;
     }
     .instance_window.ex_window {

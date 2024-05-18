@@ -594,12 +594,11 @@
                 & span, & a {
                     display: inline-block;
                     border-radius: 12px;
-                    padding: 2px 18px;
-                    margin: 2px;
+                    padding: 2px 32px 2px 8px;
+                    margin: 2px 1px;
                     background-position: center right;
                     background-repeat: no-repeat;
                     background-size: 24px 24px;
-                    padding-right: 32px;
                 }
                 > a.card_link {
                     display: block;
@@ -646,6 +645,7 @@
                         cursor: pointer;
                     }
                 }
+                .counter              { width: calc(33% - 48px); }
                 .count_post           { background-image: url("../resources/ic_rpl.png"); }
                 .count_follow         { background-image: url("../resources/ic_cnt_flw.png"); }
                 .count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
@@ -653,7 +653,6 @@
                 .count_reblog         { background-image: url("../resources/ic_reblog.png"); }
                 .count_fav            { background-image: url("../resources/ic_favorite.png"); }
                 .count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
-                .counter              { width: 17%; }
                 .count_reaction {
                     background-color: rgba(0,172,255,0.2);
                     padding-right: 8px;
@@ -725,12 +724,24 @@
         /*=== Short User Infomation Style ========================================================*/
         > li.short_userinfo {
             background-color: rgba(62,82,96,0.683);
-            > .user_header { height: 64px; }
-            .main_content {
-                width: 100%;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
+            container-type: inline-size;
+            container-name: profileHeader;
+            > .user_header {
+                height: 64px;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            > .content {
+                position: relative;
+                height: 1.15em;
+                > .main_content {
+                    position: absolute;
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
             }
         }
 
@@ -967,7 +978,7 @@
             > .content {
                 position: relative;
                 width: 100%;
-                min-height: 1.25em;
+                min-height: 1.15em;
                 >.main_content {
                     position: absolute;
                     line-height: 1.35em;
@@ -1127,42 +1138,37 @@
 .column_profile {
     position: relative;
     > .profile_header {
-        height: 216px;
+        height: 200px;
         overflow-y: hidden;
-        .user_header {
-            height: 96px;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-        .detail_info {
-            > .counter {
-                width: 82px;
-                margin: 2px 1px;
-                padding-left: 8px;
-                &:hover {
+        > li.header_userinfo {
+            container-type: inline-size;
+            container-name: profileHeader;
+            > .user_header {
+                height: 96px;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            > .detail_info {
+                > .counter:hover {
                     opacity: 0.75;
                     text-decoration: underline;
                     cursor: pointer;
                 }
-            }
-            > a {
-                transform: translate(-2px, 2px);
-                padding: 0px;
-                margin: 0px;
-                > img {
-                    width: 24px;
-                    height: 24px;
-                    vertical-align: text-bottom;
+                > a {
+                    transform: translate(-2px, 2px);
+                    padding: 0px;
+                    margin: 0px;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                        vertical-align: text-bottom;
+                    }
+                    &:hover>img {
+                        background-color: rgba(255,255,255,0.2);
+                        cursor: pointer;
+                    }
                 }
-                &:hover>img {
-                    background-color: rgba(255,255,255,0.2);
-                    cursor: pointer;
-                }
-            }
-            &.auth_details {
-                margin: -2px -4px 4px;
-                > .counter { width: 64px; }
             }
         }
     }
@@ -1282,19 +1288,25 @@
         }
     }
 }
-.column_profile>.profile_header, .post_detail_col .short_userinfo {
-    .detail_info>.counter.ff_private {
-        width: 184px;
-        font-size: 14px;
-        padding: 2px 12px;
-        text-align: center;
-        &:hover {
-            opacity: 1.0;
-            text-decoration: none;
-            cursor: not-allowed;
+.timeline>ul>li.short_userinfo, .column_profile>ul.profile_header>li.header_userinfo {
+    > .detail_info { margin: 0px; }
+}
+.account_timeline.single_user>.column_profile>ul.profile_header>li.header_userinfo>.detail_info>.counter {
+    width: calc(33% - 54px);
+}
+.account_timeline.allaccount_user>.accounts_box>.column_profile>ul.profile_header>li.header_userinfo>.detail_info>.counter {
+    width: calc(33% - 64px);
+}
+@container profileHeader (width < 400px) {
+    .timeline>ul>li.short_userinfo, .user_ff_elm>ul>li.short_userinfo, .column_profile>ul.profile_header>li.header_userinfo {
+        > .detail_info>.counter {
+            padding: 4px 28px 4px 2px;
+            font-size: 14px;
+            font-weight: normal;
         }
     }
 }
+
 
 /*=== Instance Info Layout =======================================================================*/
 
@@ -1394,6 +1406,5 @@
             padding: 4px;
             background-color: #4461a6;
         }
-        > li.short_userinfo>.detail_info>.counter { width: 16%; }
     }
 }
