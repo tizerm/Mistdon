@@ -352,6 +352,9 @@
     #head_postarea>.submit_button { display: none; }
 }
 
+
+#navi .li_reconnect { display: none; }
+
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {

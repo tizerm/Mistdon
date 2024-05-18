@@ -13,6 +13,7 @@ class Account {
         this.socket_prefs = []
         this.socket = null
         this.reconnect = false
+        this.disconnect_time = null
         this.emoji_cache = null
         this.channels_cache = null
         this.user_cache = null
@@ -830,6 +831,7 @@ class Account {
 
         // WebSocket接続を開始
         this.socket = new WebSocket(this.socket_url)
+        this.disconnect_time = null
         this.reconnect = arg.reconnect
 
         // WebSocket接続開始時処理
@@ -844,9 +846,13 @@ class Account {
             Notification.error(`${this.full_address}で接続エラーが発生しました、再接続してください。`)
             // エラーで切れた場合は再接続しない
             this.reconnect = false
+            this.disconnect_time = new RelativeTime(new Date())
             // エラーで接続が切れたことをタイムライングループに通知する
-            this.socket_prefs.map(m => m.target_group).forEach(gp => gp.setWarning())
+            this.socket_prefs.forEach(pref => pref.target_group.setWarning(true))
             console.log(event)
+
+            if (!$("#navi .li_reconnect").is(":visible")) // 再接続ボタンを表示
+                $("#navi .li_reconnect").show(...Preference.getAnimation("TIMELINE_DELETE"))
         })
         // WebSocket接続停止時処理
         this.socket.addEventListener("close", (event) => {
@@ -858,6 +864,32 @@ class Account {
         })
         // 受信処理を設定
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
+    }
+
+    /**
+     * #StaticMethod
+     * WebSocket接続が切断されているすべてのアカウントに対して再接続を試行する.
+     */
+    static async reconnect() {
+        const group_map = new Map()
+        // WebSocket接続の切れているアカウントに対して再接続を実行
+        ;[...Account.map.values()].filter(f => f.disconnect_time).forEach(account => {
+            account.connect({
+                openFunc: () => {},
+                closeFunc: () => { // 一時切断でポップアップを表示しない設定の場合は表示しない
+                    if (!Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
+                        Notification.info(`${account.full_address}との接続が一時的に切断されました.`)
+                },
+                reconnect: true
+            })
+            // 更新対象のグループを抽出
+            account.socket_prefs.map(m => m.target_group).forEach(gp => group_map.set(gp.id, gp))
+        })
+        const gpitr = group_map.values()
+        for (const gp of gpitr) { // 対象グループを一斉リロード
+            gp.reload()
+            gp.setWarning(false)
+        }
     }
 
     /**

@@ -373,9 +373,12 @@ class Group {
     /**
      * #Method
      * このグループを警告表示にする(！を出す)
+     *
+     * @param bool trueで表示 falseで削除
      */
-    setWarning() {
-        $(`#${this.id}`).find(".ic_group_warn").show()
+    setWarning(bool) {
+        if (bool) $(`#${this.id}`).find(".ic_group_warn").show()
+        else $(`#${this.id}`).find(".ic_group_warn").hide()
     }
 
     /**

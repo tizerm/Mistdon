@@ -88,6 +88,25 @@
 
     /**
      * #Event
+     * 再接続ボタン.
+     */
+    $("#navi #on_reconnect").on("click", e => {
+        const label = [...Account.map.values()].filter(f => f.disconnect_time)
+            .reduce((rs, el) => `${rs}<br/>${el.full_address}: ${el.disconnect_time.both} 切断`, '')
+        dialog({
+            type: 'confirm',
+            title: "リアルタイム更新再接続",
+            text: `エラーによって切断されたインスタンスと再接続します。<br/>
+                よろしいですか？<br/>${label}`,
+            accept: () => { // OKボタン押下時の処理
+                Account.reconnect()
+                $("#navi .li_reconnect").hide(...Preference.getAnimation("FADE_STD"))
+            }
+        })
+    })
+
+    /**
+     * #Event
      * キーボードショートカット早見表ボタン.
      */
     $("#navi #on_help_keybind").on("click", e => {
