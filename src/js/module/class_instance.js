@@ -524,15 +524,13 @@ class Instance {
                         <button type="button" class="window_close_button" title="閉じる"><img
                             src="resources/ic_not.png" alt="閉じる"/></button>
                     </div>
-                    <table><tbody><tr>
-                        <td class="timeline column_instance_info">
-                            <ul class="instance_header"></ul>
-                            <ul class="instance_detail"></ul>
-                            <ul class="instance_admin">
-                                <li class="admin_header">Administrator</li>
-                            </ul>
-                        </td>
-                    </tr></tbody></table>
+                    <div class="timeline column_instance_info">
+                        <ul class="instance_header"></ul>
+                        <ul class="instance_detail"></ul>
+                        <ul class="instance_admin">
+                            <li class="admin_header">Administrator</li>
+                        </ul>
+                    </div>
                 </div>
             `,
             color: getRandomColor(),

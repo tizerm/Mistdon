@@ -212,14 +212,7 @@
         }
     }
 }
-
-.account_timeline>table,
-.instance_window>table {
-    width: 100%;
-    table-layout: fixed;
-}
-.inline_emoji,
-#columns>.__initial_message .ic_inline {
+.inline_emoji, #columns>.__initial_message .ic_inline {
     display: inline-block;
     height: 24px;
     width: auto;
@@ -1297,7 +1290,7 @@
 .account_timeline.allaccount_user>.accounts_box>.column_profile>ul.profile_header>li.header_userinfo>.detail_info>.counter {
     width: calc(33% - 64px);
 }
-@container profileHeader (width < 400px) {
+@container profileHeader (width < 380px) {
     .timeline>ul>li.short_userinfo, .user_ff_elm>ul>li.short_userinfo, .column_profile>ul.profile_header>li.header_userinfo {
         > .detail_info>.counter {
             padding: 4px 28px 4px 2px;
@@ -1307,7 +1300,6 @@
     }
 }
 
-
 /*=== Instance Info Layout =======================================================================*/
 
 .column_instance_info {
@@ -1315,59 +1307,68 @@
     > .instance_header {
         height: 312px;
         overflow-y: hidden;
-        .header_image { height: 96px; }
-        .info {
-            position: relative;
-            > .instance_icon {
-                width: 36px;
-                width: 36px;
+        > li.header_instanceinfo {
+            container-type: inline-size;
+            container-name: instanceHeader;
+            > .header_image {
+                height: 96px;
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-size: cover;
             }
-            > .instance_name {
-                position: absolute;
-                top: 2px;
-                left: 48px;
-                margin: 0px;
-                padding: 0px;
-                font-size: 24px;
-                width: calc(100% - 60px);
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-            }
-            > .instance_link {
-                display: block;
-                border-top-right-radius: 8px;
-                border-bottom-right-radius: 8px;
-                padding: 4px 12px;
-                font-size: 14px;
-                border-left: solid 12px #aaaaaa;
-                background-color: rgba(255,255,255,0.08);
-            }
-        }
-        & ul.detail_info {
-            margin: 6px 0px;
-            text-align: left;
-            background-color: transparent;
-            height: auto;
-            > li {
-                margin: 4px 0px;
-                padding: 0px;
-                border-radius: 16px;
-                > h6 {
-                    display: inline-block;
+            > .info {
+                position: relative;
+                > .instance_icon {
+                    width: 36px;
+                    width: 36px;
+                }
+                > .instance_name {
+                    position: absolute;
+                    top: 2px;
+                    left: 48px;
                     margin: 0px;
-                    padding: 4px 16px;
-                    background-color: rgba(255,255,255,0.15);
+                    padding: 0px;
+                    font-size: 24px;
+                    width: calc(100% - 60px);
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+                > .instance_link {
+                    display: block;
+                    border-top-right-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                    padding: 4px 12px;
+                    font-size: 14px;
+                    border-left: solid 12px #aaaaaa;
+                    background-color: rgba(255,255,255,0.08);
+                }
+            }
+            > ul.detail_info {
+                margin: 6px 0px;
+                text-align: left;
+                background-color: transparent;
+                height: auto;
+                > li {
+                    margin: 4px 0px;
+                    padding: 0px;
                     border-radius: 16px;
-                    font-size: 16px;
+                    > h6 {
+                        display: inline-block;
+                        margin: 0px;
+                        padding: 4px 16px;
+                        background-color: rgba(255,255,255,0.15);
+                        border-radius: 16px;
+                        font-size: 16px;
+                    }
+                    > span {
+                        padding: 2px 12px;
+                        font-size: 16px;
+                    }
+                    &.total_users    { background-color: #4461a6; }
+                    &.monthly_users  { background-color: #bf4747; }
+                    &.monthly_status { background-color: #62913f; }
                 }
-                > span {
-                    padding: 2px 12px;
-                    font-size: 16px;
-                }
-                &.total_users    { background-color: #4461a6; }
-                &.monthly_users  { background-color: #bf4747; }
-                &.monthly_status { background-color: #62913f; }
             }
         }
     }
@@ -1408,3 +1409,13 @@
         }
     }
 }
+
+@container instanceHeader (width < 380px) {
+    .column_instance_info>.instance_header>li.header_instanceinfo>ul.detail_info>li {
+        > h6, > span {
+            font-size: 13px;
+            font-weight: normal;
+        }
+    }
+}
+

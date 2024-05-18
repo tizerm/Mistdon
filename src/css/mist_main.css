@@ -971,9 +971,16 @@
 
         /*=== History Timeline Layout ============================================================*/
         > .history_timeline {
-            & td {
-                width: 360px;
-                max-width: 360px;
+            display: flex;
+            width: min(960px,calc(100vw - 64px));
+            overflow-x: auto;
+            &::-webkit-scrollbar { height: 8px; }
+
+            > div {
+                flex-basis: 300px;
+                flex-shrink: 0;
+                flex-grow: 1;
+
                 > .col_head {
                     border-top-left-radius: 18px;
                     border-top-right-radius: 18px;
@@ -1060,7 +1067,7 @@
         height: min(960px,100vh);
         z-index: 33;
         right: 0px;
-        > table { height: calc(100% - 36px); }
+        > .column_instance_info { height: calc(100% - 36px); }
     }
     .post_detail_window.ex_window {
         width: min(480px,100vw);
