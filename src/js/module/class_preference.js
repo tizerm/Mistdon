@@ -206,9 +206,9 @@ class Preference {
                 </div>
             `,
             color: '42809e',
-            drag_only_x: false,
             resizable: true,
-            resize_only_y: false
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // テンプレート内容をウィンドウにバインド

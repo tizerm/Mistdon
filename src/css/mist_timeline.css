@@ -396,14 +396,6 @@
                     margin: 0px 12px;
                     overflow-wrap: break-word;
 
-                    & a:not([class*="mention"]) {
-                        display: inline-block;
-                        max-width: 240px;
-                        overflow: hidden;
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                        vertical-align: text-bottom;
-                    }
                     & p:not(:last-child) { margin-bottom: 1em; }
                 }
                 > .hidden_content {
@@ -568,7 +560,7 @@
                 }
             }
 
-            /*=== Quote Info =====================================================================*/
+            /*=== Notification Impression Info ===================================================*/
             > .notified_impression {
                 text-align: center;
                 & span {
@@ -711,6 +703,16 @@
                     &.label_1m  { background-color: #2a6185; }
                     &.label_hfy { background-color: #2a3985; }
                     &.label_1y  { background-color: #472a85; }
+                }
+            }
+            > .content, > .post_quote {
+                >.main_content a:not([class*="mention"]) {
+                    display: inline-block;
+                    max-width: 240px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    vertical-align: text-bottom;
                 }
             }
         }
@@ -1123,12 +1125,16 @@
 
 .user_header { background-color: #999999; }
 .column_profile {
-    width: 420px;
     position: relative;
     > .profile_header {
         height: 216px;
         overflow-y: hidden;
-        .user_header { height: 96px; }
+        .user_header {
+            height: 96px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
         .detail_info {
             > .counter {
                 width: 82px;
@@ -1259,6 +1265,20 @@
                 top: 20px;
             }
             &:hover { background-color: rgba(88,88,88,0.92); }
+        }
+    }
+}
+.account_timeline.single_user>.column_profile { width: 100%; }
+.account_timeline.allaccount_user {
+    max-width: calc(100vw - 72px);
+    > .accounts_box {
+        display: flex;
+        width: 100%;
+        overflow-x: auto;
+        &::-webkit-scrollbar { height: 8px; }
+        > .column_profile {
+            flex-shrink: 0;
+            flex-basis: 420px;
         }
     }
 }

@@ -1018,11 +1018,11 @@
         if (btn.is(".closed")) { // 既に閉じていた場合は開く
             btn.removeClass("closed")
             btn.next().css('height', 'calc((100vh - 310px) * 0.2)')
-            btn.closest("td").find(".posts").css('height', 'calc((100vh - 310px) * 0.6)')
+            btn.closest(".column_profile").find(".posts").css('height', 'calc((100vh - 310px) * 0.6)')
         } else { // 開いている場合は閉じる
             btn.addClass("closed")
             btn.next().css('height', '32px')
-            btn.closest("td").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
+            btn.closest(".column_profile").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
         }
     })
 
@@ -1032,9 +1032,9 @@
      * => ユーザーの投稿を表示
      */
     $(document).on("click", ".account_timeline .count_post", e => {
-        $(e.target).closest("td").find(".user_ff_elm").hide()
-        $(e.target).closest("td").find(".user_bookmark_elm").hide()
-        $(e.target).closest("td").find(".user_post_elm").show()
+        $(e.target).closest(".column_profile").find(".user_ff_elm").hide()
+        $(e.target).closest(".column_profile").find(".user_bookmark_elm").hide()
+        $(e.target).closest(".column_profile").find(".user_post_elm").show()
     })
 
     /**
@@ -1043,7 +1043,7 @@
      * => フォロイー一覧を表示
      */
     $(document).on("click", ".account_timeline .count_follow:not(.label_private)",
-        e => User.getCache($(e.target).closest("td")).createFFTaglist('follows'))
+        e => User.getCache($(e.target).closest(".column_profile")).createFFTaglist('follows'))
 
     /**
      * #Event
@@ -1051,7 +1051,7 @@
      * => フォロワー一覧を表示
      */
     $(document).on("click", ".account_timeline .count_follower:not(.label_private)",
-        e => User.getCache($(e.target).closest("td")).createFFTaglist('followers'))
+        e => User.getCache($(e.target).closest(".column_profile")).createFFTaglist('followers'))
 
     /**
      * #Event
@@ -1059,7 +1059,7 @@
      * => お気に入り一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_mastfav",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Mastodon'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Favorite_Mastodon'))
 
     /**
      * #Event
@@ -1067,7 +1067,7 @@
      * => お気に入り一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_miskfav",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Misskey'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Favorite_Misskey'))
 
     /**
      * #Event
@@ -1075,7 +1075,7 @@
      * => ブックマーク一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_bookmark",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Bookmark'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Bookmark'))
 
     /**
      * #Event
@@ -1083,7 +1083,7 @@
      * => 最近リアクションを送信したノート一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_reaction",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Reaction'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Reaction'))
 
     /**
      * #Event
@@ -1091,7 +1091,7 @@
      * => ユーザーが所属しているインスタンスの情報を表示
      */
     $(document).on("click", ".account_timeline .__on_show_instance",
-        e => User.getCache($(e.target).closest("td")).getInstance().then(instance => instance.createDetailHtml()))
+        e => User.getCache($(e.target).closest(".column_profile")).getInstance().then(instance => instance.createDetailHtml()))
 
     /**
      * #Event
@@ -1111,7 +1111,7 @@
     $(document).on("click", ".account_timeline .__tab_profile_medias", e => {
         if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
             // メディアタイムラインを未取得の場合は取得する
-            User.getCache($(e.target).closest("td")).createMediaGallery()
+            User.getCache($(e.target).closest(".column_profile")).createMediaGallery()
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
     })
@@ -1155,7 +1155,7 @@
                 .removeClass("ui-state-disabled").attr("name", post_id.substring(post_id.indexOf('@')))
         } else if ($(e.target).closest("table").is("#auth_account_table"))
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
-                .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("name"))
+                .removeClass("ui-state-disabled").attr("name", $(e.target).closest(".column_profile").attr("name"))
         else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")
 
         // フォロ限などはブースト/リノートを禁止
@@ -1184,7 +1184,7 @@
      */
     $(document).on("contextmenu", "ul.__context_user>li", e => {
         popContextMenu(e, "pop_context_user")
-        $("#pop_context_user").attr("name", $(e.target).closest("td").attr("name"))
+        $("#pop_context_user").attr("name", $(e.target).closest(".column_profile").attr("name"))
         return false
     })
     $(document).on("contextmenu", "li.short_userinfo, li.user_nametag", e => {
@@ -1338,8 +1338,10 @@
      */
     $(document).on("click", "#pop_multi_window .window_close_button", e => {
         const target_window = $(e.target).closest(".ex_window")
-        // ユーザーウィンドウとタイムラインウィンドウはキャッシュマップを削除
-        if (target_window.is(".account_timeline")) User.deleteCache(target_window.find("td"))
+        // キャッシュマップを削除
+        if (target_window.is(".account_timeline.single_user")) User.deleteCache(target_window.find(".column_profile"))
+        else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
+            target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
@@ -1412,16 +1414,5 @@
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",
         e => $("#pop_lastest_release").hide(...Preference.getAnimation("LEFT_DROP"), () => $("#pop_lastest_release").remove()))
-
-    /**
-     * #Event
-     * すべての認証アカウントのプロフィール表示: 閉じるボタン.
-     * => キャッシュを消してからウィンドウを閉じる
-     */
-    $(document).on("click", "#__on_alluser_close", e => {
-        // ユーザーキャッシュをすべてクリア
-        $("#pop_ex_timeline td.column_profile").each((index, elm) => User.deleteCache($(elm)))
-        $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP"))
-    })
 
 })

@@ -1467,17 +1467,35 @@ class Account {
      * アカウントのプロフィール一覧を生成するDOMを返却
      */
     static createProfileTimeline() {
-        // 先に表示フレームだけ生成
+        // 既に表示されていたらなにもしない
+        if ($(".account_timeline.allaccount_user").length > 0) return
+
+        // 一意認識用のUUIDとフレームを生成
+        const window_uuid = crypto.randomUUID()
+        const window_key = `allaccount_window_${window_uuid}`
         const template_html = [...Account.map.keys()]
             .map(address => User.createDetailHtml(address)).reduce((rs, el) => rs + el, '')
-        $("#pop_ex_timeline").html(`
-            <div class="account_timeline auth_user">
-                <table id="auth_account_table"><tbody>
-                    <tr>${template_html}</tr>
-                </tbody></table>
-            </div>
-            <button type="button" id="__on_alluser_close" class="close_button">×</button>
-        `).show(...Preference.getAnimation("WINDOW_FOLD"))
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="account_timeline allaccount_user ex_window">
+                    <h2><span>すべてのアカウント</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${window_uuid}"/>
+                        <label for="__window_opacity_${window_uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="accounts_box">${template_html}</div>
+                </div>
+            `,
+            color: getRandomColor(),
+            resizable: true,
+            drag_axis: "x",
+            resize_axis: "e, w"
+        })
 
         // それぞれのアカウントのユーザー情報を取得してバインド
         Account.each(account => account.getUserCache().then(user => {
