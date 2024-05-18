@@ -480,6 +480,14 @@ class Preference {
      * 全体設定の内容から永続適用CSSを生成.
      */
     static generateStylesheet() {
+        // カラムの横幅定義
+        let columns = ''
+        Column.each(col => columns += `
+            #${col.id} {
+                flex-basis: min(${col.pref.col_width}px,calc(100% - 2px));
+                &.fixed_col { max-width: ${col.pref.col_width}px; }
+            }`)
+
         // ギャラリーレイアウトのコンテナクエリを定義
         const width_limit = Number(Preference.GENERAL_PREFERENCE.gallery_width_limit)
         let containers = ''
@@ -490,6 +498,7 @@ class Preference {
         `
         // CSSをバインド
         $('style').html(`
+            ${columns}
             .timeline ul {
                 > li {
                     &.normal_layout {

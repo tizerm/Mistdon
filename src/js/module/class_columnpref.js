@@ -500,7 +500,7 @@ class ColumnPref {
      */
     static get(arg) {
         // 数値型だった場合インデクスとして番号からプロパティを取得
-        if (typeof arg == 'number') return ColumnPref.map.get($(".column_td").eq(arg).attr("id"))
+        if (typeof arg == 'number') return ColumnPref.map.get($(".column_box").eq(arg).attr("id"))
         // 文字列型だった場合はそのままキーとしてプロパティを取得
         else if (typeof arg == 'string') return ColumnPref.map.get(arg)
         // オブジェクトだった場合jQueryオブジェクトとして取得
@@ -542,7 +542,7 @@ class ColumnPref {
     create() {
         // カラム本体を空の状態でjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
-            <td id="${this.id}" class="column_td ui-sortable">
+            <div id="${this.id}" class="column_box ui-sortable">
                 <div class="col_head">
                     <h2><input type="text" class="__txt_col_head" placeholder="(カラムの名前を設定してください)"/></h2>
                     <div class="group_button">
@@ -564,14 +564,14 @@ class ColumnPref {
                 </div>
                 <div class="col_tl_groups __ui_gp_sortable">
                 </div>
-            </td>
+            </div>
         `))
         // 初期値が存在する場合は初期値を設定
         if (this.pref?.label_head) // カラム名称
             jqelm.find(".__txt_col_head").val(this.pref.label_head)
         if (this.pref?.col_width) { // カラム幅
             jqelm.find(".__txt_col_width").val(this.pref.col_width)
-            jqelm.closest("td").css("width", `${this.pref.col_width}px`)
+            jqelm.closest(".column_box").css("width", `${this.pref.col_width}px`)
         }
         if (this.pref?.d_hide) // デフォルトで閉じる
             jqelm.find(".__chk_default_hide").prop("checked", true)
@@ -585,7 +585,7 @@ class ColumnPref {
         this.tl_groups.forEach((v, k) => jqelm.find(".col_tl_groups").append(v.create()))
 
         // 最後にカラムのDOMを追加
-        $("#columns>table>tbody>tr").append(jqelm)
+        $("#columns").append(jqelm)
     }
 
     /**
@@ -598,9 +598,9 @@ class ColumnPref {
         column.create()
         column.addGroup()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#columns>table #${column.id}>.col_option`))
+        setColorPalette($(`#${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
-        $(`#columns>table #${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
+        $(`#${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**
@@ -658,7 +658,7 @@ class ColumnPref {
      * @param target 再計算対象のカラム
      */
     static recalcHeight(target) {
-        const target_col = ColumnPref.get(target.closest("td"))
+        const target_col = ColumnPref.get(target.closest(".column_box"))
         if (Number(target.val()) <= 0) { // 0以下が入力されたらリセット
             target_col.resetHeight()
             ColumnPref.setButtonPermission()
@@ -701,9 +701,9 @@ class ColumnPref {
     static setButtonPermission() {
         // 最後のタイムライングループの縦幅を編集禁止にする
         $(".__txt_group_height").prop("disabled", false)
-        $("#columns>table>tbody>tr>td>.col_tl_groups>.tl_group:last-child .__txt_group_height").prop("disabled", true).val("")
+        $("#columns>.column_box>.col_tl_groups>.tl_group:last-child .__txt_group_height").prop("disabled", true).val("")
         // すべてのタイムライングループの高さを再設定
-        $("#columns>table td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>.column_box").each((col_index, col_elm) => { // カラムイテレータ
             let total = 0
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 let height = $(gp_elm).find('.__txt_group_height').val()
@@ -754,8 +754,8 @@ class ColumnPref {
             tolerance: "pointer",
             update: (e, ui) => {
                 if (ui.sender) { // 他のカラムにグループが移動した場合高さを再設定
-                    ColumnPref.get(ui.sender.closest("td")).resetHeight()
-                    ColumnPref.get(ui.item.closest("td")).resetHeight()
+                    ColumnPref.get(ui.sender.closest(".column_box")).resetHeight()
+                    ColumnPref.get(ui.item.closest(".column_box")).resetHeight()
                 }
                 ColumnPref.setButtonPermission()
             }
@@ -782,7 +782,7 @@ class ColumnPref {
      */
     static normalize() {
         // DOM要素から不正な空データを除外する
-        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>.column_box").each((col_index, col_elm) => { // カラムイテレータ
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 // タイムラインが存在しないグループは削除
                 if ($(gp_elm).find("ul>li").length == 0) $(gp_elm).remove()
@@ -801,7 +801,7 @@ class ColumnPref {
         ColumnPref.normalize()
         // 現在のカラムを構成しているDOMのHTML構造から設定JSONを生成する
         const col_list = []
-        $("#columns>table>tbody>tr>td").each((col_index, col_elm) => { // カラムイテレータ
+        $("#columns>.column_box").each((col_index, col_elm) => { // カラムイテレータ
             const group_list = []
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
                 const tl_list = []

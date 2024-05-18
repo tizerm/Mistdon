@@ -561,7 +561,7 @@
      * => そのタイムライングループにカーソルを合わせる
      */
     $(document).on("click", ".tl_group_box", e => {
-        const target_col = Column.get($(e.target).closest("td"))
+        const target_col = Column.get($(e.target).closest(".column_box"))
         Column.disposeCursor()
         target_col.setCursor()
         const target_gp = target_col.getGroup($(e.target).closest(".tl_group_box").attr("id"))
@@ -575,28 +575,28 @@
      * => カラム内のグループすべてトップに移動
      */
     $(document).on("click", ".__on_column_top", e =>
-        Column.get($(e.target).closest("td")).eachGroup(gp => gp.scroll(0)))
+        Column.get($(e.target).closest(".column_box")).eachGroup(gp => gp.scroll(0)))
 
     /**
      * #Event
      * カラムボタン: カラムを開く.
      */
     $(document).on("click", ".__on_column_open", e =>
-        Column.get($(e.target).closest("td").index(".closed_col")).toggle())
+        Column.get($(e.target).closest(".closed_col").index(".closed_col")).toggle())
 
     /**
      * #Event
      * カラムボタン: カラムを閉じる.
      */
     $(document).on("click", ".__on_column_close", e =>
-        Column.get($(e.target).closest("td").index(".column_td")).toggle())
+        Column.get($(e.target).closest(".column_box")).toggle())
 
     /**
      * #Event
      * カラムボタン: 可変幅ON/OFF.
      */
     $(document).on("click", ".__on_column_flex", e =>
-        Column.get($(e.target).closest("td")).toggleFlex())
+        Column.get($(e.target).closest(".column_box")).toggleFlex())
 
     /**
      * #Event
@@ -604,20 +604,20 @@
      * => カラム内のグループすべてリロード
      */
     $(document).on("click", ".__on_column_reload", e =>
-        Column.get($(e.target).closest("td")).eachGroup(gp => gp.reload()))
+        Column.get($(e.target).closest(".column_box")).eachGroup(gp => gp.reload()))
 
     /**
      * #Event
      * グループボタン: トップへ移動.
      */
-    $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest("td"))
+    $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).scroll(0))
 
     /**
      * #Event
      * グループボタン: リロード.
      */
-    $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest("td"))
+    $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
     /*=== Post Event =============================================================================================*/
@@ -659,7 +659,7 @@
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
-            .get($(e.target).closest("td"))
+            .get($(e.target).closest(".column_box"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
@@ -710,7 +710,7 @@
     $(document).on("click", ".__on_poll_vote", e => {
         const vote_target = [$(e.target).index()] // 単体投票の場合は単一配列
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest("td"))
+            Column.get($(e.target).closest(".column_box"))
                 .getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus($(e.target).closest("li")).vote(vote_target, $(e.target))
         else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_target, $(e.target)) // ポップアップの場合は一時保存から取得
@@ -726,7 +726,7 @@
         $(e.target).closest(".post_poll").find("input.__chk_multi_vote:checked")
             .each((index, elm) => vote_targets.push($(elm).val()))
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest("td"))
+            Column.get($(e.target).closest(".column_box"))
                 .getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus($(e.target).closest("li")).vote(vote_targets, $(e.target))
         else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_targets, $(e.target)) // ポップアップの場合は一時保存から取得
@@ -762,7 +762,7 @@
         if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
             User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
         else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, false)
@@ -780,7 +780,7 @@
     $(document).on("click", "li .post_quote", e => {
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).quote.createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
@@ -808,7 +808,7 @@
             const target_li = $(e.target).closest("li")
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-                target_post = Column.get($(e.target).closest("td"))
+                target_post = Column.get($(e.target).closest(".column_box"))
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
             else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
@@ -833,7 +833,7 @@
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
-                target_post = Column.get($(e.target).closest("td"))
+                target_post = Column.get($(e.target).closest(".column_box"))
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
             else if ($(e.target).closest("ul.scrollable_tl").length > 0)
                 // 一時スクロールタイムラインの場合は静的マップから取得
@@ -1171,7 +1171,7 @@
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
-        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
+        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest(".column_box"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
         $("#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"))
         return false

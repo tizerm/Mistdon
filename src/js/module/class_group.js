@@ -357,7 +357,7 @@ class Group {
      */
     static getCursor() {
         return Column.get($(".__target_col")).getGroup($(".__target_col")
-            .closest("td").find(".__target_group").closest(".tl_group_box").attr("id"))
+            .closest(".column_box").find(".__target_group").closest(".tl_group_box").attr("id"))
     }
 
     /**
