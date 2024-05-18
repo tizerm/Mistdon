@@ -1866,9 +1866,9 @@ class Status {
                 </div>
             `,
             color: getRandomColor(),
-            drag_only_x: false,
             resizable: true,
-            resize_only_y: true
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // 投稿内容をバインドして追加情報を非同期でバインド

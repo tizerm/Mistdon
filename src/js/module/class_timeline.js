@@ -288,9 +288,9 @@ class Timeline {
                 </div>
             `,
             color: this.pref.color ?? this.target_account?.pref.acc_color,
-            drag_only_x: false,
             resizable: true,
-            resize_only_y: false
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // スクロールローダーを生成してマップに登録

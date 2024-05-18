@@ -49,7 +49,7 @@ class Column {
      */
     static get(arg) {
         // 数値型だった場合インデクスとして番号からプロパティを取得
-        if (typeof arg == 'number') return Column.map.get($(".column_td").eq(arg).attr("id"))
+        if (typeof arg == 'number') return Column.map.get($(".column_box").eq(arg).attr("id"))
         // 文字列型だった場合はそのままキーとしてプロパティを取得
         else if (typeof arg == 'string') return Column.map.get(arg)
         // オブジェクトだった場合jQueryオブジェクトとして取得
@@ -61,7 +61,7 @@ class Column {
      * 開いているカラムの中で最初のカラムを返却
      */
     static getOpenedFirst() {
-        return Column.get($(".column_td:visible").first())
+        return Column.get($(".column_box:visible").first())
     }
 
     /**
@@ -110,7 +110,7 @@ class Column {
         // カラム本体を空の状態で生成(ナンバーアイコンは10未満のカラムのみ表示)
         const num_img = this.index < 9 ? `<img src="resources/${this.index + 1}.png" class="ic_column_num"/>` : ''
         let html /* 閉じた状態のカラム */ = `
-            <td id="${this.id}_closed" class="closed_col">
+            <div id="${this.id}_closed" class="closed_col">
                 ${num_img}
                 <div class="col_action">
                     <a class="__on_column_open" title="カラムを開く">
@@ -120,15 +120,13 @@ class Column {
                 <div class="rotate_head">
                     <h2>${this.pref.label_head}</h2>
                 </div>
-            </td>
+            </div>
         `; html /* 開いた状態のカラム */ += `
-            <td id="${this.id}" class="column_td">
+            <div id="${this.id}" class="column_box ${this.pref.d_flex ? 'flex_col' : 'fixed_col'}">
                 <div class="col_head">
                     <h2>${this.pref.label_head}</h2>
                     <div class="ic_column_cursor">${num_img}</div>
-                    <h6></h6>
                     <div class="col_action">
-                        <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_column_warn"/>
                         <a class="__on_column_reload" title="カラムをリロード"
                             ><img src="resources/ic_reload.png" alt="カラムをリロード"/></a>
                         <a class="__on_column_flex" title="可変幅ON/OFF"
@@ -142,23 +140,18 @@ class Column {
                 </div>
                 <div class="col_tl_groups">
                 </div>
-            </td>
+            </div>
         `
         // テーブルにバインド(対象が複数に渡るので一度バインドしてから表示制御)
-        $("#columns>table tr").append(html)
+        $("#columns").append(html)
 
         // カラムの色と幅を変更
-        $(`#${this.id}>.col_head`).css("background-color", `#${this.pref.col_color}`)
-        $(`#${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
-
-        // デフォルトで可変幅にする場合はクラスを付与して幅を自動にする
-        if (this.pref.d_flex)  $(`#${this.id}`).addClass('flex_col').css("width", "auto")
-        else $(`#${this.id}`).css("width", `${this.pref.col_width}px`)
+        $(`#${this.id}>.col_head, #${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
 
         // デフォルトで閉じる場合は表示を反転
         if (this.pref.d_hide) {
-            $(`#columns>table #${this.id}`).hide()
-            $(`#columns>table #${this.id}_closed`).show()
+            $(`#${this.id}`).hide()
+            $(`#${this.id}_closed`).show()
         }
 
         // タイムライングループをセット
@@ -209,7 +202,7 @@ class Column {
         const target = $(`#${this.id}`)
         if (this.open_flg) {
             // Open⇒Close
-            if ($(".column_td:visible").length <= 1) {
+            if ($(".column_box:visible").length <= 1) {
                 // 全部のカラムを閉じようとしたら止める
                 Notification.info("すべてのカラムを閉じることはできません.")
                 return
@@ -255,12 +248,12 @@ class Column {
         const img = target.find(".ic_column_flex")
         if (!this.flex) {
             // OFF⇒ON
-            target.addClass('flex_col').css('width', 'auto')
+            target.addClass('flex_col').removeClass('fixed_col')
             img.attr('src', 'resources/ic_flex_on.png')
             this.flex = true
         } else {
             // ON⇒OFF
-            target.removeClass('flex_col').css('width', `${this.pref.col_width}px`)
+            target.removeClass('flex_col').addClass('fixed_col')
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
         }
@@ -291,33 +284,33 @@ class Column {
 
     // Getter: このカラムの右横のカラムを取得(ローテーション)
     get next() {
-        let index = $(`#${this.id}`).index(".column_td") + 1
+        let index = $(`#${this.id}`).index(".column_box") + 1
         // 右端の場合は最初の要素を選択
-        if ($(".column_td").length <= index) index = 0
+        if ($(".column_box").length <= index) index = 0
         return Column.get(index)
     }
 
     // Getter: このカラムの右横の開いているカラムを取得(ローテーション)
     get opened_next() {
-        let index = $(`#${this.id}`).index(".column_td:visible") + 1
+        let index = $(`#${this.id}`).index(".column_box:visible") + 1
         // 右端の場合は最初の要素を選択
-        if ($(".column_td:visible").length <= index) index = 0
-        return Column.get($(".column_td:visible").eq(index))
+        if ($(".column_box:visible").length <= index) index = 0
+        return Column.get($(".column_box:visible").eq(index))
     }
 
     // Getter: このカラムの左横のカラムを取得(ローテーション)
     get prev() {
-        let index = $(`#${this.id}`).index(".column_td") - 1
+        let index = $(`#${this.id}`).index(".column_box") - 1
         // 左端の場合は最後の要素を選択
-        if (index < 0) index = $(".column_td").length - 1
+        if (index < 0) index = $(".column_box").length - 1
         return Column.get(index)
     }
 
     // Getter: このカラムの左横の開いているカラムを取得(ローテーション)
     get opened_prev() {
-        let index = $(`#${this.id}`).index(".column_td:visible") - 1
+        let index = $(`#${this.id}`).index(".column_box:visible") - 1
         // 右端の場合は最初の要素を選択
-        if (index < 0) index = $(".column_td:visible").length - 1
-        return Column.get($(".column_td:visible").eq(index))
+        if (index < 0) index = $(".column_box:visible").length - 1
+        return Column.get($(".column_box:visible").eq(index))
     }
 }

@@ -561,7 +561,7 @@
      * => そのタイムライングループにカーソルを合わせる
      */
     $(document).on("click", ".tl_group_box", e => {
-        const target_col = Column.get($(e.target).closest("td"))
+        const target_col = Column.get($(e.target).closest(".column_box"))
         Column.disposeCursor()
         target_col.setCursor()
         const target_gp = target_col.getGroup($(e.target).closest(".tl_group_box").attr("id"))
@@ -575,28 +575,28 @@
      * => カラム内のグループすべてトップに移動
      */
     $(document).on("click", ".__on_column_top", e =>
-        Column.get($(e.target).closest("td")).eachGroup(gp => gp.scroll(0)))
+        Column.get($(e.target).closest(".column_box")).eachGroup(gp => gp.scroll(0)))
 
     /**
      * #Event
      * カラムボタン: カラムを開く.
      */
     $(document).on("click", ".__on_column_open", e =>
-        Column.get($(e.target).closest("td").index(".closed_col")).toggle())
+        Column.get($(e.target).closest(".closed_col").index(".closed_col")).toggle())
 
     /**
      * #Event
      * カラムボタン: カラムを閉じる.
      */
     $(document).on("click", ".__on_column_close", e =>
-        Column.get($(e.target).closest("td").index(".column_td")).toggle())
+        Column.get($(e.target).closest(".column_box")).toggle())
 
     /**
      * #Event
      * カラムボタン: 可変幅ON/OFF.
      */
     $(document).on("click", ".__on_column_flex", e =>
-        Column.get($(e.target).closest("td")).toggleFlex())
+        Column.get($(e.target).closest(".column_box")).toggleFlex())
 
     /**
      * #Event
@@ -604,20 +604,20 @@
      * => カラム内のグループすべてリロード
      */
     $(document).on("click", ".__on_column_reload", e =>
-        Column.get($(e.target).closest("td")).eachGroup(gp => gp.reload()))
+        Column.get($(e.target).closest(".column_box")).eachGroup(gp => gp.reload()))
 
     /**
      * #Event
      * グループボタン: トップへ移動.
      */
-    $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest("td"))
+    $(document).on("click", ".__on_group_top", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).scroll(0))
 
     /**
      * #Event
      * グループボタン: リロード.
      */
-    $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest("td"))
+    $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
     /*=== Post Event =============================================================================================*/
@@ -659,7 +659,7 @@
         const image_url = $(e.target).closest(".__on_media_expand").attr("href")
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
-            .get($(e.target).closest("td"))
+            .get($(e.target).closest(".column_box"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id"))
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
@@ -710,7 +710,7 @@
     $(document).on("click", ".__on_poll_vote", e => {
         const vote_target = [$(e.target).index()] // 単体投票の場合は単一配列
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest("td"))
+            Column.get($(e.target).closest(".column_box"))
                 .getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus($(e.target).closest("li")).vote(vote_target, $(e.target))
         else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_target, $(e.target)) // ポップアップの場合は一時保存から取得
@@ -726,7 +726,7 @@
         $(e.target).closest(".post_poll").find("input.__chk_multi_vote:checked")
             .each((index, elm) => vote_targets.push($(elm).val()))
         if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest("td"))
+            Column.get($(e.target).closest(".column_box"))
                 .getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus($(e.target).closest("li")).vote(vote_targets, $(e.target))
         else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_targets, $(e.target)) // ポップアップの場合は一時保存から取得
@@ -762,7 +762,7 @@
         if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
             User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
         else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, false)
@@ -780,7 +780,7 @@
     $(document).on("click", "li .post_quote", e => {
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest("td")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).quote.createExpandWindow(target_li, e, false)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
@@ -808,7 +808,7 @@
             const target_li = $(e.target).closest("li")
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-                target_post = Column.get($(e.target).closest("td"))
+                target_post = Column.get($(e.target).closest(".column_box"))
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
             else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
@@ -833,7 +833,7 @@
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
-                target_post = Column.get($(e.target).closest("td"))
+                target_post = Column.get($(e.target).closest(".column_box"))
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
             else if ($(e.target).closest("ul.scrollable_tl").length > 0)
                 // 一時スクロールタイムラインの場合は静的マップから取得
@@ -1018,11 +1018,11 @@
         if (btn.is(".closed")) { // 既に閉じていた場合は開く
             btn.removeClass("closed")
             btn.next().css('height', 'calc((100vh - 310px) * 0.2)')
-            btn.closest("td").find(".posts").css('height', 'calc((100vh - 310px) * 0.6)')
+            btn.closest(".column_profile").find(".posts").css('height', 'calc((100vh - 310px) * 0.6)')
         } else { // 開いている場合は閉じる
             btn.addClass("closed")
             btn.next().css('height', '32px')
-            btn.closest("td").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
+            btn.closest(".column_profile").find(".posts").css('height', 'calc(((100vh - 310px) * 0.8) - 32px)')
         }
     })
 
@@ -1032,9 +1032,9 @@
      * => ユーザーの投稿を表示
      */
     $(document).on("click", ".account_timeline .count_post", e => {
-        $(e.target).closest("td").find(".user_ff_elm").hide()
-        $(e.target).closest("td").find(".user_bookmark_elm").hide()
-        $(e.target).closest("td").find(".user_post_elm").show()
+        $(e.target).closest(".column_profile").find(".user_ff_elm").hide()
+        $(e.target).closest(".column_profile").find(".user_bookmark_elm").hide()
+        $(e.target).closest(".column_profile").find(".user_post_elm").show()
     })
 
     /**
@@ -1043,7 +1043,7 @@
      * => フォロイー一覧を表示
      */
     $(document).on("click", ".account_timeline .count_follow:not(.label_private)",
-        e => User.getCache($(e.target).closest("td")).createFFTaglist('follows'))
+        e => User.getCache($(e.target).closest(".column_profile")).createFFTaglist('follows'))
 
     /**
      * #Event
@@ -1051,7 +1051,7 @@
      * => フォロワー一覧を表示
      */
     $(document).on("click", ".account_timeline .count_follower:not(.label_private)",
-        e => User.getCache($(e.target).closest("td")).createFFTaglist('followers'))
+        e => User.getCache($(e.target).closest(".column_profile")).createFFTaglist('followers'))
 
     /**
      * #Event
@@ -1059,7 +1059,7 @@
      * => お気に入り一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_mastfav",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Mastodon'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Favorite_Mastodon'))
 
     /**
      * #Event
@@ -1067,7 +1067,7 @@
      * => お気に入り一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_miskfav",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Favorite_Misskey'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Favorite_Misskey'))
 
     /**
      * #Event
@@ -1075,7 +1075,7 @@
      * => ブックマーク一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_bookmark",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Bookmark'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Bookmark'))
 
     /**
      * #Event
@@ -1083,7 +1083,7 @@
      * => 最近リアクションを送信したノート一覧を表示
      */
     $(document).on("click", ".account_timeline .__on_show_reaction",
-        e => User.getCache($(e.target).closest("td")).createBookmarkList('Reaction'))
+        e => User.getCache($(e.target).closest(".column_profile")).createBookmarkList('Reaction'))
 
     /**
      * #Event
@@ -1091,7 +1091,7 @@
      * => ユーザーが所属しているインスタンスの情報を表示
      */
     $(document).on("click", ".account_timeline .__on_show_instance",
-        e => User.getCache($(e.target).closest("td")).getInstance().then(instance => instance.createDetailHtml()))
+        e => User.getCache($(e.target).closest(".column_profile")).getInstance().then(instance => instance.createDetailHtml()))
 
     /**
      * #Event
@@ -1111,7 +1111,7 @@
     $(document).on("click", ".account_timeline .__tab_profile_medias", e => {
         if ($(e.target).closest(".user_post_elm").find(".media_uls>ul").is(":empty"))
             // メディアタイムラインを未取得の場合は取得する
-            User.getCache($(e.target).closest("td")).createMediaGallery()
+            User.getCache($(e.target).closest(".column_profile")).createMediaGallery()
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
     })
@@ -1153,9 +1153,9 @@
             const post_id = $(e.target).closest("li").attr("id")
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
                 .removeClass("ui-state-disabled").attr("name", post_id.substring(post_id.indexOf('@')))
-        } else if ($(e.target).closest("table").is("#auth_account_table"))
+        } else if ($(e.target).closest(".allaccount_user").length > 0) // すべてのアカウント一覧
             $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit")
-                .removeClass("ui-state-disabled").attr("name", $(e.target).closest("td").attr("name"))
+                .removeClass("ui-state-disabled").attr("name", $(e.target).closest(".column_profile").attr("name"))
         else $("#pop_context_menu .__menu_post_del, #pop_context_menu .__menu_post_edit").addClass("ui-state-disabled")
 
         // フォロ限などはブースト/リノートを禁止
@@ -1171,7 +1171,7 @@
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
-        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest("td"))
+        if (tl_group_flg) Status.TEMPORARY_CONTEXT_STATUS = Column.get($(e.target).closest(".column_box"))
             .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus($(e.target).closest("li"))
         $("#pop_context_menu").attr("name", $(e.target).closest("li").attr("name"))
         return false
@@ -1184,7 +1184,7 @@
      */
     $(document).on("contextmenu", "ul.__context_user>li", e => {
         popContextMenu(e, "pop_context_user")
-        $("#pop_context_user").attr("name", $(e.target).closest("td").attr("name"))
+        $("#pop_context_user").attr("name", $(e.target).closest(".column_profile").attr("name"))
         return false
     })
     $(document).on("contextmenu", "li.short_userinfo, li.user_nametag", e => {
@@ -1338,8 +1338,10 @@
      */
     $(document).on("click", "#pop_multi_window .window_close_button", e => {
         const target_window = $(e.target).closest(".ex_window")
-        // ユーザーウィンドウとタイムラインウィンドウはキャッシュマップを削除
-        if (target_window.is(".account_timeline")) User.deleteCache(target_window.find("td"))
+        // キャッシュマップを削除
+        if (target_window.is(".account_timeline.single_user")) User.deleteCache(target_window.find(".column_profile"))
+        else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
+            target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
@@ -1412,16 +1414,5 @@
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",
         e => $("#pop_lastest_release").hide(...Preference.getAnimation("LEFT_DROP"), () => $("#pop_lastest_release").remove()))
-
-    /**
-     * #Event
-     * すべての認証アカウントのプロフィール表示: 閉じるボタン.
-     * => キャッシュを消してからウィンドウを閉じる
-     */
-    $(document).on("click", "#__on_alluser_close", e => {
-        // ユーザーキャッシュをすべてクリア
-        $("#pop_ex_timeline td.column_profile").each((index, elm) => User.deleteCache($(elm)))
-        $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP"))
-    })
 
 })

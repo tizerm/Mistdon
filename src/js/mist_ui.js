@@ -229,11 +229,11 @@ function createWindow(arg) {
     // Draggableにする(横方向にしか移動不可にするならパラメータ指定)
     $(`#${arg.window_key}`).draggable({
         handle: "h2",
-        axis: arg.drag_only_x ? "x" : false
+        axis: arg.drag_axis
     })
 
     // リサイズ可能にする場合はResizableにする
-    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: arg.resize_only_y ? "n, s" : "all" })
+    if (arg.resizable) $(`#${arg.window_key}`).resizable({ handles: arg.resize_axis })
 
     // ヘッダボタンにツールチップを設定
     $(`#${arg.window_key}>.window_buttons`).tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))

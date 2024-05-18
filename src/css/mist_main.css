@@ -34,9 +34,13 @@
         border-radius: 12px;
         margin: 2px 0px;
         width: calc(100vw - 72px);
+        container-type: inline-size;
+        container-name: header;
+
+        > * { flex-shrink: 0; }
 
         > .post_user {
-            width: 72px;
+            flex-basis: 72px;
             margin-right: 2px;
             > .__lnk_postuser {
                 display: block;
@@ -51,7 +55,7 @@
             }
         }
         > .opt_buttons {
-            width: 74px;
+            flex-basis: 74px;
             padding: 0px 4px;
             & img {
                 width: 36px;
@@ -91,14 +95,14 @@
             }
         }
         > .submit_button {
-            width: 74px;
+            flex-basis: 74px;
             > #__on_submit>img {
                 width: 72px;
                 height: 72px;
             }
         }
         > .additional_buttons {
-            width: 113px;
+            flex-basis: 113px;
             > * { margin: -1px; }
         }
     }
@@ -119,8 +123,11 @@
         &::-webkit-scrollbar { height: 8px; }
         > .flex_section {
             display: flex;
-            width: max(calc(100vw - 72px),880px);
+            width: 100%;
             height: 208px;
+
+            > * { flex-shrink: 0; }
+
             & h5 {
                 border-bottom: solid 1px #dddddd;
                 margin: 4px 0px;
@@ -142,6 +149,7 @@
             > .option_close {
                 position: relative;
                 border-radius: 12px;
+                flex-basis: 28px;
                 > button>img {
                     width: 24px;
                     height: 24px;
@@ -159,8 +167,7 @@
             }
 
             > .additional_users {
-                width: 172px;
-                min-width: 172px;
+                flex-basis: 172px;
                 text-align: center;
                 > ul.account_list {
                     overflow-y: auto;
@@ -195,8 +202,7 @@
                 }
             }
             > .publish_setting {
-                width: 172px;
-                min-width: 172px;
+                flex-basis: 172px;
                 text-align: center;
                 & input[name="__opt_visibility"]+label {
                     border-radius: 16px;
@@ -313,7 +319,6 @@
             > .refernced_post {
                 display: none;
                 flex-basis: 320px;
-                max-width: 320px;
                 > ul.refernce_post {
                     overflow-y: auto;
                     height: calc(100% - 32px);
@@ -336,6 +341,15 @@
 @keyframes marquee-anim {
     0%   { left: 100%; transform: translate(0); }
     100% { left: 0; transform: translate(-100%, 0); }
+}
+@container header (width < 520px) {
+    #head_postarea>.additional_buttons { display: none; }
+}
+@container header (width < 400px) {
+    #head_postarea>.opt_buttons { display: none; }
+}
+@container header (width < 320px) {
+    #head_postarea>.submit_button { display: none; }
 }
 
 /*=== Popup Window Area ==========================================================================*/
@@ -897,16 +911,6 @@
             color: #ffffff;
         }
 
-        /*=== Accounts Timeline Layout ===========================================================*/
-        > .account_timeline {
-            opacity: 1.0;
-            background-color: rgba(34,34,34,0.683);
-            width: calc(100vw - 72px);
-            overflow-x: scroll;
-            &::-webkit-scrollbar { height: 8px; }
-        }
-        &:has(>.account_timeline) { z-index: 30; }
-
         /*=== Search Timeline Layout =============================================================*/
         > .search_timeline {
             > .search_options {
@@ -967,9 +971,16 @@
 
         /*=== History Timeline Layout ============================================================*/
         > .history_timeline {
-            & td {
-                width: 360px;
-                max-width: 360px;
+            display: flex;
+            width: min(960px,calc(100vw - 64px));
+            overflow-x: auto;
+            &::-webkit-scrollbar { height: 8px; }
+
+            > div {
+                flex-basis: 300px;
+                flex-shrink: 0;
+                flex-grow: 1;
+
                 > .col_head {
                     border-top-left-radius: 18px;
                     border-top-right-radius: 18px;
@@ -1047,12 +1058,16 @@
         z-index: 32;
         right: 0px;
     }
+    .account_timeline.allaccount_user.ex_window {
+        z-index: 31;
+        right: 0px;
+    }
     .instance_window.ex_window {
         width: min(420px,100vw);
         height: min(960px,100vh);
         z-index: 33;
         right: 0px;
-        > table { height: calc(100% - 36px); }
+        > .column_instance_info { height: calc(100% - 36px); }
     }
     .post_detail_window.ex_window {
         width: min(480px,100vw);

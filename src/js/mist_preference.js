@@ -44,12 +44,12 @@
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", e => ColumnPref.addColumn())
     // カラム削除ボタンイベント(動的バインド)
-    $(document).on("click", ".__on_remove_column", e => ColumnPref.get($(e.target).closest("td")).removeColumn())
+    $(document).on("click", ".__on_remove_column", e => ColumnPref.get($(e.target).closest(".column_box")).removeColumn())
     // グループ追加ボタンイベント(動的バインド)
-    $(document).on("click", ".__on_add_group", e => ColumnPref.get($(e.target).closest("td")).addGroup())
+    $(document).on("click", ".__on_add_group", e => ColumnPref.get($(e.target).closest(".column_box")).addGroup())
     // グループ削除ボタンイベント(動的バインド)
     $(document).on("click", ".__on_remove_group", 
-        e => ColumnPref.get($(e.target).closest("td")).removeGroup($(e.target).closest(".tl_group").attr("id")))
+        e => ColumnPref.get($(e.target).closest(".column_box")).removeGroup($(e.target).closest(".tl_group").attr("id")))
     // タイムライン追加ボタンイベント(動的バインド)
     $(document).on("click", ".__on_add_tl", e => ColumnPref.getGroup($(e.target)).addTimeline())
     // タイムライン削除ボタンイベント(動的バインド)
@@ -57,7 +57,7 @@
         e => ColumnPref.getGroup($(e.target)).removeTimeline($(e.target).closest("li").index()))
     // カラムカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_color",
-        e => $(e.target).closest("td").find(".col_head").css("background-color", `#${$(e.target).val()}`))
+        e => $(e.target).closest(".column_box").find(".col_head").css("background-color", `#${$(e.target).val()}`))
     // グループカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_color",
         e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`))
@@ -69,7 +69,7 @@
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`))
     // カラム幅変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_width",
-        e => $(e.target).closest("td").css("width", `${$(e.target).val()}px`))
+        e => $(e.target).closest(".column_box").css("width", `${$(e.target).val()}px`))
     // グループレイアウト変更イベント
     $(document).on("change", ".__cmb_tl_layout", e => GroupPref.changeLayoutEvent($(e.target)))
     // グループレイアウト閉じるボタン
