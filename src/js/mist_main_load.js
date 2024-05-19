@@ -1,5 +1,6 @@
-﻿// HTMLロード時に非同期で実行
-$(() => (async () => {
+﻿$(() => (async () => {
+    /*============================================================================================================*/
+
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs()
     await window.accessApi.readPrefCols()
@@ -36,10 +37,9 @@ $(() => (async () => {
         return
     }
 
-    // カスタム絵文字のキャッシュ確認
-    Account.cacheEmojis()
+    /*============================================================================================================*/
 
-    ;(async () => { // 右クリック時のメニュー生成(時間かかるのでこのセクションだけ非同期実行)
+    ;(async () => { // 右クリック時のメニュー生成(async)
         $("#pop>.pop_context>.ui_menu>li ul.account_menu").each((index, elm) => {
             // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
             if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")))
@@ -50,6 +50,9 @@ $(() => (async () => {
         $("#pop>.pop_context>.ui_menu>li ul.limited_renote_menu").html(limited_renote_html)
         $("#pop>.pop_context>.ui_menu").menu()
     })()
+
+    // カスタム絵文字のキャッシュ確認(async)
+    Account.cacheEmojis()
 
     // 添付メディアリストをSortableにする
     $("#post_options .__ui_media_sortable").sortable({
@@ -75,38 +78,18 @@ $(() => (async () => {
         update: (e, ui) => $("#post_options .__attach_delete_box>li").remove()
     })
 
-    // ナビゲーションの表示設定
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.search) $("#navi .li_search").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.clip) $("#navi .li_clips").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()
-    // 投稿フォームの各種ボタン表示制御
-    if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
-    if (!Preference.GENERAL_PREFERENCE.enable_post_button) $("#header>#head_postarea>.submit_button").hide()
-    if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
-    if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
-        $("#header>#post_options .additional_users .__on_option_close").click()
-    enabledAdditionalAccount(true)
+    // 全体設定から各種設定項目を適用
+    Preference.initAlternateTimelinePref()
+    Preference.initVisibility()
     Preference.initBookmarkPref()
+    Preference.generateStylesheet()
+    Preference.initBackground()
 
-    // 一時タイムライン設定を反映
-    Preference.setAlternateTimelinePref()
+    enabledAdditionalAccount(true)
 
     // ツールチップを設定表示
     $("#header>#head_postarea").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
     $("#pop_expand_action, #post_options").tooltip(Preference.getUIPref("UPPER", "UI_FADE_ANIMATION"))
-
-    // 設定からスタイルシートを生成
-    Preference.generateStylesheet()
-    Preference.setBackground()
-    $("#__txt_postarea").css('font-size', `${Preference.GENERAL_PREFERENCE.font_size?.default}px`)
 
     // カラム生成
     Column.each(col => {
@@ -124,6 +107,7 @@ $(() => (async () => {
             gp.onLoadTimeline(rest_promises)
         })
     })
+
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({
         openFunc: () => {},
@@ -133,12 +117,14 @@ $(() => (async () => {
         },
         reconnect: true
     }))
-    // カラムにツールチップを設定
+
+    // カラムにツールチップを設定しカーソルと横幅を設定
     $(".column_box .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
-    // 見えている中で最初のカラムにカーソルをセット
     Column.getOpenedFirst().setCursor()
     Column.setWidthLimit()
 })())
+
+/*================================================================================================================*/
 
 /**
  * #LimitedMethod

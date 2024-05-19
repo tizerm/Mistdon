@@ -34,8 +34,10 @@
         border-radius: 12px;
         margin: 2px 0px;
         width: calc(100vw - 72px);
-        container-type: inline-size;
-        container-name: header;
+        &.flex_form {
+            container-type: inline-size;
+            container-name: header;
+        }
 
         > * { flex-shrink: 0; }
 
@@ -82,8 +84,10 @@
                 background-color: rgb(56,56,56);
                 border: solid 1px #888888;
                 color: #ffffff;
-                width: calc(100% - 12px);
+                width: calc(100% - 8px);
                 height: 68px;
+                font-size: 14px;
+                &::placeholder { font-size: 13px; }
                 &::selection {
                     color: #222222;
                     background-color: #dddddd;
@@ -342,14 +346,17 @@
     0%   { left: 100%; transform: translate(0); }
     100% { left: 0; transform: translate(-100%, 0); }
 }
-@container header (width < 520px) {
-    #head_postarea>.additional_buttons { display: none; }
+@container header (width < 580px) {
+    #head_postarea.flex_form>.additional_buttons { display: none; }
 }
-@container header (width < 400px) {
-    #head_postarea>.opt_buttons { display: none; }
+@container header (width < 460px) {
+    #head_postarea.flex_form>.opt_buttons { display: none; }
 }
-@container header (width < 320px) {
-    #head_postarea>.submit_button { display: none; }
+@container header (width < 380px) {
+    #head_postarea.flex_form>.post_user { display: none; }
+}
+@container header (width < 300px) {
+    #head_postarea.flex_form>.submit_button { display: none; }
 }
 
 

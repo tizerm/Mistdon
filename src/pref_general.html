@@ -68,23 +68,45 @@
             <dd>
                 <ul class="selector_list">
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_tool_button"/>
-                        <label for="__chk_gen_use_tool_button">ツールボタンを表示する</label>
+                        <input type="radio" id="__opt_gen_flex_headform1"
+                            name="__opt_gen_flex_headform" class="__opt_gen_flex_headform" value="true"/>
+                        <label for="__opt_gen_flex_headform1">投稿フォームを横幅に応じて自動で表示制御する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると下書き/投稿オプション/絵文字パレット/文字数メーターを表示します。オフの場合でも文字数メーター以外の機能はショートカットキーから実行可能です。"/>
+                        title="こちらを選択するとウィンドウの横幅に応じてボタンが自動的に非表示になります。"/>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_post_button"/>
-                        <label for="__chk_gen_use_post_button">投稿ボタンを表示する</label>
+                        <input type="radio" id="__opt_gen_flex_headform2"
+                            name="__opt_gen_flex_headform" class="__opt_gen_flex_headform" value="false"/>
+                        <label for="__opt_gen_flex_headform2">投稿フォームを個別に表示制御する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると投稿ボタンを表示します。オフにした場合Ctrl+Enterでしか投稿ができなくなるので注意してください。"/>
+                        title="こちらを選択すると下のオプションで個別に非表示設定できます。"/>
                     </li>
-                    <li>
-                        <input type="checkbox" id="__chk_gen_use_additional_button"/>
-                        <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
-                        <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
-                    </li>
+                    <ul id="__gp_gen_headforms" class="selector_list">
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_account_change"/>
+                            <label for="__chk_gen_use_account_change">投稿アカウント変更アイコンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると投稿アカウントのアイコンが表示される変更ボタンが表示されます。オフの場合はショートカットキーか投稿オプションの投稿アカウントダブルクリックで変更します。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_tool_button"/>
+                            <label for="__chk_gen_use_tool_button">ツールボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると下書き/投稿オプション/絵文字パレット/文字数メーターを表示します。オフの場合でも文字数メーター以外の機能はショートカットキーから実行可能です。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_post_button"/>
+                            <label for="__chk_gen_use_post_button">投稿ボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると投稿ボタンを表示します。オフにした場合Ctrl+Enterでしか投稿ができなくなるので注意してください。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_additional_button"/>
+                            <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
+                        </li>
+                    </ul>
                     <li>
                         <input type="checkbox" id="__chk_gen_hide_additional_account"/>
                         <label for="__chk_gen_hide_additional_account">投稿オプションの投稿アカウントをデフォルトで閉じる</label>

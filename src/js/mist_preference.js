@@ -30,7 +30,7 @@
         tolerance: "pointer"
     })
 
-    // 背景ファイル変更イベント
+    // 全体設定-背景ファイル変更イベント
     $(document).on("change", "#__file_gen_background", e => $("#__hdn_gen_bgfile").val(e.target.files[0].path))
     // 全体設定-フォントサイズボックスのフォーカスイベント
     $(document).on("focus", "input.__gen_fontsize", e => $(".font_sample_box").css("font-size", `${$(e.target).val()}px`))
@@ -40,6 +40,9 @@
         clearTimeout(font_timer)
         font_timer = setTimeout(() => $(".font_sample_box").css("font-size", `${$(e.target).val()}px`), 500)
     })
+    // 全体設定-フォントサイズボックスのフォーカスイベント
+    $(document).on("change", "input.__opt_gen_flex_headform", e => $("#__gp_gen_headforms input")
+        .prop("disabled", $("#__opt_gen_flex_headform1").prop("checked")))
 
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", e => ColumnPref.addColumn())

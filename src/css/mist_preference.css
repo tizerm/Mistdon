@@ -67,12 +67,16 @@
                 vertical-align: text-bottom;
                 cursor: help;
             }
-            .selector_list {
+            & ul.selector_list {
                 margin: 0px;
                 padding: 0px;
                 > li {
                     margin: 2px 0px;
                     list-style-type: none;
+                }
+                > ul.selector_list {
+                    border-left: dashed 4px #cccccc;
+                    padding-left: 8px;
                 }
             }
             .font_sample_box {

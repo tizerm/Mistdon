@@ -18,6 +18,8 @@ class Preference {
             "help_keyborad"             : pref?.navigation_visible?.help_keyborad   ?? true, // ショートカット早見表
             "help"                      : pref?.navigation_visible?.help            ?? true  // ヘルプ
         },                              // 個別設定
+        this.enable_flex_headform       = pref?.enable_flex_headform        ?? false, // ウィンドウ幅で可変表示
+        this.enable_change_account      = pref?.enable_change_account       ?? true,  // アカウント変更アイコン
         this.enable_tool_button         = pref?.enable_tool_button          ?? true,  // ツールボタン(左にあるやつ)
         this.enable_post_button         = pref?.enable_post_button          ?? true,  // 投稿ボタン
         this.enable_last_edit_button    = pref?.enable_last_edit_button     ?? true,  // 直前編集ボタン
@@ -220,6 +222,8 @@ class Preference {
                 if ($(value).is("#main")) $(`#${window_key} .pref_content`).html($(value))
             })
             Preference.setPreference()
+            // イベント矯正発火
+            $("#__opt_gen_flex_headform1").change()
             $(`#${window_key} .pref_content .tooltip_help`).tooltip({
                 position: {
                     my: "center top",
@@ -255,6 +259,9 @@ class Preference {
         $("#__chk_gen_navi_help")           .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
 
         // 個別オプション
+        $(Preference.GENERAL_PREFERENCE.enable_flex_headform ?
+            "#__opt_gen_flex_headform1" : "#__opt_gen_flex_headform2").prop("checked", true)
+        $("#__chk_gen_use_account_change")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_change_account)
         $("#__chk_gen_use_tool_button")                 .prop("checked", Preference.GENERAL_PREFERENCE.enable_tool_button)
         $("#__chk_gen_use_post_button")                 .prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
         $("#__chk_gen_use_additional_button")           .prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
@@ -348,6 +355,8 @@ class Preference {
                 "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
                 "help"                      : $("#__chk_gen_navi_help").prop("checked")
             },
+            "enable_flex_headform"          : $("#__opt_gen_flex_headform1").prop("checked"),
+            "enable_change_account"         : $("#__chk_gen_use_account_change").prop("checked"),
             "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
             "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
@@ -431,6 +440,36 @@ class Preference {
 
     /**
      * #StaticMethod
+     * ナビゲーションと投稿フォームの表示設定.
+     */
+    static initVisibility() {
+        // ナビゲーションの表示設定
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.search) $("#navi .li_search").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()
+
+        // 投稿フォームの各種ボタン表示制御
+        if (Preference.GENERAL_PREFERENCE.enable_flex_headform) $("#header>#head_postarea").addClass("flex_form")
+        else { // 可変自動制御じゃない場合は個別に表示制御
+            if (!Preference.GENERAL_PREFERENCE.enable_change_account) $("#header>#head_postarea>.post_user").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_post_button) $("#header>#head_postarea>.submit_button").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
+        }
+
+        if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
+            $("#header>#post_options .additional_users .__on_option_close").click()
+    }
+
+    /**
+     * #StaticMethod
      * ブックマーク/お気に入り機能の初期値設定.
      */
     static initBookmarkPref() {
@@ -448,7 +487,7 @@ class Preference {
      * #StaticMethod
      * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
      */
-    static setAlternateTimelinePref() {
+    static initAlternateTimelinePref() {
         // トレンドタイムライン
         Trend.TREND_PREF_TIMELINE.pref = {
             "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,
@@ -577,13 +616,16 @@ class Preference {
                 }
             }
         `)
+
+        // 投稿フォームの文字サイズを設定
+        //$("#__txt_postarea").css('font-size', `${Preference.GENERAL_PREFERENCE.font_size?.default}px`)
     }
 
     /**
      * #StaticMethod
      * 全体設定の内容から背景画像を設定.
      */
-    static setBackground() {
+    static initBackground() {
         switch (Preference.GENERAL_PREFERENCE.background?.type) {
             case 'mono_color': // 単色カラー
                 $("body").css({

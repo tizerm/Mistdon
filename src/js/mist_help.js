@@ -10,7 +10,7 @@
                 <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show("blind", { direction: "right" }, 160)
         $.ajax({
             url: "help/help_main.html",
             cache: false

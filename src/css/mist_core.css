@@ -58,7 +58,7 @@ input[type="radio"], input[type="checkbox"] {
             &:hover { background-color: #888888; }
         }
     }
-    &:checked+label{
+    &:checked:not([disabled])+label {
         background-color: #337a9f;
         color: #ffffff;
         &:hover {
@@ -70,9 +70,15 @@ input[type="radio"], input[type="checkbox"] {
             &:hover { background-color: #77afef; }
         }
     }
+    &[disabled]+label {
+        opacity: 0.5;
+        background-color: #222222;
+        color: #666666;
+        background-image: url("../resources/ic_not.png");
+    }
 }
-input[type="checkbox"]:checked+label { background-image: url("../resources/ic_check.png"); }
-input[type="radio"]:checked+label    { background-image: url("../resources/ic_radio.png"); }
+input[type="checkbox"]:checked:not([disabled])+label { background-image: url("../resources/ic_check.png"); }
+input[type="radio"]:checked:not([disabled])+label    { background-image: url("../resources/ic_radio.png"); }
 button {
     border-radius: 6px;
     border: solid 1px #cccccc;
