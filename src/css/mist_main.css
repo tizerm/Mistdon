@@ -149,7 +149,7 @@
             > .option_close {
                 position: relative;
                 border-radius: 12px;
-                flex-basis: 28px;
+                flex-basis: 24px;
                 > button>img {
                     width: 24px;
                     height: 24px;
@@ -234,7 +234,7 @@
                 + .option_close { background-color: #428571; }
             }
             > .attached_media {
-                flex-grow: 4;
+                flex-grow: 1;
                 > ul.media_list {
                     margin: 0px 8px;
                     margin-bottom: 4px;

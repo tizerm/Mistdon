@@ -27,6 +27,10 @@ class Column {
 
     // Getter: カラムの一意識別IDを取得
     get id() { return this.pref.column_id }
+    // Getter: カラムのjQueryオブジェクト
+    get element() { return $(`#${this.id}`) }
+    // Getter: カラムのjQueryオブジェクト
+    get close_element() { return $(`#${this.id}_closed`) }
 
     // スタティックマップを初期化(非同期)
     static {
@@ -150,8 +154,8 @@ class Column {
 
         // デフォルトで閉じる場合は表示を反転
         if (this.pref.d_hide) {
-            $(`#${this.id}`).hide()
-            $(`#${this.id}_closed`).show()
+            this.element.hide()
+            this.close_element.show()
         }
 
         // タイムライングループをセット
@@ -166,13 +170,12 @@ class Column {
      * このカラムにカーソルを設定
      */
     setCursor() {
-        const elm = $(`#${this.id}`)
-        elm.addClass("__target_col")
+        this.element.addClass("__target_col")
             .find(".ic_column_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
-        elm.find(".tl_group_box:first-child").addClass("__target_group")
+        this.element.find(".tl_group_box:first-child").addClass("__target_group")
             .find(".ic_group_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
         // カーソルをセットしたところまでスクロール
-        elm.get(0).scrollIntoView({ inline: 'nearest' })
+        this.element.get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**
@@ -199,7 +202,6 @@ class Column {
      * このカラムの表示/非表示を切り替える
      */
     toggle() {
-        const target = $(`#${this.id}`)
         if (this.open_flg) {
             // Open⇒Close
             if ($(".column_box:visible").length <= 1) {
@@ -208,18 +210,20 @@ class Column {
                 return
             }
             // 自身を閉じて左隣の短縮カラムを表示
-            const closed_col = target.prev()
-            target.hide()
+            this.element.hide()
             this.eachGroup(gp => gp.unread = 0)
-            closed_col.find(".group_label>.unread_count").empty()
-            closed_col.show()
+            this.close_element.find(".group_label>.unread_count").empty()
+            this.close_element.show()
             this.open_flg = false
         } else {
             // Close⇒Open
-            target.prev().hide()
-            target.show()
+            this.close_element.hide()
+            this.element.show()
             this.open_flg = true
+            // 開いたカラムまでスクロール
+            this.element.get(0).scrollIntoView({ inline: 'nearest' })
         }
+        Column.setWidthLimit()
         return this.open_flg
     }
 
@@ -244,19 +248,19 @@ class Column {
      * このカラムの可変幅設定のON/OFFを切り替える
      */
     toggleFlex() {
-        const target = $(`#${this.id}`)
-        const img = target.find(".ic_column_flex")
+        const img = this.element.find(".ic_column_flex")
         if (!this.flex) {
             // OFF⇒ON
-            target.addClass('flex_col').removeClass('fixed_col')
+            this.element.addClass('flex_col').removeClass('fixed_col')
             img.attr('src', 'resources/ic_flex_on.png')
             this.flex = true
         } else {
             // ON⇒OFF
-            target.removeClass('flex_col').addClass('fixed_col')
+            this.element.removeClass('flex_col').addClass('fixed_col')
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
         }
+        Column.setWidthLimit()
     }
 
     /**
@@ -265,9 +269,9 @@ class Column {
      */
     reload() {
         // 一旦中身を全消去する
-        $(`#${this.id}`).find(".col_loading").remove()
-        $(`#${this.id}`).find("ul").empty()
-        $(`#${this.id}`).find("ul").before(`
+        this.element.find(".col_loading").remove()
+        this.element.find("ul").empty()
+        this.element.find("ul").before(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
@@ -284,7 +288,7 @@ class Column {
 
     // Getter: このカラムの右横のカラムを取得(ローテーション)
     get next() {
-        let index = $(`#${this.id}`).index(".column_box") + 1
+        let index = this.element.index(".column_box") + 1
         // 右端の場合は最初の要素を選択
         if ($(".column_box").length <= index) index = 0
         return Column.get(index)
@@ -292,7 +296,7 @@ class Column {
 
     // Getter: このカラムの右横の開いているカラムを取得(ローテーション)
     get opened_next() {
-        let index = $(`#${this.id}`).index(".column_box:visible") + 1
+        let index = this.element.index(".column_box:visible") + 1
         // 右端の場合は最初の要素を選択
         if ($(".column_box:visible").length <= index) index = 0
         return Column.get($(".column_box:visible").eq(index))
@@ -300,7 +304,7 @@ class Column {
 
     // Getter: このカラムの左横のカラムを取得(ローテーション)
     get prev() {
-        let index = $(`#${this.id}`).index(".column_box") - 1
+        let index = this.element.index(".column_box") - 1
         // 左端の場合は最後の要素を選択
         if (index < 0) index = $(".column_box").length - 1
         return Column.get(index)
@@ -308,9 +312,37 @@ class Column {
 
     // Getter: このカラムの左横の開いているカラムを取得(ローテーション)
     get opened_prev() {
-        let index = $(`#${this.id}`).index(".column_box:visible") - 1
+        let index = this.element.index(".column_box:visible") - 1
         // 右端の場合は最初の要素を選択
         if (index < 0) index = $(".column_box:visible").length - 1
         return Column.get($(".column_box:visible").eq(index))
     }
+
+    /**
+     * #StaticMethod
+     * 横幅の限界値を再計算する.
+     */
+    static setWidthLimit() {
+        const box_width = window.innerWidth - 64
+        let total_width = 0
+        let flex_width = 0
+        let flex_count = 0
+
+        Column.each(col => { // カラム全体の横幅を計算
+            const view_width = col.open_flg ? Number(col.pref.col_width) : 48
+            total_width += view_width
+            if (col.flex && col.open_fl) flex_count++
+            else flex_width += view_width
+        })
+
+        // 空き幅を均等に分ける
+        flex_width = Math.round((box_width - flex_width) / flex_count)
+
+        Column.each(col => { // カラム全体の横幅の限界値を再設定
+            if (col.flex) col.element.css('max-width',
+                `${Math.min(box_width, Math.max(col.pref.col_width, flex_width))}px`)
+            else col.element.css('max-width', '')
+        })
+    }
+
 }

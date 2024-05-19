@@ -458,6 +458,7 @@
         Media.clearAttachMedia()
         deleteQuoteInfo()
         enabledAdditionalAccount(true)
+        $("#__txt_postarea").keyup()
     })
 
     /**
@@ -1382,11 +1383,14 @@
      */
     let resize_timer = 0
     window.addEventListener("resize", () => {
-        // プロフィール画面が表示されていなかったらなにもしない
-        if (!$("#pop_ex_timeline").is(":visible") && $("#pop_multi_window>.account_timeline").length == 0) return
         clearTimeout(resize_timer)
-        resize_timer = setTimeout(() => $(".account_timeline td.column_profile")
-            .each((index, elm) => User.setHeight($(elm), $(elm).find(".pinned_block").length > 0)), 250)
+        resize_timer = setTimeout(() => {
+            // カラムをリサイズ
+            Column.setWidthLimit()
+            // ユーザープロフィールウィンドウをリサイズ
+            if ($("#pop_multi_window>.account_timeline").length > 0) $(".account_timeline .column_profile")
+                .each((index, elm) => User.setHeight($(elm), $(elm).find(".pinned_block").length > 0))
+        }, 250)
     })
 
     /**

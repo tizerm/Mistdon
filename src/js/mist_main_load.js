@@ -106,6 +106,7 @@ $(() => (async () => {
     // 設定からスタイルシートを生成
     Preference.generateStylesheet()
     Preference.setBackground()
+    $("#__txt_postarea").css('font-size', `${Preference.GENERAL_PREFERENCE.font_size?.default}px`)
 
     // カラム生成
     Column.each(col => {
@@ -133,9 +134,10 @@ $(() => (async () => {
         reconnect: true
     }))
     // カラムにツールチップを設定
-    $("td .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
+    $(".column_box .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
     // 見えている中で最初のカラムにカーソルをセット
     Column.getOpenedFirst().setCursor()
+    Column.setWidthLimit()
 })())
 
 /**
