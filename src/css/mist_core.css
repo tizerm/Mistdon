@@ -67,6 +67,7 @@ input[type="radio"], input[type="checkbox"] {
         }
         &:has(>img:only-child) {
             background-color: #337a9f;
+            background-image: none;
             &:hover { background-color: #77afef; }
         }
     }
@@ -129,6 +130,7 @@ input[type="checkbox"]+label.icon_label_set, button.icon_label_set {
     }
 }
 input[type="checkbox"]:checked+label.icon_label_set {
+    background-image: none;
     background-color: #337a9f;
     color: #ffffff;
     &::before { content: ""; }

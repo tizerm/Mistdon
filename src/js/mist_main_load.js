@@ -175,3 +175,58 @@ function enabledAdditionalAccount(enable) {
     }
 }
 
+/**
+ * #LimitedMethod
+ * 投稿本文のテキストエリアを画面上部とウィンドウで切り替える.
+ */
+function toggleTextarea() {
+    const text = $("#__txt_postarea").val()
+    const window_key = 'singleton_submit_window'
+
+    if ($("#header>#head_postarea>.textbox_area>#__txt_postarea").length > 0) {
+        // ヘッダ領域からウィンドウへ
+        $("#__txt_postarea").remove()
+        $("#header>#head_postarea>.textbox_area").prepend('<div class="__window_opened">ウィンドウ展開中</div>')
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="submit_window ex_window">
+                    <h2><span>投稿本文</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_submit"/>
+                        <label for="__window_opacity_submit" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="submit_box">
+                        <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
+                            placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+                    </div>
+                    <div class="footer">
+                        <button type="button" id="__on_textwindow_submit" class="close_button">投稿</button>
+                        <button type="button" id="__on_textwindow_close" class="close_button">上に戻す</button>
+                    </div>
+                </div>
+            `,
+            color: '42809e',
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
+        })
+        // 入力テキストを引き継ぐ
+        $("#__txt_postarea").val(text).focus()
+    } else $(`#${window_key}`).hide(...Preference.getAnimation("WINDOW_FOLD"), () => {
+        // ウィンドウからヘッダ領域へ
+        $(`#${window_key}`).remove()
+        $("#header>#head_postarea>.textbox_area>.__window_opened").remove()
+        $("#header>#head_postarea>.textbox_area").prepend(`
+            <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
+                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+        `)
+        // 入力テキストを引き継ぐ
+        $("#__txt_postarea").val(text).focus()
+    })
+}
+

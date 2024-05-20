@@ -221,7 +221,7 @@
             target = $(".quote_col #__txt_quotearea")
             target_account = Account.get($("#__hdn_quote_account").val())
         } else {
-            target = $("#header #__txt_postarea")
+            target = $("#__txt_postarea")
             target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
         }
         const cursor_pos = target.get(0).selectionStart
@@ -241,31 +241,30 @@
      * 本文投稿フォーム(キーアップイベント).
      * => 文字数をカウントしてメーターに表示(設定が有効な場合のみ)
      */
-    if (Preference.GENERAL_PREFERENCE.enable_tool_button) // ツールボタンが表示されている場合のみイベント定義
-        $("#header>#head_postarea #__txt_postarea").on("keyup", e => {
-            const length = $(e.target).val().length
-            const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
-            const rate = length / limit
-            const deg = 360 * rate
+    $(document).on("keyup", "#__txt_postarea", e => {
+        const length = $(e.target).val().length
+        const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
+        const rate = length / limit
+        const deg = 360 * rate
 
-            if (length > 0) {
-                if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
-                    "border-color": "#21dec8",
-                    "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
-                }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
-                    "border-color": "#dea521",
-                    "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
-                }); else $("#post_length_graph").css({ // 文字数超過でレッド
-                    "border-color": "#de3121",
-                    "background-image": "none",
-                    "background-color": "#de3121"
-                })
-            } else $("#post_length_graph").css({ // 入力されていない場合はグレー
-                "border-color": "#aaaaaa",
+        if (length > 0) {
+            if (rate < 0.9) $("#post_length_graph").css({ // 9割まではグリーン
+                "border-color": "#21dec8",
+                "background-image": `conic-gradient(#21dec8 ${deg}deg, #222222 ${deg}deg)`
+            }); else if (rate <= 1) $("#post_length_graph").css({ // 残り1割でオレンジ
+                "border-color": "#dea521",
+                "background-image": `conic-gradient(#dea521 ${deg}deg, #222222 ${deg}deg)`
+            }); else $("#post_length_graph").css({ // 文字数超過でレッド
+                "border-color": "#de3121",
                 "background-image": "none",
-                "background-color": "transparent"
+                "background-color": "#de3121"
             })
+        } else $("#post_length_graph").css({ // 入力されていない場合はグレー
+            "border-color": "#aaaaaa",
+            "background-image": "none",
+            "background-color": "transparent"
         })
+    })
 
     /**
      * #Event
@@ -280,7 +279,7 @@
      * 本文投稿フォームとCW入力フォーム(フォーカスイベント)
      * => 投稿オプションを表示する
      */
-    $("#__txt_postarea, #__txt_content_warning").on("focus", e => {
+    $(document).on("focus", "#__txt_postarea, #__txt_content_warning", e => {
         if ($("#header>#post_options").is(":visible")) return // 投稿オプションが見えていたらなにもしない
         $("#header>#post_options").show(...Preference.getAnimation("SLIDE_FAST"))
     })
@@ -295,6 +294,12 @@
         if ($(e.target).closest(".__ignore_close_option").length > 0 || !$("#header>#post_options").is(":visible")) return
         $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
     })
+
+    /**
+     * #Event
+     * 投稿フォームウィンドウ化ボタン.
+     */
+    $("#__open_submit_window").on("click", e => toggleTextarea())
 
     /**
      * #Event
@@ -1325,6 +1330,20 @@
     /*=== Other Event ============================================================================================*/
 
     /**
+     * #Event
+     * 投稿本文ウィンドウ: 投稿ボタン.
+     * => ヘッダ領域の投稿ボタンをクリック
+     */
+    $(document).on("click", "#__on_textwindow_submit", e => $("#header #__on_submit").click())
+
+    /**
+     * #Event
+     * 投稿本文ウィンドウ: 上に戻すボタン.
+     * => ウィンドウを閉じる
+     */
+    $(document).on("click", "#__on_textwindow_close", e => toggleTextarea())
+
+    /**
      * #Event #Keydown
      * 検索ウィンドウ: 検索フォームでエンターで検索処理を実行.
      */
@@ -1358,8 +1377,11 @@
      */
     $(document).on("click", "#pop_multi_window .window_close_button", e => {
         const target_window = $(e.target).closest(".ex_window")
-        // キャッシュマップを削除
-        if (target_window.is(".account_timeline.single_user")) User.deleteCache(target_window.find(".column_profile"))
+        if (target_window.is("#singleton_submit_window")) {
+            // 投稿ウィンドウの場合トグルルーチンを呼んで終了
+            toggleTextarea()
+            return
+        } else if (target_window.is(".account_timeline.single_user")) User.deleteCache(target_window.find(".column_profile"))
         else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
             target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)

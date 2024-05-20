@@ -221,7 +221,7 @@
 
     /*=== Article Textarea Shortcut Key Events ===================================================================*/
 
-    $("#header>#head_postarea").keydown(e => {
+    $(document).on("keydown", "#__txt_postarea", e => {
         const is_control = event.ctrlKey || event.metaKey
         if (event.altKey) { // Altキー併用ショートカット
             let element = null
@@ -320,6 +320,9 @@
                         return false
                     }
                     break
+                case 122: // F11: 投稿フォームをウィンドウ化
+                    toggleTextarea()
+                    return false
                 case 27: // Esc: フォーカスアウト
                     $(e.target).blur()
                     $("#header>h1").click() // どっか適当なところをクリック
