@@ -18,6 +18,8 @@ class Preference {
             "help_keyborad"             : pref?.navigation_visible?.help_keyborad   ?? true, // ショートカット早見表
             "help"                      : pref?.navigation_visible?.help            ?? true  // ヘルプ
         },                              // 個別設定
+        this.default_textwindow         = pref?.default_textwindow          ?? false, // 投稿フォームをウィンドウ化
+        this.default_textopacity        = pref?.default_textopacity         ?? false, // 投稿フォームを透過オン
         this.enable_flex_headform       = pref?.enable_flex_headform        ?? false, // ウィンドウ幅で可変表示
         this.enable_change_account      = pref?.enable_change_account       ?? true,  // アカウント変更アイコン
         this.enable_tool_button         = pref?.enable_tool_button          ?? true,  // ツールボタン(左にあるやつ)
@@ -259,6 +261,8 @@ class Preference {
         $("#__chk_gen_navi_help")           .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
 
         // 個別オプション
+        $("#__chk_gen_default_textwindow")              .prop("checked", Preference.GENERAL_PREFERENCE.default_textwindow)
+        $("#__chk_gen_default_textopacity")             .prop("checked", Preference.GENERAL_PREFERENCE.default_textopacity)
         $(Preference.GENERAL_PREFERENCE.enable_flex_headform ?
             "#__opt_gen_flex_headform1" : "#__opt_gen_flex_headform2").prop("checked", true)
         $("#__chk_gen_use_account_change")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_change_account)
@@ -355,6 +359,8 @@ class Preference {
                 "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
                 "help"                      : $("#__chk_gen_navi_help").prop("checked")
             },
+            "default_textwindow"            : $("#__chk_gen_default_textwindow").prop("checked"),
+            "default_textopacity"           : $("#__chk_gen_default_textopacity").prop("checked"),
             "enable_flex_headform"          : $("#__opt_gen_flex_headform1").prop("checked"),
             "enable_change_account"         : $("#__chk_gen_use_account_change").prop("checked"),
             "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
@@ -429,6 +435,7 @@ class Preference {
 
         // 設定ファイルを保存
         await window.accessApi.writeGeneralPref(save_pref)
+        Preference.GENERAL_PREFERENCE = new Preference(save_pref)
         dialog({
             type: 'alert',
             title: "全体設定",
@@ -464,6 +471,8 @@ class Preference {
             if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
         }
 
+        // 投稿フォームを自動的にウィンドウにする
+        if (Preference.GENERAL_PREFERENCE.default_textwindow) toggleTextarea()
         if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
             $("#header>#post_options .additional_users .__on_option_close").click()
     }

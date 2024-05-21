@@ -566,9 +566,9 @@
      * 本文投稿フォーム(画像ファイルがクリップボードにある状態でペースト).
      * => ペースとした画像を添付メディアに追加する
      */
-    $("#__txt_postarea").get(0).addEventListener("paste", e => {
-        // ファイル以外は無視(普通のペースト)
-        if (e.clipboardData.types[0] != 'Files') return true
+    document.addEventListener("paste", e => {
+        // 本文フォーム以外とファイル以外は無視(普通のペースト)
+        if (!$(e.target).is("#__txt_postarea") || e.clipboardData.types[0] != 'Files') return true
 
         // デフォルトイベントを無視してクリップボードをファイル化して添付メソッドに渡す
         e.preventDefault()

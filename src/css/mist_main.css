@@ -95,11 +95,15 @@
             }
             > .__window_opened {
                 width: calc(100% - 8px);
-                padding: 18px 0px;
+                padding: 24px 0px;
                 background-color: rgb(56,56,56,0.717);
+                background-image: url("../resources/illust/il_info2.png");
+                background-position: center left +8px;
+                background-repeat: no-repeat;
+                color: #999999;
                 border-radius: 18px;
                 text-align: center;
-                font-size: 24px;
+                font-size: 18px;
                 font-weight: bold;
             }
             > #__hdn_text_render {
@@ -356,16 +360,21 @@
     100% { left: 0; transform: translate(-100%, 0); }
 }
 @container header (width < 580px) {
-    #head_postarea.flex_form>.additional_buttons { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.additional_buttons { display: none; }
+    #head_postarea.flex_form:has(.__window_opened)>.submit_button { display: none; }
 }
 @container header (width < 460px) {
-    #head_postarea.flex_form>.opt_buttons { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.opt_buttons { display: none; }
+    #head_postarea.flex_form:has(.__window_opened)>.textbox_area { display: none; }
 }
 @container header (width < 380px) {
-    #head_postarea.flex_form>.post_user { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.post_user { display: none; }
 }
 @container header (width < 300px) {
-    #head_postarea.flex_form>.submit_button { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.submit_button { display: none; }
+}
+@container header (width < 270px) {
+    #head_postarea.flex_form:has(.__window_opened)>.additional_buttons { display: none; }
 }
 
 #navi .li_reconnect { display: none; }
@@ -1117,9 +1126,10 @@
         width: min(960px,100vw);
         height: min(800px,100vh);
         z-index: 51;
-        right: 0px;
+        right: 4px;
         top: auto;
-        bottom: 0px;
+        bottom: 4px;
+        &:has(#__txt_postarea:focus) { opacity: 1; }
         > .submit_box {
             height: calc(100% - 90px);
             > #__txt_postarea {

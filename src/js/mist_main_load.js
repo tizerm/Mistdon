@@ -86,6 +86,8 @@
     Preference.initBackground()
 
     enabledAdditionalAccount(true)
+    $("#__txt_postarea").blur()
+    $("#header>h1").click()
 
     // ツールチップを設定表示
     $("#header>#head_postarea").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
@@ -137,8 +139,9 @@ function separateHeaderColor() {
         .each((index, elm) => add_color.push(Account.get($(elm).val()).pref.acc_color))
     if (add_color.length > 0) { // 複数のアカウントが選択されている場合はグラデーションにする
         const color_str = add_color.reduce((rs, el) => `${rs},#${el}`, '')
-        $("#header>h1").css('background-image', `linear-gradient(0.25turn, #${current_color}${color_str}`)
-    } else $("#header>h1").css({ // 追加アカウントがない場合はカレントカラーで塗る
+        $("#header>h1, #singleton_submit_window>h2")
+            .css('background-image', `linear-gradient(0.25turn, #${current_color}${color_str}`)
+    } else $("#header>h1, #singleton_submit_window>h2").css({ // 追加アカウントがない場合はカレントカラーで塗る
         'background-image': 'none',
         'background-color': `#${current_color}`
     })
@@ -215,6 +218,8 @@ function toggleTextarea() {
             drag_axis: false,
             resize_axis: "all"
         })
+        separateHeaderColor()
+        if (Preference.GENERAL_PREFERENCE.default_textopacity) $(`#${window_key} #__window_opacity_submit`).prop("checked", true)
         // 入力テキストを引き継ぐ
         $("#__txt_postarea").val(text).focus()
     } else $(`#${window_key}`).hide(...Preference.getAnimation("WINDOW_FOLD"), () => {

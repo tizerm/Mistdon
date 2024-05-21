@@ -331,7 +331,7 @@ class Column {
         Column.each(col => { // カラム全体の横幅を計算
             const view_width = col.open_flg ? Number(col.pref.col_width) : 48
             total_width += view_width
-            if (col.flex && col.open_fl) flex_count++
+            if (col.flex && col.open_flg) flex_count++
             else flex_width += view_width
         })
 
