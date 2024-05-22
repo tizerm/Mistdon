@@ -394,6 +394,35 @@
     }
 }
 
+/*=== Navigation Area Container ==================================================================*/
+
+#navi { container-type: size; container-name: navigation; }
+
+@container navigation (height < 990px) {
+    #navi>ul {
+        margin: 24px 14px;
+        >li {
+            margin: 8px 0px;
+            > a>img {
+                width: 36px;
+                height: 36px;
+            }
+        }
+    }
+}
+@container navigation (height < 710px) {
+    #navi>ul {
+        margin: 18px;
+        >li {
+            margin: 4px 0px;
+            > a>img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+    }
+}
+
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {
