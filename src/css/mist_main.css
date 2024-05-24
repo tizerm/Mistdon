@@ -82,7 +82,7 @@
                 position: absolute;
                 top: 4px;
                 right: 4px;
-                > #__open_submit_window>img {
+                > button>img {
                     width: 28px;
                     height: 28px;
                 }
@@ -364,14 +364,14 @@
     #head_postarea.flex_form:has(.__window_opened)>.submit_button { display: none; }
 }
 @container header (width < 460px) {
-    #head_postarea.flex_form:has(#__txt_postarea)>.opt_buttons { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.submit_button { display: none; }
     #head_postarea.flex_form:has(.__window_opened)>.textbox_area { display: none; }
 }
 @container header (width < 380px) {
-    #head_postarea.flex_form:has(#__txt_postarea)>.post_user { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.opt_buttons { display: none; }
 }
 @container header (width < 300px) {
-    #head_postarea.flex_form:has(#__txt_postarea)>.submit_button { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.post_user { display: none; }
 }
 @container header (width < 270px) {
     #head_postarea.flex_form:has(.__window_opened)>.additional_buttons { display: none; }
@@ -386,8 +386,6 @@
     background-color: rgb(56,56,56,0.717);
     border: solid 1px #999999;
     color: #ffffff;
-    font-size: 14px;
-    &::placeholder { font-size: 14px; }
     &::selection {
         color: #222222;
         background-color: #dddddd;

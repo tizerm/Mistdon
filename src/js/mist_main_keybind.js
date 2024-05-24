@@ -303,7 +303,8 @@
                         $("#header #__on_submit").click()
                         $(e.target).blur()
                         return false
-                    } else if (event.shiftKey) { // Shift+Enter: 投稿(フォーカスしたまま)
+                    } else if (Preference.GENERAL_PREFERENCE.enable_shift_confirm && event.shiftKey) {
+                        // Shift+Enter: 投稿(フォーカスしたまま)(オプションで無効化)
                         $("#header #__on_submit").click()
                         return false
                     }
