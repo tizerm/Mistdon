@@ -86,6 +86,7 @@
                     width: 28px;
                     height: 28px;
                 }
+                > #__on_another_submit { display: none; }
             }
             > #__txt_postarea {
                 width: calc(100% - 8px);
@@ -365,6 +366,7 @@
 }
 @container header (width < 460px) {
     #head_postarea.flex_form:has(#__txt_postarea)>.submit_button { display: none; }
+    #head_postarea.flex_form:has(#__txt_postarea)>.textbox_area>#textarea_buttons>#__on_another_submit { display: inline-block; }
     #head_postarea.flex_form:has(.__window_opened)>.textbox_area { display: none; }
 }
 @container header (width < 380px) {

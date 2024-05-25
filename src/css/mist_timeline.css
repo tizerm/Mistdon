@@ -381,11 +381,12 @@
             /*=== Contents Info ==================================================================*/
             > .content {
                 color: #ffffff;
-                line-height: 1.15em;
                 margin-bottom: 6px;
-                & p { margin: 0px; }
+                & p {
+                    margin: 0px;
+                    line-height: 1.4em;
+                }
                 > .main_content {
-                    font-size: 13px;
                     margin: 0px 12px;
                     overflow-wrap: break-word;
 
@@ -393,10 +394,11 @@
                 }
                 > .hidden_content {
                     margin-bottom: 4px;
-                    font-size: 11px;
+                    overflow-wrap: break-word;
                 }
             }
-            > .prof_normal2+.content { margin-top: 1.5em; }
+            > .prof_normal2+.content { margin-top: 28px; }
+            &:has(.label_head)>.prof_normal2+.content { margin-top: 34px; }
 
             /*=== Reaction Emoji Info ============================================================*/
             > .reaction_emoji {
@@ -800,16 +802,13 @@
                 width: calc(100% - 62px);
                 min-height: 20px;
                 color: #ffffff;
-                font-size: 12px;
 
                 border-left: solid 4px #cccccc;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
                 > .main_content {
-                    line-height: 1.35em;
                     margin: 0px;
                     padding: 0px;
-                    font-size: 13px;
                 }
                 > .from_address {
                     text-align: right;
@@ -905,7 +904,6 @@
                     border-radius: 12px;
                     margin: 0px;
                     padding: 2px 8px;
-                    font-size: 12px;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
@@ -974,10 +972,8 @@
                 min-height: 1.15em;
                 >.main_content {
                     position: absolute;
-                    line-height: 1.35em;
                     margin: 2px 8px;
                     padding: 0px;
-                    font-size: 12px;
                     width: calc(100% - 12px);
                     overflow: hidden;
                     white-space: nowrap;

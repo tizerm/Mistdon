@@ -470,7 +470,10 @@ class Preference {
         else { // 可変自動制御じゃない場合は個別に表示制御
             if (!Preference.GENERAL_PREFERENCE.enable_change_account) $("#header>#head_postarea>.post_user").hide()
             if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
-            if (!Preference.GENERAL_PREFERENCE.enable_post_button) $("#header>#head_postarea>.submit_button").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_post_button) { // 投稿ボタンは小型のを出す
+                 $("#header>#head_postarea>.submit_button").hide()
+                 $("#header>#head_postarea #__on_another_submit").show()
+            }
             if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
         }
 
@@ -557,10 +560,10 @@ class Preference {
                 > li {
                     &.normal_layout {
                         > .content {
-                            *:not(.hidden_content) {
+                            > *:not(.hidden_content) {
                                 font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
                             }
-                            .hidden_content {
+                            > .hidden_content {
                                 font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
                             }
                         }
@@ -578,10 +581,10 @@ class Preference {
                     }
                     &.chat_timeline {
                         > .content {
-                            *:not(.hidden_content) {
+                            > *:not(.hidden_content) {
                                 font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat}px;
                             }
-                            .hidden_content {
+                            > .hidden_content {
                                 font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
                             }
                         }
