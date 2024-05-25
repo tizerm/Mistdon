@@ -66,7 +66,7 @@
         e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`))
     // マルチタイムラインレイアウト表示
     $(document).on("click", ".__open_multi_tl_layout",
-        e => $(e.target).closest(".tl_group").find(".tl_layout_options").toggle("blind", { direction: "up" }, 120))
+        e => $(e.target).closest(".tl_group").find(".tl_layout_options").toggle(...Preference.getAnimation("SLIDE_FAST")))
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
         e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`))
@@ -77,7 +77,7 @@
     $(document).on("change", ".__cmb_tl_layout", e => GroupPref.changeLayoutEvent($(e.target)))
     // グループレイアウト閉じるボタン
     $(document).on("click", ".__on_layout_close",
-        e => $(e.target).closest(".tl_layout_options").hide("blind", { direction: "up" }, 120))
+        e => $(e.target).closest(".tl_layout_options").hide(...Preference.getAnimation("SLIDE_FAST")))
     // グループ高変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_height", e => ColumnPref.recalcHeight($(e.target)))
     // 表示アカウント変更イベント(動的バインド)
