@@ -482,10 +482,8 @@ class Instance {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.header_image') // ヘッダ画像を縮小表示して表示
-            .css('background-image', `url("${this.header_url}")`)
-            .css('background-size', '420px auto')
-            .css('background-position', 'center center')
+        // ヘッダ画像を縮小表示して表示
+        jqelm.find('.header_image').css('background-image', `url("${this.header_url}")`)
         return jqelm
     }
 
@@ -526,21 +524,19 @@ class Instance {
                         <button type="button" class="window_close_button" title="閉じる"><img
                             src="resources/ic_not.png" alt="閉じる"/></button>
                     </div>
-                    <table><tbody><tr>
-                        <td class="timeline column_instance_info">
-                            <ul class="instance_header"></ul>
-                            <ul class="instance_detail"></ul>
-                            <ul class="instance_admin">
-                                <li class="admin_header">Administrator</li>
-                            </ul>
-                        </td>
-                    </tr></tbody></table>
+                    <div class="timeline column_instance_info">
+                        <ul class="instance_header"></ul>
+                        <ul class="instance_detail"></ul>
+                        <ul class="instance_admin">
+                            <li class="admin_header">Administrator</li>
+                        </ul>
+                    </div>
                 </div>
             `,
             color: getRandomColor(),
-            drag_only_x: false,
-            resizable: false,
-            resize_only_y: false
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // 内容をウィンドウにバインド

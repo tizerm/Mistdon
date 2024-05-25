@@ -196,12 +196,13 @@ class Status {
                     this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
                         .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234').length
-                    this.content = this.content
+                    const markup_content = this.content
                         .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
                         .replace(new RegExp('>', 'g'), '&gt;')
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), // MisskeyはURLをリンクをリンクとして展開する
                             match => `<a href="${match}">${match}</a>`)
                         .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
+                    this.content = `<p>${markup_content}</p>` // pでマークアップ
                 } else this.content_length = 0
 
                 this.quote_flg = data.renote && data.text
@@ -769,13 +770,13 @@ class Status {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
             if (this.cw_text) html /* CWテキスト */ += `
-                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+                <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
             `; if (!this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
                 && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default) html += `
-                <div class="hidden_content">
+                <div class="hidden_content"><p>
                     ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
-                </div>
-                <div class="content_length_limit label_limitover">省略: ${this.content_length}字</div>
+                </p></div>
+                <div class="content_length_limit warn_label label_limitover">省略: ${this.content_length}字</div>
             `; else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
             html += '</div>'
         }
@@ -1032,13 +1033,13 @@ class Status {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
             if (this.cw_text) html /* CWテキスト */ += `
-                <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+                <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
             `; if (!this.profile_post_flg && !this.detail_flg // 文字数制限
                 && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat) html += `
-                <div class="hidden_content">
+                <div class="hidden_content"><p>
                     ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
-                </div>
-                <div class="content_length_limit label_limitover">省略: ${this.content_length}字</div>
+                </p></div>
+                <div class="content_length_limit warn_label label_limitover">省略: ${this.content_length}字</div>
             `
             else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
         }
@@ -1310,7 +1311,7 @@ class Status {
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header label_cw">${target_emojis.replace(this.cw_text)}</a>
+            <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
         `; html += '<div class="main_content">'
 
         html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content_text)
@@ -1866,9 +1867,9 @@ class Status {
                 </div>
             `,
             color: getRandomColor(),
-            drag_only_x: false,
             resizable: true,
-            resize_only_y: true
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // 投稿内容をバインドして追加情報を非同期でバインド

@@ -10,7 +10,7 @@
                 <button type="button" id="__on_help_close" class="close_button">×</button>
             </div>
         `))
-        $("#pop_extend_column").html(jqelm).show("slide", { direction: "right" }, 150)
+        $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         $.ajax({
             url: "help/help_main.html",
             cache: false
@@ -23,7 +23,7 @@
     });
     // 閉じるボタンクリックイベント
     $(document).on("click", "#__on_help_close", 
-        e => $("#pop_extend_column").hide("slide", { direction: "right" }, 150));
+        e => $("#pop_extend_column").hide(...Preference.getAnimation("SLIDE_RIGHT")));
     $("body").keydown(e => {
         if (e.keyCode == 112) {
             if ($("#pop_extend_column").has(".help_col").is(":visible")) $("#__on_help_close").click();

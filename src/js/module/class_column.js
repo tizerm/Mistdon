@@ -27,6 +27,10 @@ class Column {
 
     // Getter: カラムの一意識別IDを取得
     get id() { return this.pref.column_id }
+    // Getter: カラムのjQueryオブジェクト
+    get element() { return $(`#${this.id}`) }
+    // Getter: カラムのjQueryオブジェクト
+    get close_element() { return $(`#${this.id}_closed`) }
 
     // スタティックマップを初期化(非同期)
     static {
@@ -49,7 +53,7 @@ class Column {
      */
     static get(arg) {
         // 数値型だった場合インデクスとして番号からプロパティを取得
-        if (typeof arg == 'number') return Column.map.get($(".column_td").eq(arg).attr("id"))
+        if (typeof arg == 'number') return Column.map.get($(".column_box").eq(arg).attr("id"))
         // 文字列型だった場合はそのままキーとしてプロパティを取得
         else if (typeof arg == 'string') return Column.map.get(arg)
         // オブジェクトだった場合jQueryオブジェクトとして取得
@@ -61,7 +65,7 @@ class Column {
      * 開いているカラムの中で最初のカラムを返却
      */
     static getOpenedFirst() {
-        return Column.get($(".column_td:visible").first())
+        return Column.get($(".column_box:visible").first())
     }
 
     /**
@@ -110,7 +114,7 @@ class Column {
         // カラム本体を空の状態で生成(ナンバーアイコンは10未満のカラムのみ表示)
         const num_img = this.index < 9 ? `<img src="resources/${this.index + 1}.png" class="ic_column_num"/>` : ''
         let html /* 閉じた状態のカラム */ = `
-            <td id="${this.id}_closed" class="closed_col">
+            <div id="${this.id}_closed" class="closed_col">
                 ${num_img}
                 <div class="col_action">
                     <a class="__on_column_open" title="カラムを開く">
@@ -120,15 +124,13 @@ class Column {
                 <div class="rotate_head">
                     <h2>${this.pref.label_head}</h2>
                 </div>
-            </td>
+            </div>
         `; html /* 開いた状態のカラム */ += `
-            <td id="${this.id}" class="column_td">
+            <div id="${this.id}" class="column_box ${this.pref.d_flex ? 'flex_col' : 'fixed_col'}">
                 <div class="col_head">
                     <h2>${this.pref.label_head}</h2>
                     <div class="ic_column_cursor">${num_img}</div>
-                    <h6></h6>
                     <div class="col_action">
-                        <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_column_warn"/>
                         <a class="__on_column_reload" title="カラムをリロード"
                             ><img src="resources/ic_reload.png" alt="カラムをリロード"/></a>
                         <a class="__on_column_flex" title="可変幅ON/OFF"
@@ -142,20 +144,18 @@ class Column {
                 </div>
                 <div class="col_tl_groups">
                 </div>
-            </td>
+            </div>
         `
         // テーブルにバインド(対象が複数に渡るので一度バインドしてから表示制御)
-        $("#columns>table tr").append(html)
+        $("#columns").append(html)
 
         // カラムの色と幅を変更
-        $(`#${this.id}>.col_head`).css("background-color", `#${this.pref.col_color}`)
-        $(`#${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
-        $(`#${this.id}`).css("width", this.pref.d_flex ? "auto" : `${this.pref.col_width}px`)
+        $(`#${this.id}>.col_head, #${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
 
         // デフォルトで閉じる場合は表示を反転
         if (this.pref.d_hide) {
-            $(`#columns>table #${this.id}`).hide()
-            $(`#columns>table #${this.id}_closed`).show()
+            this.element.hide()
+            this.close_element.show()
         }
 
         // タイムライングループをセット
@@ -170,13 +170,12 @@ class Column {
      * このカラムにカーソルを設定
      */
     setCursor() {
-        const elm = $(`#${this.id}`)
-        elm.addClass("__target_col")
+        this.element.addClass("__target_col")
             .find(".ic_column_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
-        elm.find(".tl_group_box:first-child").addClass("__target_group")
+        this.element.find(".tl_group_box:first-child").addClass("__target_group")
             .find(".ic_group_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
         // カーソルをセットしたところまでスクロール
-        elm.get(0).scrollIntoView({ inline: 'nearest' })
+        this.element.get(0).scrollIntoView({ inline: 'nearest' })
     }
 
     /**
@@ -203,27 +202,28 @@ class Column {
      * このカラムの表示/非表示を切り替える
      */
     toggle() {
-        const target = $(`#${this.id}`)
         if (this.open_flg) {
             // Open⇒Close
-            if ($(".column_td:visible").length <= 1) {
+            if ($(".column_box:visible").length <= 1) {
                 // 全部のカラムを閉じようとしたら止める
                 Notification.info("すべてのカラムを閉じることはできません.")
                 return
             }
             // 自身を閉じて左隣の短縮カラムを表示
-            const closed_col = target.prev()
-            target.hide()
+            this.element.hide()
             this.eachGroup(gp => gp.unread = 0)
-            closed_col.find(".group_label>.unread_count").empty()
-            closed_col.show()
+            this.close_element.find(".group_label>.unread_count").empty()
+            this.close_element.show()
             this.open_flg = false
         } else {
             // Close⇒Open
-            target.prev().hide()
-            target.show()
+            this.close_element.hide()
+            this.element.show()
             this.open_flg = true
+            // 開いたカラムまでスクロール
+            this.element.get(0).scrollIntoView({ inline: 'nearest' })
         }
+        Column.setWidthLimit()
         return this.open_flg
     }
 
@@ -248,19 +248,19 @@ class Column {
      * このカラムの可変幅設定のON/OFFを切り替える
      */
     toggleFlex() {
-        const target = $(`#${this.id}`)
-        const img = target.find(".ic_column_flex")
+        const img = this.element.find(".ic_column_flex")
         if (!this.flex) {
             // OFF⇒ON
-            target.css('width', 'auto')
+            this.element.addClass('flex_col').removeClass('fixed_col')
             img.attr('src', 'resources/ic_flex_on.png')
             this.flex = true
         } else {
             // ON⇒OFF
-            target.css('width', `${this.pref.col_width}px`)
+            this.element.removeClass('flex_col').addClass('fixed_col')
             img.attr('src', 'resources/ic_flex_off.png')
             this.flex = false
         }
+        Column.setWidthLimit()
     }
 
     /**
@@ -269,9 +269,9 @@ class Column {
      */
     reload() {
         // 一旦中身を全消去する
-        $(`#${this.id}`).find(".col_loading").remove()
-        $(`#${this.id}`).find("ul").empty()
-        $(`#${this.id}`).find("ul").before(`
+        this.element.find(".col_loading").remove()
+        this.element.find("ul").empty()
+        this.element.find("ul").before(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
@@ -288,33 +288,61 @@ class Column {
 
     // Getter: このカラムの右横のカラムを取得(ローテーション)
     get next() {
-        let index = $(`#${this.id}`).index(".column_td") + 1
+        let index = this.element.index(".column_box") + 1
         // 右端の場合は最初の要素を選択
-        if ($(".column_td").length <= index) index = 0
+        if ($(".column_box").length <= index) index = 0
         return Column.get(index)
     }
 
     // Getter: このカラムの右横の開いているカラムを取得(ローテーション)
     get opened_next() {
-        let index = $(`#${this.id}`).index(".column_td:visible") + 1
+        let index = this.element.index(".column_box:visible") + 1
         // 右端の場合は最初の要素を選択
-        if ($(".column_td:visible").length <= index) index = 0
-        return Column.get($(".column_td:visible").eq(index))
+        if ($(".column_box:visible").length <= index) index = 0
+        return Column.get($(".column_box:visible").eq(index))
     }
 
     // Getter: このカラムの左横のカラムを取得(ローテーション)
     get prev() {
-        let index = $(`#${this.id}`).index(".column_td") - 1
+        let index = this.element.index(".column_box") - 1
         // 左端の場合は最後の要素を選択
-        if (index < 0) index = $(".column_td").length - 1
+        if (index < 0) index = $(".column_box").length - 1
         return Column.get(index)
     }
 
     // Getter: このカラムの左横の開いているカラムを取得(ローテーション)
     get opened_prev() {
-        let index = $(`#${this.id}`).index(".column_td:visible") - 1
+        let index = this.element.index(".column_box:visible") - 1
         // 右端の場合は最初の要素を選択
-        if (index < 0) index = $(".column_td:visible").length - 1
-        return Column.get($(".column_td:visible").eq(index))
+        if (index < 0) index = $(".column_box:visible").length - 1
+        return Column.get($(".column_box:visible").eq(index))
     }
+
+    /**
+     * #StaticMethod
+     * 横幅の限界値を再計算する.
+     */
+    static setWidthLimit() {
+        const box_width = window.innerWidth - 64
+        let total_width = 0
+        let flex_width = 0
+        let flex_count = 0
+
+        Column.each(col => { // カラム全体の横幅を計算
+            const view_width = col.open_flg ? Number(col.pref.col_width) : 48
+            total_width += view_width
+            if (col.flex && col.open_flg) flex_count++
+            else flex_width += view_width
+        })
+
+        // 空き幅を均等に分ける
+        flex_width = Math.round((box_width - flex_width) / flex_count)
+
+        Column.each(col => { // カラム全体の横幅の限界値を再設定
+            if (col.flex) col.element.css('max-width',
+                `${Math.min(box_width, Math.max(col.pref.col_width, flex_width))}px`)
+            else col.element.css('max-width', '')
+        })
+    }
+
 }

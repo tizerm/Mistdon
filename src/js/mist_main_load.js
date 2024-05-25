@@ -1,5 +1,6 @@
-﻿// HTMLロード時に非同期で実行
-$(() => (async () => {
+﻿$(() => (async () => {
+    /*============================================================================================================*/
+
     // 設定ファイル不在での起動制御
     await window.accessApi.readPrefAccs()
     await window.accessApi.readPrefCols()
@@ -36,10 +37,9 @@ $(() => (async () => {
         return
     }
 
-    // カスタム絵文字のキャッシュ確認
-    Account.cacheEmojis()
+    /*============================================================================================================*/
 
-    ;(async () => { // 右クリック時のメニュー生成(時間かかるのでこのセクションだけ非同期実行)
+    ;(async () => { // 右クリック時のメニュー生成(async)
         $("#pop>.pop_context>.ui_menu>li ul.account_menu").each((index, elm) => {
             // プラットフォーム指定がある場合は対象プラットフォームのアカウントだけ抽出
             if ($(elm).attr("name")) $(elm).html(Account.createContextMenuAccountList($(elm).attr("name")))
@@ -50,6 +50,9 @@ $(() => (async () => {
         $("#pop>.pop_context>.ui_menu>li ul.limited_renote_menu").html(limited_renote_html)
         $("#pop>.pop_context>.ui_menu").menu()
     })()
+
+    // カスタム絵文字のキャッシュ確認(async)
+    Account.cacheEmojis()
 
     // 添付メディアリストをSortableにする
     $("#post_options .__ui_media_sortable").sortable({
@@ -75,37 +78,20 @@ $(() => (async () => {
         update: (e, ui) => $("#post_options .__attach_delete_box>li").remove()
     })
 
-    // ナビゲーションの表示設定
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.search) $("#navi .li_search").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.clip) $("#navi .li_clips").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
-    if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()
-    // 投稿フォームの各種ボタン表示制御
-    if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
-    if (!Preference.GENERAL_PREFERENCE.enable_post_button) $("#header>#head_postarea>.submit_button").hide()
-    if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
-    if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
-        $("#header>#post_options .additional_users .__on_option_close").click()
-    enabledAdditionalAccount(true)
+    // 全体設定から各種設定項目を適用
+    Preference.initAlternateTimelinePref()
+    Preference.initVisibility()
     Preference.initBookmarkPref()
+    Preference.generateStylesheet()
+    Preference.initBackground()
 
-    // 一時タイムライン設定を反映
-    Preference.setAlternateTimelinePref()
+    enabledAdditionalAccount(true)
+    $("#__txt_postarea").blur()
+    $("#header>h1").click()
 
     // ツールチップを設定表示
     $("#header>#head_postarea").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
     $("#pop_expand_action, #post_options").tooltip(Preference.getUIPref("UPPER", "UI_FADE_ANIMATION"))
-
-    // 設定からスタイルシートを生成
-    Preference.generateStylesheet()
-    Preference.setBackground()
 
     // カラム生成
     Column.each(col => {
@@ -123,6 +109,7 @@ $(() => (async () => {
             gp.onLoadTimeline(rest_promises)
         })
     })
+
     // 対象アカウントをWebSocketに接続
     Account.each(account => account.connect({
         openFunc: () => {},
@@ -132,11 +119,14 @@ $(() => (async () => {
         },
         reconnect: true
     }))
-    // カラムにツールチップを設定
-    $("td .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
-    // 見えている中で最初のカラムにカーソルをセット
+
+    // カラムにツールチップを設定しカーソルと横幅を設定
+    $(".column_box .col_action, .tl_group_box .gp_action").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
     Column.getOpenedFirst().setCursor()
+    Column.setWidthLimit()
 })())
+
+/*================================================================================================================*/
 
 /**
  * #LimitedMethod
@@ -149,8 +139,9 @@ function separateHeaderColor() {
         .each((index, elm) => add_color.push(Account.get($(elm).val()).pref.acc_color))
     if (add_color.length > 0) { // 複数のアカウントが選択されている場合はグラデーションにする
         const color_str = add_color.reduce((rs, el) => `${rs},#${el}`, '')
-        $("#header>h1").css('background-image', `linear-gradient(0.25turn, #${current_color}${color_str}`)
-    } else $("#header>h1").css({ // 追加アカウントがない場合はカレントカラーで塗る
+        $("#header>h1, #singleton_submit_window>h2")
+            .css('background-image', `linear-gradient(0.25turn, #${current_color}${color_str}`)
+    } else $("#header>h1, #singleton_submit_window>h2").css({ // 追加アカウントがない場合はカレントカラーで塗る
         'background-image': 'none',
         'background-color': `#${current_color}`
     })
@@ -185,5 +176,62 @@ function enabledAdditionalAccount(enable) {
         close_elm.css('background-color', '#777777').show()
         $('#header>#post_options .additional_users').hide()
     }
+}
+
+/**
+ * #LimitedMethod
+ * 投稿本文のテキストエリアを画面上部とウィンドウで切り替える.
+ */
+function toggleTextarea() {
+    const text = $("#__txt_postarea").val()
+    const window_key = 'singleton_submit_window'
+
+    if ($("#header>#head_postarea>.textbox_area>#__txt_postarea").length > 0) {
+        // ヘッダ領域からウィンドウへ
+        $("#__txt_postarea").remove()
+        $("#header>#head_postarea>.textbox_area").prepend('<div class="__window_opened">ウィンドウ展開中</div>')
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="submit_window ex_window">
+                    <h2><span>投稿本文</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_submit"/>
+                        <label for="__window_opacity_submit" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="submit_box">
+                        <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
+                            placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+                    </div>
+                    <div class="footer">
+                        <button type="button" id="__on_textwindow_submit" class="close_button">投稿</button>
+                        <button type="button" id="__on_textwindow_close" class="close_button">上に戻す</button>
+                    </div>
+                </div>
+            `,
+            color: '42809e',
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
+        })
+        separateHeaderColor()
+        if (Preference.GENERAL_PREFERENCE.default_textopacity) $(`#${window_key} #__window_opacity_submit`).prop("checked", true)
+        // 入力テキストを引き継ぐ
+        $("#__txt_postarea").val(text).focus()
+    } else $(`#${window_key}`).hide(...Preference.getAnimation("WINDOW_FOLD"), () => {
+        // ウィンドウからヘッダ領域へ
+        $(`#${window_key}`).remove()
+        $("#header>#head_postarea>.textbox_area>.__window_opened").remove()
+        $("#header>#head_postarea>.textbox_area").prepend(`
+            <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
+                placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+        `)
+        // 入力テキストを引き継ぐ
+        $("#__txt_postarea").val(text).focus()
+    })
 }
 

@@ -44,32 +44,30 @@ class History {
         $("#pop_ex_timeline").html(`
             <h2>送信履歴</h2>
             <div class="history_timeline">
-                <table id="history_timeline_table"><tbody><tr>
-                    <td class="reaction_history">
-                        <div class="col_head">
-                            <h3>アクティビティ履歴</h3>
+                <div class="reaction_history">
+                    <div class="col_head">
+                        <h3>アクティビティ履歴</h3>
+                    </div>
+                    <div class="timeline">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
                         </div>
-                        <div class="timeline">
-                            <div class="col_loading">
-                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                                <span class="loading_text">Now Loading...</span>
-                            </div>
-                            <ul class="__context_posts"></ul>
+                        <ul class="__context_posts"></ul>
+                    </div>
+                </div>
+                <div class="post_history">
+                    <div class="col_head">
+                        <h3>投稿履歴</h3>
+                    </div>
+                    <div class="timeline">
+                        <div class="col_loading">
+                            <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                            <span class="loading_text">Now Loading...</span>
                         </div>
-                    </td>
-                    <td class="post_history">
-                        <div class="col_head">
-                            <h3>投稿履歴</h3>
-                        </div>
-                        <div class="timeline">
-                            <div class="col_loading">
-                                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                                <span class="loading_text">Now Loading...</span>
-                            </div>
-                            <ul class="__context_posts"></ul>
-                        </div>
-                    </td>
-                </tr></tbody></table>
+                        <ul class="__context_posts"></ul>
+                    </div>
+                </div>
             </div>
             <button type="button" id="__on_search_close" class="close_button">×</button>
         `).show(...Preference.getAnimation("SLIDE_RIGHT"))

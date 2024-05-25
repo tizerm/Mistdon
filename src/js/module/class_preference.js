@@ -18,6 +18,10 @@ class Preference {
             "help_keyborad"             : pref?.navigation_visible?.help_keyborad   ?? true, // ショートカット早見表
             "help"                      : pref?.navigation_visible?.help            ?? true  // ヘルプ
         },                              // 個別設定
+        this.default_textwindow         = pref?.default_textwindow          ?? false, // 投稿フォームをウィンドウ化
+        this.default_textopacity        = pref?.default_textopacity         ?? false, // 投稿フォームを透過オン
+        this.enable_flex_headform       = pref?.enable_flex_headform        ?? false, // ウィンドウ幅で可変表示
+        this.enable_change_account      = pref?.enable_change_account       ?? true,  // アカウント変更アイコン
         this.enable_tool_button         = pref?.enable_tool_button          ?? true,  // ツールボタン(左にあるやつ)
         this.enable_post_button         = pref?.enable_post_button          ?? true,  // 投稿ボタン
         this.enable_last_edit_button    = pref?.enable_last_edit_button     ?? true,  // 直前編集ボタン
@@ -26,6 +30,7 @@ class Preference {
         this.enable_action_palette      = pref?.enable_action_palette       ?? true,  // 簡易アクションパレット
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
+        this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
         this.disable_disconnect_pop     = pref?.disable_disconnect_pop      ?? false, // 一時切断通知
         this.enable_animation           = pref?.enable_animation            ?? true,  // アニメーション
@@ -52,6 +57,16 @@ class Preference {
             "list"                      : pref?.tl_cache_limit?.list        ?? 200, // リスト
             "media"                     : pref?.tl_cache_limit?.media       ?? 80,  // メディア
             "gallery"                   : pref?.tl_cache_limit?.gallery     ?? 120  // ギャラリー
+        },
+        this.font_size = {              // フォントサイズ
+            "default"                   : pref?.font_size?.default          ?? 13, // ノーマル
+            "default_omit"              : pref?.font_size?.default_omit     ?? 11, // ノーマル(省略)
+            "default_quote"             : pref?.font_size?.default_quote    ?? 11, // ノーマル(引用)
+            "chat"                      : pref?.font_size?.chat             ?? 13, // チャット
+            "chat_omit"                 : pref?.font_size?.chat_omit        ?? 11, // チャット(省略)
+            "chat_quote"                : pref?.font_size?.chat_quote       ?? 11, // チャット(引用)
+            "list"                      : pref?.font_size?.list             ?? 13, // リスト
+            "media"                     : pref?.font_size?.media            ?? 13 // メディア
         },
         this.media_height_limit = {     // メディアの高さ制限
             "default"                   : pref?.media_height_limit?.default ?? 240, // ノーマル
@@ -196,9 +211,9 @@ class Preference {
                 </div>
             `,
             color: '42809e',
-            drag_only_x: false,
             resizable: true,
-            resize_only_y: false
+            drag_axis: false,
+            resize_axis: "all"
         })
 
         // テンプレート内容をウィンドウにバインド
@@ -210,6 +225,8 @@ class Preference {
                 if ($(value).is("#main")) $(`#${window_key} .pref_content`).html($(value))
             })
             Preference.setPreference()
+            // イベント矯正発火
+            $("#__opt_gen_flex_headform1").change()
             $(`#${window_key} .pref_content .tooltip_help`).tooltip({
                 position: {
                     my: "center top",
@@ -245,6 +262,11 @@ class Preference {
         $("#__chk_gen_navi_help")           .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
 
         // 個別オプション
+        $("#__chk_gen_default_textwindow")              .prop("checked", Preference.GENERAL_PREFERENCE.default_textwindow)
+        $("#__chk_gen_default_textopacity")             .prop("checked", Preference.GENERAL_PREFERENCE.default_textopacity)
+        $(Preference.GENERAL_PREFERENCE.enable_flex_headform ?
+            "#__opt_gen_flex_headform1" : "#__opt_gen_flex_headform2").prop("checked", true)
+        $("#__chk_gen_use_account_change")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_change_account)
         $("#__chk_gen_use_tool_button")                 .prop("checked", Preference.GENERAL_PREFERENCE.enable_tool_button)
         $("#__chk_gen_use_post_button")                 .prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
         $("#__chk_gen_use_additional_button")           .prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
@@ -253,6 +275,7 @@ class Preference {
         $("#__chk_gen_use_action_palette")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
+        $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_disable_disconnect_notification") .prop("checked", Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
         $("#__chk_gen_animation")                       .prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
@@ -282,6 +305,16 @@ class Preference {
         $("#__txt_gen_tlcache_list")    .val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.list)
         $("#__txt_gen_tlcache_media")   .val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.media)
         $("#__txt_gen_tlcache_gallery") .val(Preference.GENERAL_PREFERENCE.tl_cache_limit?.gallery)
+
+        // 文字サイズ
+        $("#__txt_gen_fontsize_default")        .val(Preference.GENERAL_PREFERENCE.font_size?.default)
+        $("#__txt_gen_fontsize_default_omit")   .val(Preference.GENERAL_PREFERENCE.font_size?.default_omit)
+        $("#__txt_gen_fontsize_default_quote")  .val(Preference.GENERAL_PREFERENCE.font_size?.default_quote)
+        $("#__txt_gen_fontsize_chat")           .val(Preference.GENERAL_PREFERENCE.font_size?.chat)
+        $("#__txt_gen_fontsize_chat_omit")      .val(Preference.GENERAL_PREFERENCE.font_size?.chat_omit)
+        $("#__txt_gen_fontsize_chat_quote")     .val(Preference.GENERAL_PREFERENCE.font_size?.chat_quote)
+        $("#__txt_gen_fontsize_list")           .val(Preference.GENERAL_PREFERENCE.font_size?.list)
+        $("#__txt_gen_fontsize_media")          .val(Preference.GENERAL_PREFERENCE.font_size?.media)
 
         // メディア高さ制限
         $("#__txt_gen_imageheight_limit_default")   .val(Preference.GENERAL_PREFERENCE.media_height_limit?.default)
@@ -328,6 +361,10 @@ class Preference {
                 "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
                 "help"                      : $("#__chk_gen_navi_help").prop("checked")
             },
+            "default_textwindow"            : $("#__chk_gen_default_textwindow").prop("checked"),
+            "default_textopacity"           : $("#__chk_gen_default_textopacity").prop("checked"),
+            "enable_flex_headform"          : $("#__opt_gen_flex_headform1").prop("checked"),
+            "enable_change_account"         : $("#__chk_gen_use_account_change").prop("checked"),
             "enable_tool_button"            : $("#__chk_gen_use_tool_button").prop("checked"),
             "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
@@ -336,6 +373,7 @@ class Preference {
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
+            "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
             "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
@@ -362,6 +400,16 @@ class Preference {
                 "list"                      : $("#__txt_gen_tlcache_list").val(),
                 "media"                     : $("#__txt_gen_tlcache_media").val(),
                 "gallery"                   : $("#__txt_gen_tlcache_gallery").val(),
+            },
+            "font_size": {                  // フォントサイズ
+                "default"                   : $("#__txt_gen_fontsize_default").val(),
+                "default_omit"              : $("#__txt_gen_fontsize_default_omit").val(),
+                "default_quote"             : $("#__txt_gen_fontsize_default_quote").val(),
+                "chat"                      : $("#__txt_gen_fontsize_chat").val(),
+                "chat_omit"                 : $("#__txt_gen_fontsize_chat_omit").val(),
+                "chat_quote"                : $("#__txt_gen_fontsize_chat_quote").val(),
+                "list"                      : $("#__txt_gen_fontsize_list").val(),
+                "media"                     : $("#__txt_gen_fontsize_media").val(),
             },
             "media_height_limit": {         // メディアの高さ制限
                 "default"                   : $("#__txt_gen_imageheight_limit_default").val(),
@@ -390,6 +438,7 @@ class Preference {
 
         // 設定ファイルを保存
         await window.accessApi.writeGeneralPref(save_pref)
+        Preference.GENERAL_PREFERENCE = new Preference(save_pref)
         dialog({
             type: 'alert',
             title: "全体設定",
@@ -397,6 +446,41 @@ class Preference {
             // サブウィンドウを閉じる
             accept: () => $("#pop_multi_window").empty()
         })
+    }
+
+    /**
+     * #StaticMethod
+     * ナビゲーションと投稿フォームの表示設定.
+     */
+    static initVisibility() {
+        // ナビゲーションの表示設定
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.home) $("#navi .li_home").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.auth) $("#navi .li_auth").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.search) $("#navi .li_search").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.trend) $("#navi .li_trend").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()
+
+        // 投稿フォームの各種ボタン表示制御
+        if (Preference.GENERAL_PREFERENCE.enable_flex_headform) $("#header>#head_postarea").addClass("flex_form")
+        else { // 可変自動制御じゃない場合は個別に表示制御
+            if (!Preference.GENERAL_PREFERENCE.enable_change_account) $("#header>#head_postarea>.post_user").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_tool_button) $("#header>#head_postarea>.opt_buttons").hide()
+            if (!Preference.GENERAL_PREFERENCE.enable_post_button) { // 投稿ボタンは小型のを出す
+                 $("#header>#head_postarea>.submit_button").hide()
+                 $("#header>#head_postarea #__on_another_submit").show()
+            }
+            if (!Preference.GENERAL_PREFERENCE.enable_last_edit_button) $("#header>#head_postarea>.additional_buttons").hide()
+        }
+
+        // 投稿フォームを自動的にウィンドウにする
+        if (Preference.GENERAL_PREFERENCE.default_textwindow) toggleTextarea()
+        if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
+            $("#header>#post_options .additional_users .__on_option_close").click()
     }
 
     /**
@@ -418,7 +502,7 @@ class Preference {
      * #StaticMethod
      * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
      */
-    static setAlternateTimelinePref() {
+    static initAlternateTimelinePref() {
         // トレンドタイムライン
         Trend.TREND_PREF_TIMELINE.pref = {
             "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,
@@ -450,6 +534,14 @@ class Preference {
      * 全体設定の内容から永続適用CSSを生成.
      */
     static generateStylesheet() {
+        // カラムの横幅定義
+        let columns = ''
+        Column.each(col => columns += `
+            #${col.id} {
+                flex-basis: min(${col.pref.col_width}px,calc(100% - 2px));
+                &.fixed_col { max-width: ${col.pref.col_width}px; }
+            }`)
+
         // ギャラリーレイアウトのコンテナクエリを定義
         const width_limit = Number(Preference.GENERAL_PREFERENCE.gallery_width_limit)
         let containers = ''
@@ -460,19 +552,72 @@ class Preference {
         `
         // CSSをバインド
         $('style').html(`
+            ${columns}
+            #__txt_postarea {
+                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+            }
             .timeline ul {
                 > li {
-                    > .media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                    &.normal_layout {
+                        > .content {
+                            > *:not(.hidden_content) {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
+                            }
+                        }
+                        > .post_quote {
+                            > .main_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_quote}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                        }
                     }
-                    &.chat_timeline>.media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                    &.chat_timeline {
+                        > .content {
+                            > *:not(.hidden_content) {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
+                            }
+                        }
+                        > .post_quote {
+                            > .main_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_quote}px;
+                            }
+                            > .hidden_content {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                        }
                     }
-                    &.media_timeline>.media a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                    &.short_timeline>.content>.main_content {
+                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.list}px;
+                    }
+                    &.media_timeline {
+                        > .content {
+                            > .main_content, > a.expand_header {
+                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.media}px;
+                            }
+                        }
+                        >.media a.__on_media_expand {
+                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                        }
                     }
                     &.gallery_timeline>a.__on_media_expand {
                         max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                    }
+                    &.short_userinfo>.content>.main_content {
+                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
                     }
                 }
                 @container gallery (width <= ${width_limit}px) {
@@ -483,14 +628,22 @@ class Preference {
                     > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
                 }
             }
+            .column_profile {
+                > ul.profile_detail>li.profile_userinfo>.content>.main_content {
+                    font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+                }
+            }
         `)
+
+        // 投稿フォームの文字サイズを設定
+        //$("#__txt_postarea").css('font-size', `${Preference.GENERAL_PREFERENCE.font_size?.default}px`)
     }
 
     /**
      * #StaticMethod
      * 全体設定の内容から背景画像を設定.
      */
-    static setBackground() {
+    static initBackground() {
         switch (Preference.GENERAL_PREFERENCE.background?.type) {
             case 'mono_color': // 単色カラー
                 $("body").css({

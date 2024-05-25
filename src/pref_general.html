@@ -68,23 +68,57 @@
             <dd>
                 <ul class="selector_list">
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_tool_button"/>
-                        <label for="__chk_gen_use_tool_button">ツールボタンを表示する</label>
+                        <input type="checkbox" id="__chk_gen_default_textwindow"/>
+                        <label for="__chk_gen_default_textwindow">投稿フォームをデフォルトでウィンドウ化する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると下書き/投稿オプション/絵文字パレット/文字数メーターを表示します。オフの場合でも文字数メーター以外の機能はショートカットキーから実行可能です。"/>
+                        title="オンにすると最初から投稿本文のフォームがウィンドウとして画面に表示されます。透過オプションと併せて使うことをオススメします。"/>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_post_button"/>
-                        <label for="__chk_gen_use_post_button">投稿ボタンを表示する</label>
+                        <input type="checkbox" id="__chk_gen_default_textopacity"/>
+                        <label for="__chk_gen_default_textopacity">投稿フォームウィンドウをデフォルトで透過する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると投稿ボタンを表示します。オフにした場合Ctrl+Enterでしか投稿ができなくなるので注意してください。"/>
+                        title="オンにすると投稿フォームをウィンドウ表示にしたときに、自動的にマウスアウト透過オプションがオンになります。。"/>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_additional_button"/>
-                        <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
+                        <input type="radio" id="__opt_gen_flex_headform1"
+                            name="__opt_gen_flex_headform" class="__opt_gen_flex_headform" value="true"/>
+                        <label for="__opt_gen_flex_headform1">投稿フォームを横幅に応じて自動で表示制御する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
+                        title="こちらを選択するとウィンドウの横幅に応じてボタンが自動的に非表示になります。"/>
                     </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_flex_headform2"
+                            name="__opt_gen_flex_headform" class="__opt_gen_flex_headform" value="false"/>
+                        <label for="__opt_gen_flex_headform2">投稿フォームを個別に表示制御する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="こちらを選択すると下のオプションで個別に非表示設定できます。"/>
+                    </li>
+                    <ul id="__gp_gen_headforms" class="selector_list">
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_account_change"/>
+                            <label for="__chk_gen_use_account_change">投稿アカウント変更アイコンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると投稿アカウントのアイコンが表示される変更ボタンが表示されます。オフの場合はショートカットキーか投稿オプションの投稿アカウントダブルクリックで変更します。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_tool_button"/>
+                            <label for="__chk_gen_use_tool_button">ツールボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると下書き/投稿オプション/絵文字パレット/文字数メーターを表示します。オフの場合でも文字数メーター以外の機能はショートカットキーから実行可能です。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_post_button"/>
+                            <label for="__chk_gen_use_post_button">投稿ボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると投稿ボタンを表示します。オフにした場合Ctrl+Enterでしか投稿ができなくなるので注意してください。"/>
+                        </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_additional_button"/>
+                            <label for="__chk_gen_use_additional_button">直前投稿操作ボタンを表示する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにすると直前の投稿を削除/直前の投稿を削除して再編集/直前の投稿をコピー/直前の投稿につなげるボタンを表示します。オフの場合でもこれらの機能はショートカットキーから実行可能です。"/>
+                        </li>
+                    </ul>
                     <li>
                         <input type="checkbox" id="__chk_gen_hide_additional_account"/>
                         <label for="__chk_gen_hide_additional_account">投稿オプションの投稿アカウントをデフォルトで閉じる</label>
@@ -114,6 +148,12 @@
                         <label for="__chk_gen_use_notified_impression">通知タイムラインで累計反応数を表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="オンにすると通知タイムラインのブースト/リノート/お気に入り/リアクション通知に対して累計のインプレッション数が表示されるようになります。ただし、リアルタイム更新で新たに通知が来た場合、同じ投稿の既にある通知の数は変わりません。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_use_shift_confirm"/>
+                        <label for="__chk_gen_use_shift_confirm">Shift+Enterで投稿する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとShift+Enterでフォーカスを維持しながら投稿ができます。他のアプリのクセなどで間違って打ってしまう場合はオフにしてください。"/>
                     </li>
                     <li>
                         <input type="checkbox" id="__chk_gen_show_media_confirm"/>
@@ -328,6 +368,50 @@
                         <td><input type="text" id="__txt_gen_tlcache_gallery" size="6" maxlength="3"/>件</td>
                     </tr>
                 </tbody></table>
+            </dd>
+            <dt>各レイアウトの文字サイズ
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="各種レイアウト時の投稿本文の文字サイズをpxで設定します。一番上のノーマルレイアウト時のフォントサイズはユーザープロフィールなどにも適用されます。"/>
+            </dt>
+            <dd>
+                <table><tbody>
+                    <tr>
+                        <th>ノーマル</th>
+                        <td><input type="text" id="__txt_gen_fontsize_default" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>ノーマル(省略)</th>
+                        <td><input type="text" id="__txt_gen_fontsize_default_omit" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>ノーマル(引用)</th>
+                        <td><input type="text" id="__txt_gen_fontsize_default_quote" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット</th>
+                        <td><input type="text" id="__txt_gen_fontsize_chat" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット(省略)</th>
+                        <td><input type="text" id="__txt_gen_fontsize_chat_omit" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>チャット(引用)</th>
+                        <td><input type="text" id="__txt_gen_fontsize_chat_quote" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>リスト</th>
+                        <td><input type="text" id="__txt_gen_fontsize_list" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>メディア</th>
+                        <td><input type="text" id="__txt_gen_fontsize_media" class="__gen_fontsize" size="6" maxlength="2"/>px</td>
+                    </tr>
+                </tbody></table>
+                <div class="font_sample_box">
+                    <p>あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。</p>
+                    <p>The quick brown fox jumps over the lazy dog.</p>
+                </div>
             </dd>
             <dt>画像サムネイルの高さ制限
                 <img src="resources/ic_help.png" class="tooltip_help"

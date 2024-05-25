@@ -229,7 +229,7 @@ class User {
      */
     static createDetailHtml(address) {
         return `
-            <td class="timeline column_profile" name="${address}">
+            <div class="timeline column_profile" name="${address}">
                 <div class="col_loading">
                     <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                     <span class="loading_text">Now Loading...</span>
@@ -262,7 +262,7 @@ class User {
                     </ul>
                     <ul class="ff_nametags"></ul>
                 </div>
-            </td>
+            </div>
         `
     }
 
@@ -314,32 +314,25 @@ class User {
             default:
                 break
         }
-        html += `
+        html /* フォロー/フォロワー数(非公開の場合は非公開ラベルを出す) */ += `
             </div>
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-        `
-        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
-        if (this.hide_ff) html += `
-            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
-        `; else html += `
-            <span class="count_follow counter ${this.hide_follow ? 'label_private' : 'label_follow'}"
-                title="${this.hide_follow ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
-                ${this.hide_follow ? '???' : this.count_follow}
-            </span>
-            <span class="count_follower counter ${this.hide_follower ? 'label_private' : 'label_follower'}"
-                title="${this.hide_follower ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
-                ${this.hide_follower ? '???' : this.count_follower}
-            </span>
-        `
-        html += '</div></li>'
+                <span class="count_follow counter ${this.hide_follow || this.hide_ff ? 'label_private' : 'label_follow'}"
+                    title="${this.hide_follow || this.hide_ff ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                    ${this.hide_follow || this.hide_ff ? '???' : this.count_follow}
+                </span>
+                <span class="count_follower counter ${this.hide_follower || this.hide_ff ? 'label_private' : 'label_follower'}"
+                    title="${this.hide_follower || this.hide_ff ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                    ${this.hide_follower || this.hide_ff ? '???' : this.count_follower}
+                </span>
+            </div>
+        </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.user_header') // ヘッダ画像を縮小表示して表示
-            .css('background-image', `url("${this.header_url}")`)
-            .css('background-size', '420px auto')
-            .css('background-position', 'center center')
+        // ヘッダ画像を縮小表示して表示
+        jqelm.find('.user_header').css('background-image', `url("${this.header_url}")`)
         if (this.all_account_flg) // 認証プロフィール表示の場合はブックマークアイコンを追加
             jqelm.find('.detail_info').addClass('auth_details').prepend(bookmarks)
         else // 認証されていないプロフィール表示の場合は所属インスタンスボタンを追加
@@ -396,31 +389,28 @@ class User {
             default:
                 break
         }
-        html += `
+        html /* フォロー/フォロワー数(非公開の場合は非公開ラベルを出す) */ += `
             </div>
             <div class="content"><div class="main_content">
                 ${$($.parseHTML(this.profile)).text()}
             </div></div>
-        `
-        html += `
             <div class="detail_info">
                 <span class="count_post counter label_postcount" title="投稿数">${this.count_post}</span>
-        `
-        // フォロー/フォロワー数(非公開の場合は非公開ラベルを出す)
-        if (this.hide_ff) html += `
-            <span class="ff_private counter label_private">フォロー/フォロワー非公開</span>
-        `; else html += `
-            <span class="count_follow counter label_follow" title="フォロー">${this.count_follow}</span>
-            <span class="count_follower counter label_follower" title="フォロワー">${this.count_follower}</span>
-        `
-        html += '</div></li>'
+                <span class="count_follow counter ${this.hide_follow || this.hide_ff ? 'label_private' : 'label_follow'}"
+                    title="${this.hide_follow || this.hide_ff ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                    ${this.hide_follow || this.hide_ff ? '???' : this.count_follow}
+                </span>
+                <span class="count_follower counter ${this.hide_follower || this.hide_ff ? 'label_private' : 'label_follower'}"
+                    title="${this.hide_follower || this.hide_ff ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                    ${this.hide_follower || this.hide_ff ? '???' : this.count_follower}
+                </span>
+            </div>
+        </li>`
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.user_header') // ヘッダ画像を縮小表示して表示
-            .css('background-image', `url("${this.header_url}")`)
-            .css('background-size', '480px auto')
-            .css('background-position', 'center center')
+        // ヘッダ画像を縮小表示して表示
+        jqelm.find('.user_header').css('background-image', `url("${this.header_url}")`)
         return jqelm
     }
 
@@ -739,7 +729,7 @@ class User {
      * (アカウントプロフィール一覧で使用)
      */
     addProfileUniqueId() {
-        $(`#pop_ex_timeline>.account_timeline td[name="${this.full_address}"]`)
+        $(`.account_timeline.allaccount_user>.accounts_box>.column_profile[name="${this.full_address}"]`)
             .attr('id', `user_${this.user_uuid}`)
     }
 
@@ -764,19 +754,17 @@ class User {
                         <button type="button" class="window_close_button" title="閉じる"><img
                             src="resources/ic_not.png" alt="閉じる"/></button>
                     </div>
-                    <table><tbody><tr>
-                        ${User.createDetailHtml(this.full_address)}
-                    </tr></tbody></table>
+                    ${User.createDetailHtml(this.full_address)}
                 </div>
             `,
             color: getRandomColor(),
-            drag_only_x: true,
-            resizable: false,
-            resize_only_y: false
+            resizable: true,
+            drag_axis: "x",
+            resize_axis: "e, w"
         })
 
         // キーを設定してバインド処理を実行
-        $(`#${window_key} td[name="${this.full_address}"]`).attr('id', this.user_key)
+        $(`#${window_key}>.column_profile[name="${this.full_address}"]`).attr('id', this.user_key)
         this.bindDetail()
     }
 
@@ -787,7 +775,7 @@ class User {
     async bindDetail() {
         // キャッシュマップに保存
         User.USER_CACHE_MAP.set(this.user_key, this)
-        const target_elm = $(`.account_timeline td#${this.user_key}[name="${this.full_address}"]`)
+        const target_elm = $(`#${this.user_key}[name="${this.full_address}"]`)
         // ヘッダとプロフィール詳細を表示
         target_elm.find(".profile_header").html(this.header_element)
         target_elm.find(".profile_detail").html(this.profile_element)
@@ -796,7 +784,7 @@ class User {
             <div class="user_bookmark_elm">
                 <ul class="bookmarks __context_posts"></ul>
             </div>
-        `); else target_elm.find('.profile_header .user_header').css('background-size', '480px auto')
+        `)
 
         // ヘッダ部分にツールチップを生成
         target_elm.find(".detail_info").tooltip(Preference.getUIPref("DROP", "UI_FADE_ANIMATION"))
@@ -864,10 +852,10 @@ class User {
         if (!exist_pinned) target_elm.find(".pinned_block").remove()
 
         // ブロックの高さを計算
-        target_elm.find("ul.posts").css('height', `calc(100vh - ${340 + detail_height + pinned_height}px)`)
-        target_elm.find("ul.media_post").css('height', `calc(100vh - ${340 + detail_height}px)`)
-        target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${309 + detail_height}px)`)
-        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${520 + detail_height}px)`)
+        target_elm.find("ul.posts").css('height', `calc(100vh - ${320 + detail_height + pinned_height}px)`)
+        target_elm.find("ul.media_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
+        target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${290 + detail_height}px)`)
+        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${500 + detail_height}px)`)
     }
 
     /**
@@ -877,7 +865,7 @@ class User {
      * @param type お気に入り/ブックマーク/リアクションのどれかを指定
      */
     async createBookmarkList(type) {
-        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
+        const target_td = $(`#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
@@ -911,7 +899,7 @@ class User {
      * @param type フォローを取得するかフォロワーを取得するか指定
      */
     async createFFTaglist(type) {
-        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
+        const target_td = $(`#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
@@ -946,7 +934,7 @@ class User {
      * このユーザーのメディア投稿一覧を取得して表示する.
      */
     async createMediaGallery() {
-        const target_td = $(`.account_timeline td#user_${this.user_uuid}[name="${this.full_address}"]`)
+        const target_td = $(`#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>

@@ -34,6 +34,8 @@ class Group {
     get id() { return this.pref.group_id }
     // Getter: このタイムラインが所属するカラム
     get parent_column() { return Column.get(this.__column_id) }
+    // Getter: グループのjQueryオブジェクト
+    get element() { return $(`#${this.id}`) }
 
     /**
      * #Method
@@ -277,7 +279,7 @@ class Group {
             const insert_text = `${pph}p/h${this.ppm_que.length < 10 ? '(E)' : ''}`
 
             // バインド
-            $(`#${this.id}`).find(".group_head>h6").html(insert_text)
+            this.element.find(".group_head>h6").html(insert_text)
             $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.speed_meter`)
                 .html(insert_text)
         })(), 60000) // 1分おきに実行
@@ -346,8 +348,7 @@ class Group {
      * このグループにカーソルを設定
      */
     setCursor() {
-        const elm = $(`#${this.id}`)
-        elm.addClass("__target_group")
+        this.element.addClass("__target_group")
             .find(".ic_group_cursor").append('<img src="resources/ani_cur.png" class="ic_cursor"/>')
     }
 
@@ -357,7 +358,7 @@ class Group {
      */
     static getCursor() {
         return Column.get($(".__target_col")).getGroup($(".__target_col")
-            .closest("td").find(".__target_group").closest(".tl_group_box").attr("id"))
+            .closest(".column_box").find(".__target_group").closest(".tl_group_box").attr("id"))
     }
 
     /**
@@ -373,9 +374,12 @@ class Group {
     /**
      * #Method
      * このグループを警告表示にする(！を出す)
+     *
+     * @param bool trueで表示 falseで削除
      */
-    setWarning() {
-        $(`#${this.id}`).find(".ic_group_warn").show()
+    setWarning(bool) {
+        if (bool) this.element.find(".ic_group_warn").show()
+        else this.element.find(".ic_group_warn").hide()
     }
 
     /**
@@ -403,9 +407,9 @@ class Group {
      */
     reload() {
         // 一旦中身を全消去する
-        $(`#${this.id}`).find(".col_loading").remove()
-        $(`#${this.id}`).find("ul").empty()
-        $(`#${this.id}`).find("ul").before(`
+        this.element.find(".col_loading").remove()
+        this.element.find("ul").empty()
+        this.element.find("ul").before(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
@@ -423,20 +427,20 @@ class Group {
     // Getter: このグループの下のグループを取得(ローテーション)
     get next() {
         const parent_selector = `#${this.parent_column.id} .col_tl_groups`
-        let index = $(`#${this.id}`).index(`${parent_selector}>.tl_group_box`) + 1
+        let index = this.element.index(`${parent_selector}>.tl_group_box`) + 1
         // 右端の場合は最初の要素を選択
         if ($(`${parent_selector}>.tl_group_box`).length <= index) index = 0
-        return this.parent_column.getGroup($(`#${this.id}`)
+        return this.parent_column.getGroup(this.element
             .closest(".col_tl_groups").find(".tl_group_box").eq(index).attr("id"))
     }
 
     // Getter: このグループの上のグループを取得(ローテーション)
     get prev() {
         const parent_selector = `#${this.parent_column.id} .col_tl_groups`
-        let index = $(`#${this.id}`).index(`${parent_selector}>.tl_group_box`) - 1
+        let index = this.element.index(`${parent_selector}>.tl_group_box`) - 1
         // 左端の場合は最後の要素を選択
         if (index < 0) index = $(`${parent_selector}>.tl_group_box`).length - 1
-        return this.parent_column.getGroup($(`#${this.id}`)
+        return this.parent_column.getGroup(this.element
             .closest(".col_tl_groups").find(".tl_group_box").eq(index).attr("id"))
     }
 

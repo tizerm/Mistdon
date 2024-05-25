@@ -71,6 +71,8 @@
                 src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
     <ul id="bottom_navi">
+        <li class="li_reconnect"><a id="on_reconnect" title="再接続"><img
+                src="resources/ic_disconnect.png" alt="再接続"/></a></li>
         <li class="li_keyborad"><a id="on_help_keybind" title="キーボードショートカット早見表"><img
                 src="resources/ic_help_key.png" alt="キーボードショートカット早見表"/></a></li>
         <li class="li_help"><a id="on_help" title="ヘルプ"><img src="resources/ic_help.png" alt="ヘルプ"/></a></li>
@@ -101,6 +103,12 @@
         <div class="textbox_area">
             <textarea id="__txt_postarea" class="__ignore_close_option __ignore_keyborad __emoji_suggest"
                 placeholder="いまなにしてる？(Ctrl+Enterでも投稿できます)" tabindex="1"></textarea>
+            <div id="textarea_buttons">
+                <button type="button" id="__open_submit_window" title="投稿フォームをウィンドウ化する" class="__ignore_close_option"
+                    ><img src="resources/ic_down.png" alt="投稿フォームをウィンドウ化する"/></button>
+                <button type="button" id="__on_another_submit" title="投稿" class="__ignore_close_option"
+                    ><img src="resources/ic_post.png" alt="投稿"/></button>
+            </div>
             <div id="__hdn_text_render"></div>
         </div>
         <div class="submit_button">
@@ -432,9 +440,7 @@
     </div>
 </div>
 <section id="columns">
-<table><tbody>
-<tr><!-- jQueryでバインディング処理をします --></tr>
-</tbody></table>
+<!-- jqueryでバインディング処理をします -->
 </section>
 </body>
 </html>
