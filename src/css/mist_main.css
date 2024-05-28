@@ -388,6 +388,7 @@
     background-color: rgb(56,56,56,0.717);
     border: solid 1px #999999;
     color: #ffffff;
+    resize: none;
     &::selection {
         color: #222222;
         background-color: #dddddd;

@@ -259,6 +259,11 @@
                 border-bottom-right-radius: 12px;
                 margin-left: 2px;
             }
+            & p {
+                line-height: 1.4em;
+                margin: 0px;
+                &:has(+p) { margin-bottom: 1.15em; }
+            }
 
             > .label_head {
                 font-family: Arial, "メイリオ", sans-selif;
@@ -382,23 +387,17 @@
             > .content {
                 color: #ffffff;
                 margin-bottom: 6px;
-                & p {
-                    margin: 0px;
-                    line-height: 1.4em;
-                }
                 > .main_content {
                     margin: 0px 12px;
                     overflow-wrap: break-word;
-
-                    & p:not(:last-child) { margin-bottom: 1em; }
                 }
                 > .hidden_content {
                     margin-bottom: 4px;
                     overflow-wrap: break-word;
                 }
             }
-            > .prof_normal2+.content { margin-top: 28px; }
-            &:has(.label_head)>.prof_normal2+.content { margin-top: 34px; }
+            > .prof_normal2+.content { margin-top: 24px; }
+            &:has(.label_head)>.prof_normal2+.content { margin-top: 30px; }
 
             /*=== Reaction Emoji Info ============================================================*/
             > .reaction_emoji {
