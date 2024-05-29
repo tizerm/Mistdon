@@ -456,6 +456,7 @@
             }
         }
         > ul ul { width: max-content; }
+        & .inline_emoji { height: 18px; }
     }
 
     /*=== Post Account Select Menu ===============================================================*/

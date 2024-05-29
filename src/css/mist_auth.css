@@ -107,6 +107,11 @@ input[type="text"] {
                         color: #cccccc;
                         font-size: 14px;
                     }
+                    & .inline_emoji {
+                        height: 24px;
+                        width: auto;
+                        vertical-align: text-bottom;
+                    }
                 }
                 > .option {
                     margin: 8px 16px;

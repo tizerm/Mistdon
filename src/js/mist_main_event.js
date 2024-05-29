@@ -212,18 +212,8 @@
      * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
      */
     $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
-        let target = null
-        let target_account = null
-        if ($(".reply_col").is(":visible")) { // リプライウィンドウ
-            target = $(".reply_col #__txt_replyarea")
-            target_account = Account.get($("#__hdn_reply_account").val())
-        } else if ($(".quote_col").is(":visible")) { // 引用ウィンドウ
-            target = $(".quote_col #__txt_quotearea")
-            target_account = Account.get($("#__hdn_quote_account").val())
-        } else {
-            target = $("#__txt_postarea")
-            target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
-        }
+        let target = $("#__txt_postarea")
+        let target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
         const cursor_pos = target.get(0).selectionStart
         const target_text = target.val()
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
@@ -238,11 +228,11 @@
 
     /**
      * #Event #Keyup
-     * 本文投稿フォーム(キーアップイベント).
-     * => 文字数をカウントしてメーターに表示(設定が有効な場合のみ)
+     * 本文投稿フォーム+CWフォーム(キーアップイベント).
+     * => 文字数をカウントしてメーターに表示
      */
-    $(document).on("keyup", "#__txt_postarea", e => {
-        const length = $(e.target).val().length
+    $(document).on("keyup", "#__txt_postarea, #__txt_content_warning", e => {
+        const length = $("#__txt_postarea").val().length + $("#__txt_content_warning").val().length
         const limit = Account.CURRENT_ACCOUNT?.pref.post_maxlength ?? 500
         const rate = length / limit
         const deg = 360 * rate
