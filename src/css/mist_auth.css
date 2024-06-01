@@ -11,27 +11,44 @@ input[type="text"] {
 
 #content {
     position: absolute;
+    display: flex;
     top: 36px;
-    left: 72px;
-    width: calc(100% - 70px);
+    left: 64px;
+    width: calc(100% - 68px);
+    overflow-x: auto;
+    &::-webkit-scrollbar { height: 8px; }
+
+    > * { flex-shrink: 0; margin: 0px 2px; }
 
     /*=== Account List Layout ====================================================================*/
     > #account_list {
-        position: absolute;
-        top: 0px;
-        left: -4px;
-        width: 340px;
         text-align: center;
+        flex-basis: 320px;
+        max-width: 420px;
+        flex-grow: 1;
+        position: relative;
 
-        > button {
-            padding: 2px 24px;
-            border-radius: 6px;
-            border: solid 1px #ffffff;
-        }
-        > label[for="__chk_update_profile"] { font-size: 14px; }
-        > span {
-            display: block;
-            font-size: 13px;
+        > .tool_section {
+            background-color: rgba(34,34,34,0.717);
+            > button.icon_label_set {
+                border-radius: 18px;
+                border-style: none;
+                margin: 2px;
+                padding: 5px 24px;
+                padding-left: 42px;
+                font-size: 16px;
+                font-weight: bold;
+                > img {
+                    height: 32px;
+                    width: 32px;
+                }
+            }
+            > label[for="__chk_update_profile"] { font-size: 14px; }
+            > .middle_help {
+                text-align: center;
+                font-weight: bold;
+                font-size: 13px;
+            }
         }
         > .col_loading {
             position: absolute;
@@ -58,7 +75,7 @@ input[type="text"] {
         > ul {
             margin: 0px;
             padding: 0px;
-            height: calc(100vh - 192px);
+            height: calc(100vh - 202px);
             overflow-y: auto;
             overflow-x: hidden;
             &::-webkit-scrollbar { width: 8px; }
@@ -141,11 +158,9 @@ input[type="text"] {
 
     /*=== Account Authonation Window Layout ======================================================*/
     > #account_auth {
-        position: absolute;
-        top: 0px;
-        right: 16px;
         text-align: center;
-        width: calc(100vw - 428px);
+        flex-basis: 480px;
+        flex-grow: 7;
 
         > h2 {
             border-radius: 18px;
@@ -158,9 +173,9 @@ input[type="text"] {
             position: relative;
             border-radius: 24px;
             background-color: rgba(48,48,48,0.92);
-            margin-top: 24px;
+            margin-top: 8px;
             width: 100%;
-            height: calc(100vh - 124px);
+            height: calc(100vh - 112px);
             & button {
                 border-radius: 8px;
                 border: solid 2px #cccccc;
@@ -207,6 +222,19 @@ input[type="text"] {
                     vertical-align: text-bottom;
                 }
             }
+            > button.icon_label_set {
+                border-radius: 18px;
+                border-style: none;
+                margin: 8px;
+                padding: 7px 24px;
+                padding-left: 48px;
+                font-size: 16px;
+                font-weight: bold;
+                > img {
+                    height: 36px;
+                    width: 36px;
+                }
+            }
             > .bottom_auth_warn {
                 display: block;
                 color: #ffd561;
@@ -248,6 +276,7 @@ input[type="text"] {
                 border-radius: 16px;
                 padding: 24px 12px;
             }
+            #txt_mst_auth_code { width: calc(100% - 96px); }
         }
     }
 }

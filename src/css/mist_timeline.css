@@ -1030,6 +1030,7 @@
                         width: 32px;
                         height: 32px;
                     }
+                    &.warn_sensitive::after { background-image: url("../resources/ic_video_warn.png"); }
                 }
                 > img {
                     border-radius: 8px;

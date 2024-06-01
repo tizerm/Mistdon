@@ -167,7 +167,7 @@
             if (!instance) return // インスタンスが確認できなかった場合はなにもしない
             $(e.target).closest("#select_platform").find(".__hdn_instance_platform").val(instance.platform)
             $("#on_auth_instance, #on_auth_instance_oauth").prop("disabled", false)
-            $("#on_auth_instance_oauth").text(instance.platform == 'Misskey' ? 'MiAuth認証' : 'OAuth認証')
+            $("#on_auth_instance_oauth>span").text(instance.platform == 'Misskey' ? 'MiAuth認証' : 'OAuth認証')
             Instance.AUTH_INSTANCE = instance
         })
     })
