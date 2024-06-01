@@ -1,19 +1,49 @@
 ﻿/*=== General Stylesheet =========================================================================*/
 
-#header>.head_buttons {
-    margin: 12px;
-    text-align: center;
+#header {
+    container-type: inline-size;
+    container-name: headerButtons;
 
-    > span {
-        display: block;
+    >.head_buttons {
+        margin: 4px;
+        text-align: center;
+        background-color: rgba(34,34,34,0.717);
+
+        > button.icon_label_set {
+            border-radius: 24px;
+            border-style: none;
+            padding: 12px 36px;
+            padding-left: 64px;
+            font-size: 18px;
+            font-weight: bold;
+            > img {
+                height: 48px;
+                width: 48px;
+            }
+        }
+        > #on_close {
+            vertical-align: middle;
+            transform: translate(0px, -2px);
+            border-radius: 24px;
+        }
+    }
+    > .middle_help {
+        background-color: rgba(34,34,34,0.717);
+        text-align: center;
+        font-weight: bold;
         font-size: 13px;
     }
-    > button {
-        border-radius: 8px;
-        border: solid 2px #ffffff;
-        padding: 6px 32px;
-        font-size: 16px;
-        font-weight: bold;
+}
+@container headerButtons (width < 770px) {
+    #header>.head_buttons>button.icon_label_set {
+        padding: 0px;
+        background-color: transparent;
+        height: 48px;
+        width: 48px;
+        vertical-align: middle;
+        transform: translate(0px, -2px);
+        > span { display: none; }
+        &:hover { background-color: #888888; }
     }
 }
 

@@ -29,6 +29,21 @@
         opacity: 0.75,
         tolerance: "pointer"
     })
+    $("#header>.head_buttons").tooltip({
+        position: {
+            my: "center top",
+            at: "center bottom"
+        },
+        show: {
+            effect: "slideDown",
+            duration: 80
+        },
+        hide: {
+            effect: "slideUp",
+            duration: 80
+        }
+    })
+
 
     // 全体設定-背景ファイル変更イベント
     $(document).on("change", "#__file_gen_background", e => $("#__hdn_gen_bgfile").val(e.target.files[0].path))

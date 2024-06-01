@@ -139,7 +139,7 @@ class Draft {
             $("#post_options .refernced_post+.option_close .__on_option_open").click()
         }).catch(err => Notification.error(err))
 
-        $("#__txt_postarea").focus()
+        $("#__txt_postarea").focus().keyup()
 
         // 下書きをファイルから下書きを削除
         Draft.writeFile()
