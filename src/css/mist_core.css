@@ -461,6 +461,16 @@ audio { height: 30px; }
                     height: auto;
                 }
                 & a.__on_detail_hashtag { text-decoration: underline; }
+                .current_version {
+                    border-radius: 8px;
+                    background-color: #bbbbbb;
+                    color: #333333;
+                    padding: 2px 16px;
+                    font-size: 18px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-weight: bold;
+                    text-align: right;
+                }
             }
             > .help_navi+.help_content    { height: calc(100vh - 288px); }
             > .help_content.shortcut_list { height: calc(100vh - 132px); }
