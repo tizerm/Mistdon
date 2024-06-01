@@ -371,7 +371,7 @@
      * 直前の投稿をコピーボタン.
      */
     $("#__on_on_last_copy").on("click", e => History.popIf(last => {
-        last.post.getRenderContent().then(text => $("#__txt_postarea").val(text))
+        last.post.getRenderContent().then(text => $("#__txt_postarea").val(text).keyup())
         $("#__txt_content_warning").val(last.post.cw_text)
     }, false))
 

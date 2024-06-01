@@ -1589,7 +1589,7 @@ class Status {
         $("#post_options #__hdn_edit_id").val(this.id)
         enabledAdditionalAccount(false)
 
-        $("#__txt_postarea").focus()
+        $("#__txt_postarea").focus().keyup()
     }
 
     /**

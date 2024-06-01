@@ -184,8 +184,8 @@
                 }
                 break
             case 116: // F5: カーソルのカラムをリロードする
-                if (is_control) {
-                    // Ctrl+F5: 画面そのものを読み込みなおす(ブラウザリロード)
+                if (is_control || event.shiftKey) {
+                    // Ctrl(or Shift)+F5: 画面そのものを読み込みなおす(ブラウザリロード)
                     location.reload()
                     return false
                 }
