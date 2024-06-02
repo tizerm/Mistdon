@@ -145,6 +145,18 @@ class Account {
 
     /**
      * #Method
+     * このアカウントのインスタンスのカスタム絵文字から絵文字変換(nullable).
+     * 絵文字キャッシュがなかったら文字列をそのまま帰す
+     * 
+     * @param str 変換対象の文字列
+     */
+    replaceEmojis(str) {
+        if (this.emojis) return this.emojis.replace(str)
+        else return str
+    }
+
+    /**
+     * #Method
      * このアカウントを投稿先アカウントに設定
      */
     setPostAccount() {
@@ -172,7 +184,7 @@ class Account {
         else $("#header>h1>.head_user").css('background-image',
             `url("resources/${this.is_skybridge ? 'ic_bluesky' : 'ic_mastodon'}.png")`)
 
-        $("#header>h1>.head_user>.username").html(this.emojis.replace(this.pref.username))
+        $("#header>h1>.head_user>.username").html(this.replaceEmojis(this.pref.username))
         $("#header>h1>.head_user>.channelname").empty()
         $("#header>h1>.head_user>.useraddress").text(`- ${this.full_address}`)
         separateHeaderColor()
@@ -1360,7 +1372,7 @@ class Account {
         Account.map.forEach((v, k) => html += `
             <li name="${k}" class="__lnk_account_elm"><div>
                 <img src="${v.pref.avatar_url}" class="user_icon"/>
-                <div class="display_name">${v.emojis.replace(v.pref.username)}</div>
+                <div class="display_name">${v.replaceEmojis(v.pref.username)}</div>
                 <div class="user_domain">${k}</div>
             </div></li>
         `)
@@ -1391,11 +1403,11 @@ class Account {
         if (platform) {
             // プラットフォーム指定がされている場合は対象プラットフォームだけ表示
             if (Account.eachPlatform(platform, elm => html += `
-                <li name="${elm.full_address}"><div>${elm.emojis.replace(elm.pref.username)} - ${elm.full_address}</div></li>`))
+                <li name="${elm.full_address}"><div>${elm.replaceEmojis(elm.pref.username)} - ${elm.full_address}</div></li>`))
                 // 対象プラットフォームが認証されていない場合は選択不可の項目を作る
                 html = `<li class="ui-state-disabled"><div>(${platform}のアカウントがありません)</div></li>`
         } else // プラットフォーム指定がない場合は普通にすべてのアカウントを表示
-            Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.emojis.replace(v.pref.username)} - ${k}</div></li>`)
+            Account.map.forEach((v, k) => html += `<li name="${k}"><div>${v.replaceEmojis(v.pref.username)} - ${k}</div></li>`)
         return html
     }
 
@@ -1419,7 +1431,7 @@ class Account {
                 console.log(err)
             }
             html += `<li>
-                <div>${account.emojis.replace(account.pref.username)} - ${account.full_address}</div>
+                <div>${account.replaceEmojis(account.pref.username)} - ${account.full_address}</div>
                 <ul class="__limited_renote_send" name="${account.full_address}">
                     <li class="__renote_send_local"><div>ローカルへリノート</div></li>
                     <li class="__renote_send_home"><div>ホームへリノート</div></li>
@@ -1472,7 +1484,7 @@ class Account {
                     <h3>${account.pref.domain}</h3>
                     <div class="user">
                         <img src="${account.pref.avatar_url}" class="usericon"/>
-                        <h4 class="username">${account.emojis.replace(account.pref.username)}</h4>
+                        <h4 class="username">${account.replaceEmojis(account.pref.username)}</h4>
                         <div class="userid">${account.full_address}</div>
                     </div>
                     <ul class="option">

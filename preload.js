@@ -8,7 +8,6 @@ contextBridge.exposeInMainWorld('accessApi', {
     readDraft: () => ipcRenderer.invoke('read-draft'),
     readHistory: () => ipcRenderer.invoke('read-history'),
     readEmojiHistory: () => ipcRenderer.invoke('read-emoji-history'),
-    readWindowPref: () => ipcRenderer.invoke('read-window-pref'),
     writePrefMstdAccs: (json_data) => ipcRenderer.send('write-pref-mstd-accs', json_data),
     writePrefMskyAccs: (json_data) => ipcRenderer.send('write-pref-msky-accs', json_data),
     writePrefAccColor: (json_data) => ipcRenderer.send('write-pref-acc-color', json_data),

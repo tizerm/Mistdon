@@ -5,7 +5,6 @@
     await window.accessApi.readPrefAccs()
     await window.accessApi.readPrefCols()
     await window.accessApi.readGeneralPref()
-    await window.accessApi.readWindowPref()
     await window.accessApi.readCustomEmojis()
 
     if (Account.isEmpty()) { // アカウントが未登録(これだけではストップしない)

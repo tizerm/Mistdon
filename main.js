@@ -747,27 +747,6 @@ async function overwriteEmojiHistory(event, data) {
     cache_emoji_history = JSON.parse(content)
 }
 
-/**
- * #IPC
- * 保存してあるウィンドウ設定を読み込む
- * アプリケーションキャッシュがあるばあいはそちらを優先
- * 
- * @return ウィンドウ設定JSON
- */
-async function readWindowPref() {
-    // 変数キャッシュがある場合はキャッシュを使用
-    if (pref_window) {
-        console.log('@INF: use app_prefs/window_pref.json cache.')
-        return pref_window
-    }
-    const content = readFile('app_prefs/window_pref.json')
-    if (!content) return null // ファイルが見つからなかったらnullを返却
-
-    pref_window = JSON.parse(content)
-    console.log('@INF: read app_prefs/window_pref.json.')
-    return pref_window
-}
-
 /*====================================================================================================================*/
 
 /**
@@ -804,6 +783,10 @@ function readDirFile(dirpath) {
     const contents = new Map()
     try {
         const filenames = fs.readdirSync(pref_path)
+        if (is_mac) { // Mac版は.DS_Storeを除外してファイル走査
+            const store_idx = filenames.indexOf('.DS_Store')
+            filenames.splice(store_idx, 1)
+        }
         filenames.forEach(fn => contents.set(fn, fs.readFileSync(path.join(pref_path, fn), 'utf8')))
     } catch(err) {
         console.log('!ERR: file read failed.')
@@ -1112,7 +1095,6 @@ app.whenReady().then(() => {
     ipcMain.handle('read-draft', readDraft)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
-    ipcMain.handle('read-window-pref', readWindowPref)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
