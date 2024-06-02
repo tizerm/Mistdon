@@ -607,7 +607,6 @@ async function readCustomEmojis() {
         return pref_emojis
     }
     const content_map = readDirFile('app_prefs/emojis')
-
     if (content_map.size == 0) return null // ファイルが見つからなかったらnullを返却
 
     const emoji_map = new Map()
@@ -785,7 +784,6 @@ function readDirFile(dirpath) {
     try {
         const filenames = fs.readdirSync(pref_path)
         if (is_mac) { // Mac版は.DS_Storeを除外してファイル走査
-            console.log(filenames)
             const store_idx = filenames.indexOf('.DS_Store')
             filenames.splice(store_idx, 1)
         }
