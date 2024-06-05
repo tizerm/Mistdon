@@ -256,6 +256,7 @@ class Status {
             default:
                 break
         }
+        this.host = host
 
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
@@ -1948,6 +1949,41 @@ class Status {
         // タイムラインレイアウトが指定されている場合は変更
         if (layout) scroll_tl.ref_group.pref.tl_layout = layout
         scroll_tl.createScrollableTimeline(this.id)
+    }
+
+    openLocalTimelineWindow(layout) {
+        const auth_account = Account.getByDomain(this.host)
+        let tl_pref = { // タイムライン設定
+            "external": true,
+            "host": this.host,
+            "platform": this.platform,
+            "color": auth_account?.pref.acc_color ?? getRandomColor(),
+            "timeline_type": "local",
+            "exclude_reblog": false,
+            "expand_cw": false,
+            "expand_media": false,
+        }
+        const gp_pref = { // グループ設定
+            "multi_user": false,
+            "multi_timeline": false,
+            "tl_layout": layout
+        }
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                tl_pref.rest_url = `https://${this.host}/api/v1/timelines/public`
+                tl_pref.query_param = { 'local': true }
+                break
+            case 'Misskey': // Misskey
+                tl_pref.rest_url = `https://${this.host}/api/notes/local-timeline`
+                tl_pref.query_param = {}
+                break
+            default:
+                break
+        }
+
+        // ローカルタイムラインオブジェクトを生成
+        const scroll_tl = new Timeline(tl_pref, new Group(gp_pref, null))
+        scroll_tl.createLocalTimeline(this.id)
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
