@@ -1295,8 +1295,9 @@
     $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_layout>li",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow($(e.target).closest("li").attr("name")))
 
-    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_localtimeline",
-        e => Status.getStatus($("#pop_context_menu").attr("name")).then(post => post.openLocalTimelineWindow("default")))
+    $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_localtimeline>li",
+        e => Status.getStatus($("#pop_context_menu").attr("name"))
+        .then(post => post.openLocalTimelineWindow($(e.target).closest("li").attr("name"))))
 
     /**
      * #Event #Contextmenu

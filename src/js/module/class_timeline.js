@@ -326,40 +326,39 @@ class Timeline {
         }))
     }
 
-    createLocalTimeline(id) {
-        this.createScrollableWindow(id, (tl, ref_id, window_key) => {
-            $(`#${window_key}>.timeline>ul`).append("<li>起点</li>")
-            tl.getTimeline(ref_id).then(body => { // 下方向のローダーを生成
-                // ロード画面を削除
+    createLoadableTimeline(post) {
+        this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
+            // 起点の投稿を表示して変数にマークする
+            post.getLayoutElement(tl.ref_group.pref.tl_layout)
+                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`)
+            const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
+
+            // 上下方向のローダーを生成
+            Promise.all([tl.getTimeline(ref_id).then(body => createScrollLoader({ // 下方向のローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop()?.id
+                },
+                load: async max_id => tl.getTimeline(max_id)
+            })), tl.getTimeline(null, ref_id).then(body => createTopLoader({ // 上方向のローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    const first_elm = target.find('li:first-child').get(0)
+                    data.forEach(p => tl.ref_group.addStatus(p, () => target.prepend(p.timeline_element)))
+                    first_elm.scrollIntoView({ block: 'center' })
+                    // since_idとして取得データの最終IDを指定
+                    return data.pop()?.id
+                },
+                load: async since_id => tl.getTimeline(null, since_id)
+            }))]).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
                 $(`#${window_key}>.timeline>.col_loading`).remove()
-                createScrollLoader({ // スクロールローダーを生成
-                    data: body,
-                    target: $(`#${window_key}>.timeline>ul`),
-                    bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                        data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
-                        // max_idとして取得データの最終IDを指定
-                        return data.pop()?.id
-                    },
-                    load: async max_id => tl.getTimeline(max_id)
-                })
-            })
-            tl.getTimeline(null, ref_id).then(body => { // 上方向のローダーを生成
-                const target = $(`#${window_key}>.timeline>ul`)
-                body.forEach(p => tl.ref_group.addStatus(p, () => target.prepend(p.timeline_element)))
-                /*
-                createScrollLoader({ // スクロールローダーを生成
-                    data: body,
-                    target: $(`#${window_key}>.timeline>ul`),
-                    bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                        data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
-                        // max_idとして取得データの最終IDを指定
-                        return data.pop()?.id
-                    },
-                    load: async max_id => tl.getTimeline(max_id)
-                })//*/
+                mark_elm.scrollIntoView({ block: 'center' })
             })
         })
-
     }
 
     /**

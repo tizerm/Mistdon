@@ -1085,6 +1085,29 @@
             background-repeat: no-repeat;
             height: 32px;
         }
+        > li.__on_top_loader {
+            background-image: url("../resources/ic_top.png");
+            background-position: center left;
+            background-repeat: no-repeat;
+            background-color: #415687;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px 0px;
+            &:hover {
+                background-color: #3562cc;
+                cursor: pointer;
+            }
+            &.loader_loading {
+                background-image: url("../resources/illust/ani_wait.png");
+                background-position: center center;
+                height: 32px;
+            }
+        }
+        > li.mark_target_post:not(.chat_timeline), > li.mark_target_post.chat_timeline>.content {
+            border: solid 2px #cccccc;
+        }
 
         > li>.label_head.label_reblog {
             background-position: center right;

@@ -1948,13 +1948,14 @@ class Status {
             this.from_timeline?.pref, new Group(structuredClone(this.from_group?.pref), null))
         // タイムラインレイアウトが指定されている場合は変更
         if (layout) scroll_tl.ref_group.pref.tl_layout = layout
-        scroll_tl.createScrollableTimeline(this.id)
+        scroll_tl.createLoadableTimeline(this)
     }
 
     openLocalTimelineWindow(layout) {
         const auth_account = Account.getByDomain(this.host)
         let tl_pref = { // タイムライン設定
-            "external": true,
+            "key_address": auth_account?.full_address,
+            "external": auth_account ? false : true,
             "host": this.host,
             "platform": this.platform,
             "color": auth_account?.pref.acc_color ?? getRandomColor(),
@@ -1983,7 +1984,10 @@ class Status {
 
         // ローカルタイムラインオブジェクトを生成
         const scroll_tl = new Timeline(tl_pref, new Group(gp_pref, null))
-        scroll_tl.createLocalTimeline(this.id)
+        this.from_timeline = scroll_tl
+        this.from_account = auth_account
+        this.detail_flg = false
+        scroll_tl.createLoadableTimeline(this)
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
