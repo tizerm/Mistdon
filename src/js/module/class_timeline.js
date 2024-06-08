@@ -305,32 +305,15 @@ class Timeline {
 
     /**
      * #Method
-     * 対象の投稿IDからこのタイムラインの設定で遡りウィンドウを生成
+     * 対象の投稿IDからこのタイムラインの設定で外部タイムラインウィンドウを生成
      * 
-     * @param id 起点にする投稿ID
+     * @param post 取得の起点にするStatusオブジェクト
      */
-    createScrollableTimeline(id) {
-        this.createScrollableWindow(id, (tl, ref_id, window_key) => tl.getTimeline(ref_id).then(body => {
-            // ロード画面を削除
-            $(`#${window_key}>.timeline>.col_loading`).remove()
-            createScrollLoader({ // スクロールローダーを生成
-                data: body,
-                target: $(`#${window_key}>.timeline>ul`),
-                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
-                    // max_idとして取得データの最終IDを指定
-                    return data.pop()?.id
-                },
-                load: async max_id => tl.getTimeline(max_id)
-            })
-        }))
-    }
-
     createLoadableTimeline(post) {
         this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
             // 起点の投稿を表示して変数にマークする
-            post.getLayoutElement(tl.ref_group.pref.tl_layout)
-                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`)
+            tl.ref_group.addStatus(post, () => post.getLayoutElement(tl.ref_group.pref.tl_layout)
+                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`))
             const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
 
             // 上下方向のローダーを生成

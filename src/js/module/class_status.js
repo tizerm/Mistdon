@@ -720,6 +720,7 @@ class Status {
                 html += `
                     <div class="user prof_normal2">
                         <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                        <div class="name_info">
                 `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
                     case 'both_prename': // ユーザーネーム+ユーザーID
                         html += `
@@ -753,16 +754,18 @@ class Status {
                     default:
                         break
                 }
-                html += '</div>'
+                html += '</div></div>'
             } else html /* ノーマルレイアウトの場合 */ += `
                 <div class="user">
                     <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                    <span class="userid">
-                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                            @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
-                        </a>
-                    </span>
+                    <div class="name_info">
+                        <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                        <span class="userid">
+                            <a class="__lnk_userdetail" name="@${this.user.full_address}">
+                                @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
+                            </a>
+                        </span>
+                    </div>
                 </div>
             `
         }
@@ -1270,14 +1273,14 @@ class Status {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                <span class="userid">
-                    <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                        @${this.user.id}
-                    </a>
-                </span>
-        `
-        html += `
+                <div class="name_info">
+                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                    <span class="userid">
+                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
+                            @${this.user.id}
+                        </a>
+                    </span>
+                </div>
             </div>
         `
         // 本文よりも先にメディアを表示

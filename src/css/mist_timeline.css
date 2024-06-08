@@ -286,7 +286,7 @@
             /*=== User Info ======================================================================*/
             > .user {
                 position: relative;
-                margin: -2px -4px 0px;
+                margin: -2px -8px 0px;
 
                 > .usericon {
                     border-radius: 12px;
@@ -294,37 +294,38 @@
                     height: 48px;
                     cursor: pointer;
                 }
-                > .username {
+                > .name_info {
                     position: absolute;
-                    left: 60px;
-                    top: 2px;
+                    top: 0px;
+                    left: 58px;
+                    width: calc(100% - 60px);
+                }
+                .username {
                     color: #ffffff;
                     font-size: 18px;
                     font-weight: bold;
                     margin: 0px;
-                    width: calc(100% - 60px);
+                    width: 100%;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                 }
-                > .userid {
-                    position: absolute;
-                    left: 60px;
-                    top: 28px;
+                .userid {
                     display: block;
                     font-family: Arial, "メイリオ", sans-selif;
                     color: #bbbbbb;
                     font-size: 14px;
-                    width: calc(100% - 60px);
+                    width: 100%;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     > a {
                         text-decoration: underline;
+                        color: #b5a5ab;
                         cursor: pointer;
                         &:hover {
                             text-decoration: none;
-                            color: #eeeeee;
+                            color: #dddddd;
                         }
                     }
                 }
@@ -337,12 +338,11 @@
 
                 /*=== User Info (Normal2 Layout) =================================================*/
                 &.prof_normal2 {
-                    position: absolute;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     width: calc(100% - 16px);
-                    margin: -4px -6px 2px;
+                    margin: -4px -6px 4px;
                     > .usericon {
                         border-radius: 12px;
                         width: 24px;
@@ -350,17 +350,22 @@
                         display: inline-block;
                         vertical-align: text-bottom;
                     }
-                    > .username {
-                        position: static;
-                        font-size: 13px;
-                        font-weight: bold;
-                        display: inline;
-                        > .inline_emoji { height: 18px; }
-                    }
-                    > .userid {
-                        position: static;
-                        display: inline;
-                        font-size: 12px;
+                    > .name_info {
+                        position: absolute;
+                        top: 0px;
+                        left: 28px;
+                        > .username {
+                            position: static;
+                            font-size: 13px;
+                            font-weight: bold;
+                            display: inline;
+                            > .inline_emoji { height: 18px; }
+                        }
+                        > .userid {
+                            position: static;
+                            display: inline;
+                            font-size: 13px;
+                        }
                     }
                 }
             }
@@ -396,8 +401,6 @@
                     overflow-wrap: break-word;
                 }
             }
-            > .prof_normal2+.content { margin-top: 24px; }
-            &:has(.label_head)>.prof_normal2+.content { margin-top: 30px; }
 
             /*=== Reaction Emoji Info ============================================================*/
             > .reaction_emoji {
@@ -949,20 +952,16 @@
                 font-size: 11px;
             }
             > .user {
-                margin: 0px 8px;
+                margin: 0px 6px;
                 > .usericon {
                     border-radius: 18px;
                     width: 36px;
                     height: 36px;
                 }
-                > .username, > .userid { font-size: 13px; }
-                > .username {
+                > .name_info {
                     left: 48px;
-                    top: 1px;
-                }
-                > .userid {
-                    left: 48px;
-                    top: 20px;
+                    width: calc(100% - 48px);
+                    > .username, > .userid { font-size: 13px; }
                 }
             }
             > .content {
