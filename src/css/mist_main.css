@@ -22,7 +22,6 @@
                 border-radius: 8px;
                 padding: 2px 8px;
                 margin-right: 8px;
-                background-color: rgba(255,255,255,0.25);
             }
         }
     }
@@ -30,7 +29,6 @@
     /*=== Default Post Area Layout ===============================================================*/
     > #head_postarea {
         display: flex;
-        background-color: rgba(34,34,34,0.717);
         border-radius: 12px;
         margin: 2px 0px;
         width: calc(100vw - 72px);
@@ -97,11 +95,9 @@
             > .__window_opened {
                 width: calc(100% - 8px);
                 padding: 24px 0px;
-                background-color: rgb(56,56,56,0.717);
                 background-image: url("../resources/illust/il_info2.png");
                 background-position: center left +8px;
                 background-repeat: no-repeat;
-                color: #999999;
                 border-radius: 18px;
                 text-align: center;
                 font-size: 18px;
@@ -134,7 +130,6 @@
         margin-top: 4px;
         z-index: 50;
         border-radius: 8px;
-        background-color: rgba(48,48,48,0.85);
         border: solid 1px #bbbbbb;
         width: calc(100vw - 72px);
         overflow-x: auto;
@@ -150,7 +145,6 @@
                 border-bottom: solid 1px #dddddd;
                 margin: 4px 0px;
                 padding: 0px 12px;
-                color: #dddddd;
                 text-align: left;
                 font-size: 14px;
                 > button>img {
@@ -180,7 +174,6 @@
                     transform-origin: left top;
                     white-space: nowrap;
                     border-style: none;
-                    color: #ffffff;
                 }
             }
 
@@ -209,14 +202,10 @@
                         }
                         > input.__chk_add_account[disabled]+label>.check_mask {
                             display: block;
-                            background-color: rgba(119,119,119,0.6);
                             background-image: url("../resources/ic_check.png");
                         }
                     }
-                    + .option_close {
-                        background-color: #514285;
-                        display: none;
-                    }
+                    + .option_close { display: none; }
                 }
             }
             > .publish_setting {
@@ -249,7 +238,6 @@
                 #__chk_poll_multiple+label { font-size: 13px; }
                 .__txt_poll_option { width: calc(100% - 8px); }
                 #__txt_poll_expire_time { width: 82px; }
-                + .option_close { background-color: #428571; }
             }
             > .attached_media {
                 flex-grow: 1;
@@ -265,10 +253,7 @@
                         & label {
                             padding: 0px;
                             border-radius: 12px;
-                            > .check_mask {
-                                border-radius: 12px;
-                                background-color: rgba(51,122,159,0.5);
-                            }
+                            > .check_mask { border-radius: 12px; }
                         }
                         & img {
                             display: inline-block;
@@ -281,17 +266,14 @@
                         &.__initial_message {
                             display: block;
                             padding: 56px 0px;
-                            background-color: rgba(255,255,255,0.08);
                             border-radius: 12px;
                             text-align: center;
                         }
                         & input[type="checkbox"]:checked+label>.check_mask {
-                            background-color: rgba(159,58,51,0.5);
                             background-image: url("../resources/ic_warn.png");
                             background-size: 96px 96px;
                         }
                         &.ui-sortable-placeholder {
-                            background-color: rgba(168,72,96,0.8);
                             border-radius: 16px;
                             width: 216px;
                             height: 132px;
@@ -302,7 +284,6 @@
                             position: absolute;
                             top: 0px;
                             right: 0px;
-                            background-color: rgba(161,0,0,0.75);
                             background-image: url("../resources/ic_warn.png");
                             background-repeat: no-repeat;
                             background-size: 32px 32px;
@@ -319,7 +300,6 @@
                     left: 4px;
                     width: 220px;
                     height: 190px;
-                    background-color: rgba(168,72,96,0.8);
                     border: dashed 4px #cccccc;
                     > .initial_dust {
                         position: absolute;
@@ -345,13 +325,11 @@
                         margin: 2px;
                         &.__initial_message {
                             padding: 68px 0px;
-                            background-color: rgba(62,62,62,0.92);
                             border-radius: 12px;
                             text-align: center;
                         }
                     }
                 }
-                + .option_close { background-color: #854257; }
             }
         }
     }
@@ -385,14 +363,8 @@
     font-family: "メイリオ", sans-selif;
     text-align: left;
     border-radius: 8px;
-    background-color: rgb(56,56,56,0.717);
     border: solid 1px #999999;
-    color: #ffffff;
     resize: none;
-    &::selection {
-        color: #222222;
-        background-color: #dddddd;
-    }
 }
 
 /*=== Navigation Area Container ==================================================================*/
@@ -437,10 +409,8 @@
 
         & ul {
             border-radius: 8px;
-            background-color: rgba(34,34,34,0.92);
             border: solid 1px #aaaaaa;
             padding: 4px;
-            color: #ffffff;
             font-size: 13px;
 
             > li {
@@ -449,10 +419,7 @@
                     margin: 2px 0px;
                     padding: 4px 12px;
                 }
-                > div.ui-state-active {
-                    border: solid 1px rgba(255,255,255,0.1);
-                    background-color: rgba(255,255,255,0.15);
-                }
+                > div.ui-state-active { border: solid 1px rgba(255,255,255,0.1); }
             }
         }
         > ul ul { width: max-content; }
@@ -510,7 +477,6 @@
             overflow-y: auto;
             &::-webkit-scrollbar { width: 8px; }
             > li {
-                background-color: rgba(56,56,56,0.88);
                 list-style-type: none;
                 margin: 4px 0px;
                 position: relative;
@@ -546,11 +512,7 @@
                     margin: 4px 12px;
                     margin-top: -2px;
                 }
-                &:hover {
-                    background-color: rgba(76,76,76,0.92);
-                    cursor: pointer;
-                }
-
+                &:hover { cursor: pointer; }
             }
         }
     }
@@ -565,7 +527,6 @@
         left: 64px;
 
         > ul {
-            background-color: rgba(0,0,0,0.92);
             margin: 0px;
             padding: 6px;
             height: 50vh;
@@ -577,8 +538,6 @@
                 list-style-type: none;
                 font-family: Consolas, "ＭＳ ゴシック", sans-selif;
                 font-size: 14px;
-                &.done  { color: #00ff00; }
-                &.error { color: #ff0000; }
             }
         }
     }
@@ -600,7 +559,6 @@
                 border-top-right-radius: 18px;
                 border-bottom-right-radius: 18px;
                 font-family: Arial, "メイリオ", sans-selif;
-                color: #ffffff;
                 margin: 0px;
                 margin-bottom: 6px;
                 padding: 8px 24px;
@@ -611,19 +569,16 @@
                 }
             }
             > .recent_emoji {
-                background-color: rgba(62,68,82,0.8);
                 border-radius: 12px;
                 > h5 {
                     margin: 2px 8px;
                     padding: 1px 16px;
                     border-bottom: solid 1px #dddddd;
-                    color: #dddddd;
                     font-size: 14px;
                     text-align: right;
                 }
             }
             > .emoji_list {
-                background-color: rgba(34,34,34,0.8);
                 overflow-y: auto;
                 flex-grow: 1;
                 &::-webkit-scrollbar { width: 8px; }
@@ -634,7 +589,6 @@
     /*=== Custom Emojis Suggester Layout =========================================================*/
     > #pop_emoji_suggester {
         display: none;
-        background-color: rgba(34,34,34,0.8);
         border: solid 1px #cccccc;
         border-radius: 8px;
         z-index: 62;
@@ -656,7 +610,6 @@
                 }
                 &.__selected_emoji, &:hover {
                     border: solid 1px #cccccc;
-                    background-color: rgba(62,82,96,0.92);
                     border-radius: 4px;
                 }
             }
@@ -688,7 +641,6 @@
     /*=== Drop Files Modal Layout ================================================================*/
     > .pop_modal {
         display: none;
-        background-color: rgba(34,34,34,0.75);
         position: fixed;
         top: 0px;
         left: 0px;
@@ -706,7 +658,6 @@
             border: dashed 6px #cccccc;
             width: calc(100vw - 32px);
             height: calc(100vh - 32px);
-            &:hover { background-color: rgba(255,255,255,0.1); }
             > .message {
                 position: absolute;
                 top: 50%;
@@ -776,7 +727,6 @@
             > li, > li:hover {
                 border: solid 2px #cccccc;
                 border-left-width: 8px;
-                background-color: rgba(56,56,56,0.92);
             }
         }
     }
@@ -787,7 +737,6 @@
         z-index: 41;
         position: absolute;
         border-radius: 8px;
-        background-color: rgba(62,62,62,0.8);
         border: solid 1px #bbbbbb;
         max-width: 320px;
         padding: 4px;
@@ -808,10 +757,7 @@
                 height: 24px;
                 width: auto;
             }
-            &:hover>img {
-                background-color: rgba(255,255,255,0.2);
-                cursor: pointer;
-            }
+            &:hover>img { cursor: pointer; }
         }
         > .reactions>.recent { display: inline; }
         > .impressions {
@@ -828,18 +774,9 @@
                 font-family: Arial, "メイリオ", sans-selif;
                 font-size: 14px;
                 font-weight: bold;
-                &.impress_reply {
-                    background-color: #cc355d;
-                    background-image: url("../resources/ic_rpl.png");
-                }
-                &.impress_reblog {
-                    background-color: #408a08;
-                    background-image: url("../resources/ic_reblog.png");
-                }
-                &.impress_fav {
-                    background-color: #a8880a;
-                    background-image: url("../resources/ic_favorite.png");
-                }
+                &.impress_reply { background-image: url("../resources/ic_rpl.png"); }
+                &.impress_reblog { background-image: url("../resources/ic_reblog.png"); }
+                &.impress_fav { background-image: url("../resources/ic_favorite.png"); }
             }
         }
     }
@@ -847,7 +784,6 @@
     /*=== Drive Window Layout ====================================================================*/
     > #pop_dirve_window {
         display: none;
-        background-color: rgba(56,56,56,0.683);
         padding: 4px;
         border-radius: 12px;
         width: min(800px,90vw);
@@ -869,7 +805,6 @@
                 margin: 0px;
                 padding: 12px;
                 border-radius: 12px;
-                background-color: rgba(76,76,76,0.683);
                 background-image: url("../resources/ic_folder.png");
                 background-position: center left 8px;
                 background-repeat: no-repeat;
@@ -883,10 +818,7 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 &[name="__root"] { background-image: url("../resources/ic_top.png"); }
-                &:hover {
-                    background-color: rgba(76,76,76,0.92);
-                    cursor: pointer;
-                }
+                &:hover { cursor: pointer; }
             }
         }
         > ul.drive_media_list {
@@ -939,7 +871,6 @@
                         position: absolute;
                         top: 0px;
                         right: 0px;
-                        background-color: rgba(161,0,0,0.75);
                         background-image: url("../resources/ic_warn.png");
                         background-repeat: no-repeat;
                         background-size: 32px 32px;
@@ -950,7 +881,6 @@
                 }
                 &.__scroll_loader {
                     display: block;
-                    background-color: rgba(62,62,62,0.92);
                     margin: 6px;
                     padding: 8px 12px;
                 }
@@ -968,20 +898,16 @@
         display: none;
         z-index: 63;
         border-radius: 8px;
-        background-color: rgba(34,34,34,0.683);
         padding: 4px 0px 4px 4px;
         position: absolute;
         top: 32px;
         right: 0px;
 
-        > h2 { background-color: #2a637d; }
         & input {
             font-family: "メイリオ", sans-selif;
             font-size: 16px;
-            background-color: #434343;
             border-radius: 4px;
             border: solid 1px #888888;
-            color: #ffffff;
         }
 
         /*=== Search Timeline Layout =============================================================*/
@@ -1001,17 +927,13 @@
         > .trend_timeline {
             > a.__on_get_features {
                 display: block;
-                background-color: #3562cc;
                 margin: 4px;
                 padding: 6px;
                 border-radius: 12px;
                 font-size: 16px;
                 font-weight: bold;
                 text-align: center;
-                &:hover {
-                    background-color: #36466e;
-                    cursor: pointer;
-                }
+                &:hover { cursor: pointer; }
             }
             > ul.trend_tags {
                 margin: 0px;
@@ -1033,10 +955,7 @@
                     height: 22px;
                     border: solid 1px #444444;
                     > span { vertical-align: middle; }
-                    &:hover {
-                        border-color: #dddddd;
-                        cursor: pointer;
-                    }
+                    &:hover { cursor: pointer; }
                 }
             }
             & ul.trend_ul { height: calc(100vh - 400px); }
@@ -1076,7 +995,6 @@
                             left: 0px;
                             width: 100%;
                             height: 100%;
-                            background-color: rgba(255,255,255,0.25);
                             > .buttons {
                                 position: absolute;
                                 width: 50%;
@@ -1098,8 +1016,6 @@
                         }
                         &:hover>.delete_modal { display: block; }
                         &.external_deleted {
-                            background-color: #bbbbbb;
-                            color: #333333;
                             text-align: center;
                             font-size: 14px;
                             font-weight: bold;
@@ -1107,8 +1023,6 @@
                         }
                     }
                 }
-                &.reaction_history>.col_head { background-color: #408a08; }
-                &.post_history>.col_head     { background-color: #3562cc; }
             }
         }
     }
@@ -1147,7 +1061,6 @@
         height: min(800px,100vh);
         z-index: 34;
         right: 0px;
-        > h2>a { color: #fff; }
         > .timeline {
             height: calc(100% - 36px);
             > ul { height: calc(100% - 8px); }
@@ -1193,13 +1106,11 @@
                 }
             }
             > .recent_reaction {
-                background-color: rgba(62,68,82,0.8);
                 border-radius: 12px;
                 > h5 {
                     margin: 2px 8px;
                     padding: 1px 16px;
                     border-bottom: solid 1px #dddddd;
-                    color: #dddddd;
                     font-size: 14px;
                     text-align: right;
                 }
@@ -1218,7 +1129,6 @@
         position: absolute;
         left: 72px;
         top: 192px;
-        background-color: rgba(34,34,34,0.88);
         border: solid 2px #cccccc;
         border-radius: 12px;
         z-index: 49;
@@ -1248,7 +1158,6 @@
         position: absolute;
         left: 72px;
         bottom: 6px;
-        background-color: rgba(82,66,62,0.683);
         background-image: url("../resources/illust/il_info2.png");
         background-position: center left -36px;
         background-repeat: no-repeat;
@@ -1268,8 +1177,6 @@
             margin: 4px;
             padding: 2px;
             border-radius: 8px;
-            background-color: #4461a6;
-            color: #ffffff;
             text-align: center;
             font-weight: bold;
         }
@@ -1302,7 +1209,6 @@
 #pop_extend_column>.reaction_col>.reaction_list a:hover img,
 #pop_custom_emoji .recent_emoji a:hover img,
 #pop_extend_column>.reaction_col>.recent_reaction a:hover img {
-    background-color: rgba(255,255,255,0.2);
     cursor: pointer;
 }
 #pop_ex_timeline>.search_timeline,
@@ -1317,11 +1223,9 @@
     border-bottom-left-radius: 18px;
     font-family: Arial, "メイリオ", sans-selif;
     font-size: 20px;
-    color: #ffffff;
     margin: 0px;
     padding: 12px 24px;
 }
-#pop_ex_timeline h2 { background-color: #5e5e5e; }
 #pop_extend_column>.reaction_col #__txt_reaction_search,
 #pop_custom_emoji #__txt_emoji_search,
 #pop_ex_timeline #__txt_search_query {

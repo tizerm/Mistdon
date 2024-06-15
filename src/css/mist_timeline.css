@@ -14,7 +14,6 @@
         height: calc(100vh - 112px);
         width: calc(100vw - 72px);
         text-align: center;
-        color: #cccccc;
         font-size: 18px;
         font-weight: bold;
         > .inner {
@@ -22,7 +21,6 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(34,34,34,0.683);
             padding: 24px;
             border-radius: 18px;
         }
@@ -30,7 +28,6 @@
     .col_action>a:hover>img,
     .gp_action>a:hover>img {
         border-radius: 8px;
-        background-color: rgba(255,255,255,0.15);
         cursor: pointer;
     }
     > * { flex-shrink: 0; }
@@ -43,7 +40,6 @@
         padding: 0px;
         margin: 2px 1px;
         flex-basis: 48px;
-        background-color: #888888;
         opacity: 0.85;
         > .ic_column_num {
             position: absolute;
@@ -98,7 +94,6 @@
                     border-radius: 12px;
                     margin-left: 8px;
                     padding: 2px 8px;
-                    background-color: rgba(255,255,255,0.15);
                     font-weight: bold;
                     font-size: 15px;
                     &:empty { display: none; }
@@ -119,7 +114,6 @@
             position: relative;
             border-top-left-radius: 18px;
             border-top-right-radius: 18px;
-            color: #ffffff;
             margin: 0px 0px 2px;
             padding: 12px 24px;
             height: 58px;
@@ -229,15 +223,12 @@
         padding: 24px;
         right: 0px;
         left: 0px;
-        background-color: rgba(62,62,62,0.92);
         border-radius: 12px;
         text-align: center;
-        color: #dddddd;
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 14px;
     }
     & ul {
-        background-color: rgba(34,34,34,0.683);
         margin: 0px;
         padding: 0px;
         height: calc(100vh - 228px);
@@ -247,7 +238,6 @@
 
         /*=== Normal Layout Style ================================================================*/
         > li {
-            background-color: rgba(56,56,56,0.683);
             position: relative;
             list-style-type: none;
             margin: 6px;
@@ -301,7 +291,6 @@
                     width: calc(100% - 60px);
                 }
                 .username {
-                    color: #ffffff;
                     font-size: 18px;
                     font-weight: bold;
                     margin: 0px;
@@ -313,7 +302,6 @@
                 .userid {
                     display: block;
                     font-family: Arial, "メイリオ", sans-selif;
-                    color: #bbbbbb;
                     font-size: 14px;
                     width: 100%;
                     overflow: hidden;
@@ -321,12 +309,8 @@
                     text-overflow: ellipsis;
                     > a {
                         text-decoration: underline;
-                        color: #b5a5ab;
                         cursor: pointer;
-                        &:hover {
-                            text-decoration: none;
-                            color: #dddddd;
-                        }
+                        &:hover { text-decoration: none; }
                     }
                 }
                 > .instance_icon {
@@ -390,7 +374,6 @@
 
             /*=== Contents Info ==================================================================*/
             > .content {
-                color: #ffffff;
                 margin-bottom: 6px;
                 > .main_content {
                     margin: 0px 12px;
@@ -463,7 +446,6 @@
                     text-align: center;
                     > button, > input.__chk_multi_vote+label {
                         display: inline-block;
-                        background-color: rgba(62,82,96,0.8);
                         background-image: none;
                         border: solid 1px #cccccc;
                         border-radius: 8px;
@@ -475,21 +457,12 @@
                         font-size: 12px;
                         font-weight: normal;
                         text-align: center;
-                        &:hover {
-                            background-color: #bbbbbb;
-                            color: #333333;
-                        }
                     }
                     > input.__chk_multi_vote:checked+label {
-                        background-color: rgba(96,62,62,0.8);
                         background-image: url("../resources/ic_check.png");
                         background-position: center left;
                         background-repeat: no-repeat;
                         background-size: 24px 24px;
-                        &:hover {
-                            background-color: #888888;
-                            color: #ffffff;
-                        }
                     }
                     > button.__on_poll_vote, > input.__chk_multi_vote+label { width: calc(50% - 6px); }
                     > button.__on_poll_multi_votes {
@@ -500,7 +473,6 @@
                 > .poll_info {
                     text-align: right;
                     font-size: 11px;
-                    color: #cccccc;
                 }
             }
             > .poll_graph_section {
@@ -511,13 +483,11 @@
                     > .text { font-size: 12px; }
                     > .rate {
                         font-size: 11px;
-                        color: #cccccc;
                     }
                 }
                 > .poll_footer {
                     text-align: right;
                     font-size: 11px;
-                    color: #cccccc;
                 }
             }
 
@@ -527,7 +497,6 @@
                 position: relative;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
-                background-color: rgba(76,76,76,0.683);
                 border-left: solid 8px #bbbbbb;
                 overflow-wrap: break-word;
                 font-size: 11px;
@@ -546,15 +515,9 @@
                     border-top-right-radius: 8px;
                     border-bottom-right-radius: 8px;
                     padding-left: 12px;
-                    background-color: #bbbbbb;
-                    color: #333333;
                     font-weight: bold;
                 }
-                &:hover {
-                    background-color: rgba(76,76,76,0.98);
-                    border-left-color: #ffffff;
-                    cursor: pointer;
-                }
+                &:hover { cursor: pointer; }
             }
 
             /*=== Notification Impression Info ===================================================*/
@@ -603,7 +566,6 @@
                     border-radius: 18px;
                     padding: 0px;
                     width: 100%;
-                    background-color: #808080;
                     background-position: center center;
                     background-size: cover;
                     &::before {
@@ -619,8 +581,6 @@
                         border-bottom-left-radius: 18px;
                         border-bottom-right-radius: 18px;
                         width: calc(100% - 24px);
-                        background-color: rgba(34,34,34,0.8);
-                        color: #ffffff;
                         > h6 {
                             margin: 0px;
                             padding: 0px;
@@ -632,15 +592,10 @@
                             font-weight: normal;
                         }
                     }
-                    &:hover>.descriptions { background-color: rgba(62,82,96,0.8); }
                 }
                 > .hashtags>a {
-                    background-color: rgba(255,255,255,0.1);
                     background-image: url("../resources/ic_tag.png");
-                    &:hover {
-                        background-color: rgba(255,255,255,0.25);
-                        cursor: pointer;
-                    }
+                    &:hover { cursor: pointer; }
                 }
                 .counter              { width: calc(33% - 48px); }
                 .count_post           { background-image: url("../resources/ic_rpl.png"); }
@@ -650,10 +605,7 @@
                 .count_reblog         { background-image: url("../resources/ic_reblog.png"); }
                 .count_fav            { background-image: url("../resources/ic_favorite.png"); }
                 .count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
-                .count_reaction {
-                    background-color: rgba(0,172,255,0.2);
-                    padding-right: 8px;
-                }
+                .count_reaction { padding-right: 8px; }
             }
 
             /*=== Footer Info ====================================================================*/
@@ -666,12 +618,10 @@
                     border-top: solid 1px #bbbbbb;
                     padding: 2px 16px;
                     margin-bottom: -4px;
-                    color: #bbbbbb;
                     font-size: 11px;
                     &:hover {
                         padding-right: 24px;
                         text-decoration: underline;
-                        color: #dddddd;
                         cursor: pointer;
                     }
                 }
@@ -690,15 +640,8 @@
                     }
                 }
                 > .from_address.created_at {
-                    color: #ffffff;
                     padding-right: 16px;
                     border-top: none;
-                    &.label_24h { background-color: #852a2a; }
-                    &.label_72h { background-color: #855c2a; }
-                    &.label_1w  { background-color: #2a8564; }
-                    &.label_1m  { background-color: #2a6185; }
-                    &.label_hfy { background-color: #2a3985; }
-                    &.label_1y  { background-color: #472a85; }
                 }
             }
             > .content, > .post_quote {
@@ -712,15 +655,9 @@
                 }
             }
         }
-        > li.self_post,
-        > li.chat_timeline.self_post>.content { background-color: rgba(62,68,82,0.683); }
-        > li.rebloged_post,
-        > li.chat_timeline.rebloged_post>.content { background-color: rgba(62,76,66,0.683); }
-        > li.favorited_post { background-color: rgba(76,76,62,0.683); }
 
         /*=== Short User Infomation Style ========================================================*/
         > li.short_userinfo {
-            background-color: rgba(62,82,96,0.683);
             container-type: inline-size;
             container-name: profileHeader;
             > .user_header {
@@ -773,7 +710,6 @@
                 }
                 > .created_at {
                     font-family: Arial, "メイリオ", sans-selif;
-                    color: #bbbbbb;
                     display: inline-block;
                     text-decoration: underline;
                     font-size: 11px;
@@ -781,10 +717,7 @@
                     top: -13px;
                     right: 0px;
                     cursor: pointer;
-                    &:hover {
-                        text-decoration: none;
-                        color: #eeeeee;
-                    }
+                    &:hover { text-decoration: none; }
                 }
             }
             .visibilityicon {
@@ -798,12 +731,10 @@
             > .content {
                 position: relative;
                 left: 34px;
-                background-color: rgba(56,56,56,0.683);
                 margin: 0px;
                 padding: 8px 12px;
                 width: calc(100% - 62px);
                 min-height: 20px;
-                color: #ffffff;
 
                 border-left: solid 4px #cccccc;
                 border-top-right-radius: 8px;
@@ -876,7 +807,6 @@
             border-top-right-radius: 12px;
             border-bottom-right-radius: 12px;
             margin-left: 2px;
-            &:hover { border-left-color: #dddddd !important; }
 
             & img {
                 width: 24px;
@@ -897,7 +827,6 @@
                 left: 28px;
                 display: inline-block;
                 width: calc(100% - 58px);
-                color: #ffffff;
 
                 > .main_content {
                     display: inline-block;
@@ -1047,7 +976,6 @@
                     position: absolute;
                     top: 0px;
                     right: 0px;
-                    background-color: rgba(161,0,0,0.75);
                     background-image: url("../resources/ic_warn.png");
                     background-repeat: no-repeat;
                     background-size: 32px 32px;
@@ -1065,16 +993,10 @@
             border-bottom-right-radius: 12px;
             margin-left: 2px;
             padding: 2px;
-            background-color: #bbbbbb;
-            color: #333333;
             font-size: 13px;
             font-weight: bold;
             text-align: center;
-            &:hover {
-                background-color: #999999;
-                color: #ffffff;
-                cursor: pointer;
-            }
+            &:hover { cursor: pointer; }
         }
 
         /*=== Scroll Loader Layout ===============================================================*/
@@ -1088,16 +1010,12 @@
             background-image: url("../resources/ic_top.png");
             background-position: center left;
             background-repeat: no-repeat;
-            background-color: #415687;
             border-radius: 16px;
             font-size: 16px;
             font-weight: bold;
             text-align: center;
             padding: 4px 0px;
-            &:hover {
-                background-color: #3562cc;
-                cursor: pointer;
-            }
+            &:hover { cursor: pointer; }
             &.loader_loading {
                 background-image: url("../resources/illust/ani_wait.png");
                 background-position: center center;
@@ -1120,12 +1038,6 @@
         border-bottom: solid 4px #cccccc;
         border-bottom-left-radius: 12px;
     }
-    .__context_posts {
-        > li:not(.chat_timeline),
-        > li.chat_timeline>.content {
-            &:hover { background-color: rgba(60,60,60,0.9); }
-        }
-    }
 }
 
 /*=== General Timeline Preference ================================================================*/
@@ -1145,7 +1057,6 @@
 
 /*=== Profile Column Layout ======================================================================*/
 
-.user_header { background-color: #999999; }
 .column_profile {
     position: relative;
     > .profile_header {
@@ -1175,10 +1086,7 @@
                         height: 24px;
                         vertical-align: text-bottom;
                     }
-                    &:hover>img {
-                        background-color: rgba(255,255,255,0.2);
-                        cursor: pointer;
-                    }
+                    &:hover>img { cursor: pointer; }
                 }
             }
         }
@@ -1194,7 +1102,6 @@
                 margin: 1px;
                 border-radius: 6px;
                 padding: 2px 8px;
-                background-color: rgba(255,255,255,0.08);
                 font-size: 13px;
             }
             & td{
@@ -1212,12 +1119,10 @@
                 display: inline-block;
                 border-top-left-radius: 12px;
                 border-top-right-radius: 12px;
-                background-color: rgba(62,62,62,0.92);
                 padding: 3px;
                 width: calc(50% - 28px);
                 font-size: 13px;
                 cursor: pointer;
-                &:hover { background-color: rgba(62,82,96,0.92); }
             }
         }
         > .media_uls { display: none; }
@@ -1238,16 +1143,11 @@
         }
     }
     .pinned_block {
-        > h4 {
-            background-color: #3b783b;
-            &:hover {
-                cursor: pointer;
-                opacity: 1.0;
-            }
+        > h4:hover {
+            cursor: pointer;
+            opacity: 1.0;
         }
-        > ul>li { background-color: rgba(82,66,62,0.683); }
     }
-    .posts_block>h4 { background-color: #3b5778; }
     .posts, .media_post { height: calc((100vh - 310px) * 0.6); }
     > .user_bookmark_elm, > .user_ff_elm { display: none; }
 
@@ -1281,7 +1181,6 @@
                 left: 46px;
                 top: 20px;
             }
-            &:hover { background-color: rgba(88,88,88,0.92); }
         }
     }
 }
@@ -1359,7 +1258,6 @@
                     padding: 4px 12px;
                     font-size: 14px;
                     border-left: solid 12px #aaaaaa;
-                    background-color: rgba(255,255,255,0.08);
                 }
             }
             > ul.detail_info {
@@ -1375,7 +1273,6 @@
                         display: inline-block;
                         margin: 0px;
                         padding: 4px 16px;
-                        background-color: rgba(255,255,255,0.15);
                         border-radius: 16px;
                         font-size: 16px;
                     }
@@ -1383,9 +1280,6 @@
                         padding: 2px 12px;
                         font-size: 16px;
                     }
-                    &.total_users    { background-color: #4461a6; }
-                    &.monthly_users  { background-color: #bf4747; }
-                    &.monthly_status { background-color: #62913f; }
                 }
             }
         }
@@ -1408,7 +1302,6 @@
             padding: 0px !important;
             height: auto !important;
             > li {
-                background-color: rgba(255,255,255,0.08) !important;
                 margin: 4px 0px !important;
                 padding: 4px 12px !important;
             }
@@ -1423,7 +1316,6 @@
             font-weight: bold;
             text-align: center;
             padding: 4px;
-            background-color: #4461a6;
         }
     }
 }
