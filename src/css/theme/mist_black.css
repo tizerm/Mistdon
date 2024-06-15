@@ -1,0 +1,583 @@
+﻿/*=== UI Theme Coloring - Black ==================================================================*/
+
+body.theme-black {
+    /*=== General Coloring =======================================================================*/
+
+    *::-webkit-scrollbar-thumb { background-color: #808080; }
+    & a {
+        &:any-link { color: #a5a9b5; }
+        &:hover    { color: #d1d8ed; }
+    }
+    & input, & select {
+        background-color: #434343;
+        border-color: #afafaf;
+        color: #ffffff;
+    }
+
+    & input[type="radio"], & input[type="checkbox"] {
+        + label {
+            background-color: rgba(255,255,255,0.1);
+            color: #cccccc;
+            &:hover                      { background-color: #cfcfcf; color: #333333; }
+            &:has(>img:only-child):hover { background-color: #888888; }
+        }
+        &:checked:not([disabled])+label {
+            background-color: #337a9f;
+            color: #ffffff;
+            &:hover { background-color: #afcfef; color: #333333; }
+            &:has(>img:only-child) {
+                background-color: #337a9f;
+                &:hover { background-color: #77afef; }
+            }
+        }
+        &[disabled]+label {
+            opacity: 0.5;
+            background-color: #222222;
+            color: #666666;
+        }
+    }
+    & button {
+        border-color: #cccccc;
+        background-color: #4f4f4f;
+        color: #ffffff;
+
+        &:hover     { background-color: #777777; }
+        &:active    { background-color: #222222; color: #a0a0a0; }
+        &[disabled] { background-color: #222222; color: #666666; }
+    }
+    & button:has(>img:only-child) {
+        background-color: transparent;
+        &:hover { background-color: #777777; }
+    }
+    & input[type="checkbox"]+label.icon_label_set, button.icon_label_set {
+        background-color: rgba(255,255,255,0.15);
+        &:active { background-color: #222222; color: #a0a0a0; }
+    }
+    & input[type="checkbox"]:checked+label.icon_label_set {
+        background-color: #337a9f;
+        color: #ffffff;
+    }
+    & input[type="checkbox"]:not([disabled])+label.icon_label_set, button.icon_label_set:not([disabled]) {
+        &:hover { background-color: #777777; }
+    }
+    & input[type="checkbox"]:checked:not([disabled])+label.icon_label_set:hover {
+        background-color: #afcfef;
+        color: #333333;
+    }
+    & input[type="checkbox"][disabled]+label.icon_label_set, button[disabled].icon_label_set {
+        background-color: rgba(0,0,0,0.5);
+        color: #666666;
+        > img { opacity: 0.4; }
+    }
+    & input[type="checkbox"]+label:has(>.check_mask) {
+        &:hover>.check_mask {
+            background-color: rgba(159,58,51,0.6);
+        }
+    }
+    & input[type="checkbox"]:checked+label:has(>.check_mask) {
+        > .check_mask {
+            background-color: rgba(51,122,159,0.6);
+        }
+    }
+
+    .ui-tooltip { background-color: rgba(34,34,34,0.85); color: #ffffff; }
+    .ui-dialog { background-color: rgba(34,34,34,0.8); }
+    .ui-dialog-titlebar,
+    .ui-dialog-buttonpane {
+        background-color: rgba(62,62,62,0.92);
+    }
+    .ui-dialog-content,
+    .ui-dialog-title {
+        color: #ffffff;
+    }
+    .ui-button { background-color: #606060; color: #ffffff; }
+    & button.close_button { border-color: #ffffff; }
+    .__on_select_color, .__on_call_palette { border-color: #808080; }
+    .__on_select_color:hover { border-color: #ffffff; }
+
+    /*=== Navigation =============================================================================*/
+
+    #navi {
+        background-color: rgba(67,85,107,0.85);
+        > ul>li>a:hover>img { background-color: rgba(255,255,255,0.15); }
+    }
+
+    /*=== Header =================================================================================*/
+
+    #header {
+        > h1 {
+            background-color: #325c9c;
+            color: #ffffff;
+            > .head_tips>.prefix { background-color: rgba(255,255,255,0.25); }
+        }
+
+        /*=== Default Post Area Layout ===========================================================*/
+        > #head_postarea {
+            background-color: rgba(34,34,34,0.717);
+
+            > .opt_buttons #post_length_graph { border-color: #aaaaaa; }
+            > .textbox_area>.__window_opened { background-color: rgb(56,56,56,0.717); color: #999999; }
+        }
+
+        /*=== Advanced Post Options Layout =======================================================*/
+        > #post_options {
+            background-color: rgba(48,48,48,0.85);
+            border-color: #bbbbbb;
+            > .flex_section {
+                & h5 { border-color: #dddddd; color: #dddddd; }
+                > .option_close>h5 { color: #ffffff; }
+
+                > .additional_users>ul.account_list {
+                    > li>input.__chk_add_account[disabled]+label>.check_mask { background-color: rgba(119,119,119,0.6); }
+                    + .option_close { background-color: #514285; }
+                }
+                > .poll_setting+.option_close { background-color: #428571; }
+                > .attached_media {
+                    > ul.media_list>li {
+                        & label>.check_mask { background-color: rgba(51,122,159,0.5); }
+                        &.__initial_message { background-color: rgba(255,255,255,0.08); }
+                        & input[type="checkbox"]:checked+label>.check_mask { background-color: rgba(159,58,51,0.5); }
+                        &.ui-sortable-placeholder { background-color: rgba(168,72,96,0.8); }
+                        &.warn_sensitive::after { background-color: rgba(161,0,0,0.75); }
+                    }
+                    > .__attach_delete_box { background-color: rgba(168,72,96,0.8); border-color: #cccccc; }
+                }
+                > .refernced_post {
+                    > ul.refernce_post>li.__initial_message { background-color: rgba(62,62,62,0.92); }
+                    + .option_close { background-color: #854257; }
+                }
+            }
+        }
+    }
+    #__txt_postarea {
+        background-color: rgb(56,56,56,0.717);
+        border-color: #999999;
+        color: #ffffff;
+        &::selection { color: #222222; background-color: #dddddd; }
+    }
+
+    /*=== Popup Window Area ======================================================================*/
+
+    #pop {
+        /*=== General Context Menu Layout ========================================================*/
+        > .pop_context ul {
+            background-color: rgba(34,34,34,0.92);
+            border-color: #aaaaaa;
+            color: #ffffff;
+
+            > li>div.ui-state-active {
+                border-color: rgba(255,255,255,0.1);
+                background-color: rgba(255,255,255,0.15);
+            }
+        }
+
+        /*=== Draft Menu Layout ==================================================================*/
+        > #pop_draft>ul.draft_menu>li {
+            background-color: rgba(56,56,56,0.88);
+            border: solid 2px #cccccc;
+
+            &:hover { background-color: rgba(76,76,76,0.92); }
+        }
+
+        
+        /*=== Notification Log Layout ============================================================*/
+        > #pop_notif_log>ul {
+            background-color: rgba(0,0,0,0.92);
+            > li {
+                &.done  { color: #00ff00; }
+                &.error { color: #ff0000; }
+            }
+        }
+
+        /*=== Custom Emojis Palette Layout =======================================================*/
+        > #pop_custom_emoji>.palette_block {
+            > .emoji_head { color: #ffffff; }
+            > .recent_emoji {
+                background-color: rgba(62,68,82,0.8);
+                > h5 { border-color: #dddddd; color: #dddddd; }
+            }
+            > .emoji_list { background-color: rgba(34,34,34,0.8); }
+        }
+
+        /*=== Custom Emojis Suggester Layout =====================================================*/
+        > #pop_emoji_suggester {
+            background-color: rgba(34,34,34,0.8);
+            border-color: #cccccc;
+            > ul>li.__selected_emoji, &:hover { border-color: #cccccc; background-color: rgba(62,82,96,0.92); }
+        }
+
+        /*=== Drop Files Modal Layout ============================================================*/
+        > .pop_modal { background-color: rgba(34,34,34,0.75); }
+        > #modal_drop_files>.dropbox {
+            border-color: #cccccc;
+            &:hover { background-color: rgba(255,255,255,0.1); }
+        }
+
+        /*=== Expand Image Modal Layout ==========================================================*/
+        > #modal_expand_image>#expand_thumbnail_list>li.selected_image>img { border-color: #cccccc; }
+
+        /*=== Post Expand Window Layout ==========================================================*/
+        > #pop_expand_post ul {
+            > li, > li:hover {
+                border-color: #cccccc;
+                background-color: rgba(56,56,56,0.92);
+            }
+        }
+
+        /*=== Post Default Action Pop Layout =====================================================*/
+        > #pop_expand_action {
+            background-color: rgba(62,62,62,0.8);
+            border-color: #bbbbbb;
+
+            & a:hover>img { background-color: rgba(255,255,255,0.2); }
+            > .impressions>span {
+                &.impress_reply     { background-color: #cc355d; }
+                &.impress_reblog    { background-color: #408a08; }
+                &.impress_fav       { background-color: #a8880a; }
+            }
+        }
+
+        /*=== Drive Window Layout ================================================================*/
+        > #pop_dirve_window {
+            background-color: rgba(56,56,56,0.683);
+            > ul.drive_folder_list>li {
+                background-color: rgba(76,76,76,0.683);
+                &:hover { background-color: rgba(76,76,76,0.92); }
+            }
+            > ul.drive_media_list>li {
+                > label.warn_sensitive::after   { background-color: rgba(161,0,0,0.75); }
+                &.__scroll_loader               { background-color: rgba(62,62,62,0.92); }
+            }
+        }
+
+        /*=== Extra Timeline Window Layout =======================================================*/
+        > #pop_ex_timeline {
+            background-color: rgba(34,34,34,0.683);
+
+            > h2 { background-color: #2a637d; }
+            & input {
+                background-color: #434343;
+                border-color: #888888;
+                color: #ffffff;
+            }
+
+            /*=== Trend Timeline Layout ==========================================================*/
+            > .trend_timeline {
+                > a.__on_get_features {
+                    background-color: #3562cc;
+                    &:hover { background-color: #36466e; }
+                }
+                > ul.trend_tags>li {
+                    border-color: #444444;
+                    &:hover { border-color: #dddddd; }
+                }
+            }
+
+            /*=== History Timeline Layout ========================================================*/
+            > .history_timeline>div {
+                > .timeline li {
+                    > .delete_modal {
+                        background-color: rgba(255,255,255,0.25);
+                        > .buttons>button { border-color: #ffffff; }
+                    }
+                    &.external_deleted { background-color: #bbbbbb; color: #333333; }
+                }
+                &.reaction_history>.col_head { background-color: #408a08; }
+                &.post_history>.col_head     { background-color: #3562cc; }
+            }
+        }
+
+        /*=== Internal Extend Timeline Window Layout =============================================*/
+        .post_detail_window.ex_window>h2>a { color: #fff; }
+
+        /*=== Extend Column (Optional) ===========================================================*/
+        > #pop_extend_column>.reaction_col>.recent_reaction {
+            background-color: rgba(62,68,82,0.8);
+            > h5 { border-color: #dddddd; color: #dddddd; }
+        }
+
+        /*=== General Mini Option Window Layout ==================================================*/
+        .ex_mini_window {
+            background-color: rgba(34,34,34,0.88);
+            border-color: #cccccc;
+        }
+
+        /*=== Lastest Release Notification Layout ================================================*/
+        > #pop_lastest_release {
+            background-color: rgba(82,66,62,0.683);
+            border-color: #cccccc;
+            > a.dl_link { background-color: #4461a6; color: #ffffff; }
+        }
+
+        /*=== Notifications Layout ===============================================================*/
+        > #pop_notification>ul>li {
+            > span  { background-color: rgba(34,34,34,0.8); }
+            > .done { background-color: rgba(34,60,72,0.8); }
+        }
+
+        /*=== Extend Column (Help Window) ========================================================*/
+        > #pop_extend_column {
+            background-color: rgba(34,34,34,0.8);
+
+            > .help_col {
+                > h2 {
+                    background-color: rgba(67,96,132,0.8);
+                    color: #ffffff;
+                }
+                > .help_navi ul {
+                    > li>a {
+                        background-color: rgba(62,62,62,0.92);
+                        &:hover { background-color: rgba(62,96,128,0.92); }
+                    }
+                    > ul { border-color: #aaaaaa; }
+                }
+
+                > .help_content {
+                    background-color: rgba(34,34,34,0.5);
+                    & dd>.shortcut_key {
+                        background-color: #bbbbbb;
+                        color: #333333;
+                    }
+                    & th, & td { background-color: rgba(255,255,255,0.08); }
+                    & strong { color: #ffff00; }
+                    .current_version {
+                        background-color: #bbbbbb;
+                        color: #333333;
+                    }
+                }
+            }
+        }
+
+        /*=== Internal Extend Timeline Window Layout =============================================*/
+        .ex_window {
+            border-color: #bbbbbb;
+            background-color: rgba(34,34,34,0.683);
+            color: #fff;
+            > h2 { background-color: #87995f; }
+        }
+
+        /*=== Color Palette ======================================================================*/
+        > #pop_palette { background-color: rgba(34,34,34,0.85); }
+    }
+
+    #pop_custom_emoji .emoji_list a:hover img,
+    #pop_extend_column>.reaction_col>.reaction_list a:hover img,
+    #pop_custom_emoji .recent_emoji a:hover img,
+    #pop_extend_column>.reaction_col>.recent_reaction a:hover img {
+        background-color: rgba(255,255,255,0.2);
+    }
+    #pop_extend_column>.reaction_col>h2,
+    #pop_ex_timeline h2 {
+        color: #ffffff;
+    }
+    #pop_ex_timeline h2 { background-color: #5e5e5e; }
+
+    /*=== Column Layout ==========================================================================*/
+    #columns {
+        > .__initial_message {
+            color: #cccccc;
+            > .inner { background-color: rgba(34,34,34,0.683); }
+        }
+        .col_action>a:hover>img,
+        .gp_action>a:hover>img {
+            background-color: rgba(255,255,255,0.15);
+        }
+
+        /*=== Closed Column Layout ===============================================================*/
+        > .closed_col {
+            background-color: #888888;
+            > .rotate_head>.group_label>.unread_count { background-color: rgba(255,255,255,0.15); }
+        }
+
+        /*=== Opened Column Layout ===============================================================*/
+        > .column_box>.col_head { color: #ffffff; }
+    }
+
+    /*=== Timeline Layout ========================================================================*/
+    .timeline {
+        > .col_loading { color: #dddddd; }
+        & ul {
+            background-color: rgba(34,34,34,0.683);
+
+            /*=== Normal Layout Style ============================================================*/
+            > li {
+                background-color: rgba(56,56,56,0.683);
+
+                /*=== User Info ==================================================================*/
+                > .user {
+                    .username { color: #ffffff; }
+                    .userid {
+                        color: #bbbbbb;
+                        > a {
+                            color: #b5a5ab;
+                            &:hover { color: #dddddd; }
+                        }
+                    }
+                }
+
+                /*=== Contents Info ==============================================================*/
+                > .content { color: #ffffff; }
+
+                /*=== Poll Info ==================================================================*/
+                > .post_poll {
+                    > .options {
+                        > button, > input.__chk_multi_vote+label {
+                            background-color: rgba(62,82,96,0.8);
+                            border-color: #cccccc;
+                            &:hover { background-color: #bbbbbb; color: #333333; }
+                        }
+                        > input.__chk_multi_vote:checked+label {
+                            background-color: rgba(96,62,62,0.8);
+                            &:hover { background-color: #888888; color: #ffffff; }
+                        }
+                    }
+                    > .poll_info { color: #cccccc; }
+                }
+                > .poll_graph_section {
+                    > .poll_opt_graph>.rate { color: #cccccc; }
+                    > .poll_footer { color: #cccccc; }
+                }
+
+                /*=== Quote Info =================================================================*/
+                > .post_quote {
+                    background-color: rgba(76,76,76,0.683);
+                    border-color: #bbbbbb;
+                    overflow-wrap: break-word;
+                    > .hidden_text {
+                        border-color: #ffffff;
+                        background-color: #bbbbbb;
+                        color: #333333;
+                    }
+                    &:hover { background-color: rgba(76,76,76,0.98); border-left-color: #ffffff; }
+                }
+
+                /*=== Detail Info ================================================================*/
+                > .detail_info {
+                    > a.card_link {
+                        background-color: #808080;
+                        > .descriptions {
+                            background-color: rgba(34,34,34,0.8);
+                            color: #ffffff;
+                        }
+                        &:hover>.descriptions { background-color: rgba(62,82,96,0.8); }
+                    }
+                    > .hashtags>a {
+                        background-color: rgba(255,255,255,0.1);
+                        &:hover { background-color: rgba(255,255,255,0.25); }
+                    }
+                    .count_reaction { background-color: rgba(0,172,255,0.2); }
+                }
+
+                /*=== Footer Info ================================================================*/
+                > .post_footer {
+                    > .created_at {
+                        border-color: #bbbbbb;
+                        color: #bbbbbb;
+                        &:hover { color: #dddddd; }
+                    }
+                    > .from_address.created_at {
+                        color: #ffffff;
+                        &.label_24h { background-color: #852a2a; }
+                        &.label_72h { background-color: #855c2a; }
+                        &.label_1w  { background-color: #2a8564; }
+                        &.label_1m  { background-color: #2a6185; }
+                        &.label_hfy { background-color: #2a3985; }
+                        &.label_1y  { background-color: #472a85; }
+                    }
+                }
+            }
+            > li.self_post,
+            > li.chat_timeline.self_post>.content { background-color: rgba(62,68,82,0.683); }
+            > li.rebloged_post,
+            > li.chat_timeline.rebloged_post>.content { background-color: rgba(62,76,66,0.683); }
+            > li.favorited_post { background-color: rgba(76,76,62,0.683); }
+
+            /*=== Short User Infomation Style ====================================================*/
+            > li.short_userinfo { background-color: rgba(62,82,96,0.683); }
+
+            /*=== Chat Layout Style ==============================================================*/
+            > li.chat_timeline {
+                > .user>.created_at {
+                    color: #bbbbbb;
+                    &:hover { color: #eeeeee; }
+                }
+                > .content { background-color: rgba(56,56,56,0.683); color: #ffffff; }
+            }
+
+            /*=== List Layout Style ==============================================================*/
+            > li.short_timeline {
+                &:hover { border-left-color: #dddddd !important; }
+                > .content { color: #ffffff; }
+            }
+
+            /*=== Filtered Toot Layout ===========================================================*/
+            > li.filtered_timeline {
+                background-color: #bbbbbb;
+                color: #333333;
+                &:hover { background-color: #999999; color: #ffffff; }
+            }
+
+            /*=== Scroll Loader Layout ===========================================================*/
+            > li.__on_top_loader {
+                background-color: #415687;
+                &:hover { background-color: #3562cc; }
+            }
+            > li.mark_target_post:not(.chat_timeline), > li.mark_target_post.chat_timeline>.content {
+                border-color: #cccccc;
+            }
+        }
+        .__context_posts {
+            > li:not(.chat_timeline),
+            > li.chat_timeline>.content {
+                &:hover { background-color: rgba(60,60,60,0.9); }
+            }
+        }
+    }
+
+    /*=== Profile Column Layout ==================================================================*/
+
+    .user_header { background-color: #999999; }
+    .column_profile {
+        > .profile_header>li.header_userinfo>.detail_info>a:hover>img { background-color: rgba(255,255,255,0.2); }
+        > .profile_detail .prof_field {
+                & th, & td { background-color: rgba(255,255,255,0.08); }
+        }
+        > .user_post_elm>.tab>a {
+            background-color: rgba(62,62,62,0.92);
+            &:hover { background-color: rgba(62,82,96,0.92); }
+        }
+        .pinned_block {
+            > h4 { background-color: #3b783b; }
+            > ul>li { background-color: rgba(82,66,62,0.683); }
+        }
+        .posts_block>h4 { background-color: #3b5778; }
+
+        .ff_nametags>li.user_nametag:hover { background-color: rgba(88,88,88,0.92); }
+    }
+
+    /*=== Instance Info Layout ===================================================================*/
+
+    .column_instance_info {
+        > .instance_header>li.header_instanceinfo {
+            > .info>.instance_link {
+                border-color: #aaaaaa;
+                background-color: rgba(255,255,255,0.08);
+            }
+            > ul.detail_info>li {
+                > h6 { background-color: rgba(255,255,255,0.15); }
+                &.total_users    { background-color: #4461a6; }
+                &.monthly_users  { background-color: #bf4747; }
+                &.monthly_status { background-color: #62913f; }
+            }
+        }
+
+        /*=== Instance Description Layout (Invoke default layout) ================================*/
+        > .instance_detail {
+            & h1, & h2, & h3, & h4, & h5, & h6 { border-color: #aaaaaa !important; }
+            & ul>li { background-color: rgba(255,255,255,0.08) !important; }
+        }
+        > .instance_admin>li.admin_header { background-color: #4461a6; }
+    }
+
+}
+

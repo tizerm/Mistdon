@@ -256,6 +256,7 @@ class Status {
             default:
                 break
         }
+        this.host = host
 
         // このステータスを一意に決定するためのキーを設定
         this.sort_date = new Date(original_date)
@@ -719,6 +720,7 @@ class Status {
                 html += `
                     <div class="user prof_normal2">
                         <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                        <div class="name_info">
                 `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
                     case 'both_prename': // ユーザーネーム+ユーザーID
                         html += `
@@ -752,16 +754,18 @@ class Status {
                     default:
                         break
                 }
-                html += '</div>'
+                html += '</div></div>'
             } else html /* ノーマルレイアウトの場合 */ += `
                 <div class="user">
                     <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                    <span class="userid">
-                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                            @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
-                        </a>
-                    </span>
+                    <div class="name_info">
+                        <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                        <span class="userid">
+                            <a class="__lnk_userdetail" name="@${this.user.full_address}">
+                                @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
+                            </a>
+                        </span>
+                    </div>
                 </div>
             `
         }
@@ -1269,14 +1273,14 @@ class Status {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                <span class="userid">
-                    <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                        @${this.user.id}
-                    </a>
-                </span>
-        `
-        html += `
+                <div class="name_info">
+                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
+                    <span class="userid">
+                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
+                            @${this.user.id}
+                        </a>
+                    </span>
+                </div>
             </div>
         `
         // 本文よりも先にメディアを表示
@@ -1947,7 +1951,46 @@ class Status {
             this.from_timeline?.pref, new Group(structuredClone(this.from_group?.pref), null))
         // タイムラインレイアウトが指定されている場合は変更
         if (layout) scroll_tl.ref_group.pref.tl_layout = layout
-        scroll_tl.createScrollableTimeline(this.id)
+        scroll_tl.createLoadableTimeline(this)
+    }
+
+    openLocalTimelineWindow(layout) {
+        const auth_account = Account.getByDomain(this.host)
+        let tl_pref = { // タイムライン設定
+            "key_address": auth_account?.full_address,
+            "external": auth_account ? false : true,
+            "host": this.host,
+            "platform": this.platform,
+            "color": auth_account?.pref.acc_color ?? getRandomColor(),
+            "timeline_type": "local",
+            "exclude_reblog": false,
+            "expand_cw": false,
+            "expand_media": false,
+        }
+        const gp_pref = { // グループ設定
+            "multi_user": false,
+            "multi_timeline": false,
+            "tl_layout": layout
+        }
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                tl_pref.rest_url = `https://${this.host}/api/v1/timelines/public`
+                tl_pref.query_param = { 'local': true }
+                break
+            case 'Misskey': // Misskey
+                tl_pref.rest_url = `https://${this.host}/api/notes/local-timeline`
+                tl_pref.query_param = {}
+                break
+            default:
+                break
+        }
+
+        // ローカルタイムラインオブジェクトを生成
+        const scroll_tl = new Timeline(tl_pref, new Group(gp_pref, null))
+        this.from_timeline = scroll_tl
+        this.from_account = auth_account
+        this.detail_flg = false
+        scroll_tl.createLoadableTimeline(this)
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却

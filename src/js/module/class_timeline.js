@@ -41,8 +41,9 @@ class Timeline {
      * 引数を指定した場合は、指定した投稿よりも前を30件取得する
      * 
      * @param max_id この投稿よりも前の投稿を取得する起点のID
+     * @param since_id この投稿よりも後ろの投稿を取得する起点のID
      */
-    async getTimeline(max_id) {
+    async getTimeline(max_id, since_id) {
         // 外部サーバーでなくターゲットのアカウントが存在しない場合はreject
         if (!this.pref.external && !this.target_account) return Promise.reject('account not found.')
         // クエリパラメータにlimitプロパティを事前に追加(これはMastodonとMisskeyで共通)
@@ -55,7 +56,8 @@ class Timeline {
                     // ヘッダにアクセストークンをセット(認証済みの場合)
                     let header = {}
                     if (!this.pref.external) header = { "Authorization": `Bearer ${this.target_account.pref.access_token}` }
-                    if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
+                    if (max_id) query_param.max_id = max_id
+                    if (since_id) query_param.min_id = since_id
                     // REST APIで最新TLを30件取得、する処理をプロミスとして格納
                     response = await $.ajax({
                         type: "GET",
@@ -64,11 +66,14 @@ class Timeline {
                         headers: header,
                         data: query_param
                     })
+                    // Mastodonの場合逆順にする
+                    if (since_id) response = response.reverse()
                     break
                 case 'Misskey': // Misskey
                     // クエリパラメータにアクセストークンをセット(認証済みの場合)
                     if (!this.pref.external) query_param.i = this.target_account.pref.access_token
-                    if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
+                    if (max_id) query_param.untilId = max_id
+                    if (since_id) query_param.sinceId = since_id
                     // REST APIで最新TLを30件取得、する処理をプロミスとして格納
                     response = await $.ajax({
                         type: "POST",
@@ -184,7 +189,7 @@ class Timeline {
         if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
         this.reload_timer_id = setInterval(() => (async () => {
             // 最新のタイムラインを取得
-            const recent = await this.getTimeline(null)
+            const recent = await this.getTimeline()
             // 逆から順にタイムラインに追加
             recent.reverse().forEach(post => this.parent_group.prepend(post))
         })(), this.pref.reload_span * 60000)
@@ -300,15 +305,19 @@ class Timeline {
 
     /**
      * #Method
-     * 対象の投稿IDからこのタイムラインの設定で遡りウィンドウを生成
+     * 対象の投稿IDからこのタイムラインの設定で外部タイムラインウィンドウを生成
      * 
-     * @param id 起点にする投稿ID
+     * @param post 取得の起点にするStatusオブジェクト
      */
-    createScrollableTimeline(id) {
-        this.createScrollableWindow(id, (tl, ref_id, window_key) => tl.getTimeline(ref_id).then(body => {
-            // ロード画面を削除
-            $(`#${window_key}>.timeline>.col_loading`).remove()
-            createScrollLoader({ // スクロールローダーを生成
+    createLoadableTimeline(post) {
+        this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
+            // 起点の投稿を表示して変数にマークする
+            tl.ref_group.addStatus(post, () => post.getLayoutElement(tl.ref_group.pref.tl_layout)
+                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`))
+            const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
+
+            // 上下方向のローダーを生成
+            Promise.all([tl.getTimeline(ref_id).then(body => createScrollLoader({ // 下方向のローダーを生成
                 data: body,
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
@@ -317,8 +326,22 @@ class Timeline {
                     return data.pop()?.id
                 },
                 load: async max_id => tl.getTimeline(max_id)
+            })), tl.getTimeline(null, ref_id).then(body => createTopLoader({ // 上方向のローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    const first_elm = target.find('li:first-child').get(0)
+                    data.forEach(p => tl.ref_group.addStatus(p, () => target.prepend(p.timeline_element)))
+                    first_elm.scrollIntoView({ block: 'center' })
+                    // since_idとして取得データの最終IDを指定
+                    return data.pop()?.id
+                },
+                load: async since_id => tl.getTimeline(null, since_id)
+            }))]).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
+                $(`#${window_key}>.timeline>.col_loading`).remove()
+                mark_elm.scrollIntoView({ block: 'center' })
             })
-        }))
+        })
     }
 
     /**
