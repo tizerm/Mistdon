@@ -837,7 +837,7 @@
                     background-image: url("../resources/ic_reblog.png");
                 }
                 &.impress_fav {
-                    background-color: #a8880a;
+                    background-color: #825e1b;
                     background-image: url("../resources/ic_favorite.png");
                 }
             }

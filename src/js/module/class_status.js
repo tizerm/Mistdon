@@ -242,7 +242,7 @@ class Status {
                 this.count_reply = data.repliesCount
                 this.count_reblog = data.renoteCount
                 // リアクションがある場合はリアクション一覧をリスト化する
-                if ((this.detail_flg || this.notif_type == 'reaction' || this.notif_type == 'renote') && data.reactions) {
+                if (data.reactions) {
                     const reactions = []
                     Object.keys(data.reactions).forEach(key => reactions.push({
                         shortcode: key,
@@ -822,30 +822,10 @@ class Status {
             } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
             html += `<div class="reaction_emoji">${alias}</div>`
         }
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+        if (this.medias.length > 0) { // 添付メディア
             const img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
-            html += '<div class="media">'
-            if (this.sensitive) html /* 閲覧注意 */ += `
-                <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-                <div class="media_content">
-            `; else html += '<div class="media_content">'
-            // アスペクト比をリンクオプションとして設定
-            this.medias.forEach(media => {
-                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                    <audio controls src="${media.url}" preload="none"></audio>
-                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                        class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
-                    </a>
-                `
-            })
-            html += `
-                    </div>
-                </div>
-            `
+            html += this.bindMediaSection(img_class)
         }
-
         // 一部の通知はインプレッション数値を表示する
         if (Preference.GENERAL_PREFERENCE.enable_notified_impression
             && ['favourite', 'reblog', 'reaction', 'renote'].includes(this.notif_type)) {
@@ -862,7 +842,7 @@ class Status {
                     break
             }
             html += '</div>'
-        }
+        } else if (!this.detail_flg) html += this.impression_section
 
         if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
             html += '<div class="detail_info">'
@@ -957,7 +937,7 @@ class Status {
         if (this.reply_to) jqelm.closest('li').addClass('replied_post')
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
-            jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+            jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
         if (this.profile_post_flg || this.detail_flg) // プロフィールと詳細表示は投稿時刻で色分けする
             jqelm.find('.post_footer>.created_at').addClass(`from_address ${this.relative_time.color_class}`)
@@ -1099,29 +1079,12 @@ class Status {
             `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             html += '</div>'
         }
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+        if (this.medias.length > 0) { // 添付メディア
             const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
-            html += '<div class="media">'
-            if (this.sensitive) html /* 閲覧注意 */ += `
-                <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-                <div class="media_content">
-            `; else html += '<div class="media_content">'
-            // アスペクト比をリンクオプションとして設定
-            this.medias.forEach(media => {
-                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                    <audio controls src="${media.url}" preload="none"></audio>
-                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                        class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
-                    </a>
-                `
-            })
-            html += `
-                    </div>
-                </div>
-            `
+            html += this.bindMediaSection(img_class)
         }
+        // インプレッション(反応とリアクション)
+        html += this.impression_section
         html += `
             </li>
         `
@@ -1130,7 +1093,10 @@ class Status {
         const jqelm = $($.parseHTML(html))
         jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
-        jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+        if (this.reblog) { // BTRNにはクラスをつけて背景をセット
+            jqelm.closest('li').addClass('rebloged_post')
+            jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+        }
         // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && !this.detail_flg && (this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
@@ -1284,30 +1250,11 @@ class Status {
             </div>
         `
         // 本文よりも先にメディアを表示
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+        if (this.medias.length > 0) { // 添付メディア
             let img_class = 'img_grid_single'
             if (this.medias.length > 4) img_class = 'img_grid_16'
             else if (this.medias.length > 1) img_class = 'img_grid_4'
-            html += '<div class="media">'
-            if (this.sensitive) html /* 閲覧注意 */ += `
-                <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-                <div class="media_content">
-            `; else html += '<div class="media_content">'
-            // アスペクト比をリンクオプションとして設定
-            this.medias.forEach(media => {
-                if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                    <audio controls src="${media.url}" preload="none"></audio>
-                `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                        class="__on_media_expand ${img_class}">
-                        <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
-                    </a>
-                `
-            })
-            html += `
-                    </div>
-                </div>
-            `
+            html += this.bindMediaSection(img_class)
         }
         html += `
             <div class="content">
@@ -1323,6 +1270,8 @@ class Status {
                 </div>
             </div>
         `
+        // インプレッション(反応とリアクション)
+        html += this.impression_section
         html /* 投稿(ステータス)日付 */ += `
             <div class="post_footer">
                 <a class="created_at __on_datelink">${this.date_text}</a>
@@ -1353,7 +1302,7 @@ class Status {
             jqelm.closest('li').addClass('self_post')
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
-            jqelm.find('.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
+            jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
         // 時間で色分け
         jqelm.closest('li').css('border-left-color', this.relative_time.color)
@@ -1409,6 +1358,73 @@ class Status {
                 <span>フィルター: ${this.mute_warning}</span>
             </li>
         `))
+    }
+
+    bindMediaSection(img_class) {
+        let html = '<div class="media">'
+        if (this.sensitive) html /* 閲覧注意 */ += `
+            <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
+            <div class="media_content">
+        `; else html += '<div class="media_content">'
+        // アスペクト比をリンクオプションとして設定
+        this.medias.forEach(media => {
+            if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
+                <audio controls src="${media.url}" preload="none"></audio>
+            `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
+                <a href="${media.url}" type="${media.type}" name="${media.aspect}"
+                    class="__on_media_expand ${img_class}">
+                    <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
+                </a>
+            `
+        })
+        html += `
+                </div>
+            </div>
+        `
+        return html
+    }
+
+    get impression_section() {
+        let html = '<div class="impressions">'
+        if ((this.reactions?.length ?? 0) > 0 || this.count_fav > 0) { // インプレッション(反応とリアクション)
+            // リプライ数とブースト/リノート数(あるやつだけ表示)
+            if (this.count_reply > 0) html += `
+                <span class="count_reply counter" title="リプライ数">${this.count_reply}</span>
+            `; if (this.count_reblog > 0) html += `
+                <span class="count_reblog counter" title="ブースト/リノート数">${this.count_reblog}</span>
+            `; switch (this.platform) {
+                case 'Mastodon': // Mastodon
+                    // ふぁぼの表示だけする
+                    html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
+                    break
+                case 'Misskey': // Misskey
+                    let reaction_html = '' // リアクションHTMLは後ろにつける
+                    let reaction_count = 0 // リアクション合計値を保持
+                    this.reactions?.forEach(reaction => {
+                        if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
+                            <span class="bottom_reaction"><img src="${reaction.url}" class="inline_emoji"/></span>
+                        `; else if (reaction.shortcode.lastIndexOf('@') > 0) reaction_html /* 取得できなかった絵文字 */ += `
+                            <span class="bottom_reaction">
+                                :${reaction.shortcode.substring(1, reaction.shortcode.lastIndexOf('@'))}:
+                            </span>
+                        `; else reaction_html /* それ以外はそのまま表示 */ += `
+                            <span class="bottom_reaction">${reaction.shortcode}</span>
+                        `
+                        reaction_count += Number(reaction.count)
+                    })
+                    // 先にリアクションの合計値を表示
+                    const emojis = this.host_emojis ?? Emojis.get(this.host)
+                    html += `
+                        <div class="reaction_section">${emojis.replace(reaction_html)}</div>
+                        <span class="count_reaction_total counter" title="リアクション合計">${reaction_count}</span>
+                    `
+                    break
+                default:
+                    break
+            }
+        }
+        html += '</div>'
+        return html
     }
 
     /**

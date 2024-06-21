@@ -574,10 +574,23 @@
                     font-size: 18px;
                     font-weight: bold;
                     text-align: right;
-                    &.count_reblog         { background-image: url("../resources/ic_reblog.png"); }
-                    &.count_fav            { background-image: url("../resources/ic_favorite.png"); }
-                    &.count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
                 }
+            }
+
+            /*=== Impressions Info ===============================================================*/
+            > .impressions {
+                background-color: rgba(31,31,31,0.683);
+                border-radius: 8px;
+                > .counter {
+                    display: inline-block;
+                    border-radius: 12px;
+                    padding: 3px 8px 3px 30px;
+                    background-position: center left;
+                    background-repeat: no-repeat;
+                    background-size: 24px 24px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                }
+                > .reaction_section { display: inline; }
             }
 
             /*=== Detail Info ====================================================================*/
@@ -642,14 +655,7 @@
                         cursor: pointer;
                     }
                 }
-                .counter              { width: calc(33% - 48px); }
-                .count_post           { background-image: url("../resources/ic_rpl.png"); }
-                .count_follow         { background-image: url("../resources/ic_cnt_flw.png"); }
-                .count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
-                .count_reply          { background-image: url("../resources/ic_rpl.png"); }
-                .count_reblog         { background-image: url("../resources/ic_reblog.png"); }
-                .count_fav            { background-image: url("../resources/ic_favorite.png"); }
-                .count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
+                .counter { width: calc(33% - 48px); }
                 .count_reaction {
                     background-color: rgba(0,172,255,0.2);
                     padding-right: 8px;
@@ -1105,7 +1111,7 @@
             }
         }
         > li.mark_target_post:not(.chat_timeline), > li.mark_target_post.chat_timeline>.content {
-            border: solid 2px #cccccc;
+            background-color: #415687;
         }
 
         > li>.label_head.label_reblog {
@@ -1130,18 +1136,25 @@
 
 /*=== General Timeline Preference ================================================================*/
 
-.label_reply     { background-color: #cc355d; }
-.label_reblog    { background-color: #408a08; }
-.label_favorite  { background-color: #a8880a; }
-.label_postcount { background-color: #606060; }
-.label_follow    { background-color: #3562cc; }
-.label_follower  { background-color: #cc6a35; }
-.label_bookmark  { background-color: #c10000; }
-.label_cw        { background-color: #8c720b; }
-.label_sensitive { background-color: #a10000; }
-.label_limitover { background-color: #0b638c; }
-.label_private   { background-color: #bbbbbb; color: #333333; }
-.cw_content      { display: none; }
+.label_reply          { background-color: #cc355d; }
+.label_reblog         { background-color: #408a08; }
+.label_favorite       { background-color: #825e1b; }
+.label_postcount      { background-color: #606060; }
+.label_follow         { background-color: #3562cc; }
+.label_follower       { background-color: #cc6a35; }
+.label_bookmark       { background-color: #c10000; }
+.label_cw             { background-color: #8c720b; }
+.label_sensitive      { background-color: #a10000; }
+.label_limitover      { background-color: #0b638c; }
+.label_private        { background-color: #bbbbbb; color: #333333; }
+.cw_content           { display: none; }
+.count_post           { background-image: url("../resources/ic_rpl.png"); }
+.count_follow         { background-image: url("../resources/ic_cnt_flw.png"); }
+.count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
+.count_reply          { background-image: url("../resources/ic_rpl.png"); }
+.count_reblog         { background-image: url("../resources/ic_reblog.png"); }
+.count_fav            { background-image: url("../resources/ic_favorite.png"); }
+.count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
 
 /*=== Profile Column Layout ======================================================================*/
 
