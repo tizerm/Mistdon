@@ -579,8 +579,11 @@
 
             /*=== Impressions Info ===============================================================*/
             > .impressions {
+                position: relative;
                 background-color: rgba(31,31,31,0.683);
                 border-radius: 8px;
+                color: #bbbbbb;
+                &:empty { display: none; }
                 > .counter {
                     display: inline-block;
                     border-radius: 12px;
@@ -591,6 +594,39 @@
                     font-family: Arial, "メイリオ", sans-selif;
                 }
                 > .reaction_section { display: inline; }
+                > .count_reaction_total {
+                    background-image: none;
+                    padding-left: 8px;
+                }
+                > .warn_remote, > .__fetch_remote_impression {
+                    display: inline-block;
+                    border-radius: 12px;
+                    vertical-align: text-bottom;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                        vertical-align: text-bottom;
+                    }
+                    &.warn_remote { background-color: #a10000; }
+                    &.__fetch_remote_impression {
+                        position: absolute;
+                        bottom: 0px;
+                        right: 0px;
+                    }
+                }
+                > .__fetch_remote_impression+.__tooltip {
+                    display: none;
+                    position: absolute;
+                    top: -36px;
+                    right: 0px;
+                    padding: 2px 6px;
+                    border: solid 1px #cccccc;
+                    background-color: rgba(82,66,62,0.88);
+                    color: #ffffff;
+                    font-size: 14px;
+                    border-radius: 8px;
+                }
+                > .__fetch_remote_impression:hover+.__tooltip { display: inline-block; }
             }
 
             /*=== Detail Info ====================================================================*/

@@ -432,7 +432,7 @@ class Preference {
             },
             "tl_impression": {              // タイムラインインプレッション表示
                 "enabled"                   : $("#__chk_gen_show_tl_impression").prop("checked"),
-                "span"                      : $("#__txt_gen_tl_impression_span").val()
+                "span"                      : ($("#__txt_gen_tl_impression_span").val() || 3)
             },
             "history_limit"                 : $("#__txt_gen_history_limit").val(),
             "reaction_history_limit"        : $("#__txt_gen_reaction_history_limit").val(),

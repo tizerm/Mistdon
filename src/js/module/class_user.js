@@ -90,7 +90,7 @@ class User {
         this.all_account_flg = arg.auth
         // Mistdonに認証情報のあるホストの場合は対象アカウントを引っ張ってくる
         this.authorized = Account.getByDomain(host)
-        if (this.platform == 'Misskey') this.use_emoji_cache = this.authorized ? true : false
+        if (this.platform == 'Misskey') this.use_emoji_cache = !!this.authorized
         this.user_uuid = crypto.randomUUID()
     }
 

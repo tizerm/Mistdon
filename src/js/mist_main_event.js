@@ -761,6 +761,16 @@
     $(document).on("click", ".__on_datelink", e =>
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
+    if (Preference.GENERAL_PREFERENCE.tl_impression?.enabled)
+        $(document).on("click", ".__fetch_remote_impression", e => {
+            const target_li = $(e.target).closest("li")
+            Status.getStatus(target_li.attr("name")).then(post => {
+                // インプレッションセクションを最新の状態で置き換える
+                target_li.find('.impressions').replaceWith(post.impression_section)
+                if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
+            })
+        })
+
     /**
      * #Event #Hold
      * リストレイアウトの投稿本体を長押し.

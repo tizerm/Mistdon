@@ -32,7 +32,7 @@ class Status {
                 this.allow_context = !(this.type == 'notification' && ['follow', 'follow_request'].includes(json.type))
                 original_date = json.created_at
                 // ブーストフラグとブースト関係の専用項目
-                this.reblog = json.reblog ? true : false
+                this.reblog = !!json.reblog
                 this.reblog_by = this.reblog ? json.account.acct : null
                 this.reblog_by_icon = this.reblog ? json.account.avatar : null
                 this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(json.reblog.created_at)) : null
@@ -44,6 +44,7 @@ class Status {
                 this.notif_id = json.status?.id // 通知のID
 
                 this.use_emoji_cache = false // Mastodonの場合絵文字キャッシュは使わない
+                this.remote_flg = data.account.acct.match(/@/)
 
                 // ユーザーに関するデータ
                 this.user = {
@@ -163,6 +164,7 @@ class Status {
                 // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する
                 this.use_emoji_cache = !data.uri
                 if (this.notif_type == 'reaction') this.reaction_emoji = data.reaction // リアクションを保存
+                this.remote_flg = !!data.user?.host
 
                 // ユーザーに関するデータ
                 this.user = {
@@ -1389,7 +1391,14 @@ class Status {
         if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return ''
 
         let html = '<div class="impressions">'
-        if ((this.reactions?.length ?? 0) > 0 || this.count_fav > 0) { // インプレッション(反応とリアクション)
+        if ((this.reactions?.length ?? 0) > 0 || this.count_reply > 0
+            || this.count_reblog > 0 || this.count_fav > 0) { // インプレッション(反応とリアクション)
+            // リモートの投稿の場合は警告アイコンを表示
+            if (this.remote_flg) html += `
+                <span class="warn_remote" title="リモートの投稿です">
+                    <img src="resources/ic_warn.png"/>
+                </span>
+            `
             // リプライ数とブースト/リノート数(あるやつだけ表示)
             if (this.count_reply > 0) html += `
                 <span class="count_reply counter" title="リプライ数">${this.count_reply}</span>
@@ -1398,7 +1407,7 @@ class Status {
             `; switch (this.platform) {
                 case 'Mastodon': // Mastodon
                     // ふぁぼの表示だけする
-                    html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
+                    if (this.count_fav > 0) html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
                     break
                 case 'Misskey': // Misskey
                     let reaction_html = '' // リアクションHTMLは後ろにつける
@@ -1415,16 +1424,24 @@ class Status {
                         `
                         reaction_count += Number(reaction.count)
                     })
-                    // 先にリアクションの合計値を表示
-                    const emojis = this.host_emojis ?? Emojis.get(this.host)
-                    html += `
-                        <div class="reaction_section">${emojis.replace(reaction_html)}</div>
-                        <span class="count_reaction_total counter" title="リアクション合計">${reaction_count}</span>
-                    `
+                    if (reaction_count > 0) { // リアクションが存在する場合はカウンターをバインド
+                        const emojis = this.host_emojis ?? Emojis.get(this.host)
+                        // 絵文字キャッシュが取得できる場合のみ置換処理を実行
+                        if (emojis) reaction_html = emojis.replace(reaction_html)
+                        html += `
+                            <div class="reaction_section">${reaction_html}</div>
+                            <span class="count_reaction_total counter" title="リアクション合計">${reaction_count}</span>
+                        `
+                    }
                     break
                 default:
                     break
             }
+            if (this.remote_flg) html /* リモートフェッチボタンの表示 */ += `
+                <button type="button" class="__fetch_remote_impression" title="リモートインプレッション表示"
+                    ><img src="resources/ic_down.png" alt="リモートインプレッション表示"/></button>
+                <span class="__tooltip">リモートのインプレッションを表示</span>
+            `
         }
         html += '</div>'
         return html
