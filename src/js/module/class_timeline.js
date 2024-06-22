@@ -195,6 +195,27 @@ class Timeline {
         })(), this.pref.reload_span * 60000)
     }
 
+    async initAutoMerger() {
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled
+            || this.pref.timeline_type == 'notification') return // 通知は実行しない
+        if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
+        this.reload_timer_id = setInterval(() => this.mergeImpressions(),
+            Preference.GENERAL_PREFERENCE.tl_impression?.span * 60000)
+    }
+
+    async mergeImpressions() {
+        // 最新のタイムラインを取得
+        const recent = await this.getTimeline()
+        const group = this.parent_group
+
+        recent.forEach(post => {
+            if (!group.status_map.has(post.status_key)) return // ないときは省略
+            group.status_map.set(post.status_key, post) // ステータスを更新
+            // インプレッションの表示内容を更新
+            group.getStatusElement(post.status_key).find('.impressions').replaceWith(post.impression_section)
+        })
+    }
+
     /**
      * #Method
      * このタイムラインから外部インスタンスにWebSocket接続する

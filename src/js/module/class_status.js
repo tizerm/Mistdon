@@ -1385,6 +1385,9 @@ class Status {
     }
 
     get impression_section() {
+        // インプレッション表示をしない場合は無効化
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return ''
+
         let html = '<div class="impressions">'
         if ((this.reactions?.length ?? 0) > 0 || this.count_fav > 0) { // インプレッション(反応とリアクション)
             // リプライ数とブースト/リノート数(あるやつだけ表示)

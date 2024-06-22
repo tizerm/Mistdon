@@ -66,7 +66,7 @@ class Preference {
             "chat_omit"                 : pref?.font_size?.chat_omit        ?? 11, // チャット(省略)
             "chat_quote"                : pref?.font_size?.chat_quote       ?? 11, // チャット(引用)
             "list"                      : pref?.font_size?.list             ?? 13, // リスト
-            "media"                     : pref?.font_size?.media            ?? 13 // メディア
+            "media"                     : pref?.font_size?.media            ?? 13  // メディア
         },
         this.media_height_limit = {     // メディアの高さ制限
             "default"                   : pref?.media_height_limit?.default ?? 240, // ノーマル
@@ -78,6 +78,10 @@ class Preference {
         this.contents_limit = {         // 文字数制限
             "default"                   : pref?.contents_limit?.default     ?? 250, // ノーマル
             "chat"                      : pref?.contents_limit?.chat        ?? 140  // チャット
+        },
+        this.tl_impression = {          // タイムラインインプレッション表示
+            "enabled"                   : pref?.tl_impression?.enabled      ?? false, // 有効/無効
+            "span"                      : pref?.tl_impression?.span         ?? 3      // 更新間隔
         },
         this.history_limit              = pref?.history_limit               ?? 200, // 送信履歴件数
         this.reaction_history_limit     = pref?.reaction_history_limit      ?? 20,  // リアクション履歴件数
@@ -328,6 +332,10 @@ class Preference {
         $("#__txt_gen_content_limit_default")   .val(Preference.GENERAL_PREFERENCE.contents_limit?.default)
         $("#__txt_gen_content_limit_chat")      .val(Preference.GENERAL_PREFERENCE.contents_limit?.chat)
 
+        // タイムラインインプレッション表示
+        $("#__chk_gen_show_tl_impression")  .prop("checked", Preference.GENERAL_PREFERENCE.tl_impression?.enabled)
+        $("#__txt_gen_tl_impression_span")  .val(Preference.GENERAL_PREFERENCE.tl_impression?.span)
+
         // 履歴件数
         $("#__txt_gen_history_limit")           .val(Preference.GENERAL_PREFERENCE.history_limit)
         $("#__txt_gen_reaction_history_limit")  .val(Preference.GENERAL_PREFERENCE.reaction_history_limit)
@@ -421,6 +429,10 @@ class Preference {
             "contents_limit": {             // 文字数制限
                 "default"                   : $("#__txt_gen_content_limit_default").val(),
                 "chat"                      : $("#__txt_gen_content_limit_chat").val(),
+            },
+            "tl_impression": {              // タイムラインインプレッション表示
+                "enabled"                   : $("#__chk_gen_show_tl_impression").prop("checked"),
+                "span"                      : $("#__txt_gen_tl_impression_span").val()
             },
             "history_limit"                 : $("#__txt_gen_history_limit").val(),
             "reaction_history_limit"        : $("#__txt_gen_reaction_history_limit").val(),

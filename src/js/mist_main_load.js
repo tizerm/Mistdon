@@ -102,7 +102,10 @@
                 rest_promises.push(tl.getTimeline())
                 // WebSocket接続が無効な場合は自動更新タイマーをセット
                 if (tl.pref.disable_websocket) tl.initAutoReloader()
-                else tl.setSocketParam()
+                else { // WebSocket通信する場合は自動インプレッション更新タイマーをセット
+                    tl.setSocketParam()
+                    tl.initAutoMerger()
+                }
             })
             // タイムラインをDOMにバインド
             gp.onLoadTimeline(rest_promises)
