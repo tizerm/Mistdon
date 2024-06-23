@@ -819,7 +819,7 @@ class Status {
             let alias = null
             if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
                 const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji"/>`
+                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
                 else alias = `${this.reaction_emoji} (未キャッシュです)`
             } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
             html += `<div class="reaction_emoji">${alias}</div>`
@@ -1264,11 +1264,15 @@ class Status {
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CWテキスト */ += `
-            <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
-        `; html += '<div class="main_content">'
+            <div class="main_content content_length_limit warn_label label_cw">
+                <span class="inner_content">${target_emojis.replace(this.cw_text)}</span>
+        `; else html /* 本文(絵文字を置換) */ += `
+            <div class="main_content content_length_limit expand_label label_limitover">
+                <span class="inner_content">${target_emojis.replace(this.content_text)}</span>
+        `
 
-        html /* 本文(絵文字を置換) */ += target_emojis.replace(this.content_text)
         html += `
+                    <span class="break">&nbsp;</span>
                 </div>
             </div>
         `

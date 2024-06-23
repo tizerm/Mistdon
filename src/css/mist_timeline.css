@@ -1009,15 +1009,22 @@
             > .content {
                 position: relative;
                 width: 100%;
-                min-height: 1.15em;
-                >.main_content {
-                    position: absolute;
-                    margin: 2px 8px;
-                    padding: 0px;
-                    width: calc(100% - 12px);
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
+                > .main_content {
+                    display: inline-block;
+                    margin: 0px;
+                    padding: 2px 8px;
+                    width: calc(100% - 16px);
+                    > .inner_content {
+                        display: inline-block;
+                        position: absolute;
+                        width: calc(100% - 48px);
+                        top: 2px;
+                        left: 36px;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                    &.expand_label { background-image: url("../resources/ic_right.png"); }
                 }
             }
             > .media a.__on_media_expand {

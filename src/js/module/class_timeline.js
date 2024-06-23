@@ -197,7 +197,8 @@ class Timeline {
 
     async initAutoMerger() {
         if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled
-            || this.pref.timeline_type == 'notification') return // 通知は実行しない
+            || this.pref.timeline_type == 'notification'
+            || this.parent_group.pref.tl_layout == 'gallery') return // 通知とギャラリーは実行しない
         if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
         this.reload_timer_id = setInterval(() => this.mergeImpressions(),
             Preference.GENERAL_PREFERENCE.tl_impression?.span * 60000)
