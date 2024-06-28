@@ -86,6 +86,7 @@ class Timeline {
                 default:
                     break
             }
+
             // 投稿データをソートマップ可能なオブジェクトにして返却
             const posts = []
             response.forEach(p => posts.push(new Status(p, this, this.target_account)))

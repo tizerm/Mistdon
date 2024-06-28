@@ -493,6 +493,9 @@ class Preference {
         if (Preference.GENERAL_PREFERENCE.default_textwindow) toggleTextarea()
         if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
             $("#header>#post_options .additional_users .__on_option_close").click()
+
+        if (Preference.GENERAL_PREFERENCE.tl_impression.enabled) // インプレッション表示をする場合は簡易ボタン削除
+            $("#pop_expand_action>.std_action>.__short_impression").remove()
     }
 
     /**

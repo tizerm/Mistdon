@@ -132,6 +132,10 @@ class Status {
                 this.count_reblog = data.reblogs_count
                 this.count_fav = data.favourites_count
 
+                this.flg_reblog = data.reblogged
+                this.flg_fav = data.favourited
+                this.flg_bookmark = data.bookmarked
+
                 break
             case 'Misskey': // Misskey
                 this.notif_type = this.type == 'notification' ? json.type : null
@@ -254,6 +258,7 @@ class Status {
                     this.reactions = reactions
                     this.count_fav = reactions.reduce((sum, react) => sum + Number(react.count), 0)
                 }
+                this.reaction_self = data.myReaction
                 break
             default:
                 break
@@ -1408,7 +1413,9 @@ class Status {
                 <span class="count_reply counter" title="リプライ数">${this.count_reply}</span>
             `; if (this.count_reblog > 0) html += `
                 <span class="count_reblog counter" title="ブースト/リノート数">${this.count_reblog}</span>
-            `; switch (this.platform) {
+            `
+            let reaction_self = null
+            switch (this.platform) {
                 case 'Mastodon': // Mastodon
                     // ふぁぼの表示だけする
                     if (this.count_fav > 0) html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
@@ -1436,16 +1443,40 @@ class Status {
                             <div class="reaction_section">${reaction_html}</div>
                             <span class="count_reaction_total counter" title="リアクション合計">${reaction_count}</span>
                         `
+                        if (this.reaction_self && emojis) reaction_self = // 自分のリアクションを表示
+                            emojis.replace(`:${this.reaction_self.substring(1, this.reaction_self.lastIndexOf('@'))}:`)
                     }
                     break
                 default:
                     break
             }
+            html += '<div class="info_section">'
+            if (this.flg_reblog) html += '<span class="bottom_info flg_reblog"><img src="resources/ic_reblog.png"/></span>'
+            if (this.flg_fav) html += '<span class="bottom_info flg_fav"><img src="resources/ic_favorite.png"/></span>'
+            if (this.flg_bookmark) html += '<span class="bottom_info flg_bookmark"><img src="resources/ic_bkm.png"/></span>'
+            if (reaction_self) html += `<span class="bottom_info">${reaction_self}</span>`
+            if (this.reply_to) html += '<span class="bottom_info"><img src="resources/ic_reply.png"/></span>'
+            switch (this.visibility) { // 公開範囲がパブリック以外の場合は識別アイコンを配置
+                case 'unlisted':
+                case 'home': // ホーム
+                    html += '<span class="bottom_info"><img src="resources/ic_unlisted.png"/></span>'
+                    break
+                case 'private':
+                case 'followers': // フォロ限
+                    html += '<span class="bottom_info"><img src="resources/ic_followers.png"/></span>'
+                    break
+                default:
+                    break
+            }
+            if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only) // 連合なし
+                html += '<span class="bottom_info"><img src="resources/ic_local.png"/></span>'
             if (this.remote_flg) html /* リモートフェッチボタンの表示 */ += `
                 <button type="button" class="__fetch_remote_impression" title="リモートインプレッション表示"
                     ><img src="resources/ic_down.png" alt="リモートインプレッション表示"/></button>
                 <span class="__tooltip">リモートのインプレッションを表示</span>
             `
+            html += '</div>'
+
         }
         html += '</div>'
         return html

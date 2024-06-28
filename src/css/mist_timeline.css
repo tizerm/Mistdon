@@ -598,7 +598,7 @@
                     background-image: none;
                     padding-left: 8px;
                 }
-                > .warn_remote, > .__fetch_remote_impression {
+                .warn_remote, .__fetch_remote_impression, .bottom_info {
                     display: inline-block;
                     border-radius: 12px;
                     vertical-align: text-bottom;
@@ -608,25 +608,38 @@
                         vertical-align: text-bottom;
                     }
                     &.warn_remote { background-color: #a10000; }
-                    &.__fetch_remote_impression {
-                        position: absolute;
-                        bottom: 0px;
-                        right: 0px;
+                }
+                > .info_section {
+                    border-radius: 12px;
+                    background-color: rgba(0,172,255,0.2);
+                    position: absolute;
+                    bottom: 0px;
+                    right: 0px;
+                    &:empty { display: none; }
+                    .flg_reblog {
+                        filter: brightness(80%) sepia(100%) hue-rotate(45deg) saturate(200%);
+                    }
+                    .flg_fav {
+                        filter: brightness(80%) sepia(100%) saturate(200%);
+                    }
+                    .flg_bookmark {
+                        filter: brightness(50%) sepia(100%) hue-rotate(330deg) saturate(300%);
                     }
                 }
-                > .__fetch_remote_impression+.__tooltip {
+                .__fetch_remote_impression+.__tooltip {
                     display: none;
                     position: absolute;
                     top: -36px;
                     right: 0px;
                     padding: 2px 6px;
                     border: solid 1px #cccccc;
+                    width: max-content;
                     background-color: rgba(82,66,62,0.88);
                     color: #ffffff;
                     font-size: 14px;
                     border-radius: 8px;
                 }
-                > .__fetch_remote_impression:hover+.__tooltip { display: inline-block; }
+                .__fetch_remote_impression:hover+.__tooltip { display: inline-block; }
             }
 
             /*=== Detail Info ====================================================================*/
@@ -1012,13 +1025,13 @@
                 > .main_content {
                     display: inline-block;
                     margin: 0px;
-                    padding: 2px 8px;
+                    padding: 6px 8px;
                     width: calc(100% - 16px);
                     > .inner_content {
                         display: inline-block;
                         position: absolute;
                         width: calc(100% - 48px);
-                        top: 2px;
+                        top: 5px;
                         left: 36px;
                         overflow: hidden;
                         white-space: nowrap;
