@@ -560,6 +560,9 @@ class Instance {
         if (!domain) { // 空の場合はメッセージを初期化
             target.text("(URLを入力してください)")
             return null
+        } else if (domain.match(new RegExp(`[/\?#:]`, 'g'))) {
+            target.text("!無効な文字が入力されています!")
+            return null
         }
         // ロード待ち画面を生成
         target.html("&nbsp;").css('background-image', 'url("resources/illust/ani_wait.png")')

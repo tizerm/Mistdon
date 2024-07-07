@@ -251,3 +251,66 @@ function getRandomColor() {
     const index = Math.floor(Math.random() * color_palette.length)
     return color_palette[index]
 }
+
+/**
+ * #Util
+ * 要素を表示したら続きを読み込むスクロールローダーを生成する.
+ * 
+ * @param arg パラメータオブジェクト
+ */
+function createScrollLoader(arg) {
+    // 最初に取得したデータをもとにデータのバインド処理を行う(返り値はページング用max_id)
+    const max_id = arg.bind(arg.data, arg.target)
+    if (!max_id) return // max_idが空の場合はデータ終端として終了
+
+    // Loader Elementを生成
+    arg.target.append(`<li id="${max_id}" class="__scroll_loader">&nbsp;</li>`)
+
+    // Intersection Observerを生成
+    const observer = new IntersectionObserver((entries, obs) => (async () => {
+        const e = entries[0]
+        if (!e.isIntersecting) return // 見えていないときは実行しない
+        console.log('ローダー表示: ' + max_id)
+        // Loaderを一旦解除してロード画面に変更
+        obs.disconnect()
+        $(e.target).css('background-image', 'url("resources/illust/ani_wait.png")')
+
+        // Loaderのmax_idを使ってデータ取得処理を実行
+        arg.data = await arg.load(max_id)
+        // Loaderを削除して再帰的にLoader生成関数を実行
+        $(e.target).remove()
+        createScrollLoader(arg)
+    })(), {
+        root: arg.target.get(0),
+        rootMargin: "0px",
+        threshold: 1.0,
+    })
+    observer.observe(arg.target.find(".__scroll_loader").get(0))
+}
+
+/**
+ * #Util
+ * 上方向に続きを読み込むローダーボタンを生成する.
+ * 
+ * @param arg パラメータオブジェクト
+ */
+function createTopLoader(arg) {
+    // 最初に取得したデータをもとにデータのバインド処理を行う(返り値はページング用since_id)
+    const since_id = arg.bind(arg.data, arg.target)
+    if (!since_id) return // since_idが空の場合はデータ終端として終了
+
+    // Loader Elementを生成してクリックイベントを生成(一回だけ実行)
+    arg.target.prepend(`<li id="${since_id}" class="__on_top_loader">続きをロード</li>`)
+    arg.target.find(".__on_top_loader").get(0).addEventListener('click', e => (async () => {
+        console.log('トップリロード: ' + since_id)
+        // ボタンをロード画面に変更
+        $(e.target).empty().addClass('loader_loading')
+
+        // Loaderのsince_idを使ってデータ取得処理を実行
+        arg.data = await arg.load(since_id)
+        // Loaderを削除して再帰的にLoader生成関数を実行
+        $(e.target).remove()
+        createTopLoader(arg)
+    })(), { once: true })
+}
+

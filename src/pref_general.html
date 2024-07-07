@@ -460,6 +460,22 @@
                     </tr>
                 </tbody></table>
             </dd>
+            <dt>タイムラインインプレッション表示
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="お気に入り/ブースト/リノート/リアクションのついている投稿を詳細表示しなくてもタイムライン上で見られるようにします。リアルタイム更新を有効にしているタイムラインは設定した更新間隔で内容を更新します。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_show_tl_impression"/>
+                        <label for="__chk_gen_show_tl_impression">タイムラインインプレッションを有効にする</label>
+                    </li>
+                    <li>
+                        <input type="number" id="__txt_gen_tl_impression_span" max="999" min="1"
+                            title="インプレッションの自動更新間隔"/>分
+                    </li>
+                </ul>
+            </dd>
             <dt>送信履歴の最大保存件数
                 <img src="resources/ic_help.png" class="tooltip_help"
                 title="投稿履歴とアクティビティ履歴の最大保存件数を設定します。これを超えると古い順から履歴から消えていきます。"/>

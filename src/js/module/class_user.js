@@ -90,7 +90,7 @@ class User {
         this.all_account_flg = arg.auth
         // Mistdonに認証情報のあるホストの場合は対象アカウントを引っ張ってくる
         this.authorized = Account.getByDomain(host)
-        if (this.platform == 'Misskey') this.use_emoji_cache = this.authorized ? true : false
+        if (this.platform == 'Misskey') this.use_emoji_cache = !!this.authorized
         this.user_uuid = crypto.randomUUID()
     }
 
@@ -279,8 +279,10 @@ class User {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.avatar_url}" class="usericon"/>
-                <h4 class="username">${target_emojis.replace(this.username)}</h4>
-                <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+                <div class="name_info">
+                    <h4 class="username">${target_emojis.replace(this.username)}</h4>
+                    <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+                </div>
         `
         let bookmarks = ''
         let instance = ''
@@ -376,8 +378,10 @@ class User {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.avatar_url}" class="usericon"/>
-                <h4 class="username">${target_emojis.replace(this.username)}</h4>
-                <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+                <div class="name_info">
+                    <h4 class="username">${target_emojis.replace(this.username)}</h4>
+                    <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+                </div>
         `
         switch (this.platform) {
             case 'Mastodon': // Mastodon
@@ -421,8 +425,10 @@ class User {
             <li class="user_nametag" name="${this.full_address}">
                 <div class="user">
                     <img src="${this.avatar_url}" class="usericon"/>
-                    <h4 class="username">${this.username}</h4>
-                    <span class="userid">${this.full_address}</a>
+                    <div class="name_info">
+                        <h4 class="username">${this.username}</h4>
+                        <span class="userid">${this.full_address}</a>
+                    </div>
                 </div>
             </li>
         `))

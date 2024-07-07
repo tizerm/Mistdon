@@ -119,14 +119,14 @@ class Emojis {
             if (!text) return ""
             return text.replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), match => {
                 const target = this.emoji_map.get(match)
-                if (target) return `<img src="${target.url}" class="inline_emoji"/>`
+                if (target) return `<img src="${target.url}" class="inline_emoji" alt=":${target.shortcode}:"/>`
                 else return match
             })
         } else { // 投稿データに付随してきた絵文字データの場合
              // 文字の入力がない場合は空文字を返却
             if (!text) return ""
-            return this.list.reduce((str, emoji) => str.replace(
-                new RegExp(`:${emoji.shortcode}:`, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
+            return this.list.reduce((str, emoji) => str.replace(new RegExp(`:${emoji.shortcode}:`, 'g'),
+                `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
         }
     }
 
@@ -152,8 +152,8 @@ class Emojis {
             const emoji_map = auth.emojis.emoji_map
             return shortcodes.reduce((str, code) => {
                 const emoji = emoji_map.get(code)
-                return str.replace(
-                    new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`)
+                return str.replace(new RegExp(emoji.shortcode, 'g'),
+                    `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`)
             }, text)
         } else { // 認証アカウント外のインスタンスの場合は現地のAPIから絵文字を取得
             const emoji_promises = []
@@ -174,8 +174,8 @@ class Emojis {
             // 取得に成功したショートコードを抜き出して置換処理を実行
             return await Promise.allSettled(emoji_promises).then(results => {
                 return results.filter(res => res.status == 'fulfilled').map(res => res.value)
-                    .reduce((str, emoji) => str.replace(
-                        new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
+                    .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
+                        `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
             })
         }
     }
@@ -221,8 +221,8 @@ class Emojis {
         // 取得に成功したショートコードを抜き出して置換処理を実行
         const replace_text = await Promise.allSettled(emoji_promises).then(results => {
             return results.filter(res => res.status == 'fulfilled').map(res => res.value)
-                .reduce((str, emoji) => str.replace(
-                    new RegExp(emoji.shortcode, 'g'), `<img src="${emoji.url}" class="inline_emoji"/>`), text)
+                .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
+                    `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
         })
         jqelm.html(replace_text)
     }

@@ -286,7 +286,7 @@
             /*=== User Info ======================================================================*/
             > .user {
                 position: relative;
-                margin: -2px -4px 0px;
+                margin: -2px -8px 0px;
 
                 > .usericon {
                     border-radius: 12px;
@@ -294,37 +294,38 @@
                     height: 48px;
                     cursor: pointer;
                 }
-                > .username {
+                > .name_info {
                     position: absolute;
-                    left: 60px;
-                    top: 2px;
+                    top: 0px;
+                    left: 58px;
+                    width: calc(100% - 60px);
+                }
+                .username {
                     color: #ffffff;
                     font-size: 18px;
                     font-weight: bold;
                     margin: 0px;
-                    width: calc(100% - 60px);
+                    width: 100%;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                 }
-                > .userid {
-                    position: absolute;
-                    left: 60px;
-                    top: 28px;
+                .userid {
                     display: block;
                     font-family: Arial, "メイリオ", sans-selif;
                     color: #bbbbbb;
                     font-size: 14px;
-                    width: calc(100% - 60px);
+                    width: 100%;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     > a {
                         text-decoration: underline;
+                        color: #b5a5ab;
                         cursor: pointer;
                         &:hover {
                             text-decoration: none;
-                            color: #eeeeee;
+                            color: #dddddd;
                         }
                     }
                 }
@@ -337,12 +338,11 @@
 
                 /*=== User Info (Normal2 Layout) =================================================*/
                 &.prof_normal2 {
-                    position: absolute;
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     width: calc(100% - 16px);
-                    margin: -4px -6px 2px;
+                    margin: -4px -6px 4px;
                     > .usericon {
                         border-radius: 12px;
                         width: 24px;
@@ -350,17 +350,22 @@
                         display: inline-block;
                         vertical-align: text-bottom;
                     }
-                    > .username {
-                        position: static;
-                        font-size: 13px;
-                        font-weight: bold;
-                        display: inline;
-                        > .inline_emoji { height: 18px; }
-                    }
-                    > .userid {
-                        position: static;
-                        display: inline;
-                        font-size: 12px;
+                    > .name_info {
+                        position: absolute;
+                        top: 0px;
+                        left: 28px;
+                        > .username {
+                            position: static;
+                            font-size: 13px;
+                            font-weight: bold;
+                            display: inline;
+                            > .inline_emoji { height: 18px; }
+                        }
+                        > .userid {
+                            position: static;
+                            display: inline;
+                            font-size: 13px;
+                        }
                     }
                 }
             }
@@ -396,8 +401,6 @@
                     overflow-wrap: break-word;
                 }
             }
-            > .prof_normal2+.content { margin-top: 24px; }
-            &:has(.label_head)>.prof_normal2+.content { margin-top: 30px; }
 
             /*=== Reaction Emoji Info ============================================================*/
             > .reaction_emoji {
@@ -571,10 +574,72 @@
                     font-size: 18px;
                     font-weight: bold;
                     text-align: right;
-                    &.count_reblog         { background-image: url("../resources/ic_reblog.png"); }
-                    &.count_fav            { background-image: url("../resources/ic_favorite.png"); }
-                    &.count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
                 }
+            }
+
+            /*=== Impressions Info ===============================================================*/
+            > .impressions {
+                position: relative;
+                background-color: rgba(31,31,31,0.683);
+                border-radius: 8px;
+                color: #bbbbbb;
+                &:empty { display: none; }
+                > .counter {
+                    display: inline-block;
+                    border-radius: 12px;
+                    padding: 3px 8px 3px 30px;
+                    background-position: center left;
+                    background-repeat: no-repeat;
+                    background-size: 24px 24px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                }
+                > .reaction_section { display: inline; }
+                > .count_reaction_total {
+                    background-image: none;
+                    padding-left: 8px;
+                }
+                .warn_remote, .__fetch_remote_impression, .bottom_info {
+                    display: inline-block;
+                    border-radius: 12px;
+                    vertical-align: text-bottom;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                        vertical-align: text-bottom;
+                    }
+                    &.warn_remote { background-color: #a10000; }
+                }
+                > .info_section {
+                    border-radius: 12px;
+                    background-color: rgba(0,172,255,0.2);
+                    position: absolute;
+                    bottom: 0px;
+                    right: 0px;
+                    &:empty { display: none; }
+                    .flg_reblog {
+                        filter: brightness(80%) sepia(100%) hue-rotate(45deg) saturate(200%);
+                    }
+                    .flg_fav {
+                        filter: brightness(80%) sepia(100%) saturate(200%);
+                    }
+                    .flg_bookmark {
+                        filter: brightness(50%) sepia(100%) hue-rotate(330deg) saturate(300%);
+                    }
+                }
+                .__fetch_remote_impression+.__tooltip {
+                    display: none;
+                    position: absolute;
+                    top: -36px;
+                    right: 0px;
+                    padding: 2px 6px;
+                    border: solid 1px #cccccc;
+                    width: max-content;
+                    background-color: rgba(82,66,62,0.88);
+                    color: #ffffff;
+                    font-size: 14px;
+                    border-radius: 8px;
+                }
+                .__fetch_remote_impression:hover+.__tooltip { display: inline-block; }
             }
 
             /*=== Detail Info ====================================================================*/
@@ -639,17 +704,16 @@
                         cursor: pointer;
                     }
                 }
-                .counter              { width: calc(33% - 48px); }
-                .count_post           { background-image: url("../resources/ic_rpl.png"); }
-                .count_follow         { background-image: url("../resources/ic_cnt_flw.png"); }
-                .count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
-                .count_reply          { background-image: url("../resources/ic_rpl.png"); }
-                .count_reblog         { background-image: url("../resources/ic_reblog.png"); }
-                .count_fav            { background-image: url("../resources/ic_favorite.png"); }
-                .count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
+                > .count_reaction_list {
+                    background-color: rgba(31,31,31,0.683);
+                    border-radius: 8px;
+                }
+                .counter { width: calc(33% - 48px); }
                 .count_reaction {
-                    background-color: rgba(0,172,255,0.2);
-                    padding-right: 8px;
+                    color: #bbbbbb;
+                    font-weight: normal;
+                    padding: 0px;
+                    margin: 0px 2px;;
                 }
             }
 
@@ -949,34 +1013,37 @@
                 font-size: 11px;
             }
             > .user {
-                margin: 0px 8px;
+                margin: 0px 6px;
                 > .usericon {
                     border-radius: 18px;
                     width: 36px;
                     height: 36px;
                 }
-                > .username, > .userid { font-size: 13px; }
-                > .username {
+                > .name_info {
                     left: 48px;
-                    top: 1px;
-                }
-                > .userid {
-                    left: 48px;
-                    top: 20px;
+                    width: calc(100% - 48px);
+                    > .username, > .userid { font-size: 13px; }
                 }
             }
             > .content {
                 position: relative;
                 width: 100%;
-                min-height: 1.15em;
-                >.main_content {
-                    position: absolute;
-                    margin: 2px 8px;
-                    padding: 0px;
-                    width: calc(100% - 12px);
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
+                > .main_content {
+                    display: inline-block;
+                    margin: 0px;
+                    padding: 6px 8px;
+                    width: calc(100% - 16px);
+                    > .inner_content {
+                        display: inline-block;
+                        position: absolute;
+                        width: calc(100% - 48px);
+                        top: 5px;
+                        left: 36px;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                    &.expand_label { background-image: url("../resources/ic_right.png"); }
                 }
             }
             > .media a.__on_media_expand {
@@ -1085,6 +1152,29 @@
             background-repeat: no-repeat;
             height: 32px;
         }
+        > li.__on_top_loader {
+            background-image: url("../resources/ic_top.png");
+            background-position: center left;
+            background-repeat: no-repeat;
+            background-color: #415687;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px 0px;
+            &:hover {
+                background-color: #3562cc;
+                cursor: pointer;
+            }
+            &.loader_loading {
+                background-image: url("../resources/illust/ani_wait.png");
+                background-position: center center;
+                height: 32px;
+            }
+        }
+        > li.mark_target_post:not(.chat_timeline), > li.mark_target_post.chat_timeline>.content {
+            background-color: #415687;
+        }
 
         > li>.label_head.label_reblog {
             background-position: center right;
@@ -1108,18 +1198,25 @@
 
 /*=== General Timeline Preference ================================================================*/
 
-.label_reply     { background-color: #cc355d; }
-.label_reblog    { background-color: #408a08; }
-.label_favorite  { background-color: #a8880a; }
-.label_postcount { background-color: #606060; }
-.label_follow    { background-color: #3562cc; }
-.label_follower  { background-color: #cc6a35; }
-.label_bookmark  { background-color: #c10000; }
-.label_cw        { background-color: #8c720b; }
-.label_sensitive { background-color: #a10000; }
-.label_limitover { background-color: #0b638c; }
-.label_private   { background-color: #bbbbbb; color: #333333; }
-.cw_content      { display: none; }
+.label_reply          { background-color: #cc355d; }
+.label_reblog         { background-color: #408a08; }
+.label_favorite       { background-color: #825e1b; }
+.label_postcount      { background-color: #606060; }
+.label_follow         { background-color: #3562cc; }
+.label_follower       { background-color: #cc6a35; }
+.label_bookmark       { background-color: #c10000; }
+.label_cw             { background-color: #8c720b; }
+.label_sensitive      { background-color: #a10000; }
+.label_limitover      { background-color: #0b638c; }
+.label_private        { background-color: #bbbbbb; color: #333333; }
+.cw_content           { display: none; }
+.count_post           { background-image: url("../resources/ic_rpl.png"); }
+.count_follow         { background-image: url("../resources/ic_cnt_flw.png"); }
+.count_follower       { background-image: url("../resources/ic_cnt_flwr.png"); }
+.count_reply          { background-image: url("../resources/ic_rpl.png"); }
+.count_reblog         { background-image: url("../resources/ic_reblog.png"); }
+.count_fav            { background-image: url("../resources/ic_favorite.png"); }
+.count_reaction_total { background-image: url("../resources/ic_emoji.png"); }
 
 /*=== Profile Column Layout ======================================================================*/
 

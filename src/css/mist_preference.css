@@ -235,7 +235,7 @@
                         &.default      { background-color: #3562cc; }
                         &.btrn         { background-color: #408a08; }
                         &.media        { background-color: #cc355d; }
-                        &.notification { background-color: #a8880a; }
+                        &.notification { background-color: #825e1b; }
                     }
                     & button.__on_layout_close { width: 100%; }
                 }
