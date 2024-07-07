@@ -254,7 +254,7 @@ function getRandomColor() {
 
 /**
  * #Util
- * 要素を表示したら続きを読み込むスクロールローダーを生成する
+ * 要素を表示したら続きを読み込むスクロールローダーを生成する.
  * 
  * @param arg パラメータオブジェクト
  */
@@ -288,6 +288,12 @@ function createScrollLoader(arg) {
     observer.observe(arg.target.find(".__scroll_loader").get(0))
 }
 
+/**
+ * #Util
+ * 上方向に続きを読み込むローダーボタンを生成する.
+ * 
+ * @param arg パラメータオブジェクト
+ */
 function createTopLoader(arg) {
     // 最初に取得したデータをもとにデータのバインド処理を行う(返り値はページング用since_id)
     const since_id = arg.bind(arg.data, arg.target)

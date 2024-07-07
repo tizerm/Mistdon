@@ -1205,7 +1205,7 @@ class Status {
                         const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
                         if (emoji) alias = `<img src="${emoji.url}" class="ic_notif_type"/>`
                         else alias = '×'
-                    } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.:@_]+$/g)) // リモートの絵文字
+                    } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.\-:@_]+$/g)) // リモートの絵文字
                         alias = '<img src="resources/ic_emoji_remote.png" class="ic_notif_type"/>'
                     else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
                     jqelm.find('.notif_footer').prepend(alias)
@@ -1371,6 +1371,12 @@ class Status {
         `))
     }
 
+    /**
+     * #Method
+     * メディア表示セクションのHTMLを返却.
+     * 
+     * @param img_class 付与するグリッドサイズクラス
+     */
     bindMediaSection(img_class) {
         let html = '<div class="media">'
         if (this.sensitive) html /* 閲覧注意 */ += `
@@ -1395,6 +1401,7 @@ class Status {
         return html
     }
 
+    // Getter: タイムラインインプレッションセクション
     get impression_section() {
         // インプレッション表示をしない場合は無効化
         if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return ''
@@ -1427,7 +1434,7 @@ class Status {
                         if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
                             <span class="bottom_reaction"><img src="${reaction.url}" class="inline_emoji"/></span>
                         `; else if (reaction.shortcode.lastIndexOf('@') > 0) reaction_html /* 取得できなかった絵文字 */ += `
-                            <span class="bottom_reaction">
+                            <span class="bottom_reaction __yet_replace_reaction">
                                 :${reaction.shortcode.substring(1, reaction.shortcode.lastIndexOf('@'))}:
                             </span>
                         `; else reaction_html /* それ以外はそのまま表示 */ += `
@@ -2025,6 +2032,12 @@ class Status {
         scroll_tl.createLoadableTimeline(this)
     }
 
+    /**
+     * #Method
+     * この投稿の前後のローカルタイムラインを取得するウィンドウを生成
+     * 
+     * @param layout タイムラインレイアウト
+     */
     openLocalTimelineWindow(layout) {
         const auth_account = Account.getByDomain(this.host)
         let tl_pref = { // タイムライン設定

@@ -196,6 +196,10 @@ class Timeline {
         })(), this.pref.reload_span * 60000)
     }
 
+    /**
+     * #Method
+     * インプレッション自動マージタイマーをセットする
+     */
     async initAutoMerger() {
         if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled
             || this.pref.timeline_type == 'notification'
@@ -205,6 +209,10 @@ class Timeline {
             Preference.GENERAL_PREFERENCE.tl_impression?.span * 60000)
     }
 
+    /**
+     * #Method
+     * タイムラインを取得して最新のインプレッション情報をセットする
+     */
     async mergeImpressions() {
         // 最新のタイムラインを取得
         const recent = await this.getTimeline()

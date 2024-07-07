@@ -761,13 +761,21 @@
     $(document).on("click", ".__on_datelink", e =>
         Status.getStatus($(e.target).closest("li").attr("name")).then(post => post.createDetailWindow()))
 
+    /**
+     * #Event
+     * リモートインプレッション取得ボタン.
+     * => リモートのインプレッション数を直接取得してタイムラインインプレッションを書き換える.
+     */
     if (Preference.GENERAL_PREFERENCE.tl_impression?.enabled)
         $(document).on("click", ".__fetch_remote_impression", e => {
             const target_li = $(e.target).closest("li")
             Status.getStatus(target_li.attr("name")).then(post => {
                 // インプレッションセクションを最新の状態で置き換える
                 target_li.find('.impressions').replaceWith(post.impression_section)
-                if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
+                if (post.platform == 'Misskey') { // Misskeyの場合未変換のカスタム絵文字を置換
+                    target_li.find('.impressions .__yet_replace_reaction:not(:empty)').removeClass('__yet_replace_reaction')
+                    Emojis.replaceDomAsync(target_li.find('.impressions .__yet_replace_reaction'), post.host)
+                }
             })
         })
 
@@ -1305,6 +1313,10 @@
     $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_layout>li",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow($(e.target).closest("li").attr("name")))
 
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 前後のLTLを取得.
+     */
     $(document).on("click", "#pop_context_menu>.ui_menu ul#__menu_post_open_localtimeline>li",
         e => Status.getStatus($("#pop_context_menu").attr("name"))
         .then(post => post.openLocalTimelineWindow($(e.target).closest("li").attr("name"))))
