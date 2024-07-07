@@ -894,10 +894,12 @@ class Status {
                         `
                         reaction_count += Number(reaction.count)
                     })
-                    // 先にリアクションの合計値を表示
-                    html += `<span class="count_reaction_total counter label_favorite"
-                        title="リアクション合計">${reaction_count}</span>`
-                    html += `<div>${reaction_html}</div>`
+                    html /* リアクション合計とリアクション一覧を表示 */ += `
+                        <span class="count_reaction_total counter label_favorite" title="リアクション合計">
+                            ${reaction_count}
+                        </span>
+                        <div class="count_reaction_list">${reaction_html}</div>
+                    `
                     break
                 default:
                     break
@@ -2042,7 +2044,7 @@ class Status {
         const auth_account = Account.getByDomain(this.host)
         let tl_pref = { // タイムライン設定
             "key_address": auth_account?.full_address,
-            "external": auth_account ? false : true,
+            "external": !auth_account,
             "host": this.host,
             "platform": this.platform,
             "color": auth_account?.pref.acc_color ?? getRandomColor(),

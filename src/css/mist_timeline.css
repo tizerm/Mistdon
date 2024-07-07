@@ -704,10 +704,16 @@
                         cursor: pointer;
                     }
                 }
+                > .count_reaction_list {
+                    background-color: rgba(31,31,31,0.683);
+                    border-radius: 8px;
+                }
                 .counter { width: calc(33% - 48px); }
                 .count_reaction {
-                    background-color: rgba(0,172,255,0.2);
-                    padding-right: 8px;
+                    color: #bbbbbb;
+                    font-weight: normal;
+                    padding: 0px;
+                    margin: 0px 2px;;
                 }
             }
 

@@ -93,7 +93,9 @@ class Timeline {
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
-            Notification.error(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`)
+            if (this.parent_column?.pref?.label_head) // 通常タイムラインの取得ミス
+                Notification.error(`${this.parent_column.pref.label_head}の${this.account_key}のタイムラインの取得に失敗しました.`)
+            else Notification.error(`${this.host}のタイムラインの取得に失敗しました.`)
             return Promise.reject(err)
         }
     }
