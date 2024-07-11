@@ -1979,9 +1979,9 @@ class Status {
      * 
      * @param target この投稿のjQueryオブジェクト(座標決定に使用)
      * @param e マウスイベント
-     * @param is_reply リプライをホバーする場合はtrue
+     * @param pop_type ホバーする位置のタイプ
      */
-    createExpandWindow(target, e, is_reply) {
+    createExpandWindow(target, e, pop_type) {
         // 強制的に通常表示にする
         this.detail_flg = false
         this.popout_flg = true
@@ -1990,32 +1990,56 @@ class Status {
 
         // 隠しウィンドウにこの投稿を挿入
         const pos = target.offset()
-        $("#pop_expand_post>ul").html(is_reply ? this.chat_elm : this.element)
-            .css('width', `${target.closest('ul').outerWidth()}px`)
+        const outer_width = target.closest('ul').outerWidth()
+        $("#pop_expand_post>ul").html(pop_type == 'reply' ? this.chat_elm : this.element).css('width', `${outer_width}px`)
         // リアクション絵文字はリモートから直接取得
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
-        if (is_reply) { // リプライの場合は直上にドロップで表示
-            $("#pop_expand_post").css({
-                'top': 'auto',
-                'bottom': Math.round(window.innerHeight - pos.top),
-                'left': pos.left - 12
-            })
-            $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
-        } else { // それ以外のポップアップの場合はマウスカーソルの位置から逆算する
-            const mouse_y = e.pageY
-            if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
-                $("#pop_expand_post").css({
-                    'top': 'auto',
-                    'bottom': Math.round(window.innerHeight - mouse_y - 48),
+        const mouse_x = e.pageX
+        const mouse_y = e.pageY
+        switch (pop_type) {
+            case 'under': // マウスのすぐ近くに展開
+                if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
+                    $("#pop_expand_post").css({
+                        'top': 'auto',
+                        'bottom': Math.round(window.innerHeight - mouse_y - 48),
+                        'left': pos.left - 12
+                    })
+                else $("#pop_expand_post").css({
+                    'bottom': 'auto',
+                    'top': mouse_y - 24,
                     'left': pos.left - 12
                 })
-            else $("#pop_expand_post").css({
-                'bottom': 'auto',
-                'top': mouse_y - 24,
-                'left': pos.left - 12
-            })
-            $("#pop_expand_post").show(...Preference.getAnimation("POP_FOLD"))
+                $("#pop_expand_post").show(...Preference.getAnimation("POP_FOLD"))
+                break
+            case 'side': // 左右に展開
+                let css = {}
+                if (window.innerHeight / 2 < mouse_y) { // ウィンドウの下の方にある場合は下から展開
+                    css.top = 'auto'
+                    css.bottom = Math.round(window.innerHeight - mouse_y - 24)
+                } else { // 通常は上から展開
+                    css.top = mouse_y - 24
+                    css.bottom = 'auto'
+                }
+                if (window.innerWidth / 2 < mouse_x) { // ウィンドウの右側にある場合は左に展開
+                    css.left = 'auto'
+                    css.right = Math.round(window.innerWidth - pos.left - 8)
+                } else { // 通常は左から展開
+                    css.left = pos.left + outer_width - 16
+                    css.right = 'auto'
+                }
+                $("#pop_expand_post").css(css).show()
+                break
+            case 'reply': // 投稿の直上に展開
+                $("#pop_expand_post").css({
+                    'top': 'auto',
+                    'bottom': Math.round(window.innerHeight - pos.top),
+                    'left': pos.left - 12
+                })
+                $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
+                break
+            default:
+                break
         }
     }
 
