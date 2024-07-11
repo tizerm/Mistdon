@@ -772,10 +772,8 @@
             Status.getStatus(target_li.attr("name")).then(post => {
                 // インプレッションセクションを最新の状態で置き換える
                 target_li.find('.impressions').replaceWith(post.impression_section)
-                if (post.platform == 'Misskey') { // Misskeyの場合未変換のカスタム絵文字を置換
-                    target_li.find('.impressions .__yet_replace_reaction:not(:empty)').removeClass('__yet_replace_reaction')
-                    Emojis.replaceDomAsync(target_li.find('.impressions .__yet_replace_reaction'), post.host)
-                }
+                // Misskeyの場合未変換のカスタム絵文字を置換
+                if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
             })
         })
 
@@ -981,6 +979,9 @@
      */
     $(document).on("click", ".__short_prepost",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    $(document).on("click", ".__short_open_list",
+        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow("list"))
 
     /**
      * #Event

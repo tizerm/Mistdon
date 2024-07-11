@@ -1436,7 +1436,7 @@ class Status {
                         if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
                             <span class="bottom_reaction"><img src="${reaction.url}" class="inline_emoji"/></span>
                         `; else if (reaction.shortcode.lastIndexOf('@') > 0) reaction_html /* 取得できなかった絵文字 */ += `
-                            <span class="bottom_reaction __yet_replace_reaction">
+                            <span class="bottom_reaction">
                                 :${reaction.shortcode.substring(1, reaction.shortcode.lastIndexOf('@'))}:
                             </span>
                         `; else reaction_html /* それ以外はそのまま表示 */ += `
