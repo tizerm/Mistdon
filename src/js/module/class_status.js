@@ -1319,8 +1319,6 @@ class Status {
         }
         // 時間で色分け
         jqelm.closest('li').css('border-left-color', this.relative_time.color)
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw)
-            jqelm.find('.content>.main_content').hide()  // CWを非表示にする
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
             jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
 

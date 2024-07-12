@@ -836,22 +836,29 @@
     $(document).on("mouseleave", "#pop_expand_post>ul>li",
         e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
 
-    $(document).on("mouseenter", "li.short_timeline", e => {
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).createExpandWindow(target_li, e, "side")
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "side")
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createExpandWindow(target_li, e, "side")
-    })
-
-    $(document).on("mouseleave", "li.short_timeline", e => {
-        // 発火した場所がポップアップした投稿の場合は無視
-        if ($(e.relatedTarget).closest("#pop_expand_post").length > 0) return
-        $("#pop_expand_post").hide()
-    })
+    /**
+     * #Event #Mouseenter #Mouseleave
+     * リストレイアウトの投稿本体に対してホバー.
+     * => オプションが有効な場合は両脇サイドにポップアップを表示する
+     */
+    if (Preference.GENERAL_PREFERENCE.enable_pop_hover_list) { // オプションが有効な場合にイベント定義
+        $(document).on("mouseenter", "li.short_timeline", e => {
+            const target_li = $(e.target).closest("li")
+            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+                Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                    .getStatus(target_li).createExpandWindow(target_li, e, "side")
+            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+                Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "side")
+            else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+                Trend.getStatus(target_li).createExpandWindow(target_li, e, "side")
+        })
+        // マウスを離したら閉じる
+        $(document).on("mouseleave", "li.short_timeline", e => {
+            // 発火した場所がポップアップした投稿の場合は無視
+            if ($(e.relatedTarget).closest("#pop_expand_post").length > 0) return
+            $("#pop_expand_post").hide()
+        })
+    }
 
     /**
      * #Event #Mouseenter
@@ -980,6 +987,10 @@
     $(document).on("click", ".__short_prepost",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
 
+    /**
+     * #Event
+     * 簡易アクションバー: リストレイアウトで開く.
+     */
     $(document).on("click", ".__short_open_list",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow("list"))
 

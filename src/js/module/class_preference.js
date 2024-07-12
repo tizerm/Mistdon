@@ -29,6 +29,7 @@ class Preference {
         this.enable_emoji_suggester     = pref?.enable_emoji_suggester      ?? true,  // カスタム絵文字サジェスター
         this.enable_action_palette      = pref?.enable_action_palette       ?? true,  // 簡易アクションパレット
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
+        this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
@@ -278,6 +279,7 @@ class Preference {
         $("#__chk_gen_use_emoji_suggester")             .prop("checked", Preference.GENERAL_PREFERENCE.enable_emoji_suggester)
         $("#__chk_gen_use_action_palette")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
+        $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
@@ -380,6 +382,7 @@ class Preference {
             "enable_emoji_suggester"        : $("#__chk_gen_use_emoji_suggester").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
+            "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
