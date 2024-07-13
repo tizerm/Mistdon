@@ -772,10 +772,8 @@
             Status.getStatus(target_li.attr("name")).then(post => {
                 // インプレッションセクションを最新の状態で置き換える
                 target_li.find('.impressions').replaceWith(post.impression_section)
-                if (post.platform == 'Misskey') { // Misskeyの場合未変換のカスタム絵文字を置換
-                    target_li.find('.impressions .__yet_replace_reaction:not(:empty)').removeClass('__yet_replace_reaction')
-                    Emojis.replaceDomAsync(target_li.find('.impressions .__yet_replace_reaction'), post.host)
-                }
+                // Misskeyの場合未変換のカスタム絵文字を置換
+                if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
             })
         })
 
@@ -797,18 +795,19 @@
      * => 投稿をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
+        $("#pop_expand_post").hide() // 一旦閉じる
         const target_li = $(e.target).closest("li")
         if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
             User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
         else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).createExpandWindow(target_li, e, false)
+                .getStatus(target_li).createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, false)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createExpandWindow(target_li, e, false)
+            Trend.getStatus(target_li).createExpandWindow(target_li, e, "under")
         else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li, e, false))
+            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li, e, "under"))
     })
 
     /**
@@ -820,13 +819,13 @@
         const target_li = $(e.target).closest("li")
         if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).quote.createExpandWindow(target_li, e, false)
+                .getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
+            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, false)
+            Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li, e, false))
+            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li, e, "under"))
     })
 
     /**
@@ -836,6 +835,30 @@
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li",
         e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
+
+    /**
+     * #Event #Mouseenter #Mouseleave
+     * リストレイアウトの投稿本体に対してホバー.
+     * => オプションが有効な場合は両脇サイドにポップアップを表示する
+     */
+    if (Preference.GENERAL_PREFERENCE.enable_pop_hover_list) { // オプションが有効な場合にイベント定義
+        $(document).on("mouseenter", "li.short_timeline", e => {
+            const target_li = $(e.target).closest("li")
+            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+                Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
+                    .getStatus(target_li).createExpandWindow(target_li, e, "side")
+            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+                Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "side")
+            else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+                Trend.getStatus(target_li).createExpandWindow(target_li, e, "side")
+        })
+        // マウスを離したら閉じる
+        $(document).on("mouseleave", "li.short_timeline", e => {
+            // 発火した場所がポップアップした投稿の場合は無視
+            if ($(e.relatedTarget).closest("#pop_expand_post").length > 0) return
+            $("#pop_expand_post").hide()
+        })
+    }
 
     /**
      * #Event #Mouseenter
@@ -858,7 +881,7 @@
                 const replied_post = target_timeline.parent_group.status_map.get(replied_key)
 
                 // 存在したらリプライ先を表示
-                replied_post?.createExpandWindow(target_li, e, true)
+                replied_post?.createExpandWindow(target_li, e, "reply")
             }
         })
 
@@ -963,6 +986,13 @@
      */
     $(document).on("click", ".__short_prepost",
         e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    /**
+     * #Event
+     * 簡易アクションバー: リストレイアウトで開く.
+     */
+    $(document).on("click", ".__short_open_list",
+        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow("list"))
 
     /**
      * #Event

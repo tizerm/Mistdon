@@ -117,9 +117,9 @@ class Emojis {
     replace(text) {
         if (this.cache_flg) { // アプリケーションキャッシュの絵文字データの場合
             if (!text) return ""
-            return text.replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), match => {
+            return text.replace(new RegExp('(?<!alt="):[a-zA-Z0-9_]+:', 'g'), match => {
                 const target = this.emoji_map.get(match)
-                if (target) return `<img src="${target.url}" class="inline_emoji" alt=":${target.shortcode}:"/>`
+                if (target) return `<img src="${target.url}" class="inline_emoji" alt="${target.shortcode}"/>`
                 else return match
             })
         } else { // 投稿データに付随してきた絵文字データの場合
@@ -145,7 +145,7 @@ class Emojis {
         const auth = Account.getByDomain(host)
 
         // 文章中に存在するショートコードを抽出
-        const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+:', 'g'))
+        const shortcodes = text.match(new RegExp('(?<!alt="):[a-zA-Z0-9_]+:', 'g'))
         if (!shortcodes) return text // 絵文字がない場合はそのまま返却
 
         if (auth) { // 対象のホストが認証アカウントにある場合はキャッシュから置換処理を実行
@@ -153,7 +153,7 @@ class Emojis {
             return shortcodes.reduce((str, code) => {
                 const emoji = emoji_map.get(code)
                 return str.replace(new RegExp(emoji.shortcode, 'g'),
-                    `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`)
+                    `<img src="${emoji.url}" class="inline_emoji" alt="${emoji.shortcode}"/>`)
             }, text)
         } else { // 認証アカウント外のインスタンスの場合は現地のAPIから絵文字を取得
             const emoji_promises = []
