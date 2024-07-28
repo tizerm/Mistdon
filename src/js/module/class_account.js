@@ -959,9 +959,11 @@ class Account {
                         url: `https://${this.pref.domain}/api/v1/custom_emojis`,
                         dataType: "json"
                     })
+
                     response.forEach(e => emojis.push({
                         "name": e.shortcode,
                         "shortcode": `:${e.shortcode}:`,
+                        "category": e.category ?? '(NO-CATEGORIZED)',
                         "url": e.url
                     }))
                     break
@@ -986,9 +988,11 @@ class Account {
                             else return Promise.reject('not exist emojis in /api/meta.')
                         })
                     ])
+
                     response.forEach(e => emojis.push({
                         "name": e.aliases[0],
                         "shortcode": `:${e.name}:`,
+                        "category": e.category ?? '(NO-CATEGORIZED)',
                         "url": e.url
                     }))
                     break
@@ -1270,40 +1274,6 @@ class Account {
             <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
         `)
         return html
-    }
-
-    /**
-     * #Method
-     * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
-     */
-    createEmojiList() {
-        $("#pop_custom_emoji").html(`
-            <div class="palette_block">
-                <div class="emoji_head">
-                    <h2>カスタム絵文字一覧</h2>
-                    <h3>${this.pref.domain}</h3>
-                </div>
-                <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
-                    placeholder="ショートコードを入力するとサジェストされます"/>
-                <div class="recent_emoji">
-                    <h5>最近使った絵文字</h5>
-                </div>
-                <div class="emoji_list">
-                </div>
-                <button type="button" id="__on_emoji_close" class="close_button">×</button>
-            </div>
-        `).show(...Preference.getAnimation("SLIDE_LEFT"))
-        // 絵文字履歴を表示する
-        this.emoji_history.map(code => this.emojis.get(code)).filter(f => f).forEach(
-            emoji => $("#pop_custom_emoji .recent_emoji").append(`
-                <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `))
-        $("#pop_custom_emoji .emoji_head").css("background-color", `#${this.pref.acc_color}`)
-
-        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji .emoji_list").append(`
-            <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `)))()
     }
 
     /**

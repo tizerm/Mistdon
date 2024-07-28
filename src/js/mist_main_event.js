@@ -168,11 +168,7 @@
      * ツールメニュー: カスタム絵文字呼び出しボタン.
      * => カスタム絵文字一覧を表示
      */
-    $("#__open_emoji_palette").on("click", e => {
-        Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
-        // サジェストテキストボックスにフォーカス
-        $("#__txt_emoji_search").focus()
-    })
+    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
 
     /**
      * #Event #Keyup
@@ -182,12 +178,12 @@
     $(document).on("keyup", "#__txt_emoji_search", e => {
         const suggest = $(e.target).val()
         if (!suggest) { // 空欄の場合すべて表示
-            $(".emoji_list>*").show()
+            $("#singleton_emoji_window .emoji_list *").show()
             return
         }
         // 一旦全部消してから一致するやつを抽出
-        $(".emoji_list>*").hide()
-        $(`.emoji_list>a.__on_emoji_append[name*="${suggest}"]`).show()
+        $("#singleton_emoji_window .emoji_list>h5, .emoji_list>.emoji_section>*").hide()
+        $(`#singleton_emoji_window .emoji_list>.emoji_section>a.__on_emoji_append[name*="${suggest}"]`).show()
     })
 
     /**
@@ -211,7 +207,7 @@
      * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
      * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
      */
-    $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
+    $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
         let target = $("#__txt_postarea")
         let target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
         const cursor_pos = target.get(0).selectionStart
@@ -1506,7 +1502,6 @@
      */
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
-    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",

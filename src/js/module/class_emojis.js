@@ -11,8 +11,15 @@ class Emojis {
         if (arg.cache_flg) {
             // キャッシュフラグがON: アカウントから参照するサーバーのカスタム絵文字(リストではなくMap)
             const emoji_map = new Map()
-            arg.emojis?.forEach(e => emoji_map.set(e.shortcode ,e))
+            const category_map = new Map()
+            arg.emojis?.forEach(e => {
+                emoji_map.set(e.shortcode, e)
+                // カテゴリ未登録の場合新しく配列を追加
+                if (!category_map.has(e.category)) category_map.set(e.category, [])
+                category_map.get(e.category).push(e.shortcode)
+            })
             this.emoji_map = emoji_map
+            this.category_map = category_map
             this.cache_flg = true
         } else {
             // キャッシュフラグがOFF: 投稿から一時的に取得されたリモート、もしくはMastodonのカスタム絵文字
@@ -227,6 +234,70 @@ class Emojis {
         jqelm.html(replace_text)
     }
 
+    static createEmojiPaletteWindow() {
+        // 絵文字取得対象アカウントを取得
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        const window_key = 'singleton_emoji_window'
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="emoji_window ex_window">
+                    <h2><span>カスタム絵文字(${target_account.full_address})</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_submit"/>
+                        <label for="__window_opacity_submit" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="suggest_box">
+                        <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
+                            placeholder="ショートコードを入力するとサジェストされます"/>
+                    </div>
+                    <div class="palette_flex">
+                        <div class="recent_emoji"></div>
+                        <div class="emoji_list"></div>
+                    </div>
+                </div>
+            `,
+            color: target_account.pref.acc_color,
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
+        })
+
+        // ターゲットのアカウントのカスタム絵文字をウィンドウにバインド
+        Emojis.bindEmojiPaletteWindow(target_account)
+        $("#__txt_emoji_search").focus()
+    }
+
+    static async bindEmojiPaletteWindow(account) {
+        const emojis = account.emojis
+        // ヘッダ設定
+        $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
+            .css('background-color', `#${account.pref.acc_color}`)
+        $('#singleton_emoji_window .recent_emoji').html('<h5>最近使った絵文字</h5>')
+        $('#singleton_emoji_window .emoji_list').empty()
+
+        // 最近使った絵文字を表示
+        account.emoji_history.map(code => emojis.get(code)).filter(f => f).forEach(
+            emoji => $('#singleton_emoji_window .recent_emoji').append(`
+                <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `))
+
+        // カテゴリごとに分けて絵文字をバインド
+        emojis.category_map.forEach((v, k) => {
+            const category_html = v.map(c => emojis.emoji_map.get(c)).reduce((rs, el) => `${rs}
+                <a class="__on_emoji_append" name="${el.shortcode}"><img src="${el.url}" alt="${el.name}"/></a>
+            `, '')
+            $('#singleton_emoji_window .emoji_list').append(`
+                <h5>${k}</h5>
+                <div class="emoji_section" name="${k}">${category_html}</div>
+            `)
+        })
+    }
+
     /**
      * #StaticMethod
      * カスタム絵文字サジェスターを起動する
@@ -235,12 +306,7 @@ class Emojis {
      */
     static createEmojiSuggester(target_elm) {
         // 絵文字取得対象アカウントを取得
-        let target_account = null
-        if (target_elm.is("#__txt_replyarea")) // リプライウィンドウ
-            target_account = Account.get($("#__hdn_reply_account").val())
-        else if (target_elm.is("#__txt_quotearea")) // 引用ウィンドウ
-            target_account = Account.get($("#__hdn_quote_account").val())
-        else target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
 
         // サジェスター生成時点でのカーソル位置を保持
         const suggest_pos = target_elm.get(0).selectionStart
