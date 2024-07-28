@@ -252,6 +252,8 @@ class Emojis {
                             src="resources/ic_not.png" alt="閉じる"/></button>
                     </div>
                     <div class="suggest_box">
+                        <div id="emoji_mode_palette" class="palette_mode active">パレット</div>
+                        <div id="emoji_mode_method" class="palette_mode">変換</div>
                         <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
                             placeholder="ショートコードを入力するとサジェストされます"/>
                     </div>

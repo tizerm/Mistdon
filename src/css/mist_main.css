@@ -1111,14 +1111,31 @@
         left: 64px;
         top: auto;
         bottom: 4px;
-        #__txt_emoji_search {
-            font-size: 18px;
-            font-weight: bold;
+        > .suggest_box {
+            > .palette_mode {
+                display: inline-block;
+                background-color: #777777;
+                color: #bbbbbb;
+                border-radius: 12px;
+                margin: 1px 0px;
+                padding: 1px;
+                width: calc(50% - 12px);
+                font-size: 18px;
+                font-weight: bold;
+                text-align: center;
+                &.active { color: #ffffff; }
+            }
+            > #emoji_mode_palette.active { background-color: #408a08; }
+            > #emoji_mode_method.active  { background-color: #3562cc; }
+            > #__txt_emoji_search {
+                font-size: 18px;
+                font-weight: bold;
+            }
         }
         > .palette_flex {
             display: flex;
             flex-direction: column;
-            height: calc(100% - 72px);
+            height: calc(100% - 102px);
             > .recent_emoji {
                 flex-shrink: 0;
                 background-color: rgba(62,68,82,0.8);

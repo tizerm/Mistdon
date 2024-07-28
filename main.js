@@ -484,6 +484,14 @@ async function writePrefCols(event, json_data) {
                                     'params': { 'channelId': tl.channel_id }
                                 }
                                 break
+                            case 'antenna': // アンテナ
+                                rest_url = `https://${host}/api/antennas/notes`
+                                query_param = { 'antennaId': tl.antenna_id }
+                                socket_param = {
+                                    'channel': 'antenna',
+                                    'params': { 'antennaId': tl.antenna_id }
+                                }
+                                break
                             case 'notification': // 通知
                                 rest_url = `https://${host}/api/i/notifications`
                                 query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
@@ -512,6 +520,7 @@ async function writePrefCols(event, json_data) {
                     'list_id': tl.timeline_type == 'list' ? tl.list_id : null,
                     'channel_id': tl.timeline_type == 'channel' ? tl.channel_id : null,
                     'channel_name': tl.timeline_type == 'channel' ? tl.channel_name : null,
+                    'antenna_id': tl.timeline_type == 'antenna' ? tl.antenna_id : null,
                     'rest_url': rest_url,
                     'socket_url': socket_url,
                     'query_param': query_param,

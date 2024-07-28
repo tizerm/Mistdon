@@ -195,6 +195,9 @@ class Account {
 
         // 投稿先メニューを生成
         this.createPostToMenu()
+
+        // カスタム絵文字パレットが表示されている場合はパレットを切り替える
+        if ($('#singleton_emoji_window').is(':visible')) Emojis.bindEmojiPaletteWindow(this)
     }
 
     /**
@@ -1136,10 +1139,34 @@ class Account {
         }
     }
 
+    async getAntennas() {
+        try {
+            const response = await $.ajax({
+                type: "POST",
+                url: `https://${this.pref.domain}/api/antennas/list`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({ "i": this.pref.access_token })
+            })
+            // アンテナを作っていない場合はreject
+            if (response.length == 0) return Promise.reject('empty')
+            const antennas = []
+            response.forEach(a => antennas.push({
+                "name": a.name,
+                "id": a.id
+            }))
+            return antennas
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
+        }
+    }
+
     /**
      * #Method #Ajax #jQuery
      * このアカウントが作成したクリップ一覧を取得する(Misskey専用)
      */
+    /*
     async getClips() {
         try {
             const response = await $.ajax({
@@ -1157,7 +1184,7 @@ class Account {
             console.log(err)
             return Promise.reject(err)
         }
-    }
+    }//*/
 
     /**
      * #Method #Ajax
