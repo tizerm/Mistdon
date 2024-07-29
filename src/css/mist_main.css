@@ -1094,11 +1094,24 @@
         > .column_instance_info { height: calc(100% - 36px); }
     }
     .post_detail_window.ex_window {
-        width: min(480px,100vw);
+        width: min(640px,100vw);
         height: min(800px,100vh);
         z-index: 34;
         right: 0px;
         > h2>a { color: #fff; }
+        > .timeline {
+            height: calc(100% - 36px);
+            > ul { height: calc(100% - 8px); }
+        }
+    }
+    .flash_window.ex_window {
+        width: min(640px,100vw);
+        height: auto;
+        max-height: 100vh;
+        z-index: 35;
+        top: 50vh;
+        left: 50vw;
+        transform: translate(-50%, -50%);
         > .timeline {
             height: calc(100% - 36px);
             > ul { height: calc(100% - 8px); }

@@ -31,7 +31,7 @@ class Timeline {
     // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
 
-    // 投稿データを一次保存するスタティックフィールド
+    // ウィンドウを一時保存するスタティックフィールド
     static TIMELINE_WINDOW_MAP = new Map()
 
     /**

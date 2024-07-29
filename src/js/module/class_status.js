@@ -2101,6 +2101,10 @@ class Status {
         scroll_tl.createLoadableTimeline(this)
     }
 
+    openFlash() {
+        this.from_group.createFlash(this.status_key)
+    }
+
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
     get notification() {
         let title = null

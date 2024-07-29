@@ -637,6 +637,9 @@
     $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
+    $(document).on("click", ".__on_open_flash_last", e => Column.get($(e.target).closest(".column_box"))
+        .getGroup($(e.target).closest(".tl_group_box").attr("id")).createFlash())
+
     /*=== Post Event =============================================================================================*/
 
     /**
@@ -832,6 +835,10 @@
     $(document).on("mouseleave", "#pop_expand_post>ul>li",
         e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
 
+    $(document).on("click", "ul.flash_tl>li", e => {
+        FlashTimeline.getWindow($(e.target)).bindNext()
+    })
+
     /**
      * #Event #Mouseenter #Mouseleave
      * リストレイアウトの投稿本体に対してホバー.
@@ -980,8 +987,9 @@
      * #Event
      * 簡易アクションバー: ここから遡る.
      */
-    $(document).on("click", ".__short_prepost",
-        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+    $(document).on("click", ".__short_prepost", e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    $(document).on("click", ".__short_flash", e => Status.TEMPORARY_ACTION_STATUS.openFlash())
 
     /**
      * #Event
@@ -1231,8 +1239,8 @@
             .closest("li").removeClass("ui-state-disabled")
 
         // メイン画面のTL出ない場合は遡りを禁止
-        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
-        else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
+        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").removeClass("ui-state-disabled")
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
@@ -1331,6 +1339,9 @@
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
+
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_flash",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openFlash())
 
     /**
      * #Event #Contextmenu
@@ -1433,6 +1444,7 @@
         else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
             target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
+        else if (target_window.is(".flash_window")) FlashTimeline.deleteWindow(target_window)
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
 

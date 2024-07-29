@@ -29,6 +29,28 @@
             }
         }
 
+        /*=== Flash Window Shortcut Key Event ====================================================================*/
+
+        if ($(".flash_window").is(":visible")) {
+            switch (e.keyCode) {
+                case 65:
+                case 37: // a, <-: 前に戻る
+                    FlashTimeline.CURRENT_WINDOW.bindPrev()
+                    return false
+                case 68:
+                case 39: // d, ->
+                case 13: // Enter: 次に送る
+                    FlashTimeline.CURRENT_WINDOW.bindNext()
+                    return false
+                case 46: // Del
+                case 81: // q: 今すぐ閉じる
+                    $("#pop_multi_window>.flash_window>.window_buttons>.window_close_button").click()
+                    return false
+                default:
+                    break
+            }
+        }
+
         /*=== Main Window Shortcut Key Event =====================================================================*/
 
         let col = null
@@ -68,12 +90,13 @@
                     return false
                 }
                 break
-            case 84: // Ctrl+T: 直前の投稿につなげる
-                if (is_control) {
+            case 84: // t: カーソルグループでフラッシュウィンドウを開く
+                if (is_control) { // Ctrl+T: 直前の投稿につなげる
                     $("#__on_last_replychain").click()
                     return false
                 }
-                break
+                Group.getCursor().createFlash()
+                return false
             case 69: // Ctrl+E: 直前の投稿を編集する
                 if (is_control) {
                     $("#__on_last_edit").click()
