@@ -1111,10 +1111,37 @@
         z-index: 35;
         top: 50vh;
         left: 50vw;
+        border-width: 4px;
         transform: translate(-50%, -50%);
         > .timeline {
-            height: calc(100% - 36px);
-            > ul { height: calc(100% - 8px); }
+            display: flex;
+            > ul {
+                width: calc(100% - 48px);
+                height: 100%;
+            }
+            > button.flash_button {
+                flex-shrink: 0;
+                flex-grow: 0;
+                border-radius: 12px;
+                padding: 4px;
+                > img {
+                    width: 24px;
+                    height: 24px;
+                }
+                &.__on_flash_prev            { background-color: #564187; }
+                &.__on_flash_next            { background-color: #415687; }
+                &.__on_flash_next.next_close { background-color: #874141; }
+                &:hover { filter: brightness(125%); }
+            }
+        }
+        > .footer {
+            > .flash_page {
+                padding: 1px;
+                font-size: 14px;
+                font-weight: bold;
+                text-align: center;
+                font-family: Arial, "メイリオ", sans-selif;
+            }
         }
     }
     #singleton_emoji_window.ex_window {

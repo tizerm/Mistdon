@@ -27,6 +27,10 @@
             border-radius: 18px;
         }
     }
+    .col_action img {
+        width: 32px;
+        height: 32px;
+    }
     .col_action>a:hover>img,
     .gp_action>a:hover>img {
         border-radius: 8px;
@@ -54,6 +58,10 @@
             position: absolute;
             top: 48px;
             left: 8px;
+            & img {
+                width: 32px;
+                height: 32px;
+            }
         }
         > .rotate_head {
             position: absolute;
@@ -273,14 +281,6 @@
                 margin: -8px -12px 6px;
                 font-size: 12px;
                 text-align: right;
-            }
-            > .visibilityicon {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                width: 36px;
-                height: 36px;
-                opacity: 0.2;
             }
 
             /*=== User Info ======================================================================*/
@@ -577,6 +577,28 @@
                 }
             }
 
+            /*=== Attributes Info ================================================================*/
+            > .post_attributes {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                border-radius: 8px;
+                background-color: transparent;
+                opacity: 0.35;
+                transition: opacity 0.2s;
+                &:empty { display: none; }
+                > img {
+                    width: 28px;
+                    height: 28px;
+                    margin: 0px 2px;
+                    vertical-align: text-bottom;
+                }
+                &:hover {
+                    background-color: rgba(31,31,31,0.683);
+                    opacity: 1.0;
+                }
+            }
+
             /*=== Impressions Info ===============================================================*/
             > .impressions {
                 position: relative;
@@ -616,15 +638,6 @@
                     bottom: 0px;
                     right: 0px;
                     &:empty { display: none; }
-                    .flg_reblog {
-                        filter: brightness(80%) sepia(100%) hue-rotate(45deg) saturate(200%);
-                    }
-                    .flg_fav {
-                        filter: brightness(80%) sepia(100%) saturate(200%);
-                    }
-                    .flg_bookmark {
-                        filter: brightness(50%) sepia(100%) hue-rotate(330deg) saturate(300%);
-                    }
                 }
                 .__fetch_remote_impression+.__tooltip {
                     display: none;
@@ -847,14 +860,6 @@
                         color: #eeeeee;
                     }
                 }
-            }
-            .visibilityicon {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                width: 32px;
-                height: 32px;
-                opacity: 0.2;
             }
             > .content {
                 position: relative;

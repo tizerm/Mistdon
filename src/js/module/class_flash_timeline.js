@@ -17,6 +17,9 @@ class FlashTimeline {
 
         // 現在のキーの位置を記録
         if (key) this.index = this.key_list.indexOf(key)
+        // 親グループに保存済みのキーがある場合はそれを使用
+        else if (this.ref_group.__flash_key) this.index = this.key_list.indexOf(this.ref_group.__flash_key)
+        // キー情報がない場合は先頭(最古)に設定
         else this.index = 0
     }
 
@@ -30,6 +33,9 @@ class FlashTimeline {
     static CURRENT_WINDOW = null
 
     createWindow() {
+        // 既に開いているウィンドウを削除
+        $("#pop_multi_window>.flash_window>.window_buttons>.window_close_button").click()
+
         // 一意認識用のUUIDを生成
         this.__timeline_uuid = crypto.randomUUID()
         const window_key = `flash_window_${this.__timeline_uuid}`
@@ -47,44 +53,87 @@ class FlashTimeline {
                             src="resources/ic_not.png" alt="閉じる"/></button>
                     </div>
                     <div class="timeline">
+                        <button type="button" class="__on_flash_prev flash_button"><img
+                            src="resources/ic_left.png" alt="戻る"/></button>
                         <ul id="${this.flash_key}" class="flash_tl __context_posts"></ul>
+                        <button type="button" class="__on_flash_next flash_button"><img
+                            src="resources/ic_right.png" alt="次へ"/></button>
+                    </div>
+                    <div class="footer">
+                        <div class="flash_page"></div>
                     </div>
                 </div>
             `,
             color: this.ref_group.pref.gp_color,
-            resizable: true,
+            resizable: false,
             drag_axis: false,
             resize_axis: "all"
         })
 
         // 投稿をバインド
-        this.bind(this.current)
+        this.bind()
         FlashTimeline.FLASH_WINDOW_MAP.set(this.flash_key, this)
         FlashTimeline.CURRENT_WINDOW = this
     }
 
     // Getter: 現在のステータス
     get current() { return this.status_map.get(this.key_list[this.index]) }
-    // Getter: 次のステータス
-    get next() { return this.status_map.get(this.key_list[++this.index]) }
-    // Getter: 前のステータス
-    get prev() { return this.status_map.get(this.key_list[--this.index]) }
 
-    bind(post) {
-        // 強制的に通常表示にする
+    bind() {
+        const post = this.current
+        // 強制的に通常表示にしてバインド
         post.detail_flg = false
         post.popout_flg = true
-        $(`#${this.flash_key}`).html(post.element)
+        const elm = $(`#${this.flash_key}`).html(post.element).closest(".flash_window")
+
+        // ページを計算してグラフ化
+        const rate = floor(((this.index + 1) / this.key_list.length) * 100, 1)
+        elm.find(".footer>.flash_page").css('background-image',
+            `linear-gradient(to right, ${post.relative_time.color} ${rate}%, #222222 ${rate}%)`)
+            .text(`${this.index + 1}/${this.key_list.length}`)
+
+        // インデクスによって先送りボタンを変更
+        if (this.index == this.key_list.length - 1) elm.find(".timeline>.__on_flash_next").addClass("next_close")
+            .find("img").attr("src", "resources/ic_not.png")
+        else elm.find(".timeline>.__on_flash_next").removeClass("next_close")
+            .find("img").attr("src", "resources/ic_right.png")
     }
 
-    bindNext() {
-        this.bind(this.next)
+    next() {
+        // 最終投稿で送ろうとした場合は画面を閉じる
+        if (this.index == this.key_list.length - 1) {
+            $("#pop_multi_window>.flash_window>.window_buttons>.window_close_button").click()
+            return this
+        }
+        this.index++
+        this.__key = null
+        return this
     }
 
-    bindPrev() {
-        if (this.index <= 0) return // 何もしない
-        this.bind(this.prev)
+    prev() {
+        if (this.index > 0) this.index--
+        this.__key = null
+        return this
     }
+
+    step(count) {
+        this.index += count
+        if (this.index >= this.key_list.length) this.index = this.key_list.length - 1
+        else if (this.index < 0) this.index = 0
+        this.__key = null
+        return this
+    }
+
+    /*
+    typeIndex(key) {
+        // 前回入力値があってインデクスを超えていない場合は続けてインデクス化
+        if (this.__key && (10 * this.index + key) < this.key_list.length)
+            this.index = 10 * this.index + key
+        else this.index = key
+        // 前回入力したキーを保存
+        this.__key = key
+        return this
+    }//*/
 
     /**
      * #StaticMethod
@@ -103,7 +152,11 @@ class FlashTimeline {
      * @param target 取得対象のターゲットDOM
      */
     static deleteWindow(target) {
-        return FlashTimeline.FLASH_WINDOW_MAP.delete(target.find("ul.flash_tl").attr("id"))
+        const key = target.find("ul.flash_tl").attr("id")
+        const del_flash = FlashTimeline.FLASH_WINDOW_MAP.get(key)
+        // 削除する前に最後に読んだキーをマップ
+        del_flash.ref_group.__flash_key = del_flash.current.status_key
+        return FlashTimeline.FLASH_WINDOW_MAP.delete(key)
     }
 }
 

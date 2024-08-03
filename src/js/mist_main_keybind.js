@@ -32,15 +32,51 @@
         /*=== Flash Window Shortcut Key Event ====================================================================*/
 
         if ($(".flash_window").is(":visible")) {
+            const current_status = FlashTimeline.CURRENT_WINDOW.current
             switch (e.keyCode) {
                 case 65:
                 case 37: // a, <-: 前に戻る
-                    FlashTimeline.CURRENT_WINDOW.bindPrev()
+                    FlashTimeline.CURRENT_WINDOW.prev().bind()
                     return false
                 case 68:
                 case 39: // d, ->
                 case 13: // Enter: 次に送る
-                    FlashTimeline.CURRENT_WINDOW.bindNext()
+                    FlashTimeline.CURRENT_WINDOW.next().bind()
+                    return false
+                case 87:
+                case 38: // w, ↑: 次に10送る
+                    FlashTimeline.CURRENT_WINDOW.step(10).bind()
+                    return false
+                case 83:
+                case 40: // s, ↓: 前に10戻る
+                    FlashTimeline.CURRENT_WINDOW.step(-10).bind()
+                    return false
+                case 77: // m: リプライ
+                    current_status.from_account.reaction('__menu_reply', null, current_status)
+                    return false
+                case 73: // i: 引用
+                    current_status.from_account.reaction('__menu_quote', null, current_status)
+                    return false
+                case 82: // r: ブースト/リノート
+                    current_status.from_account.reaction('__menu_reblog', null, current_status)
+                    return false
+                case 70: // f: お気に入り
+                    current_status.from_account.reaction('__menu_favorite', null, current_status)
+                    return false
+                case 66: // b: ブックマーク
+                    current_status.from_account.reaction('__menu_bookmark', null, current_status)
+                    return false
+                case 69: // e: リアクション
+                    current_status.from_account.reaction('__menu_reaction', null, current_status)
+                    return false
+                case 80: // p: メディアを開く
+                    $(`#${FlashTimeline.CURRENT_WINDOW.flash_key} .__on_media_expand:first-child`).click()
+                    return false
+                case 79: // o: CWを開閉する
+                    $(`#${FlashTimeline.CURRENT_WINDOW.flash_key} .expand_header`).click()
+                    return false
+                case 85: // u: ブラウザで開く
+                    window.accessApi.openExternalBrowser(current_status.uri)
                     return false
                 case 46: // Del
                 case 81: // q: 今すぐ閉じる

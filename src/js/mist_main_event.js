@@ -684,6 +684,8 @@
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
+        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+            FlashTimeline.getWindow($(e.target)).current.createImageModal(image_url)
         else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
             Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
@@ -834,10 +836,6 @@
      */
     $(document).on("mouseleave", "#pop_expand_post>ul>li",
         e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
-
-    $(document).on("click", "ul.flash_tl>li", e => {
-        FlashTimeline.getWindow($(e.target)).bindNext()
-    })
 
     /**
      * #Event #Mouseenter #Mouseleave
@@ -1457,6 +1455,12 @@
         $("#pop_multi_window>.ex_window").removeClass('active')
         $(e.target).closest(".ex_window").addClass('active')
     })
+
+    $(document).on("click", ".__on_flash_next",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind())
+
+    $(document).on("click", ".__on_flash_prev",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
     /**
      * #Event
