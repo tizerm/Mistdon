@@ -360,8 +360,11 @@ audio { height: 30px; }
     > #pop_extend_column {
         display: none;
         z-index: 60;
-        border-radius: 12px;
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
         background-color: rgba(34,34,34,0.8);
+        border: solid 2px #bbbbbb;
+        border-right-style: none;
         padding: 4px 0px 4px 4px;
         position: absolute;
         top: 24px;

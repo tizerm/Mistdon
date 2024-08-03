@@ -168,50 +168,22 @@
      * ツールメニュー: カスタム絵文字呼び出しボタン.
      * => カスタム絵文字一覧を表示
      */
-    $("#__open_emoji_palette").on("click", e => {
-        Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
-        // サジェストテキストボックスにフォーカス
-        $("#__txt_emoji_search").focus()
-    })
+    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
 
     /**
      * #Event #Keyup
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧のサジェストテキストボックス.
+     * カスタム絵文字系のサジェストテキストボックス.
      * => カスタム絵文字をショートコードで絞り込み
      */
-    $(document).on("keyup", "#__txt_emoji_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $(".emoji_list>*").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $(".emoji_list>*").hide()
-        $(`.emoji_list>a.__on_emoji_append[name*="${suggest}"]`).show()
-    })
-
-    /**
-     * #Event #Keyup
-     * リアクション一覧のサジェストテキストボックス.
-     * => リアクション絵文字をショートコードで絞り込み
-     */
-    $(document).on("keyup", "#__txt_reaction_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $(".reaction_list>*").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $(".reaction_list>*").hide()
-        $(`.reaction_list>a.__on_emoji_reaction[name*="${suggest}"]`).show()
-    })
+    $(document).on("keyup", ".emoji_suggest_textbox",
+        e => Emojis.filterEmojiPalette($(e.target).closest(".emoji_palette_section"), $(e.target).val()))
 
     /**
      * #Event
      * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
      * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
      */
-    $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
+    $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
         let target = $("#__txt_postarea")
         let target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
         const cursor_pos = target.get(0).selectionStart
@@ -641,6 +613,9 @@
     $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
+    $(document).on("click", ".__on_open_flash_last", e => Column.get($(e.target).closest(".column_box"))
+        .getGroup($(e.target).closest(".tl_group_box").attr("id")).createFlash())
+
     /*=== Post Event =============================================================================================*/
 
     /**
@@ -685,6 +660,8 @@
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
+        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+            FlashTimeline.getWindow($(e.target)).current.createImageModal(image_url)
         else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
             Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
@@ -984,8 +961,9 @@
      * #Event
      * 簡易アクションバー: ここから遡る.
      */
-    $(document).on("click", ".__short_prepost",
-        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+    $(document).on("click", ".__short_prepost", e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    $(document).on("click", ".__short_flash", e => Status.TEMPORARY_ACTION_STATUS.openFlash())
 
     /**
      * #Event
@@ -1235,8 +1213,8 @@
             .closest("li").removeClass("ui-state-disabled")
 
         // メイン画面のTL出ない場合は遡りを禁止
-        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
-        else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
+        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").removeClass("ui-state-disabled")
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
@@ -1335,6 +1313,9 @@
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
+
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_flash",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openFlash())
 
     /**
      * #Event #Contextmenu
@@ -1437,6 +1418,7 @@
         else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
             target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
+        else if (target_window.is(".flash_window")) FlashTimeline.deleteWindow(target_window)
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
 
@@ -1449,6 +1431,12 @@
         $("#pop_multi_window>.ex_window").removeClass('active')
         $(e.target).closest(".ex_window").addClass('active')
     })
+
+    $(document).on("click", ".__on_flash_next",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind())
+
+    $(document).on("click", ".__on_flash_prev",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
     /**
      * #Event
@@ -1506,7 +1494,6 @@
      */
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
-    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",

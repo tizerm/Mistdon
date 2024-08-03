@@ -11,8 +11,15 @@ class Emojis {
         if (arg.cache_flg) {
             // キャッシュフラグがON: アカウントから参照するサーバーのカスタム絵文字(リストではなくMap)
             const emoji_map = new Map()
-            arg.emojis?.forEach(e => emoji_map.set(e.shortcode ,e))
+            const category_map = new Map()
+            arg.emojis?.forEach(e => {
+                emoji_map.set(e.shortcode, e)
+                // カテゴリ未登録の場合新しく配列を追加
+                if (!category_map.has(e.category)) category_map.set(e.category, [])
+                category_map.get(e.category).push(e.shortcode)
+            })
             this.emoji_map = emoji_map
+            this.category_map = category_map
             this.cache_flg = true
         } else {
             // キャッシュフラグがOFF: 投稿から一時的に取得されたリモート、もしくはMastodonのカスタム絵文字
@@ -227,6 +234,121 @@ class Emojis {
         jqelm.html(replace_text)
     }
 
+    static createEmojiPaletteWindow() {
+        if ($("##singleton_emoji_window").length > 0) { // ウィンドウ作成済みの場合はフォーカスだけする
+            $("#__txt_emoji_search").focus()
+            return
+        }
+
+        // 絵文字取得対象アカウントを取得
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        const window_key = 'singleton_emoji_window'
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="emoji_window emoji_palette_section ex_window">
+                    <h2><span>カスタム絵文字(${target_account.full_address})</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_submit"/>
+                        <label for="__window_opacity_submit" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <div class="suggest_box">
+                        <div id="emoji_mode_palette" class="palette_mode active">パレット</div>
+                        <div id="emoji_mode_method" class="palette_mode">変換</div>
+                        <input type="hidden" id="__hdn_emoji_cursor" value=""/>
+                        <input type="text" id="__txt_emoji_search" class="__ignore_keyborad emoji_suggest_textbox"
+                            placeholder="ショートコードを入力するとサジェストされます"/>
+                    </div>
+                    <div class="palette_flex">
+                        <div class="suggest_option">
+                            <div class="first_option"></div>
+                            <h5>その他の候補</h5>
+                            <div class="other_option"></div>
+                        </div>
+                        <div class="recent_emoji"></div>
+                        <div class="emoji_list"></div>
+                    </div>
+                </div>
+            `,
+            color: target_account.pref.acc_color,
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
+        })
+
+        // ターゲットのアカウントのカスタム絵文字をウィンドウにバインド
+        Emojis.bindEmojiPaletteWindow(target_account)
+        $("#__txt_emoji_search").focus()
+    }
+
+    static async bindEmojiPaletteWindow(account) {
+        // ヘッダ設定
+        $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
+            .css('background-color', `#${account.pref.acc_color}`)
+        $('#singleton_emoji_window .recent_emoji').html('<h5>最近使った絵文字</h5>')
+        $('#singleton_emoji_window .emoji_list').empty()
+
+        // 絵文字一覧をバインド
+        Emojis.bindEmojiPalette(account, 'singleton_emoji_window', 'emoji')
+    }
+
+    static async bindEmojiPalette(account, target_id, type) {
+        const emojis = account.emojis
+        const history = (type == 'reaction') ? account.reaction_history : account.emoji_history
+        const event_class = (type == 'reaction') ? '__on_emoji_reaction' : '__on_emoji_append'
+
+        // 最近使った絵文字を表示
+        history.map(code => emojis.get(code)).filter(f => f).forEach(
+            emoji => $(`#${target_id} .recent_emoji`).append(`
+                <a class="${event_class}" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+            `))
+
+        // カテゴリごとに分けて絵文字をバインド
+        emojis.category_map.forEach((v, k) => {
+            const category_html = v.map(c => emojis.emoji_map.get(c)).reduce((rs, el) => `${rs}
+                <a class="${event_class}" name="${el.shortcode}"><img src="${el.url}" alt="${el.name}"/></a>
+            `, '')
+            $(`#${target_id} .emoji_list`).append(`
+                <h5>${k}</h5>
+                <div class="emoji_section" name="${k}">${category_html}</div>
+            `)
+        })
+    }
+
+    static filterEmojiPalette(target, word) {
+        if (!word) { // 空欄の場合候補を削除
+            target.find(".first_option").empty()
+            target.find(".other_option").empty()
+            return
+        }
+        const word_lower = word.toLowerCase()
+        const option = []
+        let first_option = null
+        target.find(".recent_emoji>a").each((index, elm) => { // 最近使ったものから優先して候補に出す
+            const shortcode = $(elm).attr("name").toLowerCase()
+            // 部分一致は優先して候補に出す
+            if (shortcode.match(new RegExp(word_lower, 'g'))) option.push($(elm).clone())
+        })
+        target.find(".emoji_list>.emoji_section>a").each((index, elm) => {
+            const shortcode = $(elm).attr("name").toLowerCase()
+            // 完全一致は確定候補にする
+            if (shortcode.match(new RegExp(`^:${word_lower}:$`, 'g'))) first_option = $(elm).clone()
+            else if (shortcode.match(new RegExp(word_lower, 'g'))) option.push($(elm).clone())
+        })
+
+        // 完全一致候補がない場合は先頭候補を確定にする
+        if (!first_option) first_option = option.shift()
+        // 確定候補をバインド
+        target.find(".first_option").html(first_option).append(`<div>${first_option.attr('name')}</div>`)
+        target.find(".other_option").empty()
+        if (option.length > 0) option.forEach(elm => target.find(".other_option").append(elm))
+        else target.find(".other_option").text("(他に候補がありません)")
+    }
+
     /**
      * #StaticMethod
      * カスタム絵文字サジェスターを起動する
@@ -235,12 +357,7 @@ class Emojis {
      */
     static createEmojiSuggester(target_elm) {
         // 絵文字取得対象アカウントを取得
-        let target_account = null
-        if (target_elm.is("#__txt_replyarea")) // リプライウィンドウ
-            target_account = Account.get($("#__hdn_reply_account").val())
-        else if (target_elm.is("#__txt_quotearea")) // 引用ウィンドウ
-            target_account = Account.get($("#__hdn_quote_account").val())
-        else target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
 
         // サジェスター生成時点でのカーソル位置を保持
         const suggest_pos = target_elm.get(0).selectionStart

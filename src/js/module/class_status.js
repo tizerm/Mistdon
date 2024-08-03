@@ -698,26 +698,6 @@ class Status {
             `
         }
 
-        // 投稿識別アイコン
-        if (this.reply_to) html /* リプライ/ツリーの場合 */ += `
-            <img src="resources/ic_reply.png" class="visibilityicon"/>
-        `; else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
-            // 連合なしのノートはアイコン表示(チャンネルは除外)
-            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
-        else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-            switch (this.visibility) {
-                case 'unlisted':
-                case 'home': // ホーム
-                    html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
-                    break
-                case 'private':
-                case 'followers': // フォロ限
-                    html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
-                    break
-                default:
-                    break
-            }
-        }
         // プロフィール表示の場合はユーザーアカウント情報を省略
         if (!this.profile_post_flg || this.reblog) {
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -833,6 +813,8 @@ class Status {
             const img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
             html += this.bindMediaSection(img_class)
         }
+        // 投稿属性セクション
+        html += this.attribute_section
         // 一部の通知はインプレッション数値を表示する
         if (Preference.GENERAL_PREFERENCE.enable_notified_impression
             && ['favourite', 'reblog', 'reaction', 'renote'].includes(this.notif_type)) {
@@ -1002,26 +984,6 @@ class Status {
             <div class="content">
         `
 
-        // 投稿識別アイコン
-        if (this.reply_to) html /* リプライ/ツリーの場合 */ += `
-            <img src="resources/ic_reply.png" class="visibilityicon"/>
-        `; else if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only)
-            // 連合なしのノートはアイコン表示(チャンネルは除外)
-            html += '<img src="resources/ic_local.png" class="visibilityicon"/>'
-        else { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-            switch (this.visibility) {
-                case 'unlisted':
-                case 'home': // ホーム
-                    html += '<img src="resources/ic_unlisted.png" class="visibilityicon"/>'
-                    break
-                case 'private':
-                case 'followers': // フォロ限
-                    html += '<img src="resources/ic_followers.png" class="visibilityicon"/>'
-                    break
-                default:
-                    break
-            }
-        }
         { // 投稿本文領域
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
             target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
@@ -1088,10 +1050,12 @@ class Status {
             `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
             html += '</div>'
         }
-        if (this.medias.length > 0) { // 添付メディア
+        if (this.medias.length > 0) { // メディアセクション
             const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
             html += this.bindMediaSection(img_class)
         }
+        // 投稿属性セクション
+        html += this.attribute_section
         // インプレッション(反応とリアクション)
         html += this.impression_section
         html += `
@@ -1258,8 +1222,7 @@ class Status {
                 </div>
             </div>
         `
-        // 本文よりも先にメディアを表示
-        if (this.medias.length > 0) { // 添付メディア
+        if (this.medias.length > 0) { // メディアセクション
             let img_class = 'img_grid_single'
             if (this.medias.length > 4) img_class = 'img_grid_16'
             else if (this.medias.length > 1) img_class = 'img_grid_4'
@@ -1283,6 +1246,8 @@ class Status {
                 </div>
             </div>
         `
+        // 投稿属性セクション
+        html += this.attribute_section
         // インプレッション(反応とリアクション)
         html += this.impression_section
         html /* 投稿(ステータス)日付 */ += `
@@ -1401,6 +1366,37 @@ class Status {
         return html
     }
 
+    // Getter: 投稿属性セクション
+    get attribute_section() {
+        let html = '<div class="post_attributes">'
+
+        if (this.flg_reblog) html += '<img src="resources/ic_reblog.png" class="flg_reblog"/>' // ブースト
+        if (this.flg_fav) html += '<img src="resources/ic_favorite.png" class="flg_fav"/>' // ふぁぼ
+        if (this.flg_bookmark) html += '<img src="resources/ic_bkm.png" class="flg_bookmark"/>'  // ブックマーク
+        if (this.reply_to) html += '<img src="resources/ic_rpl.png" class="flg_reply"/>' // リプライ
+        switch (this.visibility) { // 公開範囲がパブリック以外の場合は識別アイコンを配置
+            case 'unlisted':
+            case 'home': // ホーム
+                html += '<img src="resources/ic_unlisted.png" class="attr_visible"/>'
+                break
+            case 'private':
+            case 'followers': // フォロ限
+                html += '<img src="resources/ic_followers.png" class="attr_visible"/>'
+                break
+            case 'direct':
+            case 'specified': // ダイレクト
+                html += '<img src="resources/ic_direct.png" class="attr_visible"/>'
+                break
+            default:
+                break
+        }
+        if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only) // 連合なし
+            html += '<img src="resources/ic_local.png" class="flg_local"/>'
+
+        html += '</div>'
+        return html
+    }
+
     // Getter: タイムラインインプレッションセクション
     get impression_section() {
         // インプレッション表示をしない場合は無効化
@@ -1458,25 +1454,7 @@ class Status {
                     break
             }
             html += '<div class="info_section">'
-            if (this.flg_reblog) html += '<span class="bottom_info flg_reblog"><img src="resources/ic_reblog.png"/></span>'
-            if (this.flg_fav) html += '<span class="bottom_info flg_fav"><img src="resources/ic_favorite.png"/></span>'
-            if (this.flg_bookmark) html += '<span class="bottom_info flg_bookmark"><img src="resources/ic_bkm.png"/></span>'
             if (reaction_self) html += `<span class="bottom_info">${reaction_self}</span>`
-            if (this.reply_to) html += '<span class="bottom_info"><img src="resources/ic_reply.png"/></span>'
-            switch (this.visibility) { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-                case 'unlisted':
-                case 'home': // ホーム
-                    html += '<span class="bottom_info"><img src="resources/ic_unlisted.png"/></span>'
-                    break
-                case 'private':
-                case 'followers': // フォロ限
-                    html += '<span class="bottom_info"><img src="resources/ic_followers.png"/></span>'
-                    break
-                default:
-                    break
-            }
-            if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only) // 連合なし
-                html += '<span class="bottom_info"><img src="resources/ic_local.png"/></span>'
             if (this.remote_flg) html /* リモートフェッチボタンの表示 */ += `
                 <button type="button" class="__fetch_remote_impression" title="リモートインプレッション表示"
                     ><img src="resources/ic_down.png" alt="リモートインプレッション表示"/></button>
@@ -1890,17 +1868,24 @@ class Status {
     createReactionWindow() {
         // リアクションウィンドウのDOM生成
         const jqelm = $($.parseHTML(`
-            <div class="reaction_col">
+            <div class="reaction_col emoji_palette_section">
                 <h2>From ${this.from_account.full_address}</h2>
                 <div class="timeline">
                     <ul></ul>
                 </div>
-                <input type="text" id="__txt_reaction_search" class="__ignore_keyborad"
-                    placeholder="ショートコードを入力するとサジェストされます"/>
-                <div class="recent_reaction">
+                <div class="suggest_box">
+                    <input type="text" id="__txt_reaction_search" class="__ignore_keyborad emoji_suggest_textbox"
+                        placeholder="ショートコードを入力するとサジェストされます"/>
+                </div>
+                <div class="suggest_option">
+                    <div class="first_option"></div>
+                    <h5>その他の候補</h5>
+                    <div class="other_option"></div>
+                </div>
+                <div class="recent_emoji">
                     <h5>最近送ったリアクション</h5>
                 </div>
-                <div class="reaction_list">
+                <div class="emoji_list">
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
                 </div>
@@ -1910,16 +1895,12 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
-        // リアクション履歴を表示する
-        jqelm.find('.recent_reaction').append(this.from_account.recent_reaction_html)
         $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()
 
-        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.from_account.emojis.each(emoji => $("#pop_extend_column .reaction_list").append(`
-            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `)))()
+        // 絵文字一覧をバインド
+        Emojis.bindEmojiPalette(this.from_account, 'pop_extend_column', 'reaction')
     }
 
     /**
@@ -2099,6 +2080,10 @@ class Status {
         this.from_account = auth_account
         this.detail_flg = false
         scroll_tl.createLoadableTimeline(this)
+    }
+
+    openFlash() {
+        this.from_group.createFlash(this.status_key)
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
