@@ -278,6 +278,22 @@
         }
     })
 
+    /*=== Custom Emoji Palette Suggest Area Events ===============================================================*/
+
+    $(document).on("keydown", ".emoji_suggest_textbox", e => {
+        switch (e.keyCode) {
+            case 13: // Enter: 第一候補で確定
+                $(e.target).closest(".emoji_palette_section").find(".suggest_option>.first_option>a").click()
+                return false
+            case 27: // Esc: フォーカスアウト
+                $(e.target).blur()
+                $("#header>h1").click() // どっか適当なところをクリック
+                return false
+            default:
+                return
+        }
+    })
+
     /*=== Article Textarea Shortcut Key Events ===================================================================*/
 
     $(document).on("keydown", "#__txt_postarea", e => {

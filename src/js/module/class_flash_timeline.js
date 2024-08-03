@@ -81,16 +81,19 @@ class FlashTimeline {
 
     bind() {
         const post = this.current
-        // 強制的に通常表示にしてバインド
-        post.detail_flg = false
-        post.popout_flg = true
-        const elm = $(`#${this.flash_key}`).html(post.element).closest(".flash_window")
+        const elm = $(`#${this.flash_key}`).closest(".flash_window")
+        if (post) { // 投稿データが取得できた場合
+            // 強制的に通常表示にしてバインド
+            post.detail_flg = false
+            post.popout_flg = true
+            $(`#${this.flash_key}`).html(post.element)
 
-        // ページを計算してグラフ化
-        const rate = floor(((this.index + 1) / this.key_list.length) * 100, 1)
-        elm.find(".footer>.flash_page").css('background-image',
-            `linear-gradient(to right, ${post.relative_time.color} ${rate}%, #222222 ${rate}%)`)
-            .text(`${this.index + 1}/${this.key_list.length}`)
+            // ページを計算してグラフ化
+            const rate = floor(((this.index + 1) / this.key_list.length) * 100, 1)
+            elm.find(".footer>.flash_page").css('background-image',
+                `linear-gradient(to right, ${post.relative_time.color} ${rate}%, #222222 ${rate}%)`)
+        } else $(`#${this.flash_key}`).html(`<li>(表示できない投稿です)</li>`)
+        elm.find(".footer>.flash_page").text(`${this.index + 1}/${this.key_list.length}`)
 
         // インデクスによって先送りボタンを変更
         if (this.index == this.key_list.length - 1) elm.find(".timeline>.__on_flash_next").addClass("next_close")
@@ -155,7 +158,7 @@ class FlashTimeline {
         const key = target.find("ul.flash_tl").attr("id")
         const del_flash = FlashTimeline.FLASH_WINDOW_MAP.get(key)
         // 削除する前に最後に読んだキーをマップ
-        del_flash.ref_group.__flash_key = del_flash.current.status_key
+        del_flash.ref_group.__flash_key = del_flash.current?.status_key
         return FlashTimeline.FLASH_WINDOW_MAP.delete(key)
     }
 }

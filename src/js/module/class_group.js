@@ -74,8 +74,8 @@ class Group {
                         <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_group_warn"/>
                         <a class="__on_group_reload" title="グループをリロード"
                             ><img src="resources/ic_reload.png" alt="グループをリロード"/></a>
-                        <a class="__on_open_flash_last" title="最古の投稿からフラッシュウィンドウを開く"
-                            ><img src="resources/ic_flash.png" alt="最古の投稿からフラッシュウィンドウを開く"/></a>
+                        <a class="__on_open_flash_last" title="フラッシュウィンドウを開く"
+                            ><img src="resources/ic_flash.png" alt="フラッシュウィンドウを開く"/></a>
                         <a class="__on_group_top" title="トップへ移動"
                             ><img src="resources/ic_top.png" alt="トップへ移動"/></a>
                     </div>

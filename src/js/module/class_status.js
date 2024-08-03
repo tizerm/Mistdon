@@ -1868,17 +1868,24 @@ class Status {
     createReactionWindow() {
         // リアクションウィンドウのDOM生成
         const jqelm = $($.parseHTML(`
-            <div class="reaction_col">
+            <div class="reaction_col emoji_palette_section">
                 <h2>From ${this.from_account.full_address}</h2>
                 <div class="timeline">
                     <ul></ul>
                 </div>
-                <input type="text" id="__txt_reaction_search" class="__ignore_keyborad"
-                    placeholder="ショートコードを入力するとサジェストされます"/>
-                <div class="recent_reaction">
+                <div class="suggest_box">
+                    <input type="text" id="__txt_reaction_search" class="__ignore_keyborad emoji_suggest_textbox"
+                        placeholder="ショートコードを入力するとサジェストされます"/>
+                </div>
+                <div class="suggest_option">
+                    <div class="first_option"></div>
+                    <h5>その他の候補</h5>
+                    <div class="other_option"></div>
+                </div>
+                <div class="recent_emoji">
                     <h5>最近送ったリアクション</h5>
                 </div>
-                <div class="reaction_list">
+                <div class="emoji_list">
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>
                     <input type="hidden" id="__hdn_reaction_account" value="${this.from_account.full_address}"/>
                 </div>
@@ -1888,16 +1895,12 @@ class Status {
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
         jqelm.find('h2').css("background-color", `#${this.account_color}`)
         jqelm.find('.timeline>ul').append(this.element)
-        // リアクション履歴を表示する
-        jqelm.find('.recent_reaction').append(this.from_account.recent_reaction_html)
         $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         // サジェストテキストボックスにフォーカス
         $("#__txt_reaction_search").focus()
 
-        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.from_account.emojis.each(emoji => $("#pop_extend_column .reaction_list").append(`
-            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `)))()
+        // 絵文字一覧をバインド
+        Emojis.bindEmojiPalette(this.from_account, 'pop_extend_column', 'reaction')
     }
 
     /**

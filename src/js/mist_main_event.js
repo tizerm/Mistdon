@@ -172,35 +172,11 @@
 
     /**
      * #Event #Keyup
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧のサジェストテキストボックス.
+     * カスタム絵文字系のサジェストテキストボックス.
      * => カスタム絵文字をショートコードで絞り込み
      */
-    $(document).on("keyup", "#__txt_emoji_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $("#singleton_emoji_window .emoji_list *").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $("#singleton_emoji_window .emoji_list>h5, .emoji_list>.emoji_section>*").hide()
-        $(`#singleton_emoji_window .emoji_list>.emoji_section>a.__on_emoji_append[name*="${suggest}"]`).show()
-    })
-
-    /**
-     * #Event #Keyup
-     * リアクション一覧のサジェストテキストボックス.
-     * => リアクション絵文字をショートコードで絞り込み
-     */
-    $(document).on("keyup", "#__txt_reaction_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $(".reaction_list>*").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $(".reaction_list>*").hide()
-        $(`.reaction_list>a.__on_emoji_reaction[name*="${suggest}"]`).show()
-    })
+    $(document).on("keyup", ".emoji_suggest_textbox",
+        e => Emojis.filterEmojiPalette($(e.target).closest(".emoji_palette_section"), $(e.target).val()))
 
     /**
      * #Event

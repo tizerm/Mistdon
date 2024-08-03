@@ -966,7 +966,7 @@ class Account {
                     response.forEach(e => emojis.push({
                         "name": e.shortcode,
                         "shortcode": `:${e.shortcode}:`,
-                        "category": e.category ?? '(NO-CATEGORIZED)',
+                        "category": e.category ?? '[UNCATEGORIZED]',
                         "url": e.url
                     }))
                     break
@@ -995,7 +995,7 @@ class Account {
                     response.forEach(e => emojis.push({
                         "name": e.aliases[0],
                         "shortcode": `:${e.name}:`,
-                        "category": e.category ?? '(NO-CATEGORIZED)',
+                        "category": e.category ?? '[UNCATEGORIZED]',
                         "url": e.url
                     }))
                     break
