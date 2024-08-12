@@ -202,11 +202,14 @@ class Status {
                     this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
                         .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234').length
-                    const markup_content = this.content
+                    const markup_content = this.content // 投稿本文を最低限マークアップ
                         .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
                         .replace(new RegExp('>', 'g'), '&gt;')
-                        .replace(new RegExp('https?://[^ 　\n]+', 'g'), // MisskeyはURLをリンクをリンクとして展開する
-                            match => `<a href="${match}">${match}</a>`)
+                        // MFMのURL記法は文字列リンクとしてマークアップする(うまくいかんので一旦保留)
+                        //.replace(new RegExp('[?]?\[(.+?)\]\((https?://[^ ()　\n]+?)\)', 'g'),
+                        //    '<a href="$2" class="markuped_link">$1</a>')
+                        // 生URLはURLリンクとして展開(直前にマークアップしたリンクは無視)
+                        .replace(new RegExp('(?<!href=")https?://[^ ()　\n]+', 'g'), '<a href="$&">$&</a>')
                         .replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
                     this.content = `<p>${markup_content}</p>` // pでマークアップ
                 } else this.content_length = 0
@@ -1841,6 +1844,27 @@ class Status {
         $("#__hdn_reply_id").val(this.id)
         $("#post_options ul.refernce_post").html(this.element)
         enabledAdditionalAccount(false)
+
+        switch (this.visibility) { // 公開範囲に合わせてリプライの公開範囲を変更
+            case 'public': // パブリック
+                $('#post_options input[name="__opt_visibility"][value="public"]').prop('checked', true)
+                break
+            case 'unlisted':
+            case 'home': // ホーム
+                $('#post_options input[name="__opt_visibility"][value="unlisted"]').prop('checked', true)
+                break
+            case 'private':
+            case 'followers': // フォロ限
+                $('#post_options input[name="__opt_visibility"][value="followers"]').prop('checked', true)
+                break
+            case 'direct':
+            case 'specified': // ダイレクト
+                $('#post_options input[name="__opt_visibility"][value="direct"]').prop('checked', true)
+                break
+            default:
+                break
+        }
+
         // 表示後にリプライカラムのテキストボックスにフォーカスする(カーソルを末尾につける)
         $("#__txt_postarea").val(userid).focus().get(0).setSelectionRange(500, 500)
     }
@@ -1874,11 +1898,13 @@ class Status {
                     <ul></ul>
                 </div>
                 <div class="suggest_box">
+                    <input type="hidden" class="__hdn_emoji_code" value=""/>
                     <input type="text" id="__txt_reaction_search" class="__ignore_keyborad emoji_suggest_textbox"
                         placeholder="ショートコードを入力するとサジェストされます"/>
                 </div>
                 <div class="suggest_option">
                     <div class="first_option"></div>
+                    <div class="first_shortcode"></div>
                     <h5>その他の候補</h5>
                     <div class="other_option"></div>
                 </div>

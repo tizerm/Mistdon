@@ -285,12 +285,50 @@
             case 13: // Enter: 第一候補で確定
                 $(e.target).closest(".emoji_palette_section").find(".suggest_option>.first_option>a").click()
                 return false
+            case 32: // Space: 候補順送り
+                if (event.shiftKey) Emojis.iterateEmojiPalette($(e.target).closest(".emoji_palette_section"), true)
+                else Emojis.iterateEmojiPalette($(e.target).closest(".emoji_palette_section"))
+                return false
             case 27: // Esc: フォーカスアウト
                 $(e.target).blur()
                 $("#header>h1").click() // どっか適当なところをクリック
                 return false
             default:
                 return
+        }
+    })
+
+    $(document).on("keydown", ".__emoji_suggest", e => {
+        if (e.key == ':') { // 半角コロンを入力したらパレットのモードを変更
+            Emojis.toggleEmojiPaletteMode($(e.target))
+            return
+        }
+        // サジェスター停止中は以後なにもしない
+        if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+
+        if (e.key == ' ') { // スペースキー
+            // サジェスト候補になにも入れていない場合はパレットモードに戻す
+            if ($('#__txt_emoji_search').val().length == 0) {
+                Emojis.toggleEmojiPaletteMode($(e.target), true)
+                return
+            }
+
+            // 候補を送る
+            if (event.shiftKey) Emojis.iterateEmojiPalette($('#singleton_emoji_window'), true)
+            else Emojis.iterateEmojiPalette($('#singleton_emoji_window'))
+            return
+        }
+
+        if (e.key == 'Enter') { // Enterキー
+            // サジェスト候補になにも入れていない場合はパレットモードに戻す
+            if ($('#__txt_emoji_search').val().length == 0) {
+                Emojis.toggleEmojiPaletteMode($(e.target), true)
+                return
+            }
+
+            // 選択中の候補で確定
+            $("#singleton_emoji_window .suggest_option>.first_option>a.__on_emoji_append").click()
+            return false
         }
     })
 

@@ -166,37 +166,9 @@
     /**
      * #Event
      * ツールメニュー: カスタム絵文字呼び出しボタン.
-     * => カスタム絵文字一覧を表示
+     * => カスタム絵文字一覧を表示(カスタム絵文字関係のイベントは別所に記載)
      */
     $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
-
-    /**
-     * #Event #Keyup
-     * カスタム絵文字系のサジェストテキストボックス.
-     * => カスタム絵文字をショートコードで絞り込み
-     */
-    $(document).on("keyup", ".emoji_suggest_textbox",
-        e => Emojis.filterEmojiPalette($(e.target).closest(".emoji_palette_section"), $(e.target).val()))
-
-    /**
-     * #Event
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
-     * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
-     */
-    $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
-        let target = $("#__txt_postarea")
-        let target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
-        const cursor_pos = target.get(0).selectionStart
-        const target_text = target.val()
-        let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
-        // Mastodonの場合前後にスペースを入れる
-        if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
-        target.val(target_text.substring(0, cursor_pos) + target_emoji + target_text.substring(cursor_pos, target_text.length))
-        target.focus()
-
-        // 最近使った絵文字に登録
-        target_account.updateEmojiHistory(target_emoji)
-    })
 
     /**
      * #Event #Keyup
@@ -300,7 +272,7 @@
             success: () => {
                 $("#__on_reset_option").click()
                 $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
-                $("#__on_emoji_close").click()
+                $("#singleton_emoji_window .window_close_button").click()
             }
         })
         // ダイアログフラグをリセット
@@ -368,6 +340,64 @@
         content: $("#__txt_postarea").val(),
         option_obj: $("#post_options")
     }))
+
+    /*=== Custom Emoji Palette Event =============================================================================*/
+
+    /**
+     * #Event #Keyup
+     * カスタム絵文字系のサジェストテキストボックス.
+     * => カスタム絵文字をショートコードで絞り込み(変わってなかったらなにもしない)
+     */
+    $(document).on("keyup", ".emoji_suggest_textbox", e => {
+        const target = $(e.target).closest(".emoji_palette_section")
+        const word = $(e.target).val()
+        if (target.find(".__hdn_emoji_code").val() == word) return
+        Emojis.filterEmojiPalette(target, word)
+    })
+
+    /**
+     * #Event
+     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
+     * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
+     */
+    $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
+        const target_elm = $(`#${$("#__hdn_emoji_target_elm_id").val() || "__txt_postarea"}`)
+        const append_method = $('#emoji_mode_method').is('.active')
+        const cursor_pos = target_elm.get(0).selectionStart
+        const target_text = target_elm.val()
+        let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
+        if (Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).platform == 'Mastodon')
+            target_emoji = ` ${target_emoji} ` // Mastodonの場合前後にスペースを入れる
+
+        const start_pos = append_method ? $("#__hdn_emoji_cursor").val() - 1 : cursor_pos
+
+        const text_before = target_text.substring(0, start_pos) + target_emoji
+        const selection_pos = text_before.length
+        target_elm.val(text_before + target_text.substring(cursor_pos, target_text.length))
+        target_elm.get(0).selectionStart = selection_pos
+        target_elm.get(0).selectionEnd = selection_pos
+
+        // パレットモードに戻す
+        Emojis.toggleEmojiPaletteMode(target_elm, true)
+        target_elm.focus()
+    })
+
+    $(document).on("keyup", ".__emoji_suggest", e => {
+        // サジェスター停止中は以後なにもしない
+        if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+
+        // サジェスターを起動してから入力された内容を抜き出す
+        const start = $("#__hdn_emoji_cursor").val()
+        const end = e.target.selectionStart
+
+        if (start > end) { // コロンよりも前に来たらサジェスター停止
+            Emojis.toggleEmojiPaletteMode($(e.target), true)
+            return
+        }
+
+        // 入力中のコードをサジェスターに移してイベント発火
+        $('#__txt_emoji_search').val($(e.target).val().substring(start, end)).keyup()
+    })
 
     /*=== Post Option Article Area Event =========================================================================*/
 

@@ -582,60 +582,6 @@
         }
     }
 
-    /*=== Custom Emojis Suggester Layout =========================================================*/
-    > #pop_emoji_suggester {
-        display: none;
-        background-color: rgba(34,34,34,0.8);
-        border: solid 1px #cccccc;
-        border-radius: 8px;
-        z-index: 62;
-        position: absolute;
-        top: 198px;
-        left: 64px;
-        width: 360px;
-        padding: 4px;
-        > ul {
-            margin: 0px;
-            padding: 0px;
-            > li {
-                list-style-type: none;
-                > a>img {
-                    display: inline-block;
-                    vertical-align: text-bottom;
-                    height: 24px;
-                    width: auto;
-                }
-                &.__selected_emoji, &:hover {
-                    border: solid 1px #cccccc;
-                    background-color: rgba(62,82,96,0.92);
-                    border-radius: 4px;
-                }
-            }
-        }
-        > .recent_emoji_list>li {
-            padding-left: 18px;
-            background-position: top +4px left;
-            background-repeat: no-repeat;
-            background-size: 16px 16px;
-            display: inline-block;
-            &:nth-child(1) { background-image: url("../resources/1.png"); }
-            &:nth-child(2) { background-image: url("../resources/2.png"); }
-            &:nth-child(3) { background-image: url("../resources/3.png"); }
-            &:nth-child(4) { background-image: url("../resources/4.png"); }
-            &:nth-child(5) { background-image: url("../resources/5.png"); }
-            &:nth-child(6) { background-image: url("../resources/6.png"); }
-            &:nth-child(7) { background-image: url("../resources/7.png"); }
-            &:nth-child(8) { background-image: url("../resources/8.png"); }
-            &:nth-child(9) { background-image: url("../resources/9.png"); }
-        }
-        > .suggest_emoji_list {
-            height: 128px;
-            overflow-y: auto;
-            &::-webkit-scrollbar { width: 8px; }
-            > li { display: inline; }
-        }
-    }
-
     /*=== Drop Files Modal Layout ================================================================*/
     > .pop_modal {
         display: none;
@@ -1231,30 +1177,6 @@
             font-size: 18px;
             font-weight: bold;
         }
-        .recent_emoji {
-            flex-shrink: 0;
-            background-color: rgba(62,68,82,0.8);
-            border-radius: 12px;
-        }
-        .suggest_option {
-            flex-shrink: 0;
-            background-color: rgba(82,68,62,0.8);
-            border-radius: 12px;
-            > .other_option {
-                max-height: 160px;
-                overflow-y: auto;
-                &::-webkit-scrollbar { width: 8px; }
-            }
-            &:has(>.first_option:empty) { display: none; }
-        }
-        .emoji_list {
-            flex-basis: 100%;
-            flex-shrink: 1;
-            flex-grow: 1;
-            background-color: rgba(34,34,34,0.8);
-            overflow-y: auto;
-            &::-webkit-scrollbar { width: 8px; }
-        }
         .recent_emoji, .emoji_list, .suggest_option {
             & a {
                 > img {
@@ -1270,7 +1192,35 @@
                 }
             }
         }
-        .suggest_option>.first_option>a>img { height: 48px; }
+        .recent_emoji {
+            flex-shrink: 0;
+            background-color: rgba(62,68,82,0.8);
+            border-radius: 12px;
+        }
+        .suggest_option {
+            flex-shrink: 0;
+            background-color: rgba(82,68,62,0.8);
+            border-radius: 12px;
+            > .first_option>a>img { height: 48px; }
+            > .first_shortcode {
+                font-family: Arial, "メイリオ", sans-selif;
+                font-size: 18px;
+            }
+            > .other_option {
+                max-height: 160px;
+                overflow-y: auto;
+                &::-webkit-scrollbar { width: 8px; }
+            }
+            &:has(>.first_option:empty) { display: none; }
+        }
+        .emoji_list {
+            flex-basis: 100%;
+            flex-shrink: 1;
+            flex-grow: 1;
+            background-color: rgba(34,34,34,0.8);
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
+        }
     }
 
     /*=== General Mini Option Window Layout ======================================================*/
