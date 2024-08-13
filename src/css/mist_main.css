@@ -1179,13 +1179,14 @@
         }
         .recent_emoji, .emoji_list, .suggest_option {
             & a {
+                display: inline-block;
                 > img {
                     display: inline-block;
                     height: 32px;
                     width: auto;
                     vertical-align: text-bottom;
                 }
-                &:hover>img {
+                &:hover {
                     background-color: rgba(255,255,255,0.2);
                     filter: brightness(130%);
                     cursor: pointer;
@@ -1196,6 +1197,23 @@
             flex-shrink: 0;
             background-color: rgba(62,68,82,0.8);
             border-radius: 12px;
+            > .recent_emoji_list>a {
+                &:nth-child(-n+9) {
+                    padding-left: 20px;
+                    background-position: top +6px left;
+                    background-repeat: no-repeat;
+                    background-size: 18px 18px;
+                }
+                &:nth-child(1) { background-image: url("../resources/1.png"); }
+                &:nth-child(2) { background-image: url("../resources/2.png"); }
+                &:nth-child(3) { background-image: url("../resources/3.png"); }
+                &:nth-child(4) { background-image: url("../resources/4.png"); }
+                &:nth-child(5) { background-image: url("../resources/5.png"); }
+                &:nth-child(6) { background-image: url("../resources/6.png"); }
+                &:nth-child(7) { background-image: url("../resources/7.png"); }
+                &:nth-child(8) { background-image: url("../resources/8.png"); }
+                &:nth-child(9) { background-image: url("../resources/9.png"); }
+            }
         }
         .suggest_option {
             flex-shrink: 0;

@@ -1278,7 +1278,8 @@ class Account {
      */
     updateEmojiHistory(code) {
         // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
-        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 9)
+        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(),
+            Number(Preference.GENERAL_PREFERENCE.reaction_history_limit))
     }
 
     /**

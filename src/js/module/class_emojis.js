@@ -263,7 +263,7 @@ class Emojis {
                         <input type="hidden" id="__hdn_emoji_target_elm_id" value=""/>
                         <input type="hidden" class="__hdn_emoji_code" value=""/>
                         <input type="text" id="__txt_emoji_search" class="__ignore_keyborad emoji_suggest_textbox"
-                            placeholder="ショートコードを入力するとサジェストされます"/>
+                            tabindex="3" placeholder="ショートコードを入力するとサジェストされます"/>
                     </div>
                     <div class="palette_flex">
                         <div class="suggest_option">
@@ -272,7 +272,10 @@ class Emojis {
                             <h5>その他の候補</h5>
                             <div class="other_option"></div>
                         </div>
-                        <div class="recent_emoji"></div>
+                        <div class="recent_emoji">
+                            <h5>最近使った絵文字</h5>
+                            <div class="recent_emoji_list"></div>
+                        </div>
                         <div class="emoji_list"></div>
                     </div>
                 </div>
@@ -313,7 +316,7 @@ class Emojis {
         // ヘッダ設定
         $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
             .css('background-color', `#${account.pref.acc_color}`)
-        $('#singleton_emoji_window .recent_emoji').html('<h5>最近使った絵文字</h5>')
+        $('#singleton_emoji_window .recent_emoji>.recent_emoji_list').empty()
         $('#singleton_emoji_window .emoji_list').empty()
 
         // 絵文字一覧をバインド
@@ -327,7 +330,7 @@ class Emojis {
 
         // 最近使った絵文字を表示
         history.map(code => emojis.get(code)).filter(f => f).forEach(
-            emoji => $(`#${target_id} .recent_emoji`).append(`
+            emoji => $(`#${target_id} .recent_emoji>.recent_emoji_list`).append(`
                 <a class="${event_class}" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
             `))
 
@@ -353,7 +356,7 @@ class Emojis {
         const word_lower = word.toLowerCase()
         const option = []
         let first_option = null
-        target.find(".recent_emoji>a").each((index, elm) => { // 最近使ったものから優先して候補に出す
+        target.find(".recent_emoji a").each((index, elm) => { // 最近使ったものから優先して候補に出す
             const shortcode = $(elm).attr("name").toLowerCase()
             // 部分一致は優先して候補に出す
             if (shortcode.match(new RegExp(word_lower, 'g'))) option.push($(elm).clone())

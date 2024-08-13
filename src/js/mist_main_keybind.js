@@ -261,19 +261,12 @@
                 gp.next.setCursor()
                 return false
             default:
-                // 1～9(+テンキー): カラムの表示をトグル
-                const key_num = 49 <= e.keyCode && e.keyCode <= 57
-                const ten_num = 97 <= e.keyCode && e.keyCode <= 105
-                if (key_num || ten_num) {
-                    let number = null
-                    if (key_num) number = e.keyCode - 48 // キーボードの数字キー
-                    else if (ten_num) number = e.keyCode - 96 // テンキー
-
+                numKeyEvent(e, num => { // 1～9(+テンキー): カラムの表示をトグル
                     Column.disposeCursor()
-                    col = Column.get(number - 1)
+                    col = Column.get(num - 1)
                     if (col.toggle()) col.setCursor() // 開いた
                     else Column.getOpenedFirst().setCursor() // 閉じた
-                }
+                })
                 break
         }
     })
@@ -294,43 +287,51 @@
                 $("#header>h1").click() // どっか適当なところをクリック
                 return false
             default:
+                // Ctrl+1～9(+テンキー): 候補にある最近使った絵文字で確定
+                if ((event.ctrlKey || event.metaKey) && numKeyEvent(e,
+                    num => $(e.target).closest(".emoji_palette_section").find(`.recent_emoji>.recent_emoji_list>a:nth-child(${num})`).click())) return false
                 return
         }
     })
 
-    $(document).on("keydown", ".__emoji_suggest", e => {
-        if (e.key == ':') { // 半角コロンを入力したらパレットのモードを変更
-            Emojis.toggleEmojiPaletteMode($(e.target))
-            return
-        }
-        // サジェスター停止中は以後なにもしない
-        if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) // 変換モードが有効のときにイベント定義
+        $(document).on("keydown", ".__emoji_suggest", e => {
+            if (e.key == ':') { // 半角コロンを入力したらパレットのモードを変更
+                Emojis.toggleEmojiPaletteMode($(e.target))
+                return
+            }
+            // サジェスター停止中は以後なにもしない
+            if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
 
-        if (e.key == ' ') { // スペースキー
-            // サジェスト候補になにも入れていない場合はパレットモードに戻す
-            if ($('#__txt_emoji_search').val().length == 0) {
-                Emojis.toggleEmojiPaletteMode($(e.target), true)
+            if (e.key == ' ') { // スペースキー
+                // サジェスト候補になにも入れていない場合はパレットモードに戻す
+                if ($('#__txt_emoji_search').val().length == 0) {
+                    Emojis.toggleEmojiPaletteMode($(e.target), true)
+                    return
+                }
+
+                // 候補を送る
+                if (event.shiftKey) Emojis.iterateEmojiPalette($('#singleton_emoji_window'), true)
+                else Emojis.iterateEmojiPalette($('#singleton_emoji_window'))
                 return
             }
 
-            // 候補を送る
-            if (event.shiftKey) Emojis.iterateEmojiPalette($('#singleton_emoji_window'), true)
-            else Emojis.iterateEmojiPalette($('#singleton_emoji_window'))
-            return
-        }
+            if (e.key == 'Enter') { // Enterキー
+                // サジェスト候補になにも入れていない場合はパレットモードに戻す
+                if ($('#__txt_emoji_search').val().length == 0) {
+                    Emojis.toggleEmojiPaletteMode($(e.target), true)
+                    return
+                }
 
-        if (e.key == 'Enter') { // Enterキー
-            // サジェスト候補になにも入れていない場合はパレットモードに戻す
-            if ($('#__txt_emoji_search').val().length == 0) {
-                Emojis.toggleEmojiPaletteMode($(e.target), true)
-                return
+                // 選択中の候補で確定
+                $("#singleton_emoji_window .suggest_option>.first_option>a.__on_emoji_append").click()
+                return false
             }
 
-            // 選択中の候補で確定
-            $("#singleton_emoji_window .suggest_option>.first_option>a.__on_emoji_append").click()
-            return false
-        }
-    })
+            // Ctrl+1～9(+テンキー): 候補にある最近使った絵文字で確定
+            if ((event.ctrlKey || event.metaKey) && numKeyEvent(e,
+                num => $(`#singleton_emoji_window .recent_emoji>.recent_emoji_list>a.__on_emoji_append:nth-child(${num})`).click())) return false
+        })
 
     /*=== Article Textarea Shortcut Key Events ===================================================================*/
 
@@ -393,20 +394,12 @@
                     }
                     break
                 default:
-                    // Alt+1～9(+テンキー): N番目のアカウントに切り替え
-                    const key_num = 49 <= e.keyCode && e.keyCode <= 57
-                    const ten_num = 97 <= e.keyCode && e.keyCode <= 105
-                    if (key_num || ten_num) {
-                        let number = null
-                        if (key_num) number = e.keyCode - 48 // キーボードの数字キー
-                        else if (ten_num) number = e.keyCode - 96 // テンキー
-
-                        element = $('#header>#post_options input.__chk_add_account+label').eq(number - 1)
+                    if (numKeyEvent(e, num => { // Alt+1～9(+テンキー): N番目のアカウントに切り替え
+                        element = $('#header>#post_options input.__chk_add_account+label').eq(num - 1)
                         // Ctrl+Alt+1～9(+テンキー): 追加アカウントをトグル
                         if (is_control) element.click()
                         else element.dblclick()
-                        return false
-                    }
+                    })) return false
                     break
             }
         } else {
@@ -448,3 +441,15 @@
     })
 })
 
+function numKeyEvent(e, callback) {
+    const key_num = 49 <= e.keyCode && e.keyCode <= 57
+    const ten_num = 97 <= e.keyCode && e.keyCode <= 105
+    if (key_num || ten_num) {
+        let number = null
+        if (key_num) number = e.keyCode - 48 // キーボードの数字キー
+        else if (ten_num) number = e.keyCode - 96 // テンキー
+        callback(number)
+        return true
+    }
+    return false
+}

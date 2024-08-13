@@ -1900,7 +1900,7 @@ class Status {
                 <div class="suggest_box">
                     <input type="hidden" class="__hdn_emoji_code" value=""/>
                     <input type="text" id="__txt_reaction_search" class="__ignore_keyborad emoji_suggest_textbox"
-                        placeholder="ショートコードを入力するとサジェストされます"/>
+                        tabindex="4" placeholder="ショートコードを入力するとサジェストされます"/>
                 </div>
                 <div class="suggest_option">
                     <div class="first_option"></div>
@@ -1910,6 +1910,7 @@ class Status {
                 </div>
                 <div class="recent_emoji">
                     <h5>最近送ったリアクション</h5>
+                    <div class="recent_emoji_list"></div>
                 </div>
                 <div class="emoji_list">
                     <input type="hidden" id="__hdn_reaction_id" value="${this.id}"/>

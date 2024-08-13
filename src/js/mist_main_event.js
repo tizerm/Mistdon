@@ -362,42 +362,54 @@
      */
     $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
         const target_elm = $(`#${$("#__hdn_emoji_target_elm_id").val() || "__txt_postarea"}`)
-        const append_method = $('#emoji_mode_method').is('.active')
         const cursor_pos = target_elm.get(0).selectionStart
         const target_text = target_elm.val()
         let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
-        if (Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).platform == 'Mastodon')
-            target_emoji = ` ${target_emoji} ` // Mastodonの場合前後にスペースを入れる
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        // Mastodonの場合前後にスペースを入れる
+        if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
 
-        const start_pos = append_method ? $("#__hdn_emoji_cursor").val() - 1 : cursor_pos
+        // 挿入モードで文字の切り出し位置を変える
+        const start_pos = $('#emoji_mode_method').is('.active')
+            ? $("#__hdn_emoji_cursor").val() - 1 : cursor_pos
 
+        // 入力中の文章中にカスタム絵文字コードを挿入してカーソル位置を調整
         const text_before = target_text.substring(0, start_pos) + target_emoji
         const selection_pos = text_before.length
         target_elm.val(text_before + target_text.substring(cursor_pos, target_text.length))
         target_elm.get(0).selectionStart = selection_pos
         target_elm.get(0).selectionEnd = selection_pos
 
-        // パレットモードに戻す
+        // 最近使用した絵文字に登録してパレットモードに戻す
+        target_account.updateEmojiHistory(target_emoji)
         Emojis.toggleEmojiPaletteMode(target_elm, true)
         target_elm.focus()
     })
 
-    $(document).on("keyup", ".__emoji_suggest", e => {
-        // サジェスター停止中は以後なにもしない
-        if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) { // 変換モードが有効のときにイベント定義
 
-        // サジェスターを起動してから入力された内容を抜き出す
-        const start = $("#__hdn_emoji_cursor").val()
-        const end = e.target.selectionStart
+        $(document).on("keyup", ".__emoji_suggest", e => {
+            // サジェスター停止中は以後なにもしない
+            if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
 
-        if (start > end) { // コロンよりも前に来たらサジェスター停止
+            // サジェスターを起動してから入力された内容を抜き出す
+            const start = $("#__hdn_emoji_cursor").val()
+            const end = e.target.selectionStart
+
+            if (start > end) { // コロンよりも前に来たらサジェスター停止
+                Emojis.toggleEmojiPaletteMode($(e.target), true)
+                return
+            }
+
+            // 入力中のコードをサジェスターに移してイベント発火
+            $('#__txt_emoji_search').val($(e.target).val().substring(start, end)).keyup()
+        })
+
+        $(document).on("blur", ".__emoji_suggest", e => {
+            console.log(e)
             Emojis.toggleEmojiPaletteMode($(e.target), true)
-            return
-        }
-
-        // 入力中のコードをサジェスターに移してイベント発火
-        $('#__txt_emoji_search').val($(e.target).val().substring(start, end)).keyup()
-    })
+        })
+    }
 
     /*=== Post Option Article Area Event =========================================================================*/
 
