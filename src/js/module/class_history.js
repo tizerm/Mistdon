@@ -44,7 +44,7 @@ class History {
         $("#pop_ex_timeline").html(`
             <h2>送信履歴</h2>
             <div class="history_timeline">
-                <div class="reaction_history">
+                <div class="reaction_history history_grid">
                     <div class="col_head">
                         <h3>アクティビティ履歴</h3>
                     </div>
@@ -56,7 +56,7 @@ class History {
                         <ul class="__context_posts"></ul>
                     </div>
                 </div>
-                <div class="post_history">
+                <div class="post_history history_grid">
                     <div class="col_head">
                         <h3>投稿履歴</h3>
                     </div>
@@ -264,15 +264,15 @@ class History {
     static async delete(target) {
         const index = target.closest("li").index()
         try {
-            if (target.closest("td").is(".reaction_history")) { // アクティビティ履歴
+            if (target.closest(".history_grid").is(".reaction_history")) { // アクティビティ履歴
                 await History.activity_stack[index].undo()
 
                 History.activity_stack.splice(index, 1)
-            } else { // 投稿履歴
+            } else if (target.closest(".history_grid").is(".post_history")) { // 投稿履歴
                 await History.post_stack[index].post.delete()
 
                 History.post_stack.splice(index, 1)
-            }
+            } else throw new Error('Invalid DOM Error.') // 一致しないとエラー
             History.writeJson()
             target.closest("li").remove()
         } catch (err) {
