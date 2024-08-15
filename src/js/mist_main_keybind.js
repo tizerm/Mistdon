@@ -441,6 +441,13 @@
     })
 })
 
+/**
+ * #Event #jQuery
+ * キーイベントでナンバーキーが押された場合のイベント定義
+ * 
+ * @param e イベントオブジェクト
+ * @param callback イベント発火時に実行数するコールバック関数(引数は番号)
+ */
 function numKeyEvent(e, callback) {
     const key_num = 49 <= e.keyCode && e.keyCode <= 57
     const ten_num = 97 <= e.keyCode && e.keyCode <= 105

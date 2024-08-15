@@ -426,6 +426,10 @@ class Group {
         this.onLoadTimeline(rest_promises)
     }
 
+    /**
+     * #Method
+     * グループ内の指定したステータスキーを起点にしてフラッシュウィンドウを生成する.
+     */
     createFlash(key) {
         const flash = new FlashTimeline(this, key)
         flash.createWindow()

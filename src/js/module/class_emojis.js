@@ -234,6 +234,10 @@ class Emojis {
         jqelm.html(replace_text)
     }
 
+    /**
+     * #StaticMethod
+     * 現在選択されている投稿先のアカウントでカスタム絵文字パレットウィンドウを生成する.
+     */
     static createEmojiPaletteWindow() {
         if ($("#singleton_emoji_window").length > 0) { // ウィンドウ作成済みの場合はフォーカスだけする
             $("#__txt_emoji_search").focus()
@@ -291,6 +295,13 @@ class Emojis {
         $("#__txt_emoji_search").focus()
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字パレットの入力モードをトグルする.
+     * 
+     * @param target_elm パレット入力対象のフォームDOM Element
+     * @param force_close 変換モードを強制的に終了する場合はtrue
+     */
     static toggleEmojiPaletteMode(target_elm, force_close) {
         // パレットが起動していない場合はパレットを先に起動
         if (!force_close && $('#singleton_emoji_window').length == 0) Emojis.createEmojiPaletteWindow()
@@ -312,6 +323,12 @@ class Emojis {
         }
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字パレットウィンドウの内容を対象のアカウントで書き換える.
+     * 
+     * @param account 書き換え対象のアカウント
+     */
     static async bindEmojiPaletteWindow(account) {
         // ヘッダ設定
         $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
@@ -323,6 +340,14 @@ class Emojis {
         Emojis.bindEmojiPalette(account, 'singleton_emoji_window', 'emoji')
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字パレットの内容を対象のアカウントで書き換える(汎用版メソッド).
+     * 
+     * @param account 書き換え対象のアカウント
+     * @param target_id 書き換え対象のパレットウィンドウのDOM ID
+     * @param type パレットタイプ(絵文字アペンドかリアクションか)
+     */
     static async bindEmojiPalette(account, target_id, type) {
         const emojis = account.emojis
         const history = (type == 'reaction') ? account.reaction_history : account.emoji_history
@@ -346,6 +371,13 @@ class Emojis {
         })
     }
 
+    /**
+     * #StaticMethod
+     * カスタム絵文字パレットの内容を入力された検索コードでしぼる.
+     * 
+     * @param target 書き換え対象のパレットウィンドウのDOMオブジェクト
+     * @param word 入力中の検索コード
+     */
     static filterEmojiPalette(target, word) {
         target.find(".__hdn_emoji_code").val(word)
         if (!word) { // 空欄の場合候補を削除
@@ -389,6 +421,13 @@ class Emojis {
         else target.find(".other_option").text("(他に候補がありません)")
     }
 
+    /**
+     * #StaticMethod
+     * 現在確定対象候補になっているカスタム絵文字から前後の候補に移動する.
+     * 
+     * @param target 書き換え対象のパレットウィンドウのDOMオブジェクト
+     * @param decrement 前に移動する場合はtrue
+     */
     static iterateEmojiPalette(target, decrement) {
         const current = target.find(".first_option>a").attr('name')
         const elm = target.find(`.other_option>a[name="${current}"]`)

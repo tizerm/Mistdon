@@ -32,6 +32,10 @@ class FlashTimeline {
     static FLASH_WINDOW_MAP = new Map()
     static CURRENT_WINDOW = null
 
+    /**
+     * #Method
+     * このフラッシュオブジェクトでフラッシュウィンドウを生成.
+     */
     createWindow() {
         // 既に開いているウィンドウを削除
         $("#pop_multi_window>.flash_window>.window_buttons>.window_close_button").click()
@@ -79,6 +83,10 @@ class FlashTimeline {
     // Getter: 現在のステータス
     get current() { return this.status_map.get(this.key_list[this.index]) }
 
+    /**
+     * #Method
+     * 現在のステータスをフラッシュウィンドウにDOMバインド.
+     */
     bind() {
         const post = this.current
         const elm = $(`#${this.flash_key}`).closest(".flash_window")
@@ -102,6 +110,10 @@ class FlashTimeline {
             .find("img").attr("src", "resources/ic_right.png")
     }
 
+    /**
+     * #Method
+     * このフラッシュのステータスカウントを次に送る(次がない場合はウィンドウを閉じる).
+     */
     next() {
         // 最終投稿で送ろうとした場合は画面を閉じる
         if (this.index == this.key_list.length - 1) {
@@ -113,12 +125,22 @@ class FlashTimeline {
         return this
     }
 
+    /**
+     * #Method
+     * このフラッシュのステータスカウントを前に戻す.
+     */
     prev() {
         if (this.index > 0) this.index--
         this.__key = null
         return this
     }
 
+    /**
+     * #Method
+     * このフラッシュのステータスカウントを指定したカウントだけ飛ばす.
+     * 
+     * @param count 飛ばすカウント数
+     */
     step(count) {
         this.index += count
         if (this.index >= this.key_list.length) this.index = this.key_list.length - 1
@@ -127,6 +149,7 @@ class FlashTimeline {
         return this
     }
 
+    // TODO: 試験機能につきコメントアウト
     /*
     typeIndex(key) {
         // 前回入力値があってインデクスを超えていない場合は続けてインデクス化
@@ -140,7 +163,7 @@ class FlashTimeline {
 
     /**
      * #StaticMethod
-     * ローカルにキャッシュされているタイムラインウィンドウオブジェクトを取得する.
+     * ローカルにキャッシュされているフラッシュウィンドウオブジェクトを取得する.
      * 
      * @param target 取得対象のターゲットDOM
      */
@@ -150,7 +173,7 @@ class FlashTimeline {
 
     /**
      * #StaticMethod
-     * ローカルにキャッシュされているタイムラインウィンドウオブジェクトを削除する.
+     * ローカルにキャッシュされているフラッシュウィンドウオブジェクトを削除する.
      * 
      * @param target 取得対象のターゲットDOM
      */

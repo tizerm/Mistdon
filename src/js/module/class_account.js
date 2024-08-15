@@ -1139,6 +1139,10 @@ class Account {
         }
     }
 
+    /**
+     * #Method #Ajax #jQuery
+     * このアカウントに登録されているアンテナ一覧を取得する(Misskey専用)
+     */
     async getAntennas() {
         try {
             const response = await $.ajax({

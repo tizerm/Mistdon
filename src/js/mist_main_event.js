@@ -357,7 +357,7 @@
 
     /**
      * #Event
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
+     * カスタム絵文字パレット: カスタム絵文字一覧の絵文字.
      * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
      */
     $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
@@ -386,8 +386,13 @@
         target_elm.focus()
     })
 
-    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) { // 変換モードが有効のときにイベント定義
-
+    // カスタム絵文字パレットの変換モードが有効の場合は以下のイベントを定義
+    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) {
+        /**
+         * #Event #Keyup
+         * カスタム絵文字の変換対象フォームでキーアップ.
+         * => カスタム絵文字パレットを開いて:以降の入力コードをサジェストテキストボックスにトレースする
+         */
         $(document).on("keyup", ".__emoji_suggest", e => {
             // サジェスター停止中は以後なにもしない
             if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
@@ -405,6 +410,11 @@
             $('#__txt_emoji_search').val($(e.target).val().substring(start, end)).keyup()
         })
 
+        /**
+         * #Event #Blur
+         * カスタム絵文字の変換対象フォームでフォーカスアウト.
+         * => TODO: まだ挙動が正確に決まってない
+         */
         $(document).on("blur", ".__emoji_suggest", e => {
             console.log(e)
             Emojis.toggleEmojiPaletteMode($(e.target), true)
@@ -655,6 +665,11 @@
     $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
+    /**
+     * #Event
+     * グループボタン: フラッシュ.
+     * => 対象グループで最後にフラッシュした投稿でフラッシュウィンドウを開く(ない場合は最古の投稿)
+     */
     $(document).on("click", ".__on_open_flash_last", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).createFlash())
 
@@ -1005,6 +1020,10 @@
      */
     $(document).on("click", ".__short_prepost", e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
 
+    /**
+     * #Event
+     * 簡易アクションバー: ここからフラッシュする.
+     */
     $(document).on("click", ".__short_flash", e => Status.TEMPORARY_ACTION_STATUS.openFlash())
 
     /**
@@ -1356,6 +1375,10 @@
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
 
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: ここからフラッシュする.
+     */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_flash",
         e => Status.TEMPORARY_CONTEXT_STATUS.openFlash())
 
@@ -1474,9 +1497,19 @@
         $(e.target).closest(".ex_window").addClass('active')
     })
 
+    /**
+     * #Event
+     * フラッシュウィンドウ: 次へボタン.
+     * => 次の投稿を表示する(次がない場合は閉じる)
+     */
     $(document).on("click", ".__on_flash_next",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind())
 
+    /**
+     * #Event
+     * フラッシュウィンドウ: 前へボタン.
+     * => 前の投稿を表示する
+     */
     $(document).on("click", ".__on_flash_prev",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 

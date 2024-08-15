@@ -2109,6 +2109,10 @@ class Status {
         scroll_tl.createLoadableTimeline(this)
     }
 
+    /**
+     * #Method
+     * この投稿が存在するグループのフラッシュウィンドウをこの投稿から開く.
+     */
     openFlash() {
         this.from_group.createFlash(this.status_key)
     }
