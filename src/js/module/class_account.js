@@ -195,6 +195,9 @@ class Account {
 
         // 投稿先メニューを生成
         this.createPostToMenu()
+
+        // カスタム絵文字パレットが表示されている場合はパレットを切り替える
+        if ($('#singleton_emoji_window').is(':visible')) Emojis.bindEmojiPaletteWindow(this)
     }
 
     /**
@@ -959,9 +962,11 @@ class Account {
                         url: `https://${this.pref.domain}/api/v1/custom_emojis`,
                         dataType: "json"
                     })
+
                     response.forEach(e => emojis.push({
                         "name": e.shortcode,
                         "shortcode": `:${e.shortcode}:`,
+                        "category": e.category ?? '[UNCATEGORIZED]',
                         "url": e.url
                     }))
                     break
@@ -986,9 +991,11 @@ class Account {
                             else return Promise.reject('not exist emojis in /api/meta.')
                         })
                     ])
+
                     response.forEach(e => emojis.push({
                         "name": e.aliases[0],
                         "shortcode": `:${e.name}:`,
+                        "category": e.category ?? '[UNCATEGORIZED]',
                         "url": e.url
                     }))
                     break
@@ -1134,8 +1141,36 @@ class Account {
 
     /**
      * #Method #Ajax #jQuery
+     * このアカウントに登録されているアンテナ一覧を取得する(Misskey専用)
+     */
+    async getAntennas() {
+        try {
+            const response = await $.ajax({
+                type: "POST",
+                url: `https://${this.pref.domain}/api/antennas/list`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({ "i": this.pref.access_token })
+            })
+            // アンテナを作っていない場合はreject
+            if (response.length == 0) return Promise.reject('empty')
+            const antennas = []
+            response.forEach(a => antennas.push({
+                "name": a.name,
+                "id": a.id
+            }))
+            return antennas
+        } catch (err) {
+            console.log(err)
+            return Promise.reject(err)
+        }
+    }
+
+    /**
+     * #Method #Ajax #jQuery
      * このアカウントが作成したクリップ一覧を取得する(Misskey専用)
      */
+    /*
     async getClips() {
         try {
             const response = await $.ajax({
@@ -1153,7 +1188,7 @@ class Account {
             console.log(err)
             return Promise.reject(err)
         }
-    }
+    }//*/
 
     /**
      * #Method #Ajax
@@ -1247,7 +1282,8 @@ class Account {
      */
     updateEmojiHistory(code) {
         // 絵文字履歴の更新を試行して、変更があったら一旦変更フラグを立てる
-        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(), 9)
+        this.use_emoji_flg = shiftArray(this.emoji_history, code.trim(),
+            Number(Preference.GENERAL_PREFERENCE.reaction_history_limit))
     }
 
     /**
@@ -1270,40 +1306,6 @@ class Account {
             <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
         `)
         return html
-    }
-
-    /**
-     * #Method
-     * このアカウントのサーバーのカスタム絵文字リストのDOMを生成して表示する
-     */
-    createEmojiList() {
-        $("#pop_custom_emoji").html(`
-            <div class="palette_block">
-                <div class="emoji_head">
-                    <h2>カスタム絵文字一覧</h2>
-                    <h3>${this.pref.domain}</h3>
-                </div>
-                <input type="text" id="__txt_emoji_search" class="__ignore_keyborad"
-                    placeholder="ショートコードを入力するとサジェストされます"/>
-                <div class="recent_emoji">
-                    <h5>最近使った絵文字</h5>
-                </div>
-                <div class="emoji_list">
-                </div>
-                <button type="button" id="__on_emoji_close" class="close_button">×</button>
-            </div>
-        `).show(...Preference.getAnimation("SLIDE_LEFT"))
-        // 絵文字履歴を表示する
-        this.emoji_history.map(code => this.emojis.get(code)).filter(f => f).forEach(
-            emoji => $("#pop_custom_emoji .recent_emoji").append(`
-                <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `))
-        $("#pop_custom_emoji .emoji_head").css("background-color", `#${this.pref.acc_color}`)
-
-        // 一度枠組みを表示してから非同期で絵文字一覧を動的に表示してく
-        ;(async () => this.emojis.each(emoji => $("#pop_custom_emoji .emoji_list").append(`
-            <a class="__on_emoji_append" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
-            `)))()
     }
 
     /**

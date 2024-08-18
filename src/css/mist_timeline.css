@@ -27,6 +27,10 @@
             border-radius: 18px;
         }
     }
+    .col_action img {
+        width: 32px;
+        height: 32px;
+    }
     .col_action>a:hover>img,
     .gp_action>a:hover>img {
         border-radius: 8px;
@@ -193,7 +197,7 @@
                     > h6 {
                         position: absolute;
                         top: 3px;
-                        right: 68px;
+                        right: 88px;
                         font-weight: normal;
                         font-size: 12px;
                     }
@@ -273,14 +277,6 @@
                 margin: -8px -12px 6px;
                 font-size: 12px;
                 text-align: right;
-            }
-            > .visibilityicon {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                width: 36px;
-                height: 36px;
-                opacity: 0.2;
             }
 
             /*=== User Info ======================================================================*/
@@ -577,6 +573,28 @@
                 }
             }
 
+            /*=== Attributes Info ================================================================*/
+            > .post_attributes {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                border-radius: 8px;
+                background-color: transparent;
+                opacity: 0.35;
+                transition: opacity 0.2s;
+                &:empty { display: none; }
+                > img {
+                    width: 28px;
+                    height: 28px;
+                    margin: 0px 2px;
+                    vertical-align: text-bottom;
+                }
+                &:hover {
+                    background-color: rgba(31,31,31,0.683);
+                    opacity: 1.0;
+                }
+            }
+
             /*=== Impressions Info ===============================================================*/
             > .impressions {
                 position: relative;
@@ -616,15 +634,6 @@
                     bottom: 0px;
                     right: 0px;
                     &:empty { display: none; }
-                    .flg_reblog {
-                        filter: brightness(80%) sepia(100%) hue-rotate(45deg) saturate(200%);
-                    }
-                    .flg_fav {
-                        filter: brightness(80%) sepia(100%) saturate(200%);
-                    }
-                    .flg_bookmark {
-                        filter: brightness(50%) sepia(100%) hue-rotate(330deg) saturate(300%);
-                    }
                 }
                 .__fetch_remote_impression+.__tooltip {
                     display: none;
@@ -848,14 +857,6 @@
                     }
                 }
             }
-            .visibilityicon {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                width: 32px;
-                height: 32px;
-                opacity: 0.2;
-            }
             > .content {
                 position: relative;
                 left: 34px;
@@ -916,11 +917,9 @@
             }
         }
         > li.chat_timeline.self_post {
-            .usericon {
-                left: auto;
-                right: 0px;
-            }
+            .usericon { left: auto; right: 0px; }
             .content { left: 0px; }
+            > .post_attributes { right: 34px; }
         }
 
         /*=== List Layout Style ==================================================================*/
@@ -1156,6 +1155,7 @@
             background-image: url("../resources/ic_top.png");
             background-position: center left;
             background-repeat: no-repeat;
+            background-size: 24px 24px;
             background-color: #415687;
             border-radius: 16px;
             font-size: 16px;
@@ -1182,6 +1182,7 @@
             background-size: 32px 32px;
             padding-right: 42px;
         }
+        > li:not(.chat_timeline):has(>.label_head.label_reblog)>.post_attributes { top: 24px; }
     }
     &.tl_group_box ul {
         border-left: solid 4px #cccccc;

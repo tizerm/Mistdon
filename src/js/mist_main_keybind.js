@@ -29,6 +29,64 @@
             }
         }
 
+        /*=== Flash Window Shortcut Key Event ====================================================================*/
+
+        if ($(".flash_window").is(":visible")) {
+            const current_status = FlashTimeline.CURRENT_WINDOW.current
+            switch (e.keyCode) {
+                case 65:
+                case 37: // a, <-: 前に戻る
+                    FlashTimeline.CURRENT_WINDOW.prev().bind()
+                    return false
+                case 68:
+                case 39: // d, ->
+                case 13: // Enter: 次に送る
+                    FlashTimeline.CURRENT_WINDOW.next().bind()
+                    return false
+                case 87:
+                case 38: // w, ↑: 次に10送る
+                    FlashTimeline.CURRENT_WINDOW.step(10).bind()
+                    return false
+                case 83:
+                case 40: // s, ↓: 前に10戻る
+                    FlashTimeline.CURRENT_WINDOW.step(-10).bind()
+                    return false
+                case 77: // m: リプライ
+                    current_status.from_account.reaction('__menu_reply', null, current_status)
+                    return false
+                case 73: // i: 引用
+                    current_status.from_account.reaction('__menu_quote', null, current_status)
+                    return false
+                case 82: // r: ブースト/リノート
+                    current_status.from_account.reaction('__menu_reblog', null, current_status)
+                    return false
+                case 70: // f: お気に入り
+                    current_status.from_account.reaction('__menu_favorite', null, current_status)
+                    return false
+                case 66: // b: ブックマーク
+                    current_status.from_account.reaction('__menu_bookmark', null, current_status)
+                    return false
+                case 69: // e: リアクション
+                    current_status.from_account.reaction('__menu_reaction', null, current_status)
+                    return false
+                case 80: // p: メディアを開く
+                    $(`#${FlashTimeline.CURRENT_WINDOW.flash_key} .__on_media_expand:first-child`).click()
+                    return false
+                case 79: // o: CWを開閉する
+                    $(`#${FlashTimeline.CURRENT_WINDOW.flash_key} .expand_header`).click()
+                    return false
+                case 85: // u: ブラウザで開く
+                    window.accessApi.openExternalBrowser(current_status.uri)
+                    return false
+                case 46: // Del
+                case 81: // q: 今すぐ閉じる
+                    $("#pop_multi_window>.flash_window>.window_buttons>.window_close_button").click()
+                    return false
+                default:
+                    break
+            }
+        }
+
         /*=== Main Window Shortcut Key Event =====================================================================*/
 
         let col = null
@@ -68,12 +126,13 @@
                     return false
                 }
                 break
-            case 84: // Ctrl+T: 直前の投稿につなげる
-                if (is_control) {
+            case 84: // t: カーソルグループでフラッシュウィンドウを開く
+                if (is_control) { // Ctrl+T: 直前の投稿につなげる
                     $("#__on_last_replychain").click()
                     return false
                 }
-                break
+                Group.getCursor().createFlash()
+                return false
             case 69: // Ctrl+E: 直前の投稿を編集する
                 if (is_control) {
                     $("#__on_last_edit").click()
@@ -202,22 +261,77 @@
                 gp.next.setCursor()
                 return false
             default:
-                // 1～9(+テンキー): カラムの表示をトグル
-                const key_num = 49 <= e.keyCode && e.keyCode <= 57
-                const ten_num = 97 <= e.keyCode && e.keyCode <= 105
-                if (key_num || ten_num) {
-                    let number = null
-                    if (key_num) number = e.keyCode - 48 // キーボードの数字キー
-                    else if (ten_num) number = e.keyCode - 96 // テンキー
-
+                numKeyEvent(e, num => { // 1～9(+テンキー): カラムの表示をトグル
                     Column.disposeCursor()
-                    col = Column.get(number - 1)
+                    col = Column.get(num - 1)
                     if (col.toggle()) col.setCursor() // 開いた
                     else Column.getOpenedFirst().setCursor() // 閉じた
-                }
+                })
                 break
         }
     })
+
+    /*=== Custom Emoji Palette Suggest Area Events ===============================================================*/
+
+    $(document).on("keydown", ".emoji_suggest_textbox", e => {
+        switch (e.keyCode) {
+            case 13: // Enter: 第一候補で確定
+                $(e.target).closest(".emoji_palette_section").find(".suggest_option>.first_option>a").click()
+                return false
+            case 32: // Space: 候補順送り
+                if (event.shiftKey) Emojis.iterateEmojiPalette($(e.target).closest(".emoji_palette_section"), true)
+                else Emojis.iterateEmojiPalette($(e.target).closest(".emoji_palette_section"))
+                return false
+            case 27: // Esc: フォーカスアウト
+                $(e.target).blur()
+                $("#header>h1").click() // どっか適当なところをクリック
+                return false
+            default:
+                // Ctrl+1～9(+テンキー): 候補にある最近使った絵文字で確定
+                if ((event.ctrlKey || event.metaKey) && numKeyEvent(e,
+                    num => $(e.target).closest(".emoji_palette_section").find(`.recent_emoji>.recent_emoji_list>a:nth-child(${num})`).click())) return false
+                return
+        }
+    })
+
+    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) // 変換モードが有効のときにイベント定義
+        $(document).on("keydown", ".__emoji_suggest", e => {
+            if (e.key == ':') { // 半角コロンを入力したらパレットのモードを変更
+                Emojis.toggleEmojiPaletteMode($(e.target))
+                return
+            }
+            // サジェスター停止中は以後なにもしない
+            if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+
+            if (e.key == ' ') { // スペースキー
+                // サジェスト候補になにも入れていない場合はパレットモードに戻す
+                if ($('#__txt_emoji_search').val().length == 0) {
+                    Emojis.toggleEmojiPaletteMode($(e.target), true)
+                    return
+                }
+
+                // 候補を送る
+                if (event.shiftKey) Emojis.iterateEmojiPalette($('#singleton_emoji_window'), true)
+                else Emojis.iterateEmojiPalette($('#singleton_emoji_window'))
+                return
+            }
+
+            if (e.key == 'Enter') { // Enterキー
+                // サジェスト候補になにも入れていない場合はパレットモードに戻す
+                if ($('#__txt_emoji_search').val().length == 0) {
+                    Emojis.toggleEmojiPaletteMode($(e.target), true)
+                    return
+                }
+
+                // 選択中の候補で確定
+                $("#singleton_emoji_window .suggest_option>.first_option>a.__on_emoji_append").click()
+                return false
+            }
+
+            // Ctrl+1～9(+テンキー): 候補にある最近使った絵文字で確定
+            if ((event.ctrlKey || event.metaKey) && numKeyEvent(e,
+                num => $(`#singleton_emoji_window .recent_emoji>.recent_emoji_list>a.__on_emoji_append:nth-child(${num})`).click())) return false
+        })
 
     /*=== Article Textarea Shortcut Key Events ===================================================================*/
 
@@ -280,20 +394,12 @@
                     }
                     break
                 default:
-                    // Alt+1～9(+テンキー): N番目のアカウントに切り替え
-                    const key_num = 49 <= e.keyCode && e.keyCode <= 57
-                    const ten_num = 97 <= e.keyCode && e.keyCode <= 105
-                    if (key_num || ten_num) {
-                        let number = null
-                        if (key_num) number = e.keyCode - 48 // キーボードの数字キー
-                        else if (ten_num) number = e.keyCode - 96 // テンキー
-
-                        element = $('#header>#post_options input.__chk_add_account+label').eq(number - 1)
+                    if (numKeyEvent(e, num => { // Alt+1～9(+テンキー): N番目のアカウントに切り替え
+                        element = $('#header>#post_options input.__chk_add_account+label').eq(num - 1)
                         // Ctrl+Alt+1～9(+テンキー): 追加アカウントをトグル
                         if (is_control) element.click()
                         else element.dblclick()
-                        return false
-                    }
+                    })) return false
                     break
             }
         } else {
@@ -335,3 +441,22 @@
     })
 })
 
+/**
+ * #Event #jQuery
+ * キーイベントでナンバーキーが押された場合のイベント定義
+ * 
+ * @param e イベントオブジェクト
+ * @param callback イベント発火時に実行数するコールバック関数(引数は番号)
+ */
+function numKeyEvent(e, callback) {
+    const key_num = 49 <= e.keyCode && e.keyCode <= 57
+    const ten_num = 97 <= e.keyCode && e.keyCode <= 105
+    if (key_num || ten_num) {
+        let number = null
+        if (key_num) number = e.keyCode - 48 // キーボードの数字キー
+        else if (ten_num) number = e.keyCode - 96 // テンキー
+        callback(number)
+        return true
+    }
+    return false
+}

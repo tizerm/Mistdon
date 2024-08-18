@@ -126,8 +126,14 @@
                         title="オンにすると投稿フォームにフォーカスしたときに現れる投稿オプションの投稿アカウントが閉じた状態で初期表示されます。複数のアカウントに同じ投稿を流さない人向け。"/>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_reset_post_visibility"/>
+                        <label for="__chk_gen_reset_post_visibility">公開範囲をリセットする</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると投稿後とリセットボタンを押したときに、公開範囲がパブリックに戻ります。特定の公開範囲を多用する方はオフにするといいでしょう。"/>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_use_emoji_suggester"/>
-                        <label for="__chk_gen_use_emoji_suggester">カスタム絵文字サジェスターを使用する</label>
+                        <label for="__chk_gen_use_emoji_suggester">カスタム絵文字パレットの変換モードを有効にする</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="投稿フォームで「:」を入力したときにカスタム絵文字の変換候補を出すウィンドウを表示するか設定します。"/>
                     </li>
@@ -137,6 +143,14 @@
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="投稿にマウスオーバーしたときに表示されるリプライ/ブースト/リノートなどが手軽に行えるアクションパレットを使用するか設定します。"/>
                     </li>
+                    <ul id="__gp_gen_actionpalette" class="selector_list">
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_list_action_palette"/>
+                            <label for="__chk_gen_use_list_action_palette">リストレイアウトでもアクションパレットを使用する</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにするとリストレイアウトの投稿に対してもアクションパレットが表示されるようになります。他のUIと干渉する場合があるので煩わしい場合はオフにしてください。"/>
+                        </li>
+                    </ul>
                     <li>
                         <input type="checkbox" id="__chk_gen_use_prev_relpy"/>
                         <label for="__chk_gen_use_prev_relpy">簡易直前リプライを表示する</label>

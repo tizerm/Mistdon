@@ -55,9 +55,12 @@
         clearTimeout(font_timer)
         font_timer = setTimeout(() => $(".font_sample_box").css("font-size", `${$(e.target).val()}px`), 500)
     })
-    // 全体設定-フォントサイズボックスのフォーカスイベント
+    // 全体設定-投稿フォームの個別表示制御イベント
     $(document).on("change", "input.__opt_gen_flex_headform", e => $("#__gp_gen_headforms input")
         .prop("disabled", $("#__opt_gen_flex_headform1").prop("checked")))
+    // 全体設定-簡易アクションパレットのイベント
+    $(document).on("change", "input#__chk_gen_use_action_palette", e => $("#__gp_gen_actionpalette input")
+        .prop("disabled", !$("#__chk_gen_use_action_palette").prop("checked")))
 
     // カラム追加ボタンイベント
     $("#on_add_column").on("click", e => ColumnPref.addColumn())

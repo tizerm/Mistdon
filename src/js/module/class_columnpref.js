@@ -59,6 +59,7 @@ class TimelinePref {
                             <option value="federation">連合</option>
                             <option value="list">リスト</option>
                             <option value="channel">チャンネル</option>
+                            <option value="antenna">アンテナ</option>
                             <option value="notification">通知</option>
                         </select>
                     </div>
@@ -72,6 +73,10 @@ class TimelinePref {
                         <div class="color_info">
                             色: #<input type="text" class="__txt_channel_color __pull_color_palette" size="6"/>
                         </div>
+                    </div>
+                    <div class="lbl_antenna">
+                        対象アンテナ:<br/><select class="__cmb_tl_antenna">
+                        </select>
                     </div>
                     <div class="lbl_checkbox">
                         <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"/>
@@ -93,6 +98,7 @@ class TimelinePref {
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
             jqelm.find("h4").css("background-color", `#${account?.pref.acc_color}`)
             jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+            jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
             jqelm.find(".__txt_channel_color").val(this.pref.color)
             jqelm.find(".lbl_external_instance").hide()
         } else if (this.pref?.external) { // 外部インスタンスが表示対象の場合は「その他」を初期設定
@@ -105,6 +111,7 @@ class TimelinePref {
             jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+            jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
         }
@@ -116,12 +123,20 @@ class TimelinePref {
                 jqelm.find(".__cmb_tl_list").attr("value", this.pref.list_id)
             }
             else jqelm.find(".lbl_list").hide()
+
             if (this.pref.timeline_type == 'channel') {
                 // チャンネルの場合はチャンネルブロックを表示(後で検索用にリストIDを記録)
                 jqelm.find(".lbl_channel").show()
                 jqelm.find(".__cmb_tl_channel").attr("value", this.pref.channel_id)
             }
             else jqelm.find(".lbl_channel").hide()
+
+            if (this.pref.timeline_type == 'antenna') {
+                // アンテナの場合はアンテナブロックを表示(後で検索用にリストIDを記録)
+                jqelm.find(".lbl_antenna").show()
+                jqelm.find(".__cmb_tl_antenna").attr("value", this.pref.antenna_id)
+            }
+            else jqelm.find(".lbl_antenna").hide()
         }
         if (this.pref?.exclude_reblog) // ブースト/リノートを非表示
             jqelm.find(".__chk_exclude_reblog").prop("checked", true)
@@ -140,8 +155,10 @@ class TimelinePref {
                 const account = Account.get(0)
                 jqelm.find("h4").css("background-color", `#${account.pref.acc_color}`)
                 jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+                jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find(".lbl_list").hide()
                 jqelm.find(".lbl_channel").hide()
+                jqelm.find(".lbl_antenna").hide()
                 jqelm.find(".lbl_external_instance").hide()
             } else { // アカウント情報がない場合は
                 jqelm.find(`.__cmb_tl_account>option[value="__external"]`).prop("selected", true)
@@ -149,6 +166,7 @@ class TimelinePref {
                 jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+                jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
                 jqelm.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
             }
@@ -172,6 +190,7 @@ class TimelinePref {
             target_li.find(".lbl_external_instance").hide()
             target_li.find('.__cmb_tl_type>option').prop("disabled", false)
             target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
             target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
         } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
             target_li.find("h4").css("background-color", `#999999`)
@@ -179,6 +198,7 @@ class TimelinePref {
             target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
             target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
@@ -186,6 +206,7 @@ class TimelinePref {
         // リスト/チャンネルは一律非表示
         target_li.find(".lbl_list").hide()
         target_li.find(".lbl_channel").hide()
+        target_li.find(".lbl_antenna").hide()
         ColumnPref.setButtonPermission()
     }
 
@@ -225,6 +246,7 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
                     li_dom.find(".lbl_list").show()
                     li_dom.find(".lbl_channel").hide()
+                    li_dom.find(".lbl_antenna").hide()
                     notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // リストを持っていない
@@ -248,6 +270,7 @@ class TimelinePref {
                     li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
                     li_dom.find(".lbl_channel").show()
                     li_dom.find(".lbl_list").hide()
+                    li_dom.find(".lbl_antenna").hide()
                     notification.done()
                 }).catch(error => {
                     if (error == 'empty') { // お気に入りのチャンネルがない
@@ -258,9 +281,34 @@ class TimelinePref {
                         notification.error("チャンネルの取得で問題が発生しました.")
                 })
                 break
-            default: // リスト/チャンネル以外はウィンドウを閉じて終了
+            case 'antenna': // アンテナ
+                notification = Notification.progress("対象アカウントの登録アンテナを取得中です...")
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
+                    const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    antennas.forEach(a => options += `
+                        <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
+                    li_dom.find(".lbl_antenna").show()
+                    li_dom.find(".lbl_channel").hide()
+                    li_dom.find(".lbl_list").hide()
+                    notification.done()
+                }).catch(error => {
+                    if (error == 'empty') { // 作成済みのアンテナがない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
+                        notification.error("このアカウントにはアンテナがありません.")
+                    } else // それ以外は単にリストの取得エラー
+                        notification.error("アンテナの取得で問題が発生しました.")
+                })
+                break
+            default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
                 li_dom.find(".lbl_list").hide()
                 li_dom.find(".lbl_channel").hide()
+                li_dom.find(".lbl_antenna").hide()
                 break
         }
     }
@@ -692,6 +740,9 @@ class ColumnPref {
         // 「チャンネル」が設定されているタイムラインのチャンネルを取得
         $('.__cmb_tl_type>option[value="channel"]:checked').each(
             (index, elm) => TimelinePref.changeTypeEvent($(elm).closest("select")))
+        // 「アンテナ」が設定されているタイムラインのアンテナを取得
+        $('.__cmb_tl_type>option[value="antenna"]:checked').each(
+            (index, elm) => TimelinePref.changeTypeEvent($(elm).closest("select")))
     }
 
     /**
@@ -820,6 +871,7 @@ class ColumnPref {
                         'channel_id': $(tl_elm).find(".__cmb_tl_channel").val(),
                         'channel_name': $(tl_elm).find(".__cmb_tl_channel>option:checked").text(),
                         'channel_color': $(tl_elm).find(".__txt_channel_color").val(),
+                        'antenna_id': $(tl_elm).find(".__cmb_tl_antenna").val(),
                         'exclude_reblog': $(tl_elm).find(".__chk_exclude_reblog").prop("checked"),
                         'expand_cw': $(tl_elm).find(".__chk_expand_cw").prop("checked"),
                         'expand_media': $(tl_elm).find(".__chk_expand_media").prop("checked"),

@@ -166,65 +166,9 @@
     /**
      * #Event
      * ツールメニュー: カスタム絵文字呼び出しボタン.
-     * => カスタム絵文字一覧を表示
+     * => カスタム絵文字一覧を表示(カスタム絵文字関係のイベントは別所に記載)
      */
-    $("#__open_emoji_palette").on("click", e => {
-        Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name")).createEmojiList()
-        // サジェストテキストボックスにフォーカス
-        $("#__txt_emoji_search").focus()
-    })
-
-    /**
-     * #Event #Keyup
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧のサジェストテキストボックス.
-     * => カスタム絵文字をショートコードで絞り込み
-     */
-    $(document).on("keyup", "#__txt_emoji_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $(".emoji_list>*").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $(".emoji_list>*").hide()
-        $(`.emoji_list>a.__on_emoji_append[name*="${suggest}"]`).show()
-    })
-
-    /**
-     * #Event #Keyup
-     * リアクション一覧のサジェストテキストボックス.
-     * => リアクション絵文字をショートコードで絞り込み
-     */
-    $(document).on("keyup", "#__txt_reaction_search", e => {
-        const suggest = $(e.target).val()
-        if (!suggest) { // 空欄の場合すべて表示
-            $(".reaction_list>*").show()
-            return
-        }
-        // 一旦全部消してから一致するやつを抽出
-        $(".reaction_list>*").hide()
-        $(`.reaction_list>a.__on_emoji_reaction[name*="${suggest}"]`).show()
-    })
-
-    /**
-     * #Event
-     * ツールメニュー-カスタム絵文字一覧: カスタム絵文字一覧の絵文字.
-     * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
-     */
-    $(document).on("click", "#pop_custom_emoji .__on_emoji_append", e => {
-        let target = $("#__txt_postarea")
-        let target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
-        const cursor_pos = target.get(0).selectionStart
-        const target_text = target.val()
-        let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
-        // Mastodonの場合前後にスペースを入れる
-        if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
-        target.val(target_text.substring(0, cursor_pos) + target_emoji + target_text.substring(cursor_pos, target_text.length))
-        target.focus()
-
-        // 最近使った絵文字に登録
-        target_account.updateEmojiHistory(target_emoji)
-    })
+    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
 
     /**
      * #Event #Keyup
@@ -328,7 +272,7 @@
             success: () => {
                 $("#__on_reset_option").click()
                 $("#header>#post_options").hide(...Preference.getAnimation("SLIDE_FAST"))
-                $("#__on_emoji_close").click()
+                $("#singleton_emoji_window .window_close_button").click()
             }
         })
         // ダイアログフラグをリセット
@@ -397,6 +341,83 @@
         option_obj: $("#post_options")
     }))
 
+    /*=== Custom Emoji Palette Event =============================================================================*/
+
+    /**
+     * #Event #Keyup
+     * カスタム絵文字系のサジェストテキストボックス.
+     * => カスタム絵文字をショートコードで絞り込み(変わってなかったらなにもしない)
+     */
+    $(document).on("keyup", ".emoji_suggest_textbox", e => {
+        const target = $(e.target).closest(".emoji_palette_section")
+        const word = $(e.target).val()
+        if (target.find(".__hdn_emoji_code").val() == word) return
+        Emojis.filterEmojiPalette(target, word)
+    })
+
+    /**
+     * #Event
+     * カスタム絵文字パレット: カスタム絵文字一覧の絵文字.
+     * => 現在アクティブなフォームにカスタム絵文字のショートコードを挿入
+     */
+    $(document).on("click", "#singleton_emoji_window .__on_emoji_append", e => {
+        const target_elm = $(`#${$("#__hdn_emoji_target_elm_id").val() || "__txt_postarea"}`)
+        const cursor_pos = target_elm.get(0).selectionStart
+        const target_text = target_elm.val()
+        let target_emoji = $(e.target).closest(".__on_emoji_append").attr("name")
+        const target_account = Account.get($("#header>#head_postarea .__lnk_postuser>img").attr("name"))
+        // Mastodonの場合前後にスペースを入れる
+        if (target_account.platform == 'Mastodon') target_emoji = ` ${target_emoji} `
+
+        // 挿入モードで文字の切り出し位置を変える
+        const start_pos = $('#emoji_mode_method').is('.active')
+            ? $("#__hdn_emoji_cursor").val() - 1 : cursor_pos
+
+        // 入力中の文章中にカスタム絵文字コードを挿入してカーソル位置を調整
+        const text_before = target_text.substring(0, start_pos) + target_emoji
+        const selection_pos = text_before.length
+        target_elm.val(text_before + target_text.substring(cursor_pos, target_text.length))
+        target_elm.get(0).selectionStart = selection_pos
+        target_elm.get(0).selectionEnd = selection_pos
+
+        // 最近使用した絵文字に登録してパレットモードに戻す
+        target_account.updateEmojiHistory(target_emoji)
+        Emojis.toggleEmojiPaletteMode(target_elm, true)
+        target_elm.focus()
+    })
+
+    // カスタム絵文字パレットの変換モードが有効の場合は以下のイベントを定義
+    if (Preference.GENERAL_PREFERENCE.enable_emoji_suggester) {
+        /**
+         * #Event #Keyup
+         * カスタム絵文字の変換対象フォームでキーアップ.
+         * => カスタム絵文字パレットを開いて:以降の入力コードをサジェストテキストボックスにトレースする
+         */
+        $(document).on("keyup", ".__emoji_suggest", e => {
+            // サジェスター停止中は以後なにもしない
+            if ($('#singleton_emoji_window').length == 0 || $('#emoji_mode_palette').is(".active")) return
+
+            // サジェスターを起動してから入力された内容を抜き出す
+            const start = $("#__hdn_emoji_cursor").val()
+            const end = e.target.selectionStart
+
+            if (start > end) { // コロンよりも前に来たらサジェスター停止
+                Emojis.toggleEmojiPaletteMode($(e.target), true)
+                return
+            }
+
+            // 入力中のコードをサジェスターに移してイベント発火
+            $('#__txt_emoji_search').val($(e.target).val().substring(start, end)).keyup()
+        })
+
+        /**
+         * #Event #Blur
+         * カスタム絵文字の変換対象フォームでフォーカスアウト.
+         * => TODO: blurイベントだと変換モードでうまく動かない箇所があるのであとでなおす
+         */
+        $(document).on("blur", ".__emoji_suggest", e => Emojis.toggleEmojiPaletteMode($(e.target), true))
+    }
+
     /*=== Post Option Article Area Event =========================================================================*/
 
     /**
@@ -456,6 +477,8 @@
         $('#header>#post_options input[type="number"]').val("")
         $("#post_options .poll_setting .__on_option_close").click()
         $("#post_options .refernced_post .__on_option_close").click()
+        if (Preference.GENERAL_PREFERENCE.reset_post_visibility) // 公開範囲をリセットする
+            $('#post_options input[name="__opt_visibility"][value="public"]').prop('checked', true)
         Media.clearAttachMedia()
         deleteQuoteInfo()
         enabledAdditionalAccount(true)
@@ -641,6 +664,14 @@
     $(document).on("click", ".__on_group_reload", e => Column.get($(e.target).closest(".column_box"))
         .getGroup($(e.target).closest(".tl_group_box").attr("id")).reload())
 
+    /**
+     * #Event
+     * グループボタン: フラッシュ.
+     * => 対象グループで最後にフラッシュした投稿でフラッシュウィンドウを開く(ない場合は最古の投稿)
+     */
+    $(document).on("click", ".__on_open_flash_last", e => Column.get($(e.target).closest(".column_box"))
+        .getGroup($(e.target).closest(".tl_group_box").attr("id")).createFlash())
+
     /*=== Post Event =============================================================================================*/
 
     /**
@@ -685,6 +716,8 @@
             .getStatus(target_li).createImageModal(image_url)
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
+        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+            FlashTimeline.getWindow($(e.target)).current.createImageModal(image_url)
         else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
             Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
@@ -831,10 +864,12 @@
     /**
      * #Event #Mouseleave
      * 投稿ポップアップ.
-     * => マウスが出たらポップアップを消す
+     * => マウスが出たらポップアップを消す(リプライとそれ以外で動きを変える)
      */
-    $(document).on("mouseleave", "#pop_expand_post>ul>li",
-        e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
+    $(document).on("mouseleave", "#pop_expand_post>ul>li", e => {
+        if ($("#pop_expand_post").is(".reply_pop")) $("#pop_expand_post").hide()
+        else $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD"))
+    })
 
     /**
      * #Event #Mouseenter #Mouseleave
@@ -891,7 +926,9 @@
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) $(document).on("mouseenter",
-        "li:not(.chat_timeline, .short_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
+        "li:not(.chat_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
+            // リストレイアウト無効化オプションがついているときはなにもしない
+            if (!Preference.GENERAL_PREFERENCE.enable_list_action_palette && $(e.currentTarget).is(".short_timeline")) return
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
@@ -900,12 +937,19 @@
             else if ($(e.target).closest("ul.scrollable_tl").length > 0)
                 // 一時スクロールタイムラインの場合は静的マップから取得
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus($(e.target).closest("li"))
+            else if ($(e.target).closest("ul.flash_tl").length > 0)
+                // フラッシュタイムラインの場合も静的マップから取得
+                target_post = FlashTimeline.getWindow($(e.target)).current
             else return  // 取得できないタイムラインは実行しない
 
             // 外部インスタンスに対しては使用不可
             if (target_post.from_timeline?.pref?.external) return
             const pos = $(e.currentTarget).offset()
             const height = $(e.currentTarget).innerHeight()
+
+            // リストレイアウトの場合は縮小表示
+            if ($(e.target).closest("li").is(".short_timeline")) $("#pop_expand_action").addClass("list_action")
+            else $("#pop_expand_action").removeClass("list_action")
 
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
@@ -984,8 +1028,13 @@
      * #Event
      * 簡易アクションバー: ここから遡る.
      */
-    $(document).on("click", ".__short_prepost",
-        e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+    $(document).on("click", ".__short_prepost", e => Status.TEMPORARY_ACTION_STATUS.openScrollableWindow())
+
+    /**
+     * #Event
+     * 簡易アクションバー: ここからフラッシュする.
+     */
+    $(document).on("click", ".__short_flash", e => Status.TEMPORARY_ACTION_STATUS.openFlash())
 
     /**
      * #Event
@@ -1029,8 +1078,9 @@
      * 投稿本体からマウスアウト.
      * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
      */
-    $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
-        if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0) return
+    $(document).on("mouseleave", "li:not(.chat_timeline), li.chat_timeline>.content", e => {
+        if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0
+            && $(e.target).closest("ul.flash_tl").length == 0) return
 
         // ポップアップが表示されている場合は消去
         if ($("#pop_expand_post").is(':visible') && $(e.relatedTarget).closest("#pop_expand_post").length == 0)
@@ -1235,8 +1285,8 @@
             .closest("li").removeClass("ui-state-disabled")
 
         // メイン画面のTL出ない場合は遡りを禁止
-        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary").addClass("ui-state-disabled")
-        else $("#pop_context_menu .__menu_post_open_temporary").removeClass("ui-state-disabled")
+        if (!tl_group_flg) $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").addClass("ui-state-disabled")
+        else $("#pop_context_menu .__menu_post_open_temporary, #pop_context_menu .__menu_post_open_flash, #pop_context_menu .__menu_parent_post_open_layout").removeClass("ui-state-disabled")
 
         // コンテキストメニューを表示して投稿データをstaticに一時保存
         popContextMenu(e, "pop_context_menu")
@@ -1335,6 +1385,13 @@
      */
     $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_temporary",
         e => Status.TEMPORARY_CONTEXT_STATUS.openScrollableWindow())
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: ここからフラッシュする.
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu .__menu_post_open_flash",
+        e => Status.TEMPORARY_CONTEXT_STATUS.openFlash())
 
     /**
      * #Event #Contextmenu
@@ -1437,6 +1494,7 @@
         else if (target_window.is(".account_timeline.allaccount_user")) // ユーザーキャッシュをすべてクリア
             target_window.find(".column_profile").each((index, elm) => User.deleteCache($(elm)))
         else if (target_window.is(".timeline_window")) Timeline.deleteWindow(target_window)
+        else if (target_window.is(".flash_window")) FlashTimeline.deleteWindow(target_window)
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })
 
@@ -1449,6 +1507,22 @@
         $("#pop_multi_window>.ex_window").removeClass('active')
         $(e.target).closest(".ex_window").addClass('active')
     })
+
+    /**
+     * #Event
+     * フラッシュウィンドウ: 次へボタン.
+     * => 次の投稿を表示する(次がない場合は閉じる)
+     */
+    $(document).on("click", ".__on_flash_next",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind())
+
+    /**
+     * #Event
+     * フラッシュウィンドウ: 前へボタン.
+     * => 前の投稿を表示する
+     */
+    $(document).on("click", ".__on_flash_prev",
+        e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
     /**
      * #Event
@@ -1506,7 +1580,6 @@
      */
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
-    $(document).on("click", "#__on_emoji_close", e => $("#pop_custom_emoji").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",

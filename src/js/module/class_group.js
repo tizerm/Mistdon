@@ -74,6 +74,8 @@ class Group {
                         <img src="resources/ic_warn.png" alt="何らかの問題が発生しました" class="ic_group_warn"/>
                         <a class="__on_group_reload" title="グループをリロード"
                             ><img src="resources/ic_reload.png" alt="グループをリロード"/></a>
+                        <a class="__on_open_flash_last" title="フラッシュウィンドウを開く"
+                            ><img src="resources/ic_flash.png" alt="フラッシュウィンドウを開く"/></a>
                         <a class="__on_group_top" title="トップへ移動"
                             ><img src="resources/ic_top.png" alt="トップへ移動"/></a>
                     </div>
@@ -422,6 +424,16 @@ class Group {
         this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
         // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
         this.onLoadTimeline(rest_promises)
+    }
+
+    /**
+     * #Method
+     * グループ内の指定したステータスキーを起点にしてフラッシュウィンドウを生成する.
+     */
+    createFlash(key) {
+        const flash = new FlashTimeline(this, key)
+        flash.createWindow()
+        return flash
     }
 
     // Getter: このグループの下のグループを取得(ローテーション)
