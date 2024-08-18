@@ -671,11 +671,12 @@
             background-color: transparent;
             height: auto;
             > li, > li:hover {
-                border: solid 2px #cccccc;
+                border: solid 2px #bbbbbb;
                 border-left-width: 8px;
                 background-color: rgba(56,56,56,0.92);
             }
         }
+        &.reply_pop ul>li { border: dashed 2px #bbbbbb; }
     }
 
     /*=== Post Default Action Pop Layout =========================================================*/
@@ -687,29 +688,33 @@
         background-color: rgba(62,62,62,0.8);
         border: solid 1px #bbbbbb;
         max-width: 320px;
-        padding: 4px;
+        padding: 3px;
+        font-size: 1px;
 
         & button {
             vertical-align: text-bottom;
             > img {
+                display: inline-block;
                 vertical-align: text-bottom;
                 height: 28px;
                 width: auto;
             }
         }
         & a {
+            display: inline-block;
             > img {
                 display: inline-block;
                 vertical-align: text-bottom;
-                border-radius: 6px;
                 height: 24px;
                 width: auto;
             }
-            &:hover>img {
+            &:hover {
                 background-color: rgba(255,255,255,0.2);
+                filter: brightness(130%);
                 cursor: pointer;
             }
         }
+        > .std_action>button { margin: 0px 1px; }
         > .reactions>.recent { display: inline; }
         > .impressions {
             margin-top: 2px;
@@ -738,6 +743,12 @@
                     background-image: url("../resources/ic_favorite.png");
                 }
             }
+        }
+        &.list_action {
+            padding: 1px;
+            > .std_action>button { margin: 0px; }
+            & img { height: 20px !important; }
+            & button.__short_open_list { display: none; }
         }
     }
 
@@ -1238,6 +1249,7 @@
             background-color: rgba(34,34,34,0.8);
             overflow-y: auto;
             &::-webkit-scrollbar { width: 8px; }
+            > .emoji_section { font-size: 1px; }
         }
     }
 

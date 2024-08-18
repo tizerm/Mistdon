@@ -135,6 +135,7 @@ class Status {
                 this.flg_reblog = data.reblogged
                 this.flg_fav = data.favourited
                 this.flg_bookmark = data.bookmarked
+                this.flg_edit = !!data.edited_at
 
                 break
             case 'Misskey': // Misskey
@@ -1376,6 +1377,7 @@ class Status {
         if (this.flg_reblog) html += '<img src="resources/ic_reblog.png" class="flg_reblog"/>' // ブースト
         if (this.flg_fav) html += '<img src="resources/ic_favorite.png" class="flg_fav"/>' // ふぁぼ
         if (this.flg_bookmark) html += '<img src="resources/ic_bkm.png" class="flg_bookmark"/>'  // ブックマーク
+        if (this.flg_edit) html += '<img src="resources/ic_draft.png" class="flg_edit"/>' // 編集
         if (this.reply_to) html += '<img src="resources/ic_rpl.png" class="flg_reply"/>' // リプライ
         switch (this.visibility) { // 公開範囲がパブリック以外の場合は識別アイコンを配置
             case 'unlisted':
@@ -2001,6 +2003,7 @@ class Status {
         // リアクション絵文字はリモートから直接取得
         Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
 
+        $("#pop_expand_post").removeClass("reply_pop")
         const mouse_x = e.pageX
         const mouse_y = e.pageY
         switch (pop_type) {
@@ -2041,8 +2044,7 @@ class Status {
                     'top': 'auto',
                     'bottom': Math.round(window.innerHeight - pos.top),
                     'left': pos.left - 12
-                })
-                $("#pop_expand_post").show(...Preference.getAnimation("FADE_STD"))
+                }).addClass("reply_pop").show()
                 break
             default:
                 break

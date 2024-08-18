@@ -413,12 +413,9 @@
         /**
          * #Event #Blur
          * カスタム絵文字の変換対象フォームでフォーカスアウト.
-         * => TODO: まだ挙動が正確に決まってない
+         * => TODO: blurイベントだと変換モードでうまく動かない箇所があるのであとでなおす
          */
-        $(document).on("blur", ".__emoji_suggest", e => {
-            console.log(e)
-            Emojis.toggleEmojiPaletteMode($(e.target), true)
-        })
+        $(document).on("blur", ".__emoji_suggest", e => Emojis.toggleEmojiPaletteMode($(e.target), true))
     }
 
     /*=== Post Option Article Area Event =========================================================================*/
@@ -480,6 +477,8 @@
         $('#header>#post_options input[type="number"]').val("")
         $("#post_options .poll_setting .__on_option_close").click()
         $("#post_options .refernced_post .__on_option_close").click()
+        if (Preference.GENERAL_PREFERENCE.reset_post_visibility) // 公開範囲をリセットする
+            $('#post_options input[name="__opt_visibility"][value="public"]').prop('checked', true)
         Media.clearAttachMedia()
         deleteQuoteInfo()
         enabledAdditionalAccount(true)
@@ -865,10 +864,12 @@
     /**
      * #Event #Mouseleave
      * 投稿ポップアップ.
-     * => マウスが出たらポップアップを消す
+     * => マウスが出たらポップアップを消す(リプライとそれ以外で動きを変える)
      */
-    $(document).on("mouseleave", "#pop_expand_post>ul>li",
-        e => $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD")))
+    $(document).on("mouseleave", "#pop_expand_post>ul>li", e => {
+        if ($("#pop_expand_post").is(".reply_pop")) $("#pop_expand_post").hide()
+        else $("#pop_expand_post").hide(...Preference.getAnimation("POP_FOLD"))
+    })
 
     /**
      * #Event #Mouseenter #Mouseleave
@@ -925,7 +926,9 @@
      * => 表示アカウントのアクションバーを表示
      */
     if (Preference.GENERAL_PREFERENCE.enable_action_palette) $(document).on("mouseenter",
-        "li:not(.chat_timeline, .short_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
+        "li:not(.chat_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
+            // リストレイアウト無効化オプションがついているときはなにもしない
+            if (!Preference.GENERAL_PREFERENCE.enable_list_action_palette && $(e.currentTarget).is(".short_timeline")) return
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
@@ -934,12 +937,19 @@
             else if ($(e.target).closest("ul.scrollable_tl").length > 0)
                 // 一時スクロールタイムラインの場合は静的マップから取得
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus($(e.target).closest("li"))
+            else if ($(e.target).closest("ul.flash_tl").length > 0)
+                // フラッシュタイムラインの場合も静的マップから取得
+                target_post = FlashTimeline.getWindow($(e.target)).current
             else return  // 取得できないタイムラインは実行しない
 
             // 外部インスタンスに対しては使用不可
             if (target_post.from_timeline?.pref?.external) return
             const pos = $(e.currentTarget).offset()
             const height = $(e.currentTarget).innerHeight()
+
+            // リストレイアウトの場合は縮小表示
+            if ($(e.target).closest("li").is(".short_timeline")) $("#pop_expand_action").addClass("list_action")
+            else $("#pop_expand_action").removeClass("list_action")
 
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
@@ -1068,8 +1078,9 @@
      * 投稿本体からマウスアウト.
      * => アクションバー以外の場所にマウスが出たらアクションバーポップアップを消す
      */
-    $(document).on("mouseleave", "li:not(.chat_timeline, .short_timeline), li.chat_timeline>.content", e => {
-        if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0) return
+    $(document).on("mouseleave", "li:not(.chat_timeline), li.chat_timeline>.content", e => {
+        if ($(e.target).closest(".tl_group_box").length == 0 && $(e.target).closest("ul.scrollable_tl").length == 0
+            && $(e.target).closest("ul.flash_tl").length == 0) return
 
         // ポップアップが表示されている場合は消去
         if ($("#pop_expand_post").is(':visible') && $(e.relatedTarget).closest("#pop_expand_post").length == 0)

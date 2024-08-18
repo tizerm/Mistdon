@@ -26,8 +26,10 @@ class Preference {
         this.enable_post_button         = pref?.enable_post_button          ?? true,  // 投稿ボタン
         this.enable_last_edit_button    = pref?.enable_last_edit_button     ?? true,  // 直前編集ボタン
         this.hide_additional_account    = pref?.hide_additional_account     ?? false, // 投稿アカウントを自動で閉じる
+        this.reset_post_visibility      = pref?.reset_post_visibility       ?? true,  // 公開範囲リセット
         this.enable_emoji_suggester     = pref?.enable_emoji_suggester      ?? true,  // カスタム絵文字サジェスター
         this.enable_action_palette      = pref?.enable_action_palette       ?? true,  // 簡易アクションパレット
+        this.enable_list_action_palette = pref?.enable_list_action_palette  ?? false, // 簡易アクションパレット(リスト)
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
@@ -232,6 +234,7 @@ class Preference {
             Preference.setPreference()
             // イベント矯正発火
             $("#__opt_gen_flex_headform1").change()
+            $("#__chk_gen_use_action_palette").change()
             $(`#${window_key} .pref_content .tooltip_help`).tooltip({
                 position: {
                     my: "center top",
@@ -276,8 +279,10 @@ class Preference {
         $("#__chk_gen_use_post_button")                 .prop("checked", Preference.GENERAL_PREFERENCE.enable_post_button)
         $("#__chk_gen_use_additional_button")           .prop("checked", Preference.GENERAL_PREFERENCE.enable_last_edit_button)
         $("#__chk_gen_hide_additional_account")         .prop("checked", Preference.GENERAL_PREFERENCE.hide_additional_account)
+        $("#__chk_gen_reset_post_visibility")           .prop("checked", Preference.GENERAL_PREFERENCE.reset_post_visibility)
         $("#__chk_gen_use_emoji_suggester")             .prop("checked", Preference.GENERAL_PREFERENCE.enable_emoji_suggester)
         $("#__chk_gen_use_action_palette")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
+        $("#__chk_gen_use_list_action_palette")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_list_action_palette)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
@@ -379,8 +384,10 @@ class Preference {
             "enable_post_button"            : $("#__chk_gen_use_post_button").prop("checked"),
             "enable_last_edit_button"       : $("#__chk_gen_use_additional_button").prop("checked"),
             "hide_additional_account"       : $("#__chk_gen_hide_additional_account").prop("checked"),
+            "reset_post_visibility"         : $("#__chk_gen_reset_post_visibility").prop("checked"),
             "enable_emoji_suggester"        : $("#__chk_gen_use_emoji_suggester").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
+            "enable_list_action_palette"    : $("#__chk_gen_use_list_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),

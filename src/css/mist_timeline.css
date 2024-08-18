@@ -917,11 +917,9 @@
             }
         }
         > li.chat_timeline.self_post {
-            .usericon {
-                left: auto;
-                right: 0px;
-            }
+            .usericon { left: auto; right: 0px; }
             .content { left: 0px; }
+            > .post_attributes { right: 34px; }
         }
 
         /*=== List Layout Style ==================================================================*/
@@ -1157,6 +1155,7 @@
             background-image: url("../resources/ic_top.png");
             background-position: center left;
             background-repeat: no-repeat;
+            background-size: 24px 24px;
             background-color: #415687;
             border-radius: 16px;
             font-size: 16px;
@@ -1183,6 +1182,7 @@
             background-size: 32px 32px;
             padding-right: 42px;
         }
+        > li:not(.chat_timeline):has(>.label_head.label_reblog)>.post_attributes { top: 24px; }
     }
     &.tl_group_box ul {
         border-left: solid 4px #cccccc;
