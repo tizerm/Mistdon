@@ -168,7 +168,7 @@
      * ツールメニュー: カスタム絵文字呼び出しボタン.
      * => カスタム絵文字一覧を表示(カスタム絵文字関係のイベントは別所に記載)
      */
-    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
+    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow('palette'))
 
     /**
      * #Event #Keyup
@@ -413,9 +413,10 @@
         /**
          * #Event #Blur
          * カスタム絵文字の変換対象フォームでフォーカスアウト.
-         * => TODO: blurイベントだと変換モードでうまく動かない箇所があるのであとでなおす
+         * => 変換モードを一瞬有効にするため変換モードを遅延停止する
          */
-        $(document).on("blur", ".__emoji_suggest", e => Emojis.toggleEmojiPaletteMode($(e.target), true))
+        $(document).on("blur", ".__emoji_suggest",
+            e => setTimeout(() => Emojis.toggleEmojiPaletteMode($(e.target), true), 250))
     }
 
     /*=== Post Option Article Area Event =========================================================================*/

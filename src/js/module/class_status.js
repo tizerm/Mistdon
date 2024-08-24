@@ -785,26 +785,9 @@ class Status {
                 </div>
             `
         }
-        if (this.platform == 'Misskey' && this.quote_flg) {
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
-            html /* 引用ノート(Misskeyのみ) */ += `
-                <div class="post_quote">
-                    <div class="quote_userarea">
-                        <span>${this.quote.user.username}</span>
-                        <span>@${this.quote.user.id}</span>
-                    </div>
-            `
-            if (!this.popout_flg && !this.detail_flg // 文字数制限
-                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default) html += `
-                <div class="hidden_content">
-                    ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
-                </div>
-                <div class="hidden_text">(長いので省略)</div>
-            `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
-            html += '</div>'
-        }
-        if (this.reaction_emoji) { // リアクション絵文字がある場合
+        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+            html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
+        if (this.reaction_emoji) { // リアクション絵文字がある場合`
             let alias = null
             if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
                 const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
@@ -813,10 +796,8 @@ class Status {
             } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
             html += `<div class="reaction_emoji">${alias}</div>`
         }
-        if (this.medias.length > 0) { // 添付メディア
-            const img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
-            html += this.bindMediaSection(img_class)
-        }
+        if (this.medias.length > 0) // メディアセクション
+            html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
         // 投稿属性セクション
         html += this.attribute_section
         // 一部の通知はインプレッション数値を表示する
@@ -1035,29 +1016,10 @@ class Status {
             </div>
         `
 
-        if (this.platform == 'Misskey' && this.quote_flg) {
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
-            html /* 引用ノート(Misskeyのみ) */ += `
-                <div class="post_quote">
-                    <div class="quote_userarea">
-                        <span>${this.quote.user.username}</span>
-                        <span>@${this.quote.user.id}</span>
-                    </div>
-            `
-            if (!this.popout_flg && !this.detail_flg // 文字数制限
-                && this.quote.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat) html += `
-                <div class="hidden_content">
-                    ${target_emojis.replace(this.quote.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
-                </div>
-                <div class="hidden_text">(長いので省略)</div>
-            `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
-            html += '</div>'
-        }
-        if (this.medias.length > 0) { // メディアセクション
-            const img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
-            html += this.bindMediaSection(img_class)
-        }
+        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+            html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.chat)
+        if (this.medias.length > 0) // メディアセクション
+            html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
         // 投稿属性セクション
         html += this.attribute_section
         // インプレッション(反応とリアクション)
@@ -1367,6 +1329,36 @@ class Status {
                 </div>
             </div>
         `
+        return html
+    }
+
+    /**
+     * #Method
+     * 引用表示セクションのHTMLを返却.
+     * 
+     * @param contents_limit コンテンツ本文の文字数制限
+     */
+    bindQuoteSection(contents_limit) {
+        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
+        const target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
+        let html /* ユーザー領域 */ = `
+            <div class="post_quote">
+                <div class="quote_userarea">
+                    <span class="username">${target_emojis.replace(this.quote.user.username)}</span>
+                    <span>@${this.quote.user.id}</span>
+                </div>
+        `
+        // コンテンツ領域(文字数オーバーしている場合は文字数制限)
+        if (this.quote.cw_text) html /* CW */ += `
+            <div class="warning_content">${target_emojis.replace(this.quote.cw_text)}</div>
+        `; else if (!this.popout_flg && !this.detail_flg && this.quote.content_length > contents_limit) html += `
+            <div class="hidden_content">
+                ${target_emojis.replace(this.quote.content_text.substring(0, contents_limit))}...
+            </div>
+            <div class="hidden_text">(長いので省略)</div>
+        `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
+        html += '</div>'
+
         return html
     }
 
