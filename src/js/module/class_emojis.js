@@ -159,7 +159,7 @@ class Emojis {
             const emoji_map = auth.emojis.emoji_map
             return shortcodes.reduce((str, code) => {
                 const emoji = emoji_map.get(code)
-                return str.replace(new RegExp(emoji.shortcode, 'g'),
+                return str.replace(new RegExp(`(?<!alt=")${emoji.shortcode}`, 'g'),
                     `<img src="${emoji.url}" class="inline_emoji" alt="${emoji.shortcode}"/>`)
             }, text)
         } else { // 認証アカウント外のインスタンスの場合は現地のAPIから絵文字を取得
@@ -181,8 +181,8 @@ class Emojis {
             // 取得に成功したショートコードを抜き出して置換処理を実行
             return await Promise.allSettled(emoji_promises).then(results => {
                 return results.filter(res => res.status == 'fulfilled').map(res => res.value)
-                    .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
-                        `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
+                    .reduce((str, emoji) => str.replace(new RegExp(`(?<!alt=")${emoji.shortcode}`, 'g'),
+                        `<img src="${emoji.url}" class="inline_emoji" alt="${emoji.shortcode}"/>`), text)
             })
         }
     }
@@ -238,7 +238,7 @@ class Emojis {
      * #StaticMethod
      * 現在選択されている投稿先のアカウントでカスタム絵文字パレットウィンドウを生成する.
      */
-    static createEmojiPaletteWindow() {
+    static createEmojiPaletteWindow(mode) {
         if ($("#singleton_emoji_window").length > 0) { // ウィンドウ作成済みの場合はフォーカスだけする
             $("#__txt_emoji_search").focus()
             return
@@ -292,7 +292,8 @@ class Emojis {
 
         // ターゲットのアカウントのカスタム絵文字をウィンドウにバインド
         Emojis.bindEmojiPaletteWindow(target_account)
-        $("#__txt_emoji_search").focus()
+        // パレットモードで起動した場合のみフォーカスをサジェストフォームに移動
+        if (mode == 'palette') $("#__txt_emoji_search").focus()
     }
 
     /**
@@ -303,8 +304,8 @@ class Emojis {
      * @param force_close 変換モードを強制的に終了する場合はtrue
      */
     static toggleEmojiPaletteMode(target_elm, force_close) {
-        // パレットが起動していない場合はパレットを先に起動
-        if (!force_close && $('#singleton_emoji_window').length == 0) Emojis.createEmojiPaletteWindow()
+        // パレットが起動していない場合はパレットを先に起動(変換モードで)
+        if (!force_close && $('#singleton_emoji_window').length == 0) Emojis.createEmojiPaletteWindow('method')
         if (!force_close && $('#emoji_mode_palette').is(".active")) { // パレット⇒変換
             $('#emoji_mode_palette').removeClass("active")
             $('#emoji_mode_method').addClass("active")

@@ -536,6 +536,19 @@
                     white-space: nowrap;
                     text-overflow: ellipsis;
                     + * { margin-top: 1.35em; }
+                    .inline_emoji { height: 14px; }
+                }
+                > .warning_content {
+                    border-left: solid 4px #ffffff;
+                    border-top-right-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                    margin-top: 1.55em;
+                    padding-left: 32px;
+                    background-image: url("../resources/ic_warn.png");
+                    background-position: center left 8px;
+                    background-repeat: no-repeat;
+                    background-size: 18px 18px;
+                    .inline_emoji { height: 18px; }
                 }
                 > .hidden_text {
                     border-left: solid 4px #ffffff;

@@ -1,6 +1,6 @@
 {
   "name": "Mistdon",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "The integrated client application of Mastodon and Misskey.",
   "main": "main.js",
   "scripts": {

@@ -817,6 +817,7 @@ class User {
                         Emojis.replaceDomAsync(target.find(".username"), this.host) // ユーザー名
                         Emojis.replaceDomAsync(target.find(".label_cw"), this.host) // CWテキスト
                         Emojis.replaceDomAsync(target.find(".main_content"), this.host) // 本文
+                        Emojis.replaceDomAsync(target.find(".reaction_section"), this.host) // リアクション
                     }
                     // max_idとして取得データの最終IDを指定
                     return data.pop()?.id
@@ -831,12 +832,10 @@ class User {
 
             // ピンどめ投稿と通常投稿の絵文字を取得
             if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
-                Emojis.replaceDomAsync(target_elm.find(".pinned_post .username"), this.host) // ユーザー名
-                Emojis.replaceDomAsync(target_elm.find(".pinned_post .label_cw"), this.host) // CWテキスト
-                Emojis.replaceDomAsync(target_elm.find(".pinned_post .main_content"), this.host) // 本文
-                Emojis.replaceDomAsync(target_elm.find(".posts .username"), this.host) // ユーザー名
-                Emojis.replaceDomAsync(target_elm.find(".posts .label_cw"), this.host) // CWテキスト
-                Emojis.replaceDomAsync(target_elm.find(".posts .main_content"), this.host) // 本文
+                Emojis.replaceDomAsync(target_elm.find(".post_uls .username"), this.host) // ユーザー名
+                Emojis.replaceDomAsync(target_elm.find(".post_uls .label_cw"), this.host) // CWテキスト
+                Emojis.replaceDomAsync(target_elm.find(".post_uls .main_content"), this.host) // 本文
+                Emojis.replaceDomAsync(target_elm.find(".post_uls .reaction_section"), this.host) // リアクション
             }
         } catch (err) {
             console.log(err)

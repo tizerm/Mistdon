@@ -168,7 +168,7 @@
      * ツールメニュー: カスタム絵文字呼び出しボタン.
      * => カスタム絵文字一覧を表示(カスタム絵文字関係のイベントは別所に記載)
      */
-    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow())
+    $("#__open_emoji_palette").on("click", e => Emojis.createEmojiPaletteWindow('palette'))
 
     /**
      * #Event #Keyup
@@ -413,9 +413,10 @@
         /**
          * #Event #Blur
          * カスタム絵文字の変換対象フォームでフォーカスアウト.
-         * => TODO: blurイベントだと変換モードでうまく動かない箇所があるのであとでなおす
+         * => 変換モードを一瞬有効にするため変換モードを遅延停止する
          */
-        $(document).on("blur", ".__emoji_suggest", e => Emojis.toggleEmojiPaletteMode($(e.target), true))
+        $(document).on("blur", ".__emoji_suggest",
+            e => setTimeout(() => Emojis.toggleEmojiPaletteMode($(e.target), true), 250))
     }
 
     /*=== Post Option Article Area Event =========================================================================*/
@@ -910,14 +911,8 @@
             else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
 
-            if (target_post) { // 対象の投稿が取得できたらそこからタイムライン上のリプライ元を探す
-                const target_timeline = target_post.from_timeline
-                const replied_key = target_timeline.status_key_map.get(target_post.reply_to)
-                const replied_post = target_timeline.parent_group.status_map.get(replied_key)
-
-                // 存在したらリプライ先を表示
-                replied_post?.createExpandWindow(target_li, e, "reply")
-            }
+            // 対象の投稿が取得できたらそこからリプライ先を探して表示
+            target_post?.findReplyTo()?.createExpandWindow(target_li, e, "reply")
         })
 
     /**
