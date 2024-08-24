@@ -676,7 +676,10 @@
                 background-color: rgba(56,56,56,0.92);
             }
         }
-        &.reply_pop ul>li { border: dashed 2px #bbbbbb; }
+        &.reply_pop ul>li {
+            border: dashed 2px #bbbbbb;
+            > .user>*:not(.usericon) { display: none; }
+        }
     }
 
     /*=== Post Default Action Pop Layout =========================================================*/

@@ -910,14 +910,8 @@
             else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
 
-            if (target_post) { // 対象の投稿が取得できたらそこからタイムライン上のリプライ元を探す
-                const target_timeline = target_post.from_timeline
-                const replied_key = target_timeline.status_key_map.get(target_post.reply_to)
-                const replied_post = target_timeline.parent_group.status_map.get(replied_key)
-
-                // 存在したらリプライ先を表示
-                replied_post?.createExpandWindow(target_li, e, "reply")
-            }
+            // 対象の投稿が取得できたらそこからリプライ先を探して表示
+            target_post?.findReplyTo()?.createExpandWindow(target_li, e, "reply")
         })
 
     /**

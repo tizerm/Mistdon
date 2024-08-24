@@ -2119,6 +2119,26 @@ class Status {
         this.from_group.createFlash(this.status_key)
     }
 
+    /**
+     * #Method
+     * このリプライのリプライ元の投稿をキャッシュから検索して返す(存在しない場合nullを返却).
+     */
+    findReplyTo() {
+        const target_group = this.from_timeline.parent_group
+        const tl_itr = target_group.timelines // タイムライングループが単一TLでない場合はイテレータを設定
+            ? target_group.timelines.filter(tl => tl.host == this.from_timeline.host)[Symbol.iterator]()
+            : [this.from_timeline]
+        let replied_post = null
+        for (const tl of tl_itr) { // 同一インスタンスのタイムラインの中からリプライ元を検索
+            const replied_key = tl.status_key_map.get(this.reply_to)
+            if (replied_key) { // 見つかったらこれ以上ループしない
+                replied_post = target_group.status_map.get(replied_key)
+                break
+            }
+        }
+        return replied_post
+    }
+
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
     get notification() {
         let title = null
