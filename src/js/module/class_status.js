@@ -1350,7 +1350,7 @@ class Status {
         `
         // コンテンツ領域(文字数オーバーしている場合は文字数制限)
         if (this.quote.cw_text) html /* CW */ += `
-            <div class="warning_content">${target_emojis.replace(this.quote.cw_text)}</div>
+            <div class="warning_content label_cw">${target_emojis.replace(this.quote.cw_text)}</div>
         `; else if (!this.popout_flg && !this.detail_flg && this.quote.content_length > contents_limit) html += `
             <div class="hidden_content">
                 ${target_emojis.replace(this.quote.content_text.substring(0, contents_limit))}...
