@@ -1,41 +1,41 @@
 ﻿/*=== General ====================================================================================*/
 
 body {
-    background-color: #222222;
+    background-color: var(--core-color-bg);
     background-image: url("../resources/illust/mitlin_back3.jpg");
     background-attachment: fixed;
     background-position: left 64px bottom 32px;
     background-repeat: no-repeat;
-    color: #ffffff;
+    color: var(--core-color-text);
     margin: 0px;
     padding: 0px;
     overflow: hidden;
 }
 *::-webkit-scrollbar-track { background-color: transparent; }
-*::-webkit-scrollbar-thumb { background-color: #808080; }
+*::-webkit-scrollbar-thumb { background-color: var(--core-color-scrollbar); }
 a {
-    &:any-link { color: #a5a9b5; }
-    &:hover    { color: #d1d8ed; }
+    &:any-link { color: var(--core-color-link); }
+    &:hover    { color: var(--core-color-hoverlink); }
 }
 input {
     position: relative;
     text-align: left;
-    background-color: #434343;
+    background-color: var(--core-color-input-bg);
     border-radius: 4px;
-    border: solid 1px #afafaf;
-    color: #ffffff;
+    border: solid 1px var(--core-color-border);
+    color: var(--core-color-text);
 }
 select {
     border-radius: 4px;
-    background-color: #434343;
-    color: #ffffff;
-    border: solid 1px #afafaf;
+    background-color: var(--core-color-input-bg);
+    color: var(--core-color-text);
+    border: solid 1px var(--core-color-border);
 }
 input[type="radio"], input[type="checkbox"] {
     display: none;
     + label {
         display: inline-block;
-        background-color: rgba(255,255,255,0.1);
+        background-color: var(--core-color-check-bg);
         background-position: left center;
         background-repeat: no-repeat;
         background-size: 24px auto;
@@ -44,10 +44,10 @@ input[type="radio"], input[type="checkbox"] {
         padding: 3px 12px;
         padding-left: 32px;
         margin: 1px 0px;
-        color: #cccccc;
+        color: var(--core-color-check-text);
         &:hover {
-            background-color: #cfcfcf;
-            color: #333333;
+            background-color: var(--core-color-check-hoverbg);
+            color: var(--core-color-check-hovertext);
         }
         &:has(>img:only-child) {
             background-color: transparent;
@@ -55,26 +55,26 @@ input[type="radio"], input[type="checkbox"] {
             padding: 0px;
             cursor: pointer;
             > img { vertical-align: text-bottom; }
-            &:hover { background-color: #888888; }
+            &:hover { background-color: var(--core-color-imgcheck-hoverbg); }
         }
     }
     &:checked:not([disabled])+label {
-        background-color: #337a9f;
-        color: #ffffff;
+        background-color: var(--core-color-check-activebg);
+        color: var(--core-color-check-activetext);
         &:hover {
-            background-color: #afcfef;
-            color: #333333;
+            background-color: var(--core-color-check-acthvbg);
+            color: var(--core-color-check-acthvtext);
         }
         &:has(>img:only-child) {
-            background-color: #337a9f;
+            background-color: var(--core-color-check-activebg);
             background-image: none;
-            &:hover { background-color: #77afef; }
+            &:hover { background-color: var(--core-color-check-acthvbg); }
         }
     }
     &[disabled]+label {
         opacity: 0.5;
-        background-color: #222222;
-        color: #666666;
+        background-color: var(--core-color-check-disabledbg);
+        color: var(--core-color-check-disabledtext);
         background-image: url("../resources/ic_not.png");
     }
 }
@@ -82,18 +82,18 @@ input[type="checkbox"]:checked:not([disabled])+label { background-image: url("..
 input[type="radio"]:checked:not([disabled])+label    { background-image: url("../resources/ic_radio.png"); }
 button {
     border-radius: 6px;
-    border: solid 1px #cccccc;
-    background-color: #4f4f4f;
-    color: #ffffff;
+    border: solid 1px var(--core-color-border);
+    background-color: var(--core-color-input-bg);
+    color: var(--core-color-text);
 
-    &:hover { background-color: #777777; }
+    &:hover { background-color: var(--core-color-button-hoverbg); }
     &:active {
-        background-color: #222222;
-        color: #a0a0a0;
+        background-color: var(--core-color-button-activebg);
+        color: var(--core-color-button-activetext);
     }
     &[disabled] {
-        background-color: #222222;
-        color: #666666;
+        background-color: var(--core-color-button-disabledbg);
+        color: var(--core-color-button-disabledtext);
     }
 }
 button:has(>img:only-child) {
@@ -103,13 +103,13 @@ button:has(>img:only-child) {
     padding: 0px;
     cursor: pointer;
     > img           { vertical-align: text-bottom; }
-    &:hover         { background-color: #777777; }
+    &:hover         { background-color: var(--core-color-button-hoverbg); }
     &:active>img    { opacity: 0.5; }
     &[disabled]>img { opacity: 0.25; }
 }
 input[type="checkbox"]+label.icon_label_set, button.icon_label_set {
     position: relative;
-    background-color: rgba(255,255,255,0.15);
+    background-color: var(--core-color-check-bg);
     background-image: none;
     border-style: none;
     border-radius: 16px;
@@ -125,26 +125,26 @@ input[type="checkbox"]+label.icon_label_set, button.icon_label_set {
         vertical-align: text-bottom;
     }
     &:active {
-        background-color: #222222;
-        color: #a0a0a0;
+        background-color: var(--core-color-button-activebg);
+        color: var(--core-color-button-activetext);
     }
 }
 input[type="checkbox"]:checked+label.icon_label_set {
     background-image: none;
-    background-color: #337a9f;
-    color: #ffffff;
+    background-color: var(--core-color-check-activebg);
+    color: var(--core-color-check-activetext);
     &::before { content: ""; }
 }
 input[type="checkbox"]:not([disabled])+label.icon_label_set, button.icon_label_set:not([disabled]) {
-    &:hover { background-color: #777777; }
+    &:hover { background-color: var(--core-color-button-hoverbg); }
 }
 input[type="checkbox"]:checked:not([disabled])+label.icon_label_set:hover {
-    background-color: #afcfef;
-    color: #333333;
+    background-color: var(--core-color-check-acthvbg);
+    color: var(--core-color-check-acthvtext);
 }
 input[type="checkbox"][disabled]+label.icon_label_set, button[disabled].icon_label_set {
-    background-color: rgba(0,0,0,0.5);
-    color: #666666;
+    background-color: var(--core-color-check-disabledbg);
+    color: var(--core-color-check-disabledtext);
     cursor: not-allowed;
     > img { opacity: 0.4; }
 }
@@ -163,14 +163,14 @@ input[type="checkbox"]+label:has(>.check_mask) {
     }
     &:hover>.check_mask {
         display: block;
-        background-color: rgba(159,58,51,0.6);
+        background-color: var(--core-color-checkmask-hoverbg);
     }
 }
 input[type="checkbox"]:checked+label:has(>.check_mask) {
     &::before { content: ""; }
     > .check_mask {
         display: block;
-        background-color: rgba(51,122,159,0.6);
+        background-color: var(--core-color-checkmask-activebg);
         background-image: url("../resources/ic_check.png");
     }
 }
@@ -179,30 +179,30 @@ audio { height: 30px; }
 /*=== jQuery UI ==================================================================================*/
 
 .ui-tooltip {
-    background-color: rgba(34,34,34,0.85);
-    color: #ffffff;
+    background-color: var(--core-color-ui-bg);
+    color: var(--core-color-text);
     padding: 8px 18px;
     border-radius: 8px;
     font-size: 14px;
 }
 #pop>#pop_dialog { display: none; }
 .ui-dialog {
-    background-color: rgba(34,34,34,0.8);
+    background-color: var(--core-color-ui-bg);
     border-style: none;
 }
 .ui-dialog-titlebar,
 .ui-dialog-buttonpane {
-    background-color: rgba(62,62,62,0.92);
+    background-color: var(--core-color-dialog-bg);
     border-style: none;
 }
 .ui-dialog-content,
 .ui-dialog-title {
-    color: #ffffff;
+    color: var(--core-color-text);
 }
 .ui-button {
-    background-color: #606060;
+    background-color: var(--core-color-dialog-buttonbg);
     font-family: "メイリオ", sans-selif;
-    color: #ffffff;
+    color: var(--core-color-text);
     font-size: 13px;
     width: 128px;
     height: 42px;
@@ -214,7 +214,7 @@ audio { height: 30px; }
     position: absolute;
     top: 0px;
     left: 0px;
-    background-color: rgba(67,85,107,0.85);
+    background-color: var(--core-color-navi-bg);
     border-top-right-radius: 24px;
     width: 64px;
     height: 100vh;
@@ -234,7 +234,7 @@ audio { height: 30px; }
             }
             > a:hover>img {
                 border-radius: 12px;
-                background-color: rgba(255,255,255,0.15);
+                background-color: var(--core-color-navi-hoverbg);
                 cursor: pointer;
             }
         }
@@ -262,7 +262,7 @@ audio { height: 30px; }
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 18px;
         background-color: #325c9c;
-        color: #ffffff;
+        color: var(--core-color-text);
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -293,7 +293,7 @@ audio { height: 30px; }
             padding-left: 148px;
             height: 48px;
             width: 400px;
-            color: #ffffff;
+            color: var(--core-color-text);
             background-position: left center;
             background-repeat: no-repeat;
         }
@@ -327,11 +327,11 @@ audio { height: 30px; }
                     display: inline-block;
                     border-top-right-radius: 16px;
                     border-bottom-right-radius: 16px;
-                    border: solid 2px #cccccc;
+                    border: solid 2px var(--core-color-border);
                     border-left-style: none;
                     padding: 8px 24px;
                     padding-left: 108px;
-                    background-color: rgba(34,34,34,0.8);
+                    background-color: var(--core-color-ui-bg);
                     background-position: left bottom 35%;
                     background-repeat: no-repeat;
                     background-size: 96px auto;
@@ -345,10 +345,11 @@ audio { height: 30px; }
                     background-image: url("../resources/illust/il_info2.png");
                 }
                 > .done  {
-                    background-color: rgba(34,60,72,0.8);
+                    background-color: var(--core-color-toast-donebg);
                     background-image: url("../resources/illust/il_done2.png");
                 }
                 > .error {
+                    background-color: var(--core-color-toast-errorbg);
                     background-image: url("../resources/illust/il_err2.png");
                 }
             }
@@ -362,8 +363,8 @@ audio { height: 30px; }
         z-index: 60;
         border-top-left-radius: 16px;
         border-bottom-left-radius: 16px;
-        background-color: rgba(34,34,34,0.8);
-        border: solid 2px #bbbbbb;
+        background-color: var(--core-color-window-bg);
+        border: solid 2px var(--core-color-border);
         border-right-style: none;
         padding: 4px 0px 4px 4px;
         position: absolute;
@@ -375,10 +376,10 @@ audio { height: 30px; }
             > h2 {
                 border-top-left-radius: 18px;
                 border-bottom-left-radius: 18px;
-                background-color: rgba(67,96,132,0.8);
+                background-color: var(--core-color-header-bg);
                 font-family: Arial, "メイリオ", sans-selif;
                 font-size: 20px;
-                color: #ffffff;
+                color: var(--core-color-text);
                 margin: 0px;
                 padding: 12px 24px;
             }
@@ -393,19 +394,19 @@ audio { height: 30px; }
                         list-style-type: none;
                         > a {
                             display: block;
-                            background-color: rgba(62,62,62,0.92);
+                            background-color: var(--help-color-navi-bg);
                             margin: 4px 0px;
                             padding: 2px 24px;
                             border-radius: 12px;
                             font-size: 14px;
                             &:hover {
-                                background-color: rgba(62,96,128,0.92);
+                                background-color: var(--help-color-navi-hoverbg);
                                 padding-left: 32px;
                             }
                         }
                     }
                     > ul {
-                        border-left: solid 24px #aaaaaa;
+                        border-left: solid 24px var(--core-color-border);
                         border-top-left-radius: 16px;
                         border-bottom-left-radius: 16px;
                     }
@@ -413,7 +414,7 @@ audio { height: 30px; }
             }
             > .help_content {
                 overflow-y: auto;
-                background-color: rgba(34,34,34,0.5);
+                background-color: var(--core-color-ui-bg);
                 padding: 0px 18px 8px;
                 font-size: 13px;
 
@@ -422,32 +423,32 @@ audio { height: 30px; }
                     padding: 6px 18px;
                     margin: 16px -12px;
                     font-size: 20px;
-                    border-bottom: solid 2px #aaaaaa;
+                    border-bottom: solid 2px var(--help-color-block-border);
                 }
                 & h4 {
                     padding: 6px 18px;
                     margin: 16px -12px;
                     font-size: 17px;
-                    border-bottom: solid 1px #aaaaaa;
+                    border-bottom: solid 1px var(--help-color-block-border);
                 }
                 & dt {
                     padding: 0px 12px;
                     font-size: 14px;
-                    border-left: solid 8px #aaaaaa;
+                    border-left: solid 8px var(--help-color-block-border);
                 }
                 & dd {
                     margin-bottom: 8px;
                     margin-left: 8px;
                     padding-left: 12px;
-                    border-left: solid 4px #aaaaaa;
+                    border-left: solid 4px var(--help-color-block-border);
                     > .shortcut_key {
                         border-top-right-radius: 12px;
                         border-bottom-right-radius: 12px;
                         margin: 4px 0px;
                         margin-left: -12px;
                         padding: 2px 16px;
-                        background-color: #bbbbbb;
-                        color: #333333;
+                        background-color: var(--help-color-nega-bg);
+                        color: var(--help-color-nega-text);
                         font-size: 14px;
                         font-weight: bold;
                     }
@@ -456,9 +457,9 @@ audio { height: 30px; }
                     margin: 1px;
                     border-radius: 6px;
                     padding: 2px 8px;
-                    background-color: rgba(255,255,255,0.08);
+                    background-color: var(--help-color-table-bg);
                 }
-                & strong { color: #ffff00; }
+                & strong { color: var(--help-color-text-strong); }
                 .mistdon_logo {
                     width: 100%;
                     height: auto;
@@ -466,8 +467,8 @@ audio { height: 30px; }
                 & a.__on_detail_hashtag { text-decoration: underline; }
                 .current_version {
                     border-radius: 8px;
-                    background-color: #bbbbbb;
-                    color: #333333;
+                    background-color: var(--help-color-nega-bg);
+                    color: var(--help-color-nega-text);
                     padding: 2px 16px;
                     font-size: 18px;
                     font-family: Arial, "メイリオ", sans-selif;
@@ -488,10 +489,10 @@ audio { height: 30px; }
         border-top-left-radius: 14px;
         border-top-right-radius: 14px;
         border: solid 2px #bbbbbb;
-        background-color: rgba(34,34,34,0.683);
-        color: #fff;
+        background-color: var(--core-color-window-bg);
+        color: var(--core-color-text);
         > h2 {
-            background-color: #87995f;
+            background-color: var(--core-color-header-bg);
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             margin: 0px;
@@ -531,7 +532,7 @@ audio { height: 30px; }
         display: none;
         z-index: 9;
         border-radius: 12px;
-        background-color: rgba(34,34,34,0.85);
+        background-color: var(--core-color-ui-bg);
         width: 140px;
         padding: 6px;
     }
@@ -542,7 +543,7 @@ button.close_button {
     padding: 4px;
     text-align: center;
     width: 100%;
-    border: solid 2px #ffffff;
+    border: solid 2px var(--core-color-border);
     font-size: 16px;
     font-weight: bold;
 }
@@ -553,13 +554,13 @@ button.close_button {
     border-radius: 4px;
     width: 22px;
     height: 22px;
-    border: solid 1px #808080;
+    border: solid 1px var(--palette-color-border);
     margin: 2px;
     cursor: crosshair;
 }
 .__on_call_palette { margin-left: 4px; }
 .__on_select_color:hover {
-    border-color: #ffffff;
+    border-color: var(--palette-color-hover);
     cursor: pointer;
 }
 
