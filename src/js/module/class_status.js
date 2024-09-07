@@ -1244,6 +1244,8 @@ class Status {
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
+        // リプライ/ツリーの投稿はクラスをつける
+        if (this.reply_to) jqelm.closest('li').addClass('replied_post')
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)

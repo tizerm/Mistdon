@@ -856,6 +856,8 @@
                 .getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
+        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+            FlashTimeline.getWindow($(e.target)).current.quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
             Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else // 他の部分は直接リモートの投稿を取る
