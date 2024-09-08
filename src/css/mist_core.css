@@ -233,7 +233,7 @@ audio { height: 30px; }
                 object-fit: cover;
             }
             > a:hover>img {
-                border-radius: 12px;
+                border-radius: 16px;
                 background-color: var(--core-color-navi-hoverbg);
                 cursor: pointer;
             }
@@ -261,7 +261,7 @@ audio { height: 30px; }
         text-align: left;
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 18px;
-        background-color: #325c9c;
+        background-color: var(--core-color-header-bg);
         color: var(--core-color-text);
         overflow: hidden;
         white-space: nowrap;
@@ -274,42 +274,6 @@ audio { height: 30px; }
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {
-    /*=== Toast ==================================================================================*/
-    > #pop_toast {
-        z-index: 9;
-        font-family: Arial, "メイリオ", sans-selif;
-        font-size: 16px;
-        position: absolute;
-        font-weight: bold;
-        top: 114px;
-        left: 64px;
-
-        > span {
-            display: block;
-            border-top-right-radius: 12px;
-            border-bottom-right-radius: 12px;
-            margin: 4px 0px;
-            padding: 8px 32px;
-            padding-left: 148px;
-            height: 48px;
-            width: 400px;
-            color: var(--core-color-text);
-            background-position: left center;
-            background-repeat: no-repeat;
-        }
-        > span.toast_progress {
-            background-color: rgba(34,34,34,0.92);
-            background-image: url("../resources/illust/ani_wait.png");
-        }
-        > span.toast_done {
-            background-color: rgba(34,60,72,0.92);
-            background-image: url("../resources/illust/il_done.png");
-        }
-        > span.toast_error {
-            background-color: rgba(72,42,34,0.92);
-            background-image: url("../resources/illust/il_error.png");
-        }
-    }
     /*=== Notifications Layout ===================================================================*/
     > #pop_notification {
         z-index: 76;
@@ -447,8 +411,8 @@ audio { height: 30px; }
                         margin: 4px 0px;
                         margin-left: -12px;
                         padding: 2px 16px;
-                        background-color: var(--help-color-nega-bg);
-                        color: var(--help-color-nega-text);
+                        background-color: var(--core-color-nega-bg);
+                        color: var(--core-color-nega-text);
                         font-size: 14px;
                         font-weight: bold;
                     }
@@ -467,8 +431,8 @@ audio { height: 30px; }
                 & a.__on_detail_hashtag { text-decoration: underline; }
                 .current_version {
                     border-radius: 8px;
-                    background-color: var(--help-color-nega-bg);
-                    color: var(--help-color-nega-text);
+                    background-color: var(--core-color-nega-bg);
+                    color: var(--core-color-nega-text);
                     padding: 2px 16px;
                     font-size: 18px;
                     font-family: Arial, "メイリオ", sans-selif;
@@ -488,7 +452,7 @@ audio { height: 30px; }
         top: 18px;
         border-top-left-radius: 14px;
         border-top-right-radius: 14px;
-        border: solid 2px #bbbbbb;
+        border: solid 2px var(--core-color-border);
         background-color: var(--core-color-window-bg);
         color: var(--core-color-text);
         > h2 {

@@ -1,0 +1,106 @@
+﻿/*=== Color Theme Properties =====================================================================*/
+
+:root {
+    /*=== Core Layout Color ======================================================================*/
+    --core-color-bg:        #222222;
+    --core-color-text:      #ffffff;
+    --core-color-scrollbar: #808080;
+    --core-color-link:      #a5a9b5;
+    --core-color-hoverlink: #d1d8ed;
+    --core-color-border:    #bbbbbb;
+
+    --core-brightness-hover: 130%;
+
+    --core-color-navi-bg:      #43556be0;
+    --core-color-navi-hoverbg: #3b9c94;
+
+    /*=== Core Input Layout Color ================================================================*/
+    --core-color-input-bg:             #434343;
+    --core-color-check-bg:             #ffffff20;
+    --core-color-check-text:           #cccccc;
+    --core-color-check-hoverbg:        #cfcfcf;
+    --core-color-check-hovertext:      #333333;
+    --core-color-imgcheck-hoverbg:     #888888;
+    --core-color-check-activebg:       #337a9f;
+    --core-color-check-activetext:     #ffffff;
+    --core-color-check-acthvbg:        #afcfef;
+    --core-color-check-acthvtext:      #333333;
+    --core-color-check-disabledbg:     #222222;
+    --core-color-check-disabledtext:   #666666;
+    --core-color-button-hoverbg:       #777777;
+    --core-color-button-activebg:      #222222;
+    --core-color-button-activetext:    #a0a0a0;
+    --core-color-button-disabledbg:    #222222;
+    --core-color-button-disabledtext:  #666666;
+    --core-color-checkmask-hoverbg:    #9f3a3399;
+    --core-color-checkmask-activebg:   #337a9f99;
+    --core-color-checkmask-disabledbg: #77777799;
+
+    /*=== Core UI Layout Color ===================================================================*/
+    --core-color-ui-bg:               #222222e0;
+    --core-color-dialog-bg:           #3e3e3ee0;
+    --core-color-dialog-buttonbg:     #606060;
+    --core-color-sort-placeholder-bg: #a84860cc;
+    --core-color-toast-donebg:        #223c48e0;
+    --core-color-toast-errorbg:       #483c22e0;
+    --core-color-header-bg:           #87995f;
+    --core-color-window-bg:           #222222af;
+    --core-color-nega-bg:             #cccccc;
+    --core-color-nega-text:           #333333;
+    --core-color-nega-border:         #777777;
+    --core-color-thinui-bg:           #ffffff20;
+    --core-color-warn-bg:             #a10000cc;
+    --core-color-modal-bg:            #222222c0;
+
+    --palette-color-border: #808080;
+    --palette-color-hover:  #ffffff;
+
+    /*=== Help Layout Color ======================================================================*/
+    --help-color-navi-bg:      #3e3e3eea;
+    --help-color-navi-hoverbg: #3e6080ea;
+    --help-color-block-border: #aaaaaa;
+    --help-color-table-bg:     #3e3e3ee0;
+    --help-color-text-strong:  #ffff00;
+
+    --help-color-version-bg:  #52423ee0;
+    --help-color-version-linkbg:  #4461a6;
+
+    /*=== Main Header Layout Color ===============================================================*/
+    --head-color-opened-textarea-bg:   #383838af;
+    --head-color-opened-textarea-text: #999999;
+    --head-color-options-bg:           #303030e0;
+    --head-color-opthead-text:         #dddddd;
+    --head-color-mediamsk-activebg:    #9f3a3399;
+    --head-color-textarea-bg:          #3e3e3ee0;
+    --head-color-drive-folder-bg:      #4c4c4ce0;
+
+    /*=== Emoji Palette Layout Color =============================================================*/
+    --emoji-color-disabled-bg: #777777;
+    --emoji-color-disabled-text: #bbbbbb;
+    --emoji-color-palette-bg: #408a08;
+    --emoji-color-method-bg: #3562cc;
+    --emoji-color-recent-bg: #3e4452e0;
+    --emoji-color-suggest-bg: #52443ee0;
+
+    /*=== Static Label Colors ====================================================================*/
+    --label-color-optusers-bg:    #514285;
+    --label-color-optpolls-bg:    #428571;
+    --label-color-optrefer-bg:    #854257;
+    --label-color-reply-bg:       #cc355d;
+    --label-color-reblog-bg:      #408a08;
+    --label-color-favorite-bg:    #825e1b;
+    --label-color-hdfeatures-bg:  #3562cc;
+    --label-color-hdrhist-bg:     #408a08;
+    --label-color-hdphist-bg:     #3562cc;
+    --label-color-flash-prev-bg:  #564187;
+    --label-color-flash-next-bg:  #415687;
+    --label-color-flash-close-bg: #874141;
+
+    /*=== Timeline Layout Color ==================================================================*/
+    --tl-color-bg: #383838af;
+    --tl-color-quote-bg: #4c4c4caf;
+    --tl-color-loader-bg: #415687;
+    --tl-color-hoverbg: #3e3e3ee0;
+
+}
+
