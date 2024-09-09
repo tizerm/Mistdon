@@ -676,7 +676,7 @@
             > li, > li:hover {
                 border: solid 2px var(--core-color-border);
                 border-left-width: 8px;
-                background-color: var(--core-color-ui-bg);
+                background-color: var(--tl-color-popbg);
             }
         }
         &.reply_pop ul>li {

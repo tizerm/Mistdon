@@ -35,6 +35,7 @@
     --core-color-checkmask-hoverbg:    #9f3a3399;
     --core-color-checkmask-activebg:   #337a9f99;
     --core-color-checkmask-disabledbg: #77777799;
+    --core-color-imgbutton-hoverbg:    #3b9c94;
 
     /*=== Core UI Layout Color ===================================================================*/
     --core-color-ui-bg:               #222222e0;
@@ -62,8 +63,8 @@
     --help-color-table-bg:     #3e3e3ee0;
     --help-color-text-strong:  #ffff00;
 
-    --help-color-version-bg:  #52423ee0;
-    --help-color-version-linkbg:  #4461a6;
+    --help-color-version-bg:     #52423ee0;
+    --help-color-version-linkbg: #4461a6;
 
     /*=== Main Header Layout Color ===============================================================*/
     --head-color-opened-textarea-bg:   #383838af;
@@ -75,12 +76,12 @@
     --head-color-drive-folder-bg:      #4c4c4ce0;
 
     /*=== Emoji Palette Layout Color =============================================================*/
-    --emoji-color-disabled-bg: #777777;
+    --emoji-color-disabled-bg:   #777777;
     --emoji-color-disabled-text: #bbbbbb;
-    --emoji-color-palette-bg: #408a08;
-    --emoji-color-method-bg: #3562cc;
-    --emoji-color-recent-bg: #3e4452e0;
-    --emoji-color-suggest-bg: #52443ee0;
+    --emoji-color-palette-bg:    #408a08;
+    --emoji-color-method-bg:     #3562cc;
+    --emoji-color-recent-bg:     #3e4452e0;
+    --emoji-color-suggest-bg:    #52443ee0;
 
     /*=== Static Label Colors ====================================================================*/
     --label-color-optusers-bg:    #514285;
@@ -89,6 +90,16 @@
     --label-color-reply-bg:       #cc355d;
     --label-color-reblog-bg:      #408a08;
     --label-color-favorite-bg:    #825e1b;
+    --label-color-postcount-bg:   #606060;
+    --label-color-follow-bg:      #3562cc;
+    --label-color-followers-bg:   #cc6a35;
+    --label-color-bookmark-bg:    #c10000;
+    --label-color-cw-bg:          #8c720b;
+    --label-color-sensitive-bg:   #a10000;
+    --label-color-limitover-bg:   #0b638c;
+    --label-color-instotal-bg:    #4461a6;
+    --label-color-inslogin-bg:    #bf4747;
+    --label-color-insposts-bg:    #62913f;
     --label-color-hdfeatures-bg:  #3562cc;
     --label-color-hdrhist-bg:     #408a08;
     --label-color-hdphist-bg:     #3562cc;
@@ -97,10 +108,29 @@
     --label-color-flash-close-bg: #874141;
 
     /*=== Timeline Layout Color ==================================================================*/
-    --tl-color-bg: #383838af;
-    --tl-color-quote-bg: #4c4c4caf;
-    --tl-color-loader-bg: #415687;
-    --tl-color-hoverbg: #3e3e3ee0;
+    --tl-color-bg:                 #383838af;
+    --tl-color-hoverbg:            #4c4c4cea;
+    --tl-color-self-bg:            #3e4452af;
+    --tl-color-reblog-bg:          #3e4c42af;
+    --tl-color-favorite-bg:        #4c4c3eaf;
+    --tl-color-userlink-text:      #b5a5ab;
+    --tl-color-userlink-hovertext: #dddddd;
+    --tl-color-quote-bg:           #4c4c4caf;
+    --tl-color-quote-hoverbg:      #4f4f4fea;
+    --tl-color-quote-hoverborder:  #ffffff;
+    --tl-color-pollelm-bg:         #3e5260;
+    --tl-color-pollelm-activebg:   #603e3e;
+    --tl-color-pollelm-acthvbg:    #888888;
+    --tl-color-card-hoverbg:       #3e5260;
+    --tl-color-sublabel-text:      #bbbbbb;
+    --tl-color-loader-bg:          #415687;
+    --tl-color-popbg:              #2f2f2fea;
+    --tl-color-hoverbg:            #3e3e3ee0;
+
+    /*=== User Info Layout Color =================================================================*/
+    --user-color-pin-bg:     #52423eaf;
+    --user-color-pin-headbg: #3b783b;
+    --user-color-admin-bg:   #4461a6;
 
 }
 
