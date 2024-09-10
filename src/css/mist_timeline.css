@@ -237,7 +237,7 @@
         background-color: var(--tl-color-bg);
         border-radius: 12px;
         text-align: center;
-        color: #dddddd;
+        color: var(--tl-color-sublabel-text);
         font-family: Arial, "メイリオ", sans-selif;
         font-size: 14px;
     }
@@ -392,9 +392,11 @@
                     margin: 0px 12px;
                     overflow-wrap: break-word;
                 }
+                > *:not(.hidden_content) { font-size: var(--font-size-default); }
                 > .hidden_content {
                     margin-bottom: 4px;
                     overflow-wrap: break-word;
+                    font-size: var(--font-size-default-omit);
                 }
             }
 
@@ -415,7 +417,7 @@
                 position: relative;
                 overflow: hidden;
                 margin: 0px;
-                max-height: 240px;
+                max-height: var(--media-size-default);
                 vertical-align: text-bottom;
                 &::before {
                     content: "";
@@ -559,6 +561,8 @@
                     color: var(--core-color-nega-text);
                     font-weight: bold;
                 }
+                > .main_content { font-size: var(--font-size-default-quote); }
+                > .hidden_content { font-size: var(--font-size-default-omit); }
                 &:hover {
                     background-color: var(--tl-color-quote-hoverbg);
                     border-left-color: var(--tl-color-quote-hoverborder);
@@ -817,6 +821,7 @@
                 > .main_content {
                     position: absolute;
                     width: 100%;
+                    font-size: var(--font-size-default);
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
@@ -882,10 +887,9 @@
                 border-left: solid 4px var(--core-color-border);
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
-                > .main_content {
-                    margin: 0px;
-                    padding: 0px;
-                }
+                > .main_content { margin: 0px; padding: 0px; }
+                > *:not(.hidden_content) { font-size: var(--font-size-chat); }
+                > .hidden_content { font-size: var(--font-size-chat-omit); }
                 > .from_address {
                     text-align: right;
                     font-family: Arial, "メイリオ", sans-selif;
@@ -924,7 +928,7 @@
                 text-align: right;
             }
             > .media a.__on_media_expand {
-                max-height: 160px;
+                max-height: var(--media-size-chat);
                 .media_preview { border-radius: 6px; }
             }
         }
@@ -978,6 +982,7 @@
                     border-radius: 12px;
                     margin: 0px;
                     padding: 2px 8px;
+                    font-size: var(--font-size-list);
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
@@ -1056,9 +1061,10 @@
                     }
                     &.expand_label { background-image: url("../resources/ic_right.png"); }
                 }
+                > .main_content, > a.expand_header { font-size: var(--font-size-media); }
             }
             > .media a.__on_media_expand {
-                max-height: 320px;
+                max-height: var(--media-size-media);
                 margin: 3px 0px;
             }
             > .post_footer {
@@ -1087,6 +1093,7 @@
             > a.__on_media_expand {
                 display: inline-block;
                 width: 100%;
+                max-height: var(--media-size-gallery);
                 position: relative;
                 overflow: hidden;
                 margin: 0px;
@@ -1276,13 +1283,14 @@
         max-height: calc((100vh - 340px) * 0.2);
     }
     > .profile_detail {
+        > li.profile_userinfo>.content>.main_content { font-size: var(--font-size-default); }
         .prof_field {
             width: 100%;
             & th, & td {
                 margin: 1px;
                 border-radius: 6px;
                 padding: 2px 8px;
-                background-color: var(--help-color-table-bg);
+                background-color: var(--user-color-table-bg);
                 font-size: 13px;
             }
             & td{
@@ -1402,7 +1410,6 @@
     .column_profile>ul.profile_header>li.header_userinfo {
         > .detail_info>.counter {
             padding: 4px 28px 4px 2px;
-            font-size: 14px;
             font-weight: normal;
         }
     }

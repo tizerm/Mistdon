@@ -124,13 +124,13 @@
     --tl-color-card-hoverbg:       #3e5260;
     --tl-color-sublabel-text:      #bbbbbb;
     --tl-color-loader-bg:          #415687;
-    --tl-color-popbg:              #2f2f2fea;
+    --tl-color-popbg:              #333333ea;
     --tl-color-hoverbg:            #3e3e3ee0;
 
     /*=== User Info Layout Color =================================================================*/
+    --user-color-table-bg:   #4c4c4ce0;
     --user-color-pin-bg:     #52423eaf;
     --user-color-pin-headbg: #3b783b;
     --user-color-admin-bg:   #4461a6;
 
 }
-

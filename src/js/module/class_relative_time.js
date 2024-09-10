@@ -73,11 +73,12 @@ class RelativeTime {
     // Getter: リアルタイム更新の投稿の時間ラベルを生成
     get color() {
         const diff_msec = Date.now() - this.unix_msec
-        if (diff_msec > 86400000) return 'oklch(50% 0 0)' // 1日すぎてる場合はグレー
+        if (diff_msec > 86400000) return '#444444' // 1日すぎてる場合はグレー
+        //if (diff_msec > 86400000) return 'oklch(50% 0 0)' // 1日すぎてる場合はグレー
         // 86,400,000msec(24h)で260度になるよう対数を調整しています
         const h = Math.trunc(52.315848 * Math.log((diff_msec + 540000) / 600000))
-        // 色ごとの輝度の見え方を統一するためにOKLCH色空間を使用
-        return `oklch(50% 50% ${(h > 0 ? h : 0) + 30})`
+        return `hsl(${h > 0 ? h : 0} 50% 40%)`
+        //return `oklch(50% 50% ${(h > 0 ? h : 0) + 30})`
     }
 
 }

@@ -66,7 +66,7 @@
             }
             #post_length_graph {
                 border-radius: 50%;
-                border: solid 3px #aaaaaa;
+                border: solid 3px var(--core-color-border);
                 width: 30px;
                 height: 30px;
                 font-size: 1px;
@@ -389,6 +389,7 @@
     background-color: var(--head-color-textarea-bg);
     border: solid 1px var(--core-color-border);
     color: var(--core-color-text);
+    font-size: var(--font-size-default);
     resize: none;
     &::selection {
         color: var(--core-color-nega-text);

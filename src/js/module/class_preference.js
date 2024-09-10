@@ -577,74 +577,22 @@ class Preference {
         `
         // CSSをバインド
         $('style').html(`
-            ${columns}
-            #__txt_postarea {
-                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+            :root {
+                --font-size-default:       ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
+                --font-size-default-omit:  ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
+                --font-size-default-quote: ${Preference.GENERAL_PREFERENCE.font_size?.default_quote}px;
+                --font-size-chat:          ${Preference.GENERAL_PREFERENCE.font_size?.chat}px;
+                --font-size-chat-omit:     ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
+                --font-size-chat-quote:    ${Preference.GENERAL_PREFERENCE.font_size?.chat_quote}px;
+                --font-size-list:          ${Preference.GENERAL_PREFERENCE.font_size?.list}px;
+                --font-size-media:         ${Preference.GENERAL_PREFERENCE.font_size?.media}px;
+                --media-size-default:      ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
+                --media-size-chat:         ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
+                --media-size-media:        ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
+                --media-size-gallery:      ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
             }
+            ${columns}
             .timeline ul {
-                > li {
-                    &.normal_layout {
-                        > .content {
-                            > *:not(.hidden_content) {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
-                            }
-                            > .hidden_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
-                            }
-                        }
-                        > .post_quote {
-                            > .main_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_quote}px;
-                            }
-                            > .hidden_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default_omit}px;
-                            }
-                        }
-                        >.media a.__on_media_expand {
-                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.default}px;
-                        }
-                    }
-                    &.chat_timeline {
-                        > .content {
-                            > *:not(.hidden_content) {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat}px;
-                            }
-                            > .hidden_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
-                            }
-                        }
-                        > .post_quote {
-                            > .main_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_quote}px;
-                            }
-                            > .hidden_content {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.chat_omit}px;
-                            }
-                        }
-                        >.media a.__on_media_expand {
-                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
-                        }
-                    }
-                    &.short_timeline>.content>.main_content {
-                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.list}px;
-                    }
-                    &.media_timeline {
-                        > .content {
-                            > .main_content, > a.expand_header {
-                                font-size: ${Preference.GENERAL_PREFERENCE.font_size?.media}px;
-                            }
-                        }
-                        >.media a.__on_media_expand {
-                            max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
-                        }
-                    }
-                    &.gallery_timeline>a.__on_media_expand {
-                        max-height: ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
-                    }
-                    &.short_userinfo>.content>.main_content {
-                        font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
-                    }
-                }
                 @container gallery (width <= ${width_limit}px) {
                     > li.gallery_timeline { width: calc(100% - 2px); }
                 }
@@ -653,15 +601,7 @@ class Preference {
                     > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
                 }
             }
-            .column_profile {
-                > ul.profile_detail>li.profile_userinfo>.content>.main_content {
-                    font-size: ${Preference.GENERAL_PREFERENCE.font_size?.default}px;
-                }
-            }
         `)
-
-        // 投稿フォームの文字サイズを設定
-        //$("#__txt_postarea").css('font-size', `${Preference.GENERAL_PREFERENCE.font_size?.default}px`)
     }
 
     /**
