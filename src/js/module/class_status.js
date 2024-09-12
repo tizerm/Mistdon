@@ -915,10 +915,10 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        if (this.profile_post_flg || this.detail_flg) // プロフィールと詳細表示は投稿時刻で色分けする
-            jqelm.find('.post_footer>.created_at').addClass(`from_address ${this.relative_time.color_class}`)
         // 時間で色分け
-        jqelm.closest('li').css('border-left-color', this.relative_time.color)
+        jqelm.closest('li').css('border-left-color', this.profile_post_flg || this.detail_flg
+            ? this.relative_time.ltcolor : this.relative_time.color)
+        if (this.profile_post_flg) jqelm.find('.post_footer>.created_at').addClass('from_address')
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
