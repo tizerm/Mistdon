@@ -150,7 +150,7 @@ class Column {
         $("#columns").append(html)
 
         // カラムの色と幅を変更
-        $(`#${this.id}>.col_head, #${this.id}_closed`).css("background-color", `#${this.pref.col_color}`)
+        $(`#${this.id}>.col_head, #${this.id}_closed`).css("background-color", this.pref.col_color)
 
         // デフォルトで閉じる場合は表示を反転
         if (this.pref.d_hide) {

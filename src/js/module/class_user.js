@@ -763,7 +763,7 @@ class User {
                     ${User.createDetailHtml(this.full_address)}
                 </div>
             `,
-            color: getRandomColor(),
+            color: getHashColor(this.full_address),
             resizable: true,
             drag_axis: "x",
             resize_axis: "e, w"

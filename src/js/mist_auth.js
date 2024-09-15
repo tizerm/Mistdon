@@ -19,7 +19,7 @@
             // アカウントカラー初期設定
             $(".__txt_acc_color").each((index, elm) => {
                 const target = $(elm)
-                target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`)
+                target.closest(".account_box").find("h3").css("background-color", target.val())
             })
 
             // カラーパレット設定
@@ -44,7 +44,7 @@
      */
     $(document).on("blur", ".__txt_acc_color", e => {
         const target = $(e.target)
-        target.closest("li.account_box").find("h3").css("background-color", `#${target.val()}`)
+        target.closest("li.account_box").find("h3").css("background-color", target.val())
     })
 
     /**

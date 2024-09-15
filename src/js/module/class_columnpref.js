@@ -96,7 +96,7 @@ class TimelinePref {
         if (this.pref?.key_address) { // 表示対象アカウント
             const account = Account.get(this.pref.key_address)
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
-            jqelm.find("h4").css("background-color", `#${account?.pref.acc_color}`)
+            jqelm.find("h4").css("background-color", account?.pref.acc_color)
             jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
             jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
             jqelm.find(".__txt_channel_color").val(this.pref.color)
@@ -106,7 +106,7 @@ class TimelinePref {
             jqelm.find(".__txt_external_instance").val(this.pref.host)
             jqelm.find(".__hdn_external_platform").val(this.pref.platform)
             jqelm.find(".__txt_external_color").val(this.pref.color)
-            jqelm.find("h4").css("background-color", `#${this.pref.color}`)
+            jqelm.find("h4").css("background-color", this.pref.color)
             jqelm.find(".lbl_external_instance").show()
             jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
@@ -153,7 +153,7 @@ class TimelinePref {
         if (!this.pref) {
             if (!Account.isEmpty()) {  // アカウント情報があれば背景色は先頭にしてホスト情報を非表示
                 const account = Account.get(0)
-                jqelm.find("h4").css("background-color", `#${account.pref.acc_color}`)
+                jqelm.find("h4").css("background-color", account.pref.acc_color)
                 jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find(".lbl_list").hide()
@@ -186,7 +186,7 @@ class TimelinePref {
         const target_li = target.closest("li")
         const account = Account.get(target.find("option:selected").val())
         if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
-            target_li.find("h4").css("background-color", `#${account.pref.acc_color}`)
+            target_li.find("h4").css("background-color", account.pref.acc_color)
             target_li.find(".lbl_external_instance").hide()
             target_li.find('.__cmb_tl_type>option').prop("disabled", false)
             target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
@@ -442,7 +442,7 @@ class GroupPref {
         }
         if (this.pref?.gp_color) { // グループカラー
             jqelm.find(".__txt_group_color").val(this.pref.gp_color)
-            jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
+            jqelm.find(".group_head").css("background-color", this.pref.gp_color)
         }
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
@@ -468,7 +468,7 @@ class GroupPref {
         const jqelm = tl.create()
         $(`#${this.id}>ul`).append(jqelm)
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>ul>li:last-child`))
+        //setColorPalette($(`#${this.id}>ul>li:last-child`))
     }
 
     /**
@@ -627,7 +627,7 @@ class ColumnPref {
             jqelm.find(".__chk_default_flex").prop("checked", true)
         if (this.pref?.col_color) { // カラムカラー
             jqelm.find(".__txt_col_color").val(this.pref.col_color)
-            jqelm.find(".col_head").css("background-color", `#${this.pref.col_color}`)
+            jqelm.find(".col_head").css("background-color", this.pref.col_color)
         }
         // タイムラインの設定値をDOMと共に生成
         this.tl_groups.forEach((v, k) => jqelm.find(".col_tl_groups").append(v.create()))
@@ -646,7 +646,7 @@ class ColumnPref {
         column.create()
         column.addGroup()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${column.id}>.col_option`))
+        //setColorPalette($(`#${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
         $(`#${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
@@ -673,7 +673,7 @@ class ColumnPref {
         // グループの高さを再設定
         this.resetHeight()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_option`))
+        //setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_option`))
         ColumnPref.setInnerSortable()
     }
 

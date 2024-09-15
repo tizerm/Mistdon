@@ -495,10 +495,24 @@ audio { height: 30px; }
         position: absolute;
         display: none;
         z-index: 9;
-        border-radius: 12px;
-        background-color: var(--core-color-ui-bg);
-        width: 140px;
-        padding: 6px;
+        border-radius: 8px;
+        border: solid 2px var(--core-color-border);
+        background-color: var(--tl-color-popbg);
+        width: min(320px,100vw);
+        padding: 4px;
+        > .box_flex { display: flex; }
+        & p { margin: 4px 0px; padding: 0px; }
+        .color_preview {
+            background-color: var(--core-color-header-bg);
+            border-radius: 8px;
+            padding: 24px 8px;
+            margin-right: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            > .white { color: #ffffff; }
+            > .black { color: #000000; }
+        }
+        .__sld_color_palette { width: 180px; }
     }
 }
 button.close_button {

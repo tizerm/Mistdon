@@ -893,7 +893,7 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
@@ -1030,7 +1030,7 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
+        jqelm.find('.from_address>div').css("background-color", this.account_color)
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
@@ -1236,7 +1236,7 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // フォロ限の場合はブースト/リノート禁止クラスを付与
@@ -1916,7 +1916,7 @@ class Status {
             </div>
         `))
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
+        jqelm.find('h2').css("background-color", this.account_color)
         jqelm.find('.timeline>ul').append(this.element)
         $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         // サジェストテキストボックスにフォーカス
@@ -1952,7 +1952,7 @@ class Status {
                     </div>
                 </div>
             `,
-            color: getRandomColor(),
+            color: getHashColor(this.id),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"
@@ -2073,7 +2073,7 @@ class Status {
             "external": !auth_account,
             "host": this.host,
             "platform": this.platform,
-            "color": auth_account?.pref.acc_color ?? getRandomColor(),
+            "color": auth_account?.pref.acc_color ?? getHashColor(this.host),
             "timeline_type": "local",
             "exclude_reblog": false,
             "expand_cw": false,

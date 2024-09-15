@@ -613,7 +613,7 @@ class Preference {
             case 'mono_color': // 単色カラー
                 $("body").css({
                     "background-image": 'none',
-                    "background-color": `#${Preference.GENERAL_PREFERENCE.background?.color}`
+                    "background-color": Preference.GENERAL_PREFERENCE.background?.color
                 })
                 break
             case 'mitlin': // ミトリン

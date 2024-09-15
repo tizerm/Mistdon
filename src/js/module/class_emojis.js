@@ -333,7 +333,7 @@ class Emojis {
     static async bindEmojiPaletteWindow(account) {
         // ヘッダ設定
         $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
-            .css('background-color', `#${account.pref.acc_color}`)
+            .css('background-color', account.pref.acc_color)
         $('#singleton_emoji_window .recent_emoji>.recent_emoji_list').empty()
         $('#singleton_emoji_window .emoji_list').empty()
 
