@@ -21,9 +21,6 @@
                 const target = $(elm)
                 target.closest(".account_box").find("h3").css("background-color", target.val())
             })
-
-            // カラーパレット設定
-            setColorPalette()
         })()
         $(".__ui_sortable").sortable({
             axis: "y",

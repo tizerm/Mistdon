@@ -498,7 +498,7 @@ audio { height: 30px; }
         border-radius: 8px;
         border: solid 2px var(--core-color-border);
         background-color: var(--tl-color-popbg);
-        width: min(320px,100vw);
+        width: min(360px,100vw);
         padding: 4px;
         > .box_flex { display: flex; }
         & p { margin: 4px 0px; padding: 0px; }
@@ -507,11 +507,13 @@ audio { height: 30px; }
             border-radius: 8px;
             padding: 24px 8px;
             margin-right: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             > .white { color: #ffffff; }
             > .black { color: #000000; }
         }
+        .color_channels { flex-shrink: 0; }
+        .__txt_color_param { width: 32px; }
         .__sld_color_palette { width: 180px; }
     }
 }

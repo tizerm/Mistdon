@@ -468,7 +468,6 @@ class GroupPref {
         const jqelm = tl.create()
         $(`#${this.id}>ul`).append(jqelm)
         ColumnPref.setButtonPermission()
-        //setColorPalette($(`#${this.id}>ul>li:last-child`))
     }
 
     /**
@@ -646,7 +645,6 @@ class ColumnPref {
         column.create()
         column.addGroup()
         ColumnPref.setButtonPermission()
-        //setColorPalette($(`#${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
         $(`#${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
@@ -673,7 +671,6 @@ class ColumnPref {
         // グループの高さを再設定
         this.resetHeight()
         ColumnPref.setButtonPermission()
-        //setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_option`))
         ColumnPref.setInnerSortable()
     }
 

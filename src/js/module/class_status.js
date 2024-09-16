@@ -90,7 +90,7 @@ class Status {
                     .replace(new RegExp( // Misskey用のURLマークアップ
                         '<a href="https?://[^ 　\n]+".*?rel="nofollow noopener noreferrer".*?>https?://.+?</a>',
                         'g'), '12345678901234567890')
-                    .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234'))).text().length
+                    .replace(/:[a-zA-Z0-9_]+:/g, '1234'))).text().length
                 else this.content_length = 0
 
                 // 投票がある場合は投票に関するデータ
@@ -202,10 +202,9 @@ class Status {
                 if (this.content) { // 投稿本文の整形と字数計測
                     this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
-                        .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234').length
+                        .replace(/:[a-zA-Z0-9_]+:/g, '1234').length
                     const markup_content = this.content // 投稿本文を最低限マークアップ
-                        .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
-                        .replace(new RegExp('>', 'g'), '&gt;')
+                        .replace(/</g, '&lt;').replace(/>/g, '&gt;') // 先にタグエスケープをする(改行がエスケープされるので)
                         // MFMのURL記法は文字列リンクとしてマークアップする(うまくいかんので一旦保留)
                         //.replace(new RegExp('[?]?\[(.+?)\]\((https?://[^ ()　\n]+?)\)', 'g'),
                         //    '<a href="$2" class="markuped_link">$1</a>')
@@ -333,9 +332,8 @@ class Status {
     }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
     get content_text() {
-        return $($.parseHTML(this.content)).text()
-            .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
-            .replace(new RegExp('>', 'g'), '&gt;')
+        // タグエスケープを挟む
+        return $($.parseHTML(this.content)).text().replace(/</g, '&lt;').replace(/>/g, '&gt;')
     }
 
     /**

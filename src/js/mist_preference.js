@@ -6,16 +6,12 @@
         await window.accessApi.readPrefCols()
 
         // データがなかったらDOM生成はしない
-        if (ColumnPref.isEmpty()) {
-            setColorPalette()
-            return
-        }
+        if (ColumnPref.isEmpty()) return
 
         // カラム設定情報からDOMを生成
         ColumnPref.each(col => col.create())
         ColumnPref.setButtonPermission()
         ColumnPref.initRemoteInfo()
-        setColorPalette()
         ColumnPref.setInnerSortable()
     })()
     // カラムをSortableにする(これはカラムの有無にかかわらず実行)

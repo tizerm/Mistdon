@@ -212,7 +212,7 @@ class Emojis {
 
         let text = jqelm.html()
         // 文章中に存在するショートコードを抽出
-        const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+@.+:', 'g'))
+        const shortcodes = text.match(/:[a-zA-Z0-9_]+@.+:/g)
         if (!shortcodes) return text // 絵文字がない場合はそのまま返却
         const emoji_promises = []
         shortcodes.forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
