@@ -1309,8 +1309,9 @@
                 cursor: pointer;
                 &:hover { background-color: var(--tl-color-pollelm-bg); }
             }
+            &:has(>a.__tab_profile_channels)>a { width: calc(33% - 12px); }
         }
-        > .media_uls { display: none; }
+        > .media_uls, > .channel_uls { display: none; }
     }
     .post_div {
         position: relative;
@@ -1337,7 +1338,7 @@
         }
         > ul>li { background-color: var(--user-color-pin-bg); }
     }
-    .posts, .media_post { height: calc((100vh - 310px) * 0.6); }
+    .posts, .media_post, .channel_post { height: calc((100vh - 310px) * 0.6); }
     > .user_bookmark_elm, > .user_ff_elm { display: none; }
 
     .ff_short_profile {

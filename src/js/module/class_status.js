@@ -187,6 +187,8 @@ class Status {
                 this.visibility = data.visibility
                 this.allow_reblog = this.visibility == 'public' || this.visibility == 'home'
                 this.local_only = data.localOnly
+                this.channel_id = data.channel?.id
+                this.channel_name = data.channel?.name
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
@@ -884,6 +886,10 @@ class Status {
                 html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
             else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
+
+        if (this.profile_post_flg && this.channel_id)
+            // ユーザープロフィールのチャンネル投稿の場合はチャンネル名を表示
+            html += `<div class="from_address from_channel">${this.channel_name}</div>`
         html += `
                 </div>
             </li>
@@ -892,6 +898,8 @@ class Status {
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
+        if (this.profile_post_flg && this.channel_id) // チャンネルIDから色をハッシュ化
+            jqelm.find('.post_footer>.from_address').css("background-color", getHashColor(this.channel_id))
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
@@ -1387,7 +1395,8 @@ class Status {
             default:
                 break
         }
-        if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only) // 連合なし
+        if (this.from_timeline?.pref?.timeline_type != 'channel' &&
+            !(this.profile_post_flg && this.channel_id) && this.local_only) // 連合なし
             html += '<img src="resources/ic_local.png" class="flg_local"/>'
 
         html += '</div>'

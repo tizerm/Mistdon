@@ -238,7 +238,8 @@ class User {
                 <ul class="profile_detail __context_user"></ul>
                 <div class="user_post_elm">
                     <div class="tab">
-                        <a class="__tab_profile_posts">全投稿</a>
+                        <a class="__tab_profile_posts">投稿</a>
+                        <a class="__tab_profile_channels">チャンネル</a>
                         <a class="__tab_profile_medias">メディア</a>
                     </div>
                     <div class="post_uls">
@@ -249,6 +250,9 @@ class User {
                         <div class="posts_block post_div">
                             <ul class="posts __context_posts"></ul>
                         </div>
+                    </div>
+                    <div class="channel_uls">
+                        <ul class="channel_post __context_posts"></ul>
                     </div>
                     <div class="media_uls">
                         <ul class="media_post __context_posts"></ul>
@@ -440,9 +444,10 @@ class User {
      * このユーザーの投稿一覧を取得する
      * 
      * @param account リモートホストの情報を入れた最小限のアカウントオブジェクト
+     * @param type 取得するタイムラインのタイプ
      * @param max_id 前のページの最後の投稿のページングID
      */
-    async getPost(account, media_flg, max_id) {
+    async getPost(account, type, max_id) {
         let response = null
         let query_param = null
         try {
@@ -450,7 +455,7 @@ class User {
                 case 'Mastodon': // Mastodon
                     query_param = {
                         "limit": 40,
-                        "only_media": media_flg,
+                        "only_media": type == 'media',
                         "exclude_replies": true
                     }
                     if (max_id) query_param.max_id = max_id // ページ送りの場合はID指定
@@ -470,7 +475,8 @@ class User {
                         "userId": this.id,
                         "includeReplies": false,
                         "limit": 40,
-                        "withFiles": media_flg,
+                        "withFiles": type == 'media',
+                        "withChannelNotes": type == 'channel',
                         "includeMyRenotes": false
                     }
                     if (max_id) query_param.untilId = max_id // ページ送りの場合はID指定
@@ -486,6 +492,7 @@ class User {
                 default:
                     break
             }
+
             const posts = []
             response.forEach(p => posts.push(new Status(p, User.USER_MAIN_TIMELINE, account)))
             return posts
@@ -797,14 +804,15 @@ class User {
         if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
             Emojis.replaceDomAsync(target_elm.find(".profile_header .username"), this.host) // ユーザー名
             Emojis.replaceDomAsync(target_elm.find(".profile_detail .main_content"), this.host) // プロフィール文
-        }
+        } else target_elm.find(".__tab_profile_channels").remove() // Mastodonはチャンネルを削除
+
 
         try { // ピンどめ投稿と通常投稿を取得
             const account = { // accountには最低限の情報だけ入れる
                 "platform": this.platform,
                 "pref": { "domain": this.host }
             }
-            const response = await Promise.all([this.getPost(account, false, null), this.getPinnedPost(account)])
+            const response = await Promise.all([this.getPost(account, "post", null), this.getPinnedPost(account)])
             target_elm.find(".col_loading").remove()
 
             // 最新投稿データはスクロールローダーを生成
@@ -822,7 +830,7 @@ class User {
                     // max_idとして取得データの最終IDを指定
                     return data.pop()?.id
                 },
-                load: async max_id => this.getPost(account, false, max_id)
+                load: async max_id => this.getPost(account, "post", max_id)
             })
             { // ピンどめ投稿を展開
                 const exist_pinned = response[1].length > 0
@@ -858,6 +866,7 @@ class User {
 
         // ブロックの高さを計算
         target_elm.find("ul.posts").css('height', `calc(100vh - ${320 + detail_height + pinned_height}px)`)
+        target_elm.find("ul.channel_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
         target_elm.find("ul.media_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
         target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${290 + detail_height}px)`)
         target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${500 + detail_height}px)`)
@@ -952,7 +961,7 @@ class User {
             "pref": { "domain": this.host }
         }
         // メディア投稿データを取得してローダーを生成
-        const response = await this.getPost(account, true, null)
+        const response = await this.getPost(account, "media", null)
         target_td.find(".col_loading").remove()
         createScrollLoader({ // スクロールローダーを生成
             data: response,
@@ -962,7 +971,39 @@ class User {
                 // max_idとして取得データの最終IDを指定
                 return data.pop()?.id
             },
-            load: async max_id => this.getPost(account, true, max_id)
+            load: async max_id => this.getPost(account, "media", max_id)
+        })
+    }
+
+    async createChannelPosts() {
+        const target_td = $(`#user_${this.user_uuid}[name="${this.full_address}"]`)
+        target_td.prepend(`
+            <div class="col_loading">
+                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                <span class="loading_text">Now Loading...</span>
+            </div>
+        `)
+
+        const account = { // accountには最低限の情報だけ入れる
+            "platform": this.platform,
+            "pref": { "domain": this.host }
+        }
+        // メディア投稿データを取得してローダーを生成
+        const response = await this.getPost(account, "channel", null)
+        target_td.find(".col_loading").remove()
+        createScrollLoader({ // スクロールローダーを生成
+            data: response,
+            target: target_td.find(".channel_post"),
+            bind: (data, target) => {
+                data.filter(f => f.channel_id).forEach(p => target.append(p.element))
+                Emojis.replaceDomAsync(target.find(".username"), this.host) // ユーザー名
+                Emojis.replaceDomAsync(target.find(".label_cw"), this.host) // CWテキスト
+                Emojis.replaceDomAsync(target.find(".main_content"), this.host) // 本文
+                Emojis.replaceDomAsync(target.find(".reaction_section"), this.host) // リアクション
+                // max_idとして取得データの最終IDを指定
+                return data.pop()?.id
+            },
+            load: async max_id => this.getPost(account, "channel", max_id)
         })
     }
 

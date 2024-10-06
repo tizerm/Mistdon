@@ -1211,12 +1211,22 @@
 
     /**
      * #Event
-     * ユーザープロフィール: 全投稿タブ.
+     * ユーザープロフィール: 投稿タブ.
      * => ユーザーの投稿一覧を表示
      */
     $(document).on("click", ".account_timeline .__tab_profile_posts", e => {
         $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".post_uls").show()
+    })
+
+    $(document).on("click", ".account_timeline .__tab_profile_channels", e => {
+        if ($(e.target).closest(".user_post_elm").find(".channel_uls>ul").is(":empty"))
+            // メディアタイムラインを未取得の場合は取得する
+            User.getCache($(e.target).closest(".column_profile")).createChannelPosts()
+        $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").show()
     })
 
     /**
@@ -1229,6 +1239,7 @@
             // メディアタイムラインを未取得の場合は取得する
             User.getCache($(e.target).closest(".column_profile")).createMediaGallery()
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
     })
 
