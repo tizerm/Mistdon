@@ -1269,6 +1269,9 @@
         background-color: var(--core-color-ui-bg);
         border: solid 2px var(--core-color-border);
         border-radius: 12px;
+        padding: 8px;
+        width: min(360px,calc(100vw - 64px));
+        font-size: 14px;
         z-index: 49;
         > .footer {
             margin: -4px;
@@ -1280,14 +1283,35 @@
         }
     }
     > #pop_bookmark_option {
-        width: min(360px,calc(100vw - 64px));
-        padding: 8px;
-        font-size: 14px;
         & select#__cmb_ex_bookmark_account { width: 100%; }
         & label {
             display: inline-block;
             width: calc(50% - 48px);
         }
+    }
+    > #pop_temporary_option {
+        > div:not(.footer) { margin: 12px 0px; }
+        & select { width: 100%; }
+        .lbl_external_instance>.instance_info {
+            background-color: var(--tl-color-quote-bg);
+            background-size: auto 64px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            border-radius: 12px;
+            margin: 6px 0px;
+            padding: 2px;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: center;
+        }
+        & button.__open_multi_tl_layout {
+            vertical-align: text-bottom;
+            > img {
+                width: 24px;
+                height: 24px;
+            }
+        }
+        .lbl_external_instance, .lbl_list, .lbl_channel, .lbl_antenna { display: none; }
     }
 
     /*=== Lastest Release Notification Layout ====================================================*/

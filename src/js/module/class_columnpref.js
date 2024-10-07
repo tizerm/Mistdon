@@ -184,7 +184,7 @@ class TimelinePref {
      */
     static changeAccountEvent(target) {
         const target_li = target.closest("li")
-        const account = Account.get(target.find("option:selected").val())
+        const account = Account.get(target.val())
         if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
             target_li.find("h4").css("background-color", account.pref.acc_color)
             target_li.find(".lbl_external_instance").hide()
