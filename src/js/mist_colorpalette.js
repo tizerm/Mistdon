@@ -2,7 +2,12 @@
     // Function: 登録されているCSSプロパティ値からパレット初期値を設定する
     const setColorOpt = value => {
         $("#pop_palette .color_preview").css("background-color", value)
-        if (value.match(/^#[0-9a-f]{6}/g)) { // HEXRGB
+        if (value == '') { // 空
+            $("#cmb_color_space").val("rgb").change()
+            $("#color_text_1, #color_param_1").val(0)
+            $("#color_text_2, #color_param_2").val(0)
+            $("#color_text_3, #color_param_3").val(0)
+        } else if (value.match(/^#[0-9a-f]{6}/g)) { // HEXRGB
             $("#cmb_color_space").val("rgb").change()
 
             // 10進数のRGB色空間に変換
@@ -132,6 +137,49 @@
             default:
                 break
         }
+    })
+
+    // 色をランダムで設定
+    $("#on_random_color").on("click", e => {
+        let p1 = 0
+        let p2 = 0
+        let p3 = 0
+        switch ($("#cmb_color_space").val()) {
+            case 'rgb': // RGB
+                p1 = Math.floor(Math.random() * 256)
+                p2 = Math.floor(Math.random() * 256)
+                p3 = Math.floor(Math.random() * 256)
+                break
+            case 'hsl': // HSL
+                p1 = Math.floor(Math.random() * 360)
+                p2 = Math.floor(Math.random() * 101)
+                p3 = Math.floor(Math.random() * 101)
+                break
+            case 'lab': // CIELAB
+            case 'oklab': // OKLAB
+                p1 = 45 + Math.floor(Math.random() * 16)
+                p2 = Math.floor(Math.random() * 201) - 100
+                p3 = Math.floor(Math.random() * 201) - 100
+                break
+            case 'lch': // CIELCH
+            case 'oklch': // OKLCH
+                p1 = 45 + Math.floor(Math.random() * 16)
+                p2 = 10 + Math.floor(Math.random() * 61)
+                p3 = Math.floor(Math.random() * 360)
+                break
+            default:
+                break
+        }
+
+        $("#color_text_1").val(p1)
+        $("#color_text_2").val(p2)
+        $("#color_text_3").val(p3)
+        $("#color_param_1").val(p1)
+        $("#color_param_2").val(p2)
+        $("#color_param_3").val(p3)
+        const color_prof = getColorOpt()
+        $("#pop_palette .color_preview").css("background-color", color_prof)
+        $(".__target_color_box").val(color_prof).change().blur()
     })
 
     // カラーパレット以外をクリックしたらパレットを閉じる

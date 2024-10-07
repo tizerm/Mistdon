@@ -77,15 +77,20 @@
                 <p class="black">Aaあア#1</p>
             </div>
             <div class="color_channels">
-                <span>色空間:</span>
-                <select id="cmb_color_space" title="色空間">
-                    <option value="rgb">RGB</option>
-                    <option value="hsl">HSL</option>
-                    <option value="lab">CIELAB</option>
-                    <option value="lch">CIELCH</option>
-                    <option value="oklab">OKLAB</option>
-                    <option value="oklch">OKLCH</option>
-                </select>
+                <p>
+                    <span>色空間:</span>
+                    <select id="cmb_color_space" title="色空間">
+                        <option value="rgb">RGB</option>
+                        <option value="hsl">HSL</option>
+                        <option value="lab">CIELAB</option>
+                        <option value="lch">CIELCH</option>
+                        <option value="oklab">OKLAB</option>
+                        <option value="oklch">OKLCH</option>
+                    </select>
+                    <button type="button" id="on_random_color" title="ランダムで色を生成"
+                        class="icon_label_set"><img src="resources/ic_reblog.png" alt="ランダムで色を生成"/>
+                        <span>ランダム</span></button>
+                </p>
                 <p>
                     <span id="color_label_1">R</span>
                     <input type="text" id="color_text_1" class="__txt_color_param"/>

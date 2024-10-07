@@ -181,7 +181,7 @@ function getHashColor(str) {
     let sum = 0
     for (const s of str) sum += Math.pow(s.charCodeAt(), 2)
     const hue = sum % 360
-    const light = 45 + (sum % 11)
+    const light = 45 + (sum % 16)
     const chroma = 10 + (sum % 61)
 
     return `oklch(${light}% ${chroma}% ${hue})`

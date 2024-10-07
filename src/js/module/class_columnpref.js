@@ -49,7 +49,7 @@ class TimelinePref {
                         <input type="hidden" class="__hdn_external_platform" value="null"/>
                         <div class="instance_info">(URLを入力してください)</div>
                         <div class="color_info">
-                            色: #<input type="text" class="__txt_external_color __pull_color_palette" size="6"/>
+                            色: <input type="text" class="__txt_external_color __pull_color_palette"/>
                         </div>
                     </div>
                     <div class="lbl_tl_type">
@@ -71,7 +71,7 @@ class TimelinePref {
                         対象チャンネル:<br/><select class="__cmb_tl_channel">
                         </select>
                         <div class="color_info">
-                            色: #<input type="text" class="__txt_channel_color __pull_color_palette" size="6"/>
+                            色: <input type="text" class="__txt_channel_color __pull_color_palette"/>
                         </div>
                     </div>
                     <div class="lbl_antenna">
@@ -386,7 +386,7 @@ class GroupPref {
                         <option value="gallery">ギャラリー</option>
                         <option value="multi">マルチ</option>
                     </select>
-                    色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
+                    色: <input type="text" class="__txt_group_color __pull_color_palette"/>
                 </div>
                 <table class="tl_layout_options"><tbody>
                     <tr>
@@ -604,10 +604,12 @@ class ColumnPref {
                 </div>
                 <div class="col_option">
                     <input type="checkbox" id="dh_${this.id}" class="__chk_default_hide"/>
-                    <label for="dh_${this.id}">デフォルトで閉じる</label><br/>
+                    <label for="dh_${this.id}" class="tooltip" title="デフォルトで閉じる"><img
+                        src="resources/ic_left.png" alt="デフォルトで閉じる"/></label>
                     <input type="checkbox" id="df_${this.id}" class="__chk_default_flex"/>
-                    <label for="df_${this.id}">デフォルトで可変幅にする</label><br/>
-                    色: #<input type="text" class="__txt_col_color __pull_color_palette" size="6"/>
+                    <label for="df_${this.id}" class="tooltip" title="デフォルトで可変幅にする"><img
+                        src="resources/ic_flex_off.png" alt="デフォルトで可変幅にする"/></label>
+                    色: <input type="text" class="__txt_col_color __pull_color_palette"/>
                 </div>
                 <div class="col_tl_groups __ui_gp_sortable">
                 </div>

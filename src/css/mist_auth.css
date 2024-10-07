@@ -134,6 +134,7 @@ input[type="text"] { font-family: Arial, "メイリオ", sans-selif; }
                         margin: 0px;
                         padding: 0px;
                     }
+                    .__pull_color_palette { width: calc(100% - 48px); }
                 }
                 > .foot_button {
                     text-align: right;
