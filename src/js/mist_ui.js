@@ -10,12 +10,12 @@ $(() => {
 
     // 外部表示リンククリックイベント
     $(document).on("click", ".__lnk_external", e => {
-        const url = $(e.target).closest("a").attr("href");
-        window.accessApi.openExternalBrowser(url);
+        const url = $(e.target).closest("a").attr("href")
+        window.accessApi.openExternalBrowser(url)
         // リンク先に飛ばないようにする
-        return false;
-    });
-});
+        return false
+    })
+})
 
 /**
  * #Event #jQuery
@@ -24,22 +24,22 @@ $(() => {
  * @param arg パラメータオブジェクト
  */
 function delayHoverEvent(arg) {
-    var timer = null;
+    var timer = null
     $(document).on("mouseenter", arg.selector, e => {
-        $(e.target).css('cursor', 'progress');
+        $(e.target).css('cursor', 'progress')
         timer = setTimeout(evt => { // タイマーセット
-            timer = null;
-            $(evt.target).css('cursor', 'default');
-            arg.enterFunc(evt);
-        }, arg.delay, e);
-    });
+            timer = null
+            $(evt.target).css('cursor', 'default')
+            arg.enterFunc(evt)
+        }, arg.delay, e)
+    })
     $(document).on("mouseleave", arg.selector, e => {
         if (timer) { // タイマーが未実行の場合はタイマーを削除
-            $(e.target).css('cursor', 'default');
-            clearTimeout(timer);
-            timer = null;
-        } else arg.leaveFunc(e);
-    });
+            $(e.target).css('cursor', 'default')
+            clearTimeout(timer)
+            timer = null
+        } else arg.leaveFunc(e)
+    })
 }
 
 /**
@@ -49,105 +49,30 @@ function delayHoverEvent(arg) {
  * @param arg パラメータオブジェクト
  */
 function delayHoldEvent(arg) {
-    var timer = null;
+    var timer = null
     $(document).on("mousedown", arg.selector, e => {
-        $(e.target).css('cursor', 'progress');
+        $(e.target).css('cursor', 'progress')
         timer = setTimeout(evt => { // タイマーセット
-            timer = null;
-            $(evt.target).css('cursor', 'default');
-            arg.holdFunc(evt);
-        }, arg.delay, e);
-
-    });
+            timer = null
+            $(evt.target).css('cursor', 'default')
+            arg.holdFunc(evt)
+        }, arg.delay, e)
+    })
     // タイマー実行前にマウスを外す、もしくはクリックをあげた場合は実行しない
     $(document).on("mouseleave", arg.selector, e => {
         if (timer) {
-            $(e.target).css('cursor', 'default');
-            clearTimeout(timer);
-            timer = null;
+            $(e.target).css('cursor', 'default')
+            clearTimeout(timer)
+            timer = null
         }
-    });
+    })
     $(document).on("mouseup", arg.selector, e => {
         if (timer) {
-            $(e.target).css('cursor', 'default');
-            clearTimeout(timer);
-            timer = null;
+            $(e.target).css('cursor', 'default')
+            clearTimeout(timer)
+            timer = null
         }
-    });
-}
-
-/**
- * #Renderer #jQuery
- * カラーフォームにカラーパレット表示機能を追加
- * (動的に生成する関係で後付しないと動かないので関数化)
- */
-function setColorPalette(target) {
-    if (target) { // 付与先のターゲットが指定されている場合は指定先にあるカラーパレットにだけセット
-        target.find(".__pull_color_palette")
-            .after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
-        target.find(".__pull_color_palette+.__on_call_palette").tooltip({
-            position: {
-                my: "left+6 bottom+18",
-                at: "right center"
-            },
-            show: {
-                effect: "slide",
-                duration: 80
-            },
-            hide: {
-                effect: "slide",
-                duration: 80
-            }
-        });
-        return;
-    }
-    const palette_dom = $("#pop_palette");
-    color_palette.forEach(color => {
-        palette_dom.append(`<a id="${color}" class="__on_select_color">&nbsp;</a>`);
-        palette_dom.find('.__on_select_color:last-child').css("background-color", `#${color}`);
-    });
-    // カラーパレットの直後にパレット呼び出しボタンをセット
-    $(".__pull_color_palette").each((index, elm) => {
-        $(elm).after('<a class="__on_call_palette" title="ドラッグ&ドロップで色を選択できます">&nbsp;</a>');
-        $(elm).next().css("background-color", `#${$(elm).val()}`);
-    });
-    $(".__on_call_palette").tooltip({
-        position: {
-            my: "left+6 bottom+18",
-            at: "right center"
-        },
-        show: {
-            effect: "slide",
-            duration: 80
-        },
-        hide: {
-            effect: "slide",
-            duration: 80
-        }
-    });
-
-    $(document).on("mousedown", ".__on_call_palette", e => {
-        // イベントターゲットにするためのクラスを付与
-        $(e.target).addClass("__target_color_button").prev().addClass("__target_color_box");
-
-        palette_dom.css('top', (e.pageY + 12) + 'px').css('left', (e.pageX - 132) + 'px')
-            .show("slide", { direction: "up" }, 50);
-        return false;
-    });
-    $("body *").on("mouseup", e => {
-        const target = $(e.target);
-        if (target.is(".__on_select_color")) {
-            const color = target.attr("id");
-            $(".__target_color_box").val(color).blur();
-            $(".__target_color_button").css("background-color", `#${color}`);
-        }
-        $("body *").removeClass("__target_color_button __target_color_box");
-        palette_dom.hide("slide", { direction: "up" }, 50);
-    });
-    $(document).on("blur", ".__pull_color_palette", e => {
-        const target = $(e.target);
-        target.next().css("background-color", `#${target.val()}`);
-    });
+    })
 }
 
 /**
@@ -163,12 +88,12 @@ function popContextMenu(e, id) {
             'top': 'auto',
             'bottom': `${Math.round(window.innerHeight - e.pageY - 8)}px`,
             'left': `${e.pageX - 8}px`
-        });
+        })
     else $(`#${id}`).css({
         'bottom': 'auto',
         'top': `${e.pageY - 8}px`,
         'left': `${e.pageX - 8}px`
-    });
+    })
     $(`#${id}`).show(...Preference.getAnimation("WINDOW_FOLD"))
 }
 
@@ -179,8 +104,8 @@ function popContextMenu(e, id) {
  * @param arg 設定オブジェクト
  */
 function dialog(arg) {
-    const dialog_elm = $("#pop_dialog");
-    dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`);
+    const dialog_elm = $("#pop_dialog")
+    dialog_elm.attr('title', arg.title).html(`<p>${arg.text}</p>`)
     const animation_pref = Preference.getUIPref(null, "UI_DIALOG_ANIMATION")
     if (arg.type == 'alert') dialog_elm.dialog({ // アラート
         resizable: false,
@@ -209,7 +134,7 @@ function dialog(arg) {
             },
             "キャンセル": () => dialog_elm.dialog("close"),
         }
-    });
+    })
 }
 
 /**
@@ -224,7 +149,7 @@ function createWindow(arg) {
 
     // 初期HTMLをバインド
     $("#pop_multi_window").append(arg.html)
-    $(`#${arg.window_key}>h2`).css('background-color', `#${arg.color}`)
+    $(`#${arg.window_key}>h2`).css('background-color', arg.color)
 
     // Draggableにする(横方向にしか移動不可にするならパラメータ指定)
     $(`#${arg.window_key}`).draggable({
@@ -250,6 +175,16 @@ function createWindow(arg) {
 function getRandomColor() {
     const index = Math.floor(Math.random() * color_palette.length)
     return color_palette[index]
+}
+
+function getHashColor(str) {
+    let sum = 0
+    for (const s of str) sum += Math.pow(s.charCodeAt(), 2)
+    const hue = sum % 360
+    const light = 45 + (sum % 16)
+    const chroma = 10 + (sum % 61)
+
+    return `oklch(${light}% ${chroma}% ${hue})`
 }
 
 /**

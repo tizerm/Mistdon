@@ -212,7 +212,7 @@ class Emojis {
 
         let text = jqelm.html()
         // 文章中に存在するショートコードを抽出
-        const shortcodes = text.match(new RegExp(':[a-zA-Z0-9_]+@.+:', 'g'))
+        const shortcodes = text.match(/:[a-zA-Z0-9_]+@.+:/g)
         if (!shortcodes) return text // 絵文字がない場合はそのまま返却
         const emoji_promises = []
         shortcodes.forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
@@ -333,7 +333,7 @@ class Emojis {
     static async bindEmojiPaletteWindow(account) {
         // ヘッダ設定
         $('#singleton_emoji_window>h2').html(`<span>カスタム絵文字(${account.pref.domain})</span>`)
-            .css('background-color', `#${account.pref.acc_color}`)
+            .css('background-color', account.pref.acc_color)
         $('#singleton_emoji_window .recent_emoji>.recent_emoji_list').empty()
         $('#singleton_emoji_window .emoji_list').empty()
 

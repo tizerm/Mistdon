@@ -11,12 +11,14 @@
         content="default-src 'self'; img-src *; media-src *; connect-src *; script-src 'self'"
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/theme_dark.css"/>
     <link rel="stylesheet" type="text/css" href="css/mist_core.css"/>
     <link rel="stylesheet" type="text/css" href="css/mist_timeline.css"/>
     <link rel="stylesheet" type="text/css" href="css/mist_preference.css"/>
     <script type="text/javascript" src="js/jquery/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/mist_ui.js"></script>
+    <script type="text/javascript" src="js/mist_colorpalette.js"></script>
     <script type="text/javascript" src="js/mist_help.js"></script>
     <script type="text/javascript" src="js/module/class_relative_time.js"></script>
     <script type="text/javascript" src="js/module/class_notification.js"></script>
@@ -69,6 +71,45 @@
     </div>
     <div id="pop_palette">
         <!-- hidden: カラーパレット -->
+        <div class="box_flex">
+            <div class="color_preview">
+                <p class="white">Aaあア#1</p>
+                <p class="black">Aaあア#1</p>
+            </div>
+            <div class="color_channels">
+                <p>
+                    <span>色空間:</span>
+                    <select id="cmb_color_space" title="色空間">
+                        <option value="rgb">RGB</option>
+                        <option value="hsl">HSL</option>
+                        <option value="lab">CIELAB</option>
+                        <option value="lch">CIELCH</option>
+                        <option value="oklab">OKLAB</option>
+                        <option value="oklch">OKLCH</option>
+                    </select>
+                    <button type="button" id="on_random_color" title="ランダムで色を生成"
+                        class="icon_label_set"><img src="resources/ic_reblog.png" alt="ランダムで色を生成"/>
+                        <span>ランダム</span></button>
+                </p>
+                <p>
+                    <span id="color_label_1">R</span>
+                    <input type="text" id="color_text_1" class="__txt_color_param"/>
+                    <input type="range" id="color_param_1" class="__sld_color_palette" min="0" max="255"/>
+                </p>
+                <p>
+                    <span id="color_label_2">G</span>
+                    <input type="text" id="color_text_2" class="__txt_color_param"/>
+                    <input type="range" id="color_param_2" class="__sld_color_palette" min="0" max="255"/>
+                </p>
+                <p>
+                    <span id="color_label_3">B</span>
+                    <input type="text" id="color_text_3" class="__txt_color_param"/>
+                    <input type="range" id="color_param_3" class="__sld_color_palette" min="0" max="255"/>
+                </p>
+            </div>
+        </div>
+        <div class="sample_colors">
+        </div>
     </div>
     <div id="pop_multi_window">
         <!-- hidden: 複数ウィンドウ生成ボックス -->

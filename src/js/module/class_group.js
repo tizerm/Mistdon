@@ -100,10 +100,10 @@ class Group {
             box_color = this.parent_column.pref.col_color
         }
         // カラー設定
-        jqelm.find(".group_head").css("background-color", `#${box_color}`)
+        jqelm.find(".group_head").css("background-color", box_color)
         jqelm.find("ul").css({
-            "border-left-color": `#${box_color}`,
-            "border-bottom-color": `#${box_color}`
+            "border-left-color": box_color,
+            "border-bottom-color": box_color
         })
 
         return jqelm
@@ -126,7 +126,7 @@ class Group {
         `))
 
         if (this.parent_column.pref.multi_group)
-            jqelm.closest(".group_label").css("background-color", `#${this.pref.gp_color}`)
+            jqelm.closest(".group_label").css("background-color", this.pref.gp_color)
         else // 単一タイムライングループの場合は背景を透過
             jqelm.closest(".group_label").css("background-color", 'transparent')
         return jqelm

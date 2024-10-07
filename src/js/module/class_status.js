@@ -90,7 +90,7 @@ class Status {
                     .replace(new RegExp( // Misskey用のURLマークアップ
                         '<a href="https?://[^ 　\n]+".*?rel="nofollow noopener noreferrer".*?>https?://.+?</a>',
                         'g'), '12345678901234567890')
-                    .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234'))).text().length
+                    .replace(/:[a-zA-Z0-9_]+:/g, '1234'))).text().length
                 else this.content_length = 0
 
                 // 投票がある場合は投票に関するデータ
@@ -187,6 +187,8 @@ class Status {
                 this.visibility = data.visibility
                 this.allow_reblog = this.visibility == 'public' || this.visibility == 'home'
                 this.local_only = data.localOnly
+                this.channel_id = data.channel?.id
+                this.channel_name = data.channel?.name
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
                 if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
@@ -202,10 +204,9 @@ class Status {
                 if (this.content) { // 投稿本文の整形と字数計測
                     this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
-                        .replace(new RegExp(':[a-zA-Z0-9_]+:', 'g'), '1234').length
+                        .replace(/:[a-zA-Z0-9_]+:/g, '1234').length
                     const markup_content = this.content // 投稿本文を最低限マークアップ
-                        .replace(new RegExp('<', 'g'), '&lt;') // 先にタグエスケープをする(改行がエスケープされるので)
-                        .replace(new RegExp('>', 'g'), '&gt;')
+                        .replace(/</g, '&lt;').replace(/>/g, '&gt;') // 先にタグエスケープをする(改行がエスケープされるので)
                         // MFMのURL記法は文字列リンクとしてマークアップする(うまくいかんので一旦保留)
                         //.replace(new RegExp('[?]?\[(.+?)\]\((https?://[^ ()　\n]+?)\)', 'g'),
                         //    '<a href="$2" class="markuped_link">$1</a>')
@@ -333,9 +334,8 @@ class Status {
     }
     // Getter: 本文をHTML解析して文章の部分だけを抜き出す
     get content_text() {
-        return $($.parseHTML(this.content)).text()
-            .replace(new RegExp('<', 'g'), '&lt;') // タグエスケープを挟む
-            .replace(new RegExp('>', 'g'), '&gt;')
+        // タグエスケープを挟む
+        return $($.parseHTML(this.content)).text().replace(/</g, '&lt;').replace(/>/g, '&gt;')
     }
 
     /**
@@ -886,6 +886,10 @@ class Status {
                 html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
             else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
         }
+
+        if (this.profile_post_flg && this.channel_id)
+            // ユーザープロフィールのチャンネル投稿の場合はチャンネル名を表示
+            html += `<div class="from_address from_channel">${this.channel_name}</div>`
         html += `
                 </div>
             </li>
@@ -893,7 +897,9 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
+        if (this.profile_post_flg && this.channel_id) // チャンネルIDから色をハッシュ化
+            jqelm.find('.post_footer>.from_address').css("background-color", getHashColor(this.channel_id))
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
@@ -915,10 +921,10 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        if (this.profile_post_flg || this.detail_flg) // プロフィールと詳細表示は投稿時刻で色分けする
-            jqelm.find('.post_footer>.created_at').addClass(`from_address ${this.relative_time.color_class}`)
         // 時間で色分け
-        jqelm.closest('li').css('border-left-color', this.relative_time.color)
+        jqelm.closest('li').css('border-left-color', this.profile_post_flg || this.detail_flg
+            ? this.relative_time.ltcolor : this.relative_time.color)
+        if (this.profile_post_flg) jqelm.find('.post_footer>.created_at').addClass('from_address')
         if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
@@ -1030,7 +1036,7 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.from_address>div').css("background-color", `#${this.account_color}`)
+        jqelm.find('.from_address>div').css("background-color", this.account_color)
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
@@ -1236,7 +1242,7 @@ class Status {
 
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
-        jqelm.find('.post_footer>.from_address').css("background-color", `#${this.account_color}`)
+        jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         // フォロ限の場合はブースト/リノート禁止クラスを付与
@@ -1244,6 +1250,8 @@ class Status {
         // 自分の投稿にはクラスをつける
         if (!this.user_profile_flg && `@${this.user.full_address}` == this.from_account?.full_address)
             jqelm.closest('li').addClass('self_post')
+        // リプライ/ツリーの投稿はクラスをつける
+        if (this.reply_to) jqelm.closest('li').addClass('replied_post')
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
@@ -1387,7 +1395,8 @@ class Status {
             default:
                 break
         }
-        if (this.from_timeline?.pref?.timeline_type != 'channel' && this.local_only) // 連合なし
+        if (this.from_timeline?.pref?.timeline_type != 'channel' &&
+            !(this.profile_post_flg && this.channel_id) && this.local_only) // 連合なし
             html += '<img src="resources/ic_local.png" class="flg_local"/>'
 
         html += '</div>'
@@ -1914,7 +1923,7 @@ class Status {
             </div>
         `))
         // 色とステータスバインドの設定をしてDOMを拡張カラムにバインド
-        jqelm.find('h2').css("background-color", `#${this.account_color}`)
+        jqelm.find('h2').css("background-color", this.account_color)
         jqelm.find('.timeline>ul').append(this.element)
         $("#pop_extend_column").html(jqelm).show(...Preference.getAnimation("SLIDE_RIGHT"))
         // サジェストテキストボックスにフォーカス
@@ -1950,7 +1959,7 @@ class Status {
                     </div>
                 </div>
             `,
-            color: getRandomColor(),
+            color: getHashColor(this.id),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"
@@ -2071,7 +2080,7 @@ class Status {
             "external": !auth_account,
             "host": this.host,
             "platform": this.platform,
-            "color": auth_account?.pref.acc_color ?? getRandomColor(),
+            "color": auth_account?.pref.acc_color ?? getHashColor(this.host),
             "timeline_type": "local",
             "exclude_reblog": false,
             "expand_cw": false,

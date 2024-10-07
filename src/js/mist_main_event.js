@@ -856,6 +856,8 @@
                 .getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
             Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
+        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+            FlashTimeline.getWindow($(e.target)).current.quote.createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
             Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
         else // 他の部分は直接リモートの投稿を取る
@@ -1209,12 +1211,22 @@
 
     /**
      * #Event
-     * ユーザープロフィール: 全投稿タブ.
+     * ユーザープロフィール: 投稿タブ.
      * => ユーザーの投稿一覧を表示
      */
     $(document).on("click", ".account_timeline .__tab_profile_posts", e => {
         $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".post_uls").show()
+    })
+
+    $(document).on("click", ".account_timeline .__tab_profile_channels", e => {
+        if ($(e.target).closest(".user_post_elm").find(".channel_uls>ul").is(":empty"))
+            // メディアタイムラインを未取得の場合は取得する
+            User.getCache($(e.target).closest(".column_profile")).createChannelPosts()
+        $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".media_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").show()
     })
 
     /**
@@ -1227,6 +1239,7 @@
             // メディアタイムラインを未取得の場合は取得する
             User.getCache($(e.target).closest(".column_profile")).createMediaGallery()
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
+        $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
     })
 

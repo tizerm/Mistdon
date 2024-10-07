@@ -1491,8 +1491,8 @@ class Account {
                     </div>
                     <ul class="option">
                         <li>
-                            アカウントカラー: #<input type="text"
-                            class="__txt_acc_color __pull_color_palette" value="${account.pref.acc_color}" size="6"/>
+                            色: <input type="text" class="__txt_acc_color __pull_color_palette"
+                                value="${account.pref.acc_color}"/>
                         </li>
                         ${misskey_elm}
                         <li>
