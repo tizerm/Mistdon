@@ -1220,6 +1220,11 @@
         $(e.target).closest(".user_post_elm").find(".post_uls").show()
     })
 
+    /**
+     * #Event
+     * ユーザープロフィール: チャンネルタブ.
+     * => ユーザーのチャンネル投稿一覧を表示
+     */
     $(document).on("click", ".account_timeline .__tab_profile_channels", e => {
         if ($(e.target).closest(".user_post_elm").find(".channel_uls>ul").is(":empty"))
             // メディアタイムラインを未取得の場合は取得する

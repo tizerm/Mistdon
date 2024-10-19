@@ -177,14 +177,18 @@ function getRandomColor() {
     return color_palette[index]
 }
 
+/**
+ * #Renderer
+ * 文字列からハッシュ値を生成してユニークな色を決定する.
+ */
 function getHashColor(str) {
     let sum = 0
     for (const s of str) sum += Math.pow(s.charCodeAt(), 2)
     const hue = sum % 360
-    const light = 45 + (sum % 16)
+    const light = 45 + (sum % 11)
     const chroma = 10 + (sum % 61)
 
-    return `oklch(${light}% ${chroma}% ${hue})`
+    return `lch(${light}% ${chroma}% ${hue})`
 }
 
 /**

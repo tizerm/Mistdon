@@ -274,6 +274,7 @@ class Status {
         this.sort_date = new Date(original_date)
         this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
+        //this.status_key = `${original_date}@${this.user?.full_address}`
     }
 
     // Getter: 挿入先カラム

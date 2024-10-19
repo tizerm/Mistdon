@@ -975,6 +975,10 @@ class User {
         })
     }
 
+    /**
+     * #Method
+     * このユーザーのチャンネル投稿一覧を取得して表示する.
+     */
     async createChannelPosts() {
         const target_td = $(`#user_${this.user_uuid}[name="${this.full_address}"]`)
         target_td.prepend(`
