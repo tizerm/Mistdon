@@ -383,6 +383,18 @@
                     padding-left: 48px;
                 }
             }
+            > .remote_label {
+                margin: 1px 8px;
+                padding: 2px 16px;
+                border-radius: 8px;
+                font-family: Arial, "メイリオ", sans-selif;
+                font-size: 12px;
+                &:hover {
+                    cursor: pointer;
+                    padding-left: 18px;
+                    filter: brightness(var(--core-brightness-hover));
+                }
+            }
 
             /*=== Contents Info ==================================================================*/
             > .content {
@@ -868,6 +880,7 @@
                     }
                 }
             }
+            > .remote_label { margin-left: 36px; }
             > .content {
                 position: relative;
                 left: 34px;

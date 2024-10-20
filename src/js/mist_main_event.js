@@ -693,6 +693,24 @@
 
     /**
      * #Event
+     * リモートサーバーラベル.
+     * => リモートサーバーのインスタンス詳細ウィンドウを表示する
+     */
+    $(document).on("click", ".__on_remote_detail", e => (async () => {
+        const notification = Notification.progress(`${$(e.target).text()}のサーバー情報を取得中です...`)
+        try {
+            const simple_ins = await Instance.get($(e.target).text())
+            const detail_ins = await Instance.getDetail(simple_ins.host, simple_ins.platform)
+            detail_ins.createDetailHtml()
+            notification.done()
+        } catch (err) {
+            console.log(err)
+            notification.error("サーバー情報の取得で問題が発生しました. サポート外のサーバーの可能性があります.")
+        }
+    })())
+
+    /**
+     * #Event
      * 本文のリンク.
      * => 外部ブラウザでリンクを開く
      */
