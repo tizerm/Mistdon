@@ -83,6 +83,20 @@ class Timeline {
                         data: JSON.stringify(query_param)
                     })
                     break
+                case 'Bluesky': // Bluesky
+                    // REST APIで最新TLを30件取得、する処理をプロミスとして格納
+                    response = await $.ajax({
+                        type: "GET",
+                        url: this.pref.rest_url,
+                        dataType: "json",
+                        headers: { "Authorization": `Bearer ${this.target_account.__access_jwt}` },
+                        data: query_param
+                    })
+
+                    console.log(response)
+                    // Feedの配列をステータスに渡す
+                    response = response.feed ?? response.notifications
+                    break
                 default:
                     break
             }

@@ -8,7 +8,9 @@ class Emojis {
     // コンストラクタ: パラメータを使って初期化(ファイルとJSON両対応)
     constructor(arg) {
         this.host = arg.host ?? null
-        if (arg.cache_flg) {
+        // カスタム絵文字を使用しない場合はスルーオブジェクトを参照する
+        if (arg.thru) this.thru = true
+        else if (arg.cache_flg) {
             // キャッシュフラグがON: アカウントから参照するサーバーのカスタム絵文字(リストではなくMap)
             const emoji_map = new Map()
             const category_map = new Map()
@@ -44,6 +46,7 @@ class Emojis {
 
     // スタティックブロック(カスタム絵文字キャッシュを取りに行く)
     static {
+        Emojis.THRU = new Emojis({ 'thru': true })
         Emojis.readCache()
     }
 
@@ -122,6 +125,8 @@ class Emojis {
      * @param text 置換対象のテキスト
      */
     replace(text) {
+        if (this.thru) return text // スルーする場合はなにもしない
+
         if (this.cache_flg) { // アプリケーションキャッシュの絵文字データの場合
             if (!text) return ""
             return text.replace(new RegExp('(?<!alt="):[a-zA-Z0-9_]+:', 'g'), match => {
