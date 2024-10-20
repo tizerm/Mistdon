@@ -249,7 +249,7 @@ class Trend {
         const jqelm = $($.parseHTML(`
             <li class="trendtag_list" name="${this.tag}" title="(${this.count})"><span>#${this.tag}</span></li>
         `))
-        jqelm.css("background-color", `#${this.color}`)
+        jqelm.css("background-color", this.color)
         return jqelm
     }
 

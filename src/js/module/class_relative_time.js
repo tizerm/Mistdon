@@ -58,25 +58,26 @@ class RelativeTime {
         return this.day_abs + (relative ? ` (${relative})` : '')
     }
 
-    // Getter: プロフィール表示の日時ごとの色クラスを返却
-    get color_class() {
-        const diff_msec = Date.now() - this.unix_msec
-        if      (diff_msec < 86400000)    return "label_24h"
-        else if (diff_msec < 259200000)   return "label_72h"
-        else if (diff_msec < 604800000)   return "label_1w"
-        else if (diff_msec < 2592000000)  return "label_1m"
-        else if (diff_msec < 15552000000) return "label_hfy"
-        else if (diff_msec < 31536000000) return "label_1y"
-        else return "label_none"
-    }
-
     // Getter: リアルタイム更新の投稿の時間ラベルを生成
     get color() {
         const diff_msec = Date.now() - this.unix_msec
-        if (diff_msec > 86400000) return '#444444' // 1日すぎてる場合はグレー
+        //if (diff_msec > 86400000) return '#444444' // 1日すぎてる場合はグレー
+        if (diff_msec > 86400000) return 'lch(35% 0 0)' // 1日すぎてる場合はグレー
         // 86,400,000msec(24h)で260度になるよう対数を調整しています
         const h = Math.trunc(52.315848 * Math.log((diff_msec + 540000) / 600000))
-        return `hsl(${h > 0 ? h : 0} 50% 35%)`
+        //return `hsl(${h > 0 ? h : 0} 50% 40%)`
+        return `lch(48% 38% ${(h > 0 ? h : 0) + 30})`
+    }
+
+    // Getter: 年単位の投稿時間ラベルを生成
+    get ltcolor() {
+        const diff_msec = Date.now() - this.unix_msec
+        //if (diff_msec > 31536000000) return '#444444' // 1年すぎてる場合はグレー
+        if (diff_msec > 31536000000) return 'lch(35% 0 0)' // 1年すぎてる場合はグレー
+        // 31,536,000,000msec(1year)で260度になるよう対数を調整しています
+        const h = Math.trunc(44.048136 * Math.log((diff_msec + 82800000) / 86400000))
+        //return `hsl(${h > 0 ? h : 0} 50% 40%)`
+        return `lch(48% 38% ${(h > 0 ? h : 0) + 30})`
     }
 
 }
