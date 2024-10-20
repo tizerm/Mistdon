@@ -415,11 +415,7 @@ async function authorizeMisskey(session) {
 }
 
 async function refreshBlueskySession(event, handle) {
-
-    console.log("$$$ call refreshBlueskySession")
-    console.log(handle)
     const session = cache_bsky_session.get(handle)
-    console.log(session)
 
     try {
         const session_info = await ajax({ // セッションが有効か確認
@@ -428,15 +424,38 @@ async function refreshBlueskySession(event, handle) {
             headers: { 'Authorization': `Bearer ${session.access_token}` }
         })
 
-        console.log("$$$ Print session info")
-        console.log(session_info)
-
         return session.access_token
     } catch (err) {
-        console.log("$$$ Session error")
         console.log(err)
+        // Bad Request以外はトークンの取得に失敗
+        if (err.message != '400') return null
     }
 
+    try {
+        const session_info = await ajax({ // セッションを再取得する
+            method: "GET",
+            url: `https://${session.pds}/xrpc/com.atproto.server.refreshSession`,
+            headers: { 'Authorization': `Bearer ${session.refresh_token}` }
+        })
+
+        // セッション情報のJSONを生成
+        const write_session = {
+            'handle': session.handle,
+            'pds': session.handle,
+            'refresh_token': session_info.refreshJwt,
+            'access_token': session_info.accessJwt
+        }
+
+        // セッション情報をファイルに書き込み
+        const writer = await writeFileArrayJson('app_prefs/bsky_session.json', write_session)
+
+        cache_bsky_session.set(write_session.handle, write_session)
+
+        return session_info.accessJwt
+    } catch (err) {
+        console.log(err)
+    }
+    return null
 }
 
 /**
@@ -1033,7 +1052,7 @@ async function ajax(arg) {
         response = await fetch(url, param)
 
         // ステータスコードがエラーの場合はエラーを投げる
-        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
+        if (!response.ok) throw new Error(response.status)
 
         // responseをjsonとheaderとHTTP Statusに分けて返却
         return {
