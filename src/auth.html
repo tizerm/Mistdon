@@ -118,22 +118,49 @@
     <div id="account_auth">
         <h2>アカウントの追加</h2>
         <div id="transition_section">
-            <div id="select_platform">
-                <span id="top_text">
-                追加したいアカウントのインスタンス(サーバー)のURLを入力してください。<br/>
-                MastodonとMisskeyどちらのインスタンスでもOKです(自動判別します)。</span>
-                <div class="instance_box">https://<input type="text" id="txt_instance_domain" name="txt_instance_domain"/>/</div>
-                <input type="hidden" class="__hdn_instance_platform" value="null"/>
-                <div class="instance_info">(URLを入力してください)</div>
-                <button type="button" id="on_auth_instance_oauth" title="OAuth認証" disabled
-                    class="icon_label_set"><img src="resources/ic_auth.png" alt="OAuth認証"/>
-                    <span>OAuth認証</span></button>
-                <button type="button" id="on_auth_instance" title="旧方式認証" disabled
-                    class="icon_label_set"><img src="resources/ic_auth.png" alt="旧方式認証"/>
-                    <span>旧方式認証</span></button>
-                <strong class="bottom_auth_warn">
-                    ※OAuth,MiAuth認証をオススメしますがエラーが出る場合は右の旧方式認証をお使いください。
-                </strong>
+            <div id="pre_section">
+                <div id="select_platform">
+                    <span id="top_text">
+                    追加したいアカウントのインスタンス(サーバー)のURLを入力してください。<br/>
+                    MastodonとMisskeyどちらのインスタンスでもOKです(自動判別します)。</span>
+                    <div class="instance_box">https://<input type="text" id="txt_instance_domain" name="txt_instance_domain"/>/</div>
+                    <input type="hidden" class="__hdn_instance_platform" value="null"/>
+                    <div class="instance_info">(URLを入力してください)</div>
+                    <button type="button" id="on_auth_instance_oauth" title="OAuth認証" disabled
+                        class="icon_label_set"><img src="resources/ic_auth.png" alt="OAuth認証"/>
+                        <span>OAuth認証</span></button>
+                    <button type="button" id="on_auth_instance" title="旧方式認証" disabled
+                        class="icon_label_set"><img src="resources/ic_auth.png" alt="旧方式認証"/>
+                        <span>旧方式認証</span></button>
+                    <strong class="bottom_auth_warn">
+                        ※OAuth,MiAuth認証をオススメしますがエラーが出る場合は右の旧方式認証をお使いください。
+                    </strong>
+                </div>
+                <div id="bluesky_login">
+                    <span id="top_text">
+                    Blueskyのアカウントを認証する場合は以下のフォームから認証してください。</span>
+                    <table><tbody>
+                        <tr>
+                            <th>PDS</th>
+                            <td><input type="text" id="__txt_bsky_pds" value="bsky.social"/></td>
+                        </tr>
+                        <tr>
+                            <th>ハンドル</th>
+                            <td><input type="text" id="__txt_bsky_handle" value=""
+                                placeholder="ex) ***.bsky.social"/></td>
+                        </tr>
+                        <tr>
+                            <th>アプリパス</th>
+                            <td><input type="text" id="__txt_bsky_pass" value=""/></td>
+                        </tr>
+                    </tbody></table>
+                    <button type="button" id="on_auth_bluesky" title="Bluesky認証"
+                        class="icon_label_set"><img src="resources/ic_auth.png" alt="Bluesky認証"/>
+                        <span>認証</span></button>
+                    <strong class="bottom_auth_warn">
+                        ※独自にPDSサーバーを立てていない場合はPDSはbsky.socialのままにしてください。
+                    </strong>
+                </div>
             </div>
             <div id="form_mastodon" class="platform_section">
                 <h3>Mastodonアカウントの追加</h3>
