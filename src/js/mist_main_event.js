@@ -1736,6 +1736,12 @@
         $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    $(document).on("click", "#pop_temporary_option #__on_ex_temporary_confirm", e => {
+        TemporaryTimeline.create().getTimeline().then(tl => tl.createTemporaryTimeline())
+        // ミニウィンドウを閉じる
+        $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
+
     /**
      * #Event
      * 各種ウィンドウの閉じるボタン.

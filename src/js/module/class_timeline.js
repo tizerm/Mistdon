@@ -378,6 +378,24 @@ class Timeline {
         })
     }
 
+    createTemporaryTimeline() {
+        this.createScrollableWindow(null, (tl, empty, window_key) => {
+            // 上下方向のローダーを生成
+            tl.getTimeline().then(body => createScrollLoader({ // 下方向のローダーを生成
+                data: body,
+                target: $(`#${window_key}>.timeline>ul`),
+                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
+                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    // max_idとして取得データの最終IDを指定
+                    return data.pop()?.id
+                },
+                load: async max_id => tl.getTimeline(max_id)
+            })).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
+                $(`#${window_key}>.timeline>.col_loading`).remove()
+            })
+        })
+    }
+
     /**
      * #StaticMethod
      * ローカルにキャッシュされているタイムラインウィンドウオブジェクトを取得する.

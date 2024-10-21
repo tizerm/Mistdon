@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('accessApi', {
     overwriteDraft: (json_data) => ipcRenderer.send('write-draft', json_data),
     overwriteHistory: (json_data) => ipcRenderer.send('write-history', json_data),
     overwriteEmojiHistory: (json_data) => ipcRenderer.send('write-emoji-history', json_data),
+    getAPIParams: (arg) => ipcRenderer.invoke('get-api-params', arg),
     fetchVersion: () => ipcRenderer.invoke('fetch-version'),
     openOAuthSession: (json_data) => ipcRenderer.send('open-oauth', json_data),
     openExternalBrowser: (url) => ipcRenderer.send('open-external-browser', url),
