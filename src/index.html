@@ -68,6 +68,8 @@
                 src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
         <li class="li_bookmark"><a class="navi_show_bookmark" title="ブックマーク/お気に入り"><img
                 src="resources/ic_favorite.png" alt="ブックマーク/お気に入り"/></a></li>
+        <li class="li_temporary"><a class="navi_show_temporary" title="一時タイムライン表示"><img
+                src="resources/ic_return.png" alt="一時タイムライン表示"/></a></li>
         <li class="li_emoji"><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"><img
                 src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
@@ -434,6 +436,70 @@
         <div class="footer">
             <button type="button" id="__on_ex_bookmark_confirm" class="close_button">OK</button>
             <button type="button" id="__on_ex_bookmark_cancel" class="close_button">キャンセル</button>
+        </div>
+    </div>
+    <div id="pop_temporary_option" class="ex_mini_window">
+        <!-- hidden: 一時ウィンドウオプション -->
+        <div class="lbl_disp_account">
+            表示アカウント:<br/><select class="__cmb_tl_account">
+                ${account_list}
+                <option value="__external">その他のインスタンス</option>
+            </select>
+        </div>
+        <div class="lbl_external_instance">
+            対象インスタンス:<br/>
+            https://<input type="text" class="__txt_external_instance __ignore_keyborad"/>/
+            <input type="hidden" class="__hdn_external_platform" value="null"/>
+            <div class="instance_info">(URLを入力してください)</div>
+        </div>
+        <div class="lbl_tl_type">
+            タイムラインの種類:<br/><select class="__cmb_tl_type">
+                <option value="home">ホーム</option>
+                <option value="local">ローカル</option>
+                <option value="federation">連合</option>
+                <option value="list">リスト</option>
+                <option value="channel">チャンネル</option>
+                <option value="antenna">アンテナ</option>
+                <option value="notification">通知</option>
+            </select>
+        </div>
+        <div class="lbl_tl_layout">
+            <button type="button" class="__open_multi_tl_layout tooltip" title="マルチタイムラインレイアウトを編集"
+                ><img src="resources/ic_return.png" alt="マルチタイムラインレイアウトを編集"/></button>
+            タイムラインレイアウト:<br/><select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
+                <option value="default">ノーマル</option>
+                <option value="normal2">ノーマル2</option>
+                <option value="chat">チャット</option>
+                <option value="list">リスト</option>
+                <option value="media">メディア</option>
+                <option value="gallery">ギャラリー</option>
+                <option value="multi">マルチ</option>
+            </select>
+        </div>
+        <div class="lbl_list">
+            対象リスト:<br/><select class="__cmb_tl_list">
+            </select>
+        </div>
+        <div class="lbl_channel">
+            対象チャンネル:<br/><select class="__cmb_tl_channel">
+            </select>
+        </div>
+        <div class="lbl_antenna">
+            対象アンテナ:<br/><select class="__cmb_tl_antenna">
+            </select>
+        </div>
+        <div class="lbl_checkbox">
+            <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"/>
+            <label for="xr_${uuid}">ブースト/リノートを非表示</label><br/>
+            <input type="checkbox" id="xcw_${uuid}" class="__chk_expand_cw"/>
+            <label for="xcw_${uuid}">デフォルトでCWを展開</label><br/>
+            <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"/>
+            <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
+            <input type="checkbox" id="dws_${uuid}" class="__chk_disabled_websocket"/>
+        </div>
+        <div class="footer">
+            <button type="button" id="__on_ex_temporary_confirm" class="close_button">OK</button>
+            <button type="button" id="__on_ex_temporary_cancel" class="close_button">キャンセル</button>
         </div>
     </div>
     <div id="pop_lastest_release">

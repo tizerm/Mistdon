@@ -521,6 +521,9 @@ class Preference {
         // 展開チェック初期設定
         $("#__chk_ex_bookmark_cw").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_cw)
         $("#__chk_ex_bookmark_media").prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.profile_media)
+
+        options += `<option value="__external">その他のインスタンス</option>`
+        $("#pop_temporary_option .__cmb_tl_account").html(options)
     }
 
     /**

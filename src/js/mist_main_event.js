@@ -64,6 +64,20 @@
         $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    $("#navi .navi_show_temporary").on("click", e => {
+        const mouse_y = e.pageY
+        if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
+            $("#pop_temporary_option").css({
+                'top': 'auto',
+                'bottom': Math.round(window.innerHeight - mouse_y - 24)
+            })
+        else $("#pop_temporary_option").css({
+            'bottom': 'auto',
+            'top': mouse_y - 24
+        })
+        $("#pop_temporary_option").show(...Preference.getAnimation("LEFT_DROP"))
+    })
+
     /**
      * #Event
      * 全体プロフィールボタン.
@@ -1589,6 +1603,123 @@
         }
     })
 
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_account", e => {
+        const target_li = $("#pop_temporary_option")
+        const account = Account.get($(e.target).val())
+        if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
+            target_li.find(".lbl_external_instance").hide()
+            target_li.find('.__cmb_tl_type>option').prop("disabled", false)
+            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
+            target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+        } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
+            target_li.find(".lbl_external_instance").show()
+            target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
+            target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
+        }
+        // リスト/チャンネルは一律非表示
+        target_li.find(".lbl_list").hide()
+        target_li.find(".lbl_channel").hide()
+        target_li.find(".lbl_antenna").hide()
+    })
+
+    $(document).on("change", "#pop_temporary_option .__txt_external_instance", e => {
+        const target_external = $(e.target).closest(".lbl_external_instance")
+        const domain = $(e.target).val()
+        const info_dom = target_external.find(".instance_info")
+        Instance.showInstanceName(domain, info_dom)
+            .then(instance => target_external.find(".__hdn_external_platform").val(instance?.platform))
+    })
+
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => {
+        const li_dom = $("#pop_temporary_option")
+        let notification = null
+        switch ($(e.target).val()) {
+            case 'list': // リスト
+                notification = Notification.progress("対象アカウントのリストを取得中です...")
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
+                    const list_id = li_dom.find(".__cmb_tl_list").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    lists.forEach(l => options += `
+                        <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
+                    li_dom.find(".lbl_list").show()
+                    li_dom.find(".lbl_channel").hide()
+                    li_dom.find(".lbl_antenna").hide()
+                    notification.done()
+                }).catch(error => {
+                    if (error == 'empty') { // リストを持っていない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+                        notification.error("このアカウントにはリストがありません.")
+                    } else // それ以外は単にリストの取得エラー
+                        notification.error("リストの取得で問題が発生しました.")
+                })
+                break
+            case 'channel': // チャンネル
+                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
+                    const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    channels.forEach(c => options += `
+                        <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
+                    li_dom.find(".lbl_channel").show()
+                    li_dom.find(".lbl_list").hide()
+                    li_dom.find(".lbl_antenna").hide()
+                    notification.done()
+                }).catch(error => {
+                    if (error == 'empty') { // お気に入りのチャンネルがない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
+                    } else // それ以外は単にリストの取得エラー
+                        notification.error("チャンネルの取得で問題が発生しました.")
+                })
+                break
+            case 'antenna': // アンテナ
+                notification = Notification.progress("対象アカウントの登録アンテナを取得中です...")
+
+                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
+                    const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
+                    // リストのコンボ値のDOMを生成
+                    let options = ''
+                    antennas.forEach(a => options += `
+                        <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
+                    `)
+                    li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
+                    li_dom.find(".lbl_antenna").show()
+                    li_dom.find(".lbl_channel").hide()
+                    li_dom.find(".lbl_list").hide()
+                    notification.done()
+                }).catch(error => {
+                    if (error == 'empty') { // 作成済みのアンテナがない
+                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                        li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
+                        notification.error("このアカウントにはアンテナがありません.")
+                    } else // それ以外は単にリストの取得エラー
+                        notification.error("アンテナの取得で問題が発生しました.")
+                })
+                break
+            default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
+                li_dom.find(".lbl_list").hide()
+                li_dom.find(".lbl_channel").hide()
+                li_dom.find(".lbl_antenna").hide()
+                break
+        }
+    })
+
     /**
      * #Event
      * ブックマーク/お気に入り: OKボタン.
@@ -1613,6 +1744,7 @@
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
+    $(document).on("click", "#__on_ex_temporary_cancel", e => $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",
         e => $("#pop_lastest_release").hide(...Preference.getAnimation("LEFT_DROP"), () => $("#pop_lastest_release").remove()))
 
