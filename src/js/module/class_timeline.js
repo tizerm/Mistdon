@@ -30,6 +30,10 @@ class Timeline {
 
     // Setter: ステータスIDをキーに持つ一意識別子のマップに挿入
     set id_list(arg) { this.status_key_map.set(arg.status_id, arg.status_key) }
+    // Getter: このタイムラインのウィンドウキャッシュにアクセスするキー
+    get timeline_key() { return `timeline_${this.__timeline_uuid}` }
+    // Getter: 生成済みのウィンドウキーをDOMから参照
+    get window_key() { return $(`#${this.timeline_key}`).closest(".timeline_window").attr("id") }
 
     // ウィンドウを一時保存するスタティックフィールド
     static TIMELINE_WINDOW_MAP = new Map()
@@ -302,7 +306,6 @@ class Timeline {
     createScrollableWindow(ref_id, loaderFunction) {
         // 一意認識用のUUIDを生成
         this.__timeline_uuid = crypto.randomUUID()
-        const timeline_key = `timeline_${this.__timeline_uuid}`
         const window_key = `timeline_window_${this.__timeline_uuid}`
 
         createWindow({ // ウィンドウを生成
@@ -322,7 +325,7 @@ class Timeline {
                             <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                             <span class="loading_text">Now Loading...</span>
                         </div>
-                        <ul id="${timeline_key}" class="scrollable_tl __context_posts"></ul>
+                        <ul id="${this.timeline_key}" class="scrollable_tl __context_posts"></ul>
                     </div>
                 </div>
             `,
@@ -334,7 +337,7 @@ class Timeline {
 
         // スクロールローダーを生成してマップに登録
         loaderFunction(this, ref_id, window_key)
-        Timeline.TIMELINE_WINDOW_MAP.set(timeline_key, this)
+        Timeline.TIMELINE_WINDOW_MAP.set(this.timeline_key, this)
     }
 
     /**
@@ -374,24 +377,6 @@ class Timeline {
             }))]).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
                 $(`#${window_key}>.timeline>.col_loading`).remove()
                 mark_elm.scrollIntoView({ block: 'center' })
-            })
-        })
-    }
-
-    createTemporaryTimeline() {
-        this.createScrollableWindow(null, (tl, empty, window_key) => {
-            // 上下方向のローダーを生成
-            tl.getTimeline().then(body => createScrollLoader({ // 下方向のローダーを生成
-                data: body,
-                target: $(`#${window_key}>.timeline>ul`),
-                bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
-                    // max_idとして取得データの最終IDを指定
-                    return data.pop()?.id
-                },
-                load: async max_id => tl.getTimeline(max_id)
-            })).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
-                $(`#${window_key}>.timeline>.col_loading`).remove()
             })
         })
     }

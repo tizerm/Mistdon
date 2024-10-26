@@ -75,6 +75,7 @@
             'bottom': 'auto',
             'top': mouse_y - 24
         })
+        TemporaryTimeline.createFavoriteMenu()
         $("#pop_temporary_option").show(...Preference.getAnimation("LEFT_DROP"))
     })
 
@@ -1569,6 +1570,14 @@
     $(document).on("click", ".__on_flash_prev",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
+    $(document).on("click", "#pop_multi_window .window_temp_reload_button",
+        e => TemporaryTimeline.getTempWindow($(e.target)).reload())
+
+    $(document).on("click", "#pop_multi_window .window_temp_favorite_button",
+        e => TemporaryTimeline.getTempWindow($(e.target)).favorite())
+
+    $(document).on("click", ".__on_temp_top_loader", e => TemporaryTimeline.getTempWindow($(e.target)).loadTop())
+
     /**
      * #Event
      * 画面リサイズイベント.
@@ -1720,6 +1729,12 @@
         }
     })
 
+    $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list", e => {
+        TemporaryTimeline.get($(e.target).attr("name")).createTemporaryTimeline()
+        // ミニウィンドウを閉じる
+        $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
+
     /**
      * #Event
      * ブックマーク/お気に入り: OKボタン.
@@ -1737,7 +1752,8 @@
     })
 
     $(document).on("click", "#pop_temporary_option #__on_ex_temporary_confirm", e => {
-        TemporaryTimeline.create().getTimeline().then(tl => tl.createTemporaryTimeline())
+        const temptl_pref = TemporaryTimeline.getPrefForm()
+        TemporaryTimeline.create(temptl_pref).then(tl => tl.createTemporaryTimeline())
         // ミニウィンドウを閉じる
         $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP"))
     })

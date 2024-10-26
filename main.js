@@ -17,8 +17,8 @@ const fetch = require('node-fetch')
 var pref_accounts = null
 var pref_columns = null
 var pref_general = null
-var pref_window = null
 var pref_emojis = new Map()
+var pref_temptl_fav = null
 var cache_history = null
 var cache_draft = null
 var cache_emoji_history = null
@@ -695,6 +695,29 @@ async function overwriteDraft(event, data) {
     cache_draft = JSON.parse(content)
 }
 
+async function readTemptl() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_temptl_fav) {
+        console.log('@INF: use app_prefs/temptl_fav.json cache.')
+        return pref_temptl_fav
+    }
+    const content = readFile('app_prefs/temptl_fav.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        pref_temptl_fav = []
+        return pref_temptl_fav
+    }
+    pref_temptl_fav = JSON.parse(content)
+    console.log('@INF: read app_prefs/temptl_fav.json.')
+    return pref_temptl_fav
+}
+
+async function overwriteTemptl(event, data) {
+    const content = await overwriteFile('app_prefs/temptl_fav.json', data)
+    console.log('@INF: finish write app_prefs/temptl_fav.json')
+
+    pref_temptl_fav = JSON.parse(content)
+}
+
 /**
  * #IPC
  * 保存してある送信履歴を読み込む
@@ -1118,6 +1141,7 @@ app.whenReady().then(() => {
     ipcMain.handle('read-general-pref', readGeneralPref)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-draft', readDraft)
+    ipcMain.handle('read-temptl', readTemptl)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
@@ -1127,6 +1151,7 @@ app.whenReady().then(() => {
     ipcMain.on('write-general-pref', writeGeneralPref)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-draft', overwriteDraft)
+    ipcMain.on('write-temptl', overwriteTemptl)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)
     ipcMain.handle('get-api-params', getAPIParams)

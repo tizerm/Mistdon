@@ -1040,6 +1040,10 @@
             height: calc(100% - 38px);
             > ul { height: 100%; }
         }
+        > .window_buttons {
+            > button.window_temp_favorite_button  { right: 70px; }
+            > button.window_temp_reload_button    { right: 104px; }
+        }
     }
     .account_timeline.single_user.ex_window {
         width: min(480px,100vw);
@@ -1290,6 +1294,29 @@
         }
     }
     > #pop_temporary_option {
+        width: min(420px,calc(100vw - 64px));
+        > h3 {
+            padding: 4px 24px;
+            margin: 0px 6px 8px;
+            border-bottom: solid 2px var(--help-color-block-border);
+        }
+        > ul.temp_favorite {
+            margin: 0px;
+            padding: 0px;
+            > li.temptl_list {
+                background-color: var(--tl-color-bg);
+                margin: 2px;
+                padding: 4px 8px;
+                list-style-type: none;
+                border-radius: 8px;
+                font-family: Arial, "メイリオ", sans-selif;
+                &:hover {
+                    background-color: var(--core-color-nega-bg);
+                    color: var(--core-color-nega-text);
+                    cursor: pointer;
+                }
+            }
+        }
         > div:not(.footer) { margin: 12px 0px; }
         & select { width: 100%; }
         .lbl_external_instance>.instance_info {

@@ -1177,7 +1177,7 @@
             background-repeat: no-repeat;
             height: 32px;
         }
-        > li.__on_top_loader {
+        > li.__on_top_loader, > li.__on_temp_top_loader {
             background-image: url("../resources/ic_top.png");
             background-position: center left;
             background-repeat: no-repeat;

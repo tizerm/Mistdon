@@ -470,7 +470,7 @@ audio { height: 30px; }
             cursor: move;
         }
         > .window_buttons {
-            > button.window_close_button, > label.window_opacity_button {
+            > button, > label.window_opacity_button {
                 position: absolute;
                 top: 4px;
                 margin: 0px;
@@ -481,7 +481,7 @@ audio { height: 30px; }
                 }
             }
             > button.window_close_button  { right: 6px; }
-            > label.window_opacity_button { right: 42px; }
+            > label.window_opacity_button { right: 38px; }
         }
         &:has(input.__window_opacity:checked) {
             opacity: 0.12;
