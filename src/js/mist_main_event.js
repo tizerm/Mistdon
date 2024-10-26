@@ -1735,6 +1735,9 @@
         $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list>.delele_tempfav_button",
+        e => TemporaryTimeline.get($(e.target).closest(".temptl_list").attr("name")).delete())
+
     /**
      * #Event
      * ブックマーク/お気に入り: OKボタン.

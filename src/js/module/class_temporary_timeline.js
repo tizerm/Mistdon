@@ -42,6 +42,10 @@ class TemporaryTimeline extends Timeline {
         return TemporaryTimeline.map.get(id)
     }
 
+    static getIndex(index) {
+        return [...TemporaryTimeline.map.values()][index]
+    }
+
     static getPrefForm() {
         const opt_elm = $("#pop_temporary_option")
         const account_address = opt_elm.find(".__cmb_tl_account").val()
@@ -96,9 +100,14 @@ class TemporaryTimeline extends Timeline {
     }
 
     static createFavoriteMenu() {
-        let lists = ''
-        TemporaryTimeline.map.forEach((v, k) => lists += v.element)
-        $("#pop_temporary_option>.temp_favorite").html(lists || '<li class="fav_empty">(お気に入りなし)</li>')
+        const target = $("#pop_temporary_option>.temp_favorite")
+        if (TemporaryTimeline.map.size == 0) { // お気に入りがなかったら空にする
+            target.html('<li class="fav_empty">(お気に入りなし)</li>')
+            return
+        }
+
+        target.empty()
+        TemporaryTimeline.map.forEach((v, k) => target.append(v.element))
     }
 
     createTemporaryTimeline() {
@@ -163,9 +172,17 @@ class TemporaryTimeline extends Timeline {
         this.loadTemporaryTimeline(this.window_key)
     }
 
-    favorite() {
+    async favorite() {
         TemporaryTimeline.map.set(this.temptl_pref.ttl_id, this)
-        TemporaryTimeline.writeFile()
+        await TemporaryTimeline.writeFile()
+        Notification.info(`対象の一時タイムラインをお気に入りに登録しました.`)
+    }
+
+    async delete() {
+        TemporaryTimeline.map.delete(this.temptl_pref.ttl_id)
+        await TemporaryTimeline.writeFile()
+        TemporaryTimeline.createFavoriteMenu()
+        Notification.info(`対象の一時タイムラインをお気に入りから削除しました.`)
     }
 
     static async writeFile() {
@@ -176,9 +193,16 @@ class TemporaryTimeline extends Timeline {
 
     // Getter: 一時タイムラインお気に入りを一覧に表示する際の項目DOM
     get element() {
-        return `<li class="temptl_list" name="${this.temptl_pref.ttl_id}">
+        const jqelm = $($.parseHTML(`<li class="temptl_list" name="${this.temptl_pref.ttl_id}">
             ${this.temptl_pref.key_address ?? this.temptl_pref.ex_host} - ${this.temptl_pref.timeline_type}
-        </li>`
+            <button type="button" class="delele_tempfav_button" title="削除"><img
+                src="resources/ic_not.png" alt="削除"/></button>
+
+        </li>`))
+        jqelm.css("background-color",
+            Account.get(this.temptl_pref.key_address)?.pref.acc_color ?? getHashColor(this.temptl_pref.ex_host))
+
+        return jqelm
     }
 
     static getTempWindow(target) {

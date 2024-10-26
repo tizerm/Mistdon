@@ -329,7 +329,7 @@ class Timeline {
                     </div>
                 </div>
             `,
-            color: this.pref.color ?? this.target_account?.pref.acc_color,
+            color: this.pref.color ?? this.target_account?.pref.acc_color ?? getHashColor(this.host),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"

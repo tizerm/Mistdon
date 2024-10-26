@@ -1303,17 +1303,44 @@
         > ul.temp_favorite {
             margin: 0px;
             padding: 0px;
+            max-height: 236px;
+            overflow-y: auto;
+            &::-webkit-scrollbar { width: 8px; }
             > li.temptl_list {
-                background-color: var(--tl-color-bg);
+                position: relative;
+                background-position: center left 2px;
+                background-repeat: no-repeat;
+                background-size: 24px 24px;
                 margin: 2px;
                 padding: 4px 8px;
+                padding-left: 32px;
                 list-style-type: none;
-                border-radius: 8px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: bold;
                 font-family: Arial, "メイリオ", sans-selif;
                 &:hover {
-                    background-color: var(--core-color-nega-bg);
-                    color: var(--core-color-nega-text);
+                    filter: brightness(var(--core-brightness-hover));
+                    padding-left: 36px;
                     cursor: pointer;
+                }
+                &:nth-child(1) { background-image: url("../resources/1.png"); }
+                &:nth-child(2) { background-image: url("../resources/2.png"); }
+                &:nth-child(3) { background-image: url("../resources/3.png"); }
+                &:nth-child(4) { background-image: url("../resources/4.png"); }
+                &:nth-child(5) { background-image: url("../resources/5.png"); }
+                &:nth-child(6) { background-image: url("../resources/6.png"); }
+                &:nth-child(7) { background-image: url("../resources/7.png"); }
+                &:nth-child(8) { background-image: url("../resources/8.png"); }
+                &:nth-child(9) { background-image: url("../resources/9.png"); }
+                > button.delele_tempfav_button {
+                    position: absolute;
+                    top: 0px;
+                    right: 0px;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                    }
                 }
             }
         }

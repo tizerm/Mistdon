@@ -262,6 +262,10 @@
                 return false
             default:
                 numKeyEvent(e, num => { // 1～9(+テンキー): カラムの表示をトグル
+                    if (is_control) { // Ctrl+1～9: 一時タイムライン表示
+                        TemporaryTimeline.getIndex(num - 1).createTemporaryTimeline()
+                        return
+                    }
                     Column.disposeCursor()
                     col = Column.get(num - 1)
                     if (col.toggle()) col.setCursor() // 開いた
