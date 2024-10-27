@@ -467,8 +467,6 @@
             </select>
         </div>
         <div class="lbl_tl_layout">
-            <button type="button" class="__open_multi_tl_layout tooltip" title="マルチタイムラインレイアウトを編集"
-                ><img src="resources/ic_return.png" alt="マルチタイムラインレイアウトを編集"/></button>
             タイムラインレイアウト:<br/><select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
                 <option value="default">ノーマル</option>
                 <option value="normal2">ノーマル2</option>
@@ -479,6 +477,46 @@
                 <option value="multi">マルチ</option>
             </select>
         </div>
+        <table class="tl_layout_options"><tbody>
+            <tr>
+                <th class="default">通常</th>
+                <th class="btrn">ブースト/リノート</th>
+            </tr>
+            <tr>
+                <td><select class="__cmb_tll_default">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                </select></td>
+                <td><select class="__cmb_tll_btrn">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th class="media">メディア</th>
+                <th class="notification">通知</th>
+            </tr>
+            <tr>
+                <td><select class="__cmb_tll_media">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                    <option value="media">メディア</option>
+                    <option value="gallery">ギャラリー</option>
+                    <option value="ignore">無視</option>
+                </select></td>
+                <td><select class="__cmb_tll_notif">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="list">リスト</option>
+                </select></td>
+            </tr>
+        </tbody></table>
         <div class="lbl_list">
             対象リスト:<br/><select class="__cmb_tl_list">
             </select>

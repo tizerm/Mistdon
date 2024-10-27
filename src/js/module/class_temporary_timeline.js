@@ -66,6 +66,15 @@ class TemporaryTimeline extends Timeline {
         const opt_elm = $("#pop_temporary_option")
         const account_address = opt_elm.find(".__cmb_tl_account").val()
 
+        let multi_layout = null
+        // タイムラインレイアウトがマルチの場合はマルチレイアウト設定を保存
+        if (opt_elm.find(".__cmb_tl_layout").val() == 'multi') multi_layout = {
+            'default': opt_elm.find('.__cmb_tll_default').val(),
+            'reblog': opt_elm.find('.__cmb_tll_btrn').val(),
+            'media': opt_elm.find('.__cmb_tll_media').val(),
+            'notification': opt_elm.find('.__cmb_tll_notif').val()
+        }
+
         return { // 一時タイムラインの設定JSONを生成
             'ttl_id': `ttl_${crypto.randomUUID()}`,
             'key_address': account_address != '__external' ? account_address : null,
@@ -79,7 +88,8 @@ class TemporaryTimeline extends Timeline {
             'exclude_reblog': opt_elm.find(".__chk_exclude_reblog").prop("checked"),
             'expand_cw': opt_elm.find(".__chk_expand_cw").prop("checked"),
             'expand_media': opt_elm.find(".__chk_expand_media").prop("checked"),
-            'tl_layout': opt_elm.find(".__cmb_tl_layout").val()
+            'tl_layout': opt_elm.find(".__cmb_tl_layout").val(),
+            'multi_layout_option': multi_layout
         }
     }
 

@@ -1343,6 +1343,17 @@
                     }
                 }
             }
+            > li.fav_empty {
+                margin: 2px;
+                padding: 4px 8px;
+                background-color: var(--tl-color-quote-bg);
+                list-style-type: none;
+                border-radius: 12px;
+                text-align: center;
+                font-size: 14px;
+                font-weight: bold;
+                font-family: Arial, "メイリオ", sans-selif;
+            }
         }
         > div:not(.footer) { margin: 12px 0px; }
         & select { width: 100%; }
@@ -1357,6 +1368,19 @@
             font-weight: bold;
             font-size: 15px;
             text-align: center;
+        }
+        > table.tl_layout_options {
+            background-color: var(--core-color-ui-bg);
+            display: none;
+            width: 100%;
+            font-size: 12px;
+            & th {
+                border-radius: 8px;
+                &.default      { background-color: var(--label-color-follow-bg); }
+                &.btrn         { background-color: var(--label-color-reblog-bg); }
+                &.media        { background-color: var(--label-color-reply-bg); }
+                &.notification { background-color: var(--label-color-favorite-bg); }
+            }
         }
         & button.__open_multi_tl_layout {
             vertical-align: text-bottom;

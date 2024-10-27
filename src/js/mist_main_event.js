@@ -49,6 +49,7 @@
      * 拡張ブックマーク/お気に入りボタン.
      */
     $("#navi .navi_show_bookmark").on("click", e => {
+        $("#pop>.ex_mini_window").hide()
         // 先頭がMisskeyアカウントだったときのために強制的にチェンジイベントを発火
         $("#pop_bookmark_option #__cmb_ex_bookmark_account").change()
         const mouse_y = e.pageY
@@ -69,6 +70,7 @@
      * 一時タイムライン表示ボタン.
      */
     $("#navi .navi_show_temporary").on("click", e => {
+        $("#pop>.ex_mini_window").hide()
         const mouse_y = e.pageY
         if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
             $("#pop_temporary_option").css({
@@ -1763,10 +1765,21 @@
         }
     })
 
+
+    /**
+     * #Event #Change
+     * 一時タイムライン: レイアウトの種類変更時.
+     * => マルチ以外はマルチの設定を表示しない
+     */
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_layout", e => {
+        if ($(e.target).find("option:selected").val() != 'multi') $("#pop_temporary_option .tl_layout_options").hide()
+        else $("#pop_temporary_option .tl_layout_options").show()
+    })
+
     /**
      * #Event
      * 一時タイムライン: お気に入りクリック時.
-     * => お気に入りの設定をロードして一時タイムラインを開く..
+     * => お気に入りの設定をロードして一時タイムラインを開く.
      */
     $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list", e => {
         TemporaryTimeline.get($(e.target).attr("name")).createTemporaryTimeline()
@@ -1774,6 +1787,11 @@
         $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    /**
+     * #Event
+     * 一時タイムライン: お気に入りの削除ボタンクリック時.
+     * => 対象のお気に入りを削除する.
+     */
     $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list>.delele_tempfav_button",
         e => TemporaryTimeline.get($(e.target).closest(".temptl_list").attr("name")).delete())
 

@@ -494,7 +494,7 @@ audio { height: 30px; }
     > #pop_palette {
         position: absolute;
         display: none;
-        z-index: 9;
+        z-index: 32;
         border-radius: 8px;
         border: solid 2px var(--core-color-border);
         background-color: var(--tl-color-popbg);
