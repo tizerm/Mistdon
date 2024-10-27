@@ -6,16 +6,12 @@
         await window.accessApi.readPrefCols()
 
         // データがなかったらDOM生成はしない
-        if (ColumnPref.isEmpty()) {
-            setColorPalette()
-            return
-        }
+        if (ColumnPref.isEmpty()) return
 
         // カラム設定情報からDOMを生成
         ColumnPref.each(col => col.create())
         ColumnPref.setButtonPermission()
         ColumnPref.initRemoteInfo()
-        setColorPalette()
         ColumnPref.setInnerSortable()
     })()
     // カラムをSortableにする(これはカラムの有無にかかわらず実行)
@@ -78,16 +74,16 @@
         e => ColumnPref.getGroup($(e.target)).removeTimeline($(e.target).closest("li").index()))
     // カラムカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_color",
-        e => $(e.target).closest(".column_box").find(".col_head").css("background-color", `#${$(e.target).val()}`))
+        e => $(e.target).closest(".column_box").find(".col_head").css("background-color", $(e.target).val()))
     // グループカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_group_color",
-        e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", `#${$(e.target).val()}`))
+        e => $(e.target).closest(".tl_group").find(".group_head").css("background-color", $(e.target).val()))
     // マルチタイムラインレイアウト表示
     $(document).on("click", ".__open_multi_tl_layout",
         e => $(e.target).closest(".tl_group").find(".tl_layout_options").toggle(...Preference.getAnimation("SLIDE_FAST")))
     // 外部タイムラインカラー変更イベント(動的バインド)
     $(document).on("blur", ".__txt_external_color",
-        e => $(e.target).closest("li").find("h4").css("background-color", `#${$(e.target).val()}`))
+        e => $(e.target).closest("li").find("h4").css("background-color", $(e.target).val()))
     // カラム幅変更イベント(動的バインド)
     $(document).on("blur", ".__txt_col_width",
         e => $(e.target).closest(".column_box").css("width", `${$(e.target).val()}px`))

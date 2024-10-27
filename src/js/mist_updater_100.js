@@ -61,6 +61,17 @@
         accept: () => {}
     })
 
+    // v1.4.1以下のカラム設定のアップコンバート
+    if ([...accounts.values()].some(acc => acc.acc_color.match(/^[0-9a-f]{6}$/g))
+        || pref.some(col => col.col_color.match(/^[0-9a-f]{6}$/g))) dialog({
+        type: 'alert',
+        title: "設定ファイル確認",
+        text: `v1.4.1以下で使用されていた古いカラープロファイルが使用されています。<br/>
+            アカウント認証および設定画面で再登録するだけで新しい設定になるので、<br/>
+            お手数ですが一度設定画面で設定の再登録をお願いいたします。`,
+        accept: () => {}
+    })
+
     // GitHubのバージョン情報を取得
     const version = await window.accessApi.fetchVersion()
     if (version.lastest) $("#pop_lastest_release").remove()

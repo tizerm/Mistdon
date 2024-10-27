@@ -17,8 +17,8 @@ const fetch = require('node-fetch')
 var pref_accounts = null
 var pref_columns = null
 var pref_general = null
-var pref_window = null
 var pref_emojis = new Map()
+var pref_temptl_fav = null
 var cache_history = null
 var cache_draft = null
 var cache_emoji_history = null
@@ -74,8 +74,7 @@ async function writePrefMstdAccs(event, json_data) {
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
         'post_maxlength': json_data.post_maxlength,
-        // アカウントカラーは初期値グレー
-        'acc_color': '808080'
+        'acc_color': getRandomColor()
     }
 
     // ファイルに書き込み
@@ -116,8 +115,7 @@ async function writePrefMskyAccs(event, json_data) {
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
         'post_maxlength': json_data.post_maxlength,
-        // アカウントカラーは初期値グレー
-        'acc_color': '808080'
+        'acc_color': getRandomColor()
     }
 
     // ファイルに書き込み
@@ -285,8 +283,7 @@ async function authorizeMastodon(auth_code) {
             'access_token': access_token,
             'avatar_url': user_data?.body?.avatar,
             'post_maxlength': oauth_session.post_maxlength,
-            // アカウントカラーは初期値グレー
-            'acc_color': '808080'
+            'acc_color': getRandomColor()
         }
         // ファイルに書き込み
         const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
@@ -332,8 +329,7 @@ async function authorizeMisskey(session) {
             'access_token': access_token,
             'avatar_url': user_data.avatarUrl,
             'post_maxlength': oauth_session.post_maxlength,
-            // アカウントカラーは初期値グレー
-            'acc_color': '808080'
+            'acc_color': getRandomColor()
         }
         // ファイルに書き込み
         const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
@@ -397,119 +393,15 @@ async function writePrefCols(event, json_data) {
                 let color = null
                 if (external) color = tl.ex_color
                 else if (tl.timeline_type == 'channel') color = tl.channel_color
-
-                let rest_url = null
-                let socket_url = null
-                let query_param = null
-                let socket_param = null
-
                 // ひとつのタイムラインに2アカウント以上混在する場合はマルチフラグを立てる
                 if (tl.key_address != unique_address) multi_account_flg = true
+                // APIのURLとパラメータは関数から取得(別のところでも使うので)
+                const params = getAPIParams(event, {
+                    host: host,
+                    platform: platform,
+                    timeline: tl
+                })
 
-                // プラットフォームの種類によってAPIの形式が違うので個別に設定
-                switch (platform) {
-                    case 'Mastodon': // Mastodon
-                        // タイムラインタイプによって設定値を変える
-                        switch (tl.timeline_type) {
-                            case 'home': // ホームタイムライン
-                                rest_url = `https://${host}/api/v1/timelines/home`
-                                query_param = {}
-                                socket_param = { 'stream': 'user' }
-                                break
-                            case 'local': // ローカルタイムライン
-                                rest_url = `https://${host}/api/v1/timelines/public`
-                                query_param = { 'local': true }
-                                socket_param = { 'stream': 'public:local' }
-                                break
-                            case 'federation': // 連合タイムライン
-                                rest_url = `https://${host}/api/v1/timelines/public`
-                                query_param = { 'remote': true }
-                                socket_param = { 'stream': 'public:remote' }
-                                break
-                            case 'list': // リスト
-                                rest_url = `https://${host}/api/v1/timelines/list/${tl.list_id}`
-                                query_param = {}
-                                socket_param = { 'stream': 'list', 'list': tl.list_id }
-                                break
-                            case 'notification': // 通知
-                                rest_url = `https://${host}/api/v1/notifications`
-                                query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite', 'poll'] }
-                                socket_param = { 'stream': 'user:notification' }
-                                break
-                            case 'mention': // メンション
-                                rest_url = `https://${host}/api/v1/notifications`
-                                query_param = { 'types': ['mention'] }
-                                socket_param = { 'stream': 'user:notification' }
-                                break
-                            default:
-                                break
-                        }
-                        socket_url = `wss://${host}/api/v1/streaming`
-                        break
-                    case 'Misskey': // Misskey
-                        // タイムラインタイプによって設定値を変える
-                        switch (tl.timeline_type) {
-                            case 'home': // ホームタイムライン
-                                rest_url = `https://${host}/api/notes/timeline`
-                                query_param = {}
-                                socket_param = { 'channel': 'homeTimeline' }
-                                if (tl.exclude_reblog) query_param.withRenotes = false
-                                break
-                            case 'local': // ローカルタイムライン
-                                rest_url = `https://${host}/api/notes/local-timeline`
-                                query_param = {}
-                                socket_param = { 'channel': 'localTimeline' }
-                                if (tl.exclude_reblog) query_param.withRenotes = false
-                                break
-                            case 'federation': // 連合タイムライン
-                                rest_url = `https://${host}/api/notes/global-timeline`
-                                query_param = {}
-                                socket_param = { 'channel': 'globalTimeline' }
-                                if (tl.exclude_reblog) query_param.withRenotes = false
-                                break
-                            case 'list': // リスト
-                                rest_url = `https://${host}/api/notes/user-list-timeline`
-                                query_param = { 'listId': tl.list_id }
-                                socket_param = {
-                                    'channel': 'userList',
-                                    'params': { 'listId': tl.list_id }
-                                }
-                                if (tl.exclude_reblog) query_param.withRenotes = false
-                                break
-                            case 'channel': // チャンネル
-                                rest_url = `https://${host}/api/channels/timeline`
-                                query_param = { 'channelId': tl.channel_id }
-                                socket_param = {
-                                    'channel': 'channel',
-                                    'params': { 'channelId': tl.channel_id }
-                                }
-                                break
-                            case 'antenna': // アンテナ
-                                rest_url = `https://${host}/api/antennas/notes`
-                                query_param = { 'antennaId': tl.antenna_id }
-                                socket_param = {
-                                    'channel': 'antenna',
-                                    'params': { 'antennaId': tl.antenna_id }
-                                }
-                                break
-                            case 'notification': // 通知
-                                rest_url = `https://${host}/api/i/notifications`
-                                query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
-                                socket_param = { 'channel': 'main' }
-                                break
-                            case 'mention': // メンション
-                                rest_url = `https://${host}/api/i/notifications`
-                                query_param = { 'includeTypes': ['mention', 'reply', 'quote'] }
-                                socket_param = { 'channel': 'main' }
-                                break
-                            default:
-                                break
-                        }
-                        socket_url = `wss://${host}/streaming`
-                        break
-                    default:
-                        break
-                }
                 tl_list.push({ // タイムラインプリファレンス
                     'key_address': !external ? tl.key_address : null,
                     'external': external,
@@ -521,10 +413,10 @@ async function writePrefCols(event, json_data) {
                     'channel_id': tl.timeline_type == 'channel' ? tl.channel_id : null,
                     'channel_name': tl.timeline_type == 'channel' ? tl.channel_name : null,
                     'antenna_id': tl.timeline_type == 'antenna' ? tl.antenna_id : null,
-                    'rest_url': rest_url,
-                    'socket_url': socket_url,
-                    'query_param': query_param,
-                    'socket_param': socket_param,
+                    'rest_url': params.url,
+                    'socket_url': params.socket_url,
+                    'query_param': params.query_param,
+                    'socket_param': params.socket_param,
                     'exclude_reblog': tl.exclude_reblog,
                     'expand_cw': tl.expand_cw,
                     'expand_media': tl.expand_media,
@@ -560,9 +452,135 @@ async function writePrefCols(event, json_data) {
     })
     // 最終的な設定ファイルをJSONファイルに書き込み
     const content = await overwriteFile('app_prefs/columns.json', write_json)
-    
+
     // キャッシュを更新
     pref_columns = JSON.parse(content)
+}
+
+/**
+ * #IPC
+ * タイムライン情報のJSONをもとにAPIのURLとパラメータを返す.
+ * 
+ * @param event イベント
+ * @param arg 呼び出しパラメータ
+ */
+function getAPIParams(event, arg) {
+    let rest_url = null
+    let socket_url = null
+    let query_param = null
+    let socket_param = null
+
+    // プラットフォームの種類によってAPIの形式が違うので個別に設定
+    switch (arg.platform) {
+        case 'Mastodon': // Mastodon
+            // タイムラインタイプによって設定値を変える
+            switch (arg.timeline.timeline_type) {
+                case 'home': // ホームタイムライン
+                    rest_url = `https://${arg.host}/api/v1/timelines/home`
+                    query_param = {}
+                    socket_param = { 'stream': 'user' }
+                    break
+                case 'local': // ローカルタイムライン
+                    rest_url = `https://${arg.host}/api/v1/timelines/public`
+                    query_param = { 'local': true }
+                    socket_param = { 'stream': 'public:local' }
+                    break
+                case 'federation': // 連合タイムライン
+                    rest_url = `https://${arg.host}/api/v1/timelines/public`
+                    query_param = { 'remote': true }
+                    socket_param = { 'stream': 'public:remote' }
+                    break
+                case 'list': // リスト
+                    rest_url = `https://${arg.host}/api/v1/timelines/list/${arg.timeline.list_id}`
+                    query_param = {}
+                    socket_param = { 'stream': 'list', 'list': arg.timeline.list_id }
+                    break
+                case 'notification': // 通知
+                    rest_url = `https://${arg.host}/api/v1/notifications`
+                    query_param = { 'types': ['mention', 'reblog', 'follow', 'follow_request', 'favourite', 'poll'] }
+                    socket_param = { 'stream': 'user:notification' }
+                    break
+                case 'mention': // メンション
+                    rest_url = `https://${arg.host}/api/v1/notifications`
+                    query_param = { 'types': ['mention'] }
+                    socket_param = { 'stream': 'user:notification' }
+                    break
+                default:
+                    break
+            }
+            socket_url = `wss://${arg.host}/api/v1/streaming`
+            break
+        case 'Misskey': // Misskey
+            // タイムラインタイプによって設定値を変える
+            switch (arg.timeline.timeline_type) {
+                case 'home': // ホームタイムライン
+                    rest_url = `https://${arg.host}/api/notes/timeline`
+                    query_param = {}
+                    socket_param = { 'channel': 'homeTimeline' }
+                    if (arg.timeline.exclude_reblog) query_param.withRenotes = false
+                    break
+                case 'local': // ローカルタイムライン
+                    rest_url = `https://${arg.host}/api/notes/local-timeline`
+                    query_param = {}
+                    socket_param = { 'channel': 'localTimeline' }
+                    if (arg.timeline.exclude_reblog) query_param.withRenotes = false
+                    break
+                case 'federation': // 連合タイムライン
+                    rest_url = `https://${arg.host}/api/notes/global-timeline`
+                    query_param = {}
+                    socket_param = { 'channel': 'globalTimeline' }
+                    if (arg.timeline.exclude_reblog) query_param.withRenotes = false
+                    break
+                case 'list': // リスト
+                    rest_url = `https://${arg.host}/api/notes/user-list-timeline`
+                    query_param = { 'listId': arg.timeline.list_id }
+                    socket_param = {
+                        'channel': 'userList',
+                        'params': { 'listId': arg.timeline.list_id }
+                    }
+                    if (arg.timeline.exclude_reblog) query_param.withRenotes = false
+                    break
+                case 'channel': // チャンネル
+                    rest_url = `https://${arg.host}/api/channels/timeline`
+                    query_param = { 'channelId': arg.timeline.channel_id }
+                    socket_param = {
+                        'channel': 'channel',
+                        'params': { 'channelId': arg.timeline.channel_id }
+                    }
+                    break
+                case 'antenna': // アンテナ
+                    rest_url = `https://${arg.host}/api/antennas/notes`
+                    query_param = { 'antennaId': arg.timeline.antenna_id }
+                    socket_param = {
+                        'channel': 'antenna',
+                        'params': { 'antennaId': arg.timeline.antenna_id }
+                    }
+                    break
+                case 'notification': // 通知
+                    rest_url = `https://${arg.host}/api/i/notifications`
+                    query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }
+                    socket_param = { 'channel': 'main' }
+                    break
+                case 'mention': // メンション
+                    rest_url = `https://${arg.host}/api/i/notifications`
+                    query_param = { 'includeTypes': ['mention', 'reply', 'quote'] }
+                    socket_param = { 'channel': 'main' }
+                    break
+                default:
+                    break
+            }
+            socket_url = `wss://${arg.host}/streaming`
+            break
+        default:
+            break
+    }
+
+    return {
+        "url": rest_url,
+        "socket_url": socket_url,
+        "query_param": query_param,
+        "socket_param": socket_param
+    }
 }
 
 /**
@@ -677,6 +695,44 @@ async function overwriteDraft(event, data) {
     console.log('@INF: finish write app_prefs/draft.json')
 
     cache_draft = JSON.parse(content)
+}
+
+/**
+ * #IPC
+ * 保存してある一時タイムラインのお気に入り情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 一時タイムラインお気に入り情報
+ */
+async function readTemptl() {
+    // 変数キャッシュがある場合はキャッシュを使用
+    if (pref_temptl_fav) {
+        console.log('@INF: use app_prefs/temptl_fav.json cache.')
+        return pref_temptl_fav
+    }
+    const content = readFile('app_prefs/temptl_fav.json')
+    if (!content) { // ファイルが見つからなかったらキャッシュを初期化して返却
+        pref_temptl_fav = []
+        return pref_temptl_fav
+    }
+    pref_temptl_fav = JSON.parse(content)
+    console.log('@INF: read app_prefs/temptl_fav.json.')
+    return pref_temptl_fav
+}
+
+/**
+ * #IPC
+ * 一時タイムラインお気に入りを設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param data 書き込むJSONデータ
+ */
+async function overwriteTemptl(event, data) {
+    const content = await overwriteFile('app_prefs/temptl_fav.json', data)
+    console.log('@INF: finish write app_prefs/temptl_fav.json')
+
+    pref_temptl_fav = JSON.parse(content)
 }
 
 /**
@@ -940,6 +996,21 @@ async function ajax(arg) {
     }
 }
 
+/**
+ * #Utils
+ * ランダムで色を返却する.
+ * 
+ * @return CIELCHでの色情報
+ */
+function getRandomColor() {
+    const hue = Math.floor(Math.random() * 360)
+    const light = 45 + Math.floor(Math.random() * 11)
+    const chroma = 10 + Math.floor(Math.random() * 61)
+
+    return `lch(${light}% ${chroma}% ${hue})`
+}
+
+
 /*====================================================================================================================*/
 
 /**
@@ -1102,6 +1173,7 @@ app.whenReady().then(() => {
     ipcMain.handle('read-general-pref', readGeneralPref)
     ipcMain.handle('read-pref-emojis', readCustomEmojis)
     ipcMain.handle('read-draft', readDraft)
+    ipcMain.handle('read-temptl', readTemptl)
     ipcMain.handle('read-history', readHistory)
     ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
@@ -1111,8 +1183,10 @@ app.whenReady().then(() => {
     ipcMain.on('write-general-pref', writeGeneralPref)
     ipcMain.on('write-pref-emojis', writeCustomEmojis)
     ipcMain.on('write-draft', overwriteDraft)
+    ipcMain.on('write-temptl', overwriteTemptl)
     ipcMain.on('write-history', overwriteHistory)
     ipcMain.on('write-emoji-history', overwriteEmojiHistory)
+    ipcMain.handle('get-api-params', getAPIParams)
     ipcMain.handle('fetch-version', fetchVersion)
     ipcMain.on('open-oauth', openOAuthSession)
     ipcMain.on('open-external-browser', openExternalBrowser)

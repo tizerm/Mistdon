@@ -11,6 +11,7 @@
         content="default-src 'self'; img-src * data:; media-src * data:; connect-src *; script-src 'self'; style-src 'nonce-8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f'"
     />
     <link rel="stylesheet" type="text/css" href="js/jquery/jquery-ui.min.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
+    <link rel="stylesheet" type="text/css" href="css/theme_dark.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
     <link rel="stylesheet" type="text/css" href="css/mist_core.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
     <link rel="stylesheet" type="text/css" href="css/mist_main.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
     <link rel="stylesheet" type="text/css" href="css/mist_timeline.css" nonce="8106d79b57c192de16857e2dde3be6d841e462267969d9ecc61396a40bbae22f"/>
@@ -34,6 +35,7 @@
     <script type="text/javascript" src="js/module/class_group.js"></script>
     <script type="text/javascript" src="js/module/class_column.js"></script>
     <script type="text/javascript" src="js/module/class_flash_timeline.js"></script>
+    <script type="text/javascript" src="js/module/class_temporary_timeline.js"></script>
     <script type="text/javascript" src="js/module/class_draft.js"></script>
     <script type="text/javascript" src="js/module/class_history.js"></script>
     <script type="text/javascript" src="js/module/class_instance.js"></script>
@@ -67,6 +69,8 @@
                 src="resources/ic_prof.png" alt="すべての認証アカウントのプロフィールを表示"/></a></li>
         <li class="li_bookmark"><a class="navi_show_bookmark" title="ブックマーク/お気に入り"><img
                 src="resources/ic_favorite.png" alt="ブックマーク/お気に入り"/></a></li>
+        <li class="li_temporary"><a class="navi_show_temporary" title="一時タイムライン表示"><img
+                src="resources/ic_return.png" alt="一時タイムライン表示"/></a></li>
         <li class="li_emoji"><a class="navi_reset_emoji" title="カスタム絵文字キャッシュを更新"><img
                 src="resources/ic_emorel.png" alt="カスタム絵文字キャッシュを更新"/></a></li>
     </ul>
@@ -433,6 +437,110 @@
         <div class="footer">
             <button type="button" id="__on_ex_bookmark_confirm" class="close_button">OK</button>
             <button type="button" id="__on_ex_bookmark_cancel" class="close_button">キャンセル</button>
+        </div>
+    </div>
+    <div id="pop_temporary_option" class="ex_mini_window">
+        <!-- hidden: 一時ウィンドウオプション -->
+        <h3>お気に入り</h3>
+        <ul class="temp_favorite"></ul>
+        <div class="lbl_disp_account">
+            表示アカウント:<br/><select class="__cmb_tl_account">
+                ${account_list}
+                <option value="__external">その他のインスタンス</option>
+            </select>
+        </div>
+        <div class="lbl_external_instance">
+            対象インスタンス:<br/>
+            https://<input type="text" class="__txt_external_instance __ignore_keyborad"/>/
+            <input type="hidden" class="__hdn_external_platform" value="null"/>
+            <div class="instance_info">(URLを入力してください)</div>
+        </div>
+        <div class="lbl_tl_type">
+            タイムラインの種類:<br/><select class="__cmb_tl_type">
+                <option value="home">ホーム</option>
+                <option value="local">ローカル</option>
+                <option value="federation">連合</option>
+                <option value="list">リスト</option>
+                <option value="channel">チャンネル</option>
+                <option value="antenna">アンテナ</option>
+                <option value="notification">通知</option>
+            </select>
+        </div>
+        <div class="lbl_tl_layout">
+            タイムラインレイアウト:<br/><select class="__cmb_tl_layout tooltip" title="タイムラインレイアウト">
+                <option value="default">ノーマル</option>
+                <option value="normal2">ノーマル2</option>
+                <option value="chat">チャット</option>
+                <option value="list">リスト</option>
+                <option value="media">メディア</option>
+                <option value="gallery">ギャラリー</option>
+                <option value="multi">マルチ</option>
+            </select>
+        </div>
+        <table class="tl_layout_options"><tbody>
+            <tr>
+                <th class="default">通常</th>
+                <th class="btrn">ブースト/リノート</th>
+            </tr>
+            <tr>
+                <td><select class="__cmb_tll_default">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                </select></td>
+                <td><select class="__cmb_tll_btrn">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th class="media">メディア</th>
+                <th class="notification">通知</th>
+            </tr>
+            <tr>
+                <td><select class="__cmb_tll_media">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="chat">チャット</option>
+                    <option value="list">リスト</option>
+                    <option value="media">メディア</option>
+                    <option value="gallery">ギャラリー</option>
+                    <option value="ignore">無視</option>
+                </select></td>
+                <td><select class="__cmb_tll_notif">
+                    <option value="default">ノーマル</option>
+                    <option value="normal2">ノーマル2</option>
+                    <option value="list">リスト</option>
+                </select></td>
+            </tr>
+        </tbody></table>
+        <div class="lbl_list">
+            対象リスト:<br/><select class="__cmb_tl_list">
+            </select>
+        </div>
+        <div class="lbl_channel">
+            対象チャンネル:<br/><select class="__cmb_tl_channel">
+            </select>
+        </div>
+        <div class="lbl_antenna">
+            対象アンテナ:<br/><select class="__cmb_tl_antenna">
+            </select>
+        </div>
+        <div class="lbl_checkbox">
+            <input type="checkbox" id="xr_${uuid}" class="__chk_exclude_reblog"/>
+            <label for="xr_${uuid}">ブースト/リノートを非表示</label><br/>
+            <input type="checkbox" id="xcw_${uuid}" class="__chk_expand_cw"/>
+            <label for="xcw_${uuid}">デフォルトでCWを展開</label><br/>
+            <input type="checkbox" id="xsm_${uuid}" class="__chk_expand_media"/>
+            <label for="xsm_${uuid}">デフォルトで閲覧注意メディアを展開</label><br/>
+            <input type="checkbox" id="dws_${uuid}" class="__chk_disabled_websocket"/>
+        </div>
+        <div class="footer">
+            <button type="button" id="__on_ex_temporary_confirm" class="close_button">OK</button>
+            <button type="button" id="__on_ex_temporary_cancel" class="close_button">キャンセル</button>
         </div>
     </div>
     <div id="pop_lastest_release">

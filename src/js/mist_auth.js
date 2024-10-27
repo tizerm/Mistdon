@@ -19,11 +19,8 @@
             // アカウントカラー初期設定
             $(".__txt_acc_color").each((index, elm) => {
                 const target = $(elm)
-                target.closest(".account_box").find("h3").css("background-color", `#${target.val()}`)
+                target.closest(".account_box").find("h3").css("background-color", target.val())
             })
-
-            // カラーパレット設定
-            setColorPalette()
         })()
         $(".__ui_sortable").sortable({
             axis: "y",
@@ -44,7 +41,7 @@
      */
     $(document).on("blur", ".__txt_acc_color", e => {
         const target = $(e.target)
-        target.closest("li.account_box").find("h3").css("background-color", `#${target.val()}`)
+        target.closest("li.account_box").find("h3").css("background-color", target.val())
     })
 
     /**
@@ -54,6 +51,7 @@
      */
     $("#on_save_account_info").on("click", e => (async () => {
         const notification = Notification.progress("アカウント設定を保存中です...")
+        trimHexColor() // 色情報を変換
 
         const param_json = []
         const profile_update = $("#__chk_update_profile").prop("checked")

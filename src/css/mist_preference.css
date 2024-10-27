@@ -7,7 +7,7 @@
     >.head_buttons {
         margin: 4px;
         text-align: center;
-        background-color: rgba(34,34,34,0.717);
+        background-color: var(--core-color-ui-bg);
 
         > button.icon_label_set {
             border-radius: 24px;
@@ -28,7 +28,7 @@
         }
     }
     > .middle_help {
-        background-color: rgba(34,34,34,0.717);
+        background-color: var(--core-color-ui-bg);
         text-align: center;
         font-weight: bold;
         font-size: 13px;
@@ -43,7 +43,7 @@
         vertical-align: middle;
         transform: translate(0px, -2px);
         > span { display: none; }
-        &:hover { background-color: #888888; }
+        &:hover { background-color: var(--core-color-button-hoverbg); }
     }
 }
 
@@ -59,7 +59,7 @@
         top: 32px;
         > .pref_content {
             overflow-y: auto;
-            background-color: rgba(34,34,34,0.5);
+            background-color: var(--core-color-ui-bg);
             padding: 0px 8px 12px;
             font-size: 13px;
             height: calc(100% - 102px);
@@ -70,25 +70,25 @@
                 margin: 16px -6px;
                 font-size: 18px;
                 font-weight: bold;
-                border-bottom: solid 2px #aaaaaa;
+                border-bottom: solid 2px var(--help-color-block-border);
             }
             & h5 {
                 padding: 4px 18px;
                 margin: 16px -6px;
                 font-size: 16px;
-                border-bottom: solid 1px #aaaaaa;
+                border-bottom: solid 1px var(--help-color-block-border);
             }
             & dd {
                 margin-bottom: 8px;
                 margin-left: 8px;
                 padding-left: 12px;
-                border-left: solid 4px #aaaaaa;
+                border-left: solid 4px var(--help-color-block-border);
             }
             & th, & td {
                 margin: 1px;
                 border-radius: 6px;
                 padding: 4px 12px;
-                background-color: rgba(255,255,255,0.08);
+                background-color: var(--help-color-table-bg);
             }
             & img.tooltip_help {
                 display: inline-block;
@@ -105,12 +105,12 @@
                     list-style-type: none;
                 }
                 > ul.selector_list {
-                    border-left: dashed 4px #cccccc;
+                    border-left: dashed 4px var(--help-color-block-border);
                     padding-left: 8px;
                 }
             }
             .font_sample_box {
-                border: dashed 2px #cccccc;
+                border: dashed 2px var(--help-color-block-border);
                 padding: 4px 8px;
                 > p {
                     margin: 4px 0px;
@@ -137,7 +137,7 @@
         width: 330px;
 
         > .col_head {
-            background-color: #808080;
+            background-color: var(--core-color-header-bg);
             background-image: url("../resources/ic_sort_x.png");
             background-position: right 82px bottom 7px;
             background-repeat: no-repeat;
@@ -155,21 +155,26 @@
             width: 100%;
         }
         > .col_option {
-            background-color: rgba(67,67,67,0.8);
-            border-radius: 12px;
+            background-color: var(--tl-color-bg);
+            border-radius: 8px;
             margin: 2px 0px;
             padding: 2px 0px;
             font-size: 13px;
             text-align: center;
+            > label>img {
+                width: 24px;
+                height: 24px;
+            }
+            .__pull_color_palette { width: calc(100% - 96px); }
         }
 
         /*=== Group Layout ===================================================================*/
         > .col_tl_groups {
-            height: calc(100vh - 292px);
+            height: calc(100vh - 238px);
             > .tl_group {
                 position: relative;
                 > .group_head {
-                    background-color: #505050;
+                    background-color: var(--core-color-header-bg);
                     background-image: url("../resources/ic_sort_move.png");
                     background-position: right 56px bottom 2px;
                     background-repeat: no-repeat;
@@ -189,7 +194,8 @@
                         right: 84px;
 
                         .__txt_group_height:disabled {
-                            background-color: #808080;
+                            background-color: var(--core-color-check-disabledbg);
+                            color: var(--core-color-check-disabledtext);
                             cursor: not-allowed;
                         }
                     }
@@ -204,7 +210,7 @@
                     }
                 }
                 > .group_option {
-                    background-color: rgba(67,67,67,0.8);
+                    background-color: var(--tl-color-bg);
                     border-radius: 6px;
                     margin: 2px 0px;
                     padding: 2px 0px;
@@ -220,9 +226,11 @@
                             height: 24px;
                         }
                     }
+                    .__pull_color_palette { width: calc(100% - 168px); }
+
                 }
                 > table.tl_layout_options {
-                    background-color: rgba(34,34,34,0.8);
+                    background-color: var(--core-color-ui-bg);
                     display: none;
                     z-index: 1;
                     position: absolute;
@@ -232,10 +240,10 @@
                     font-size: 12px;
                     & th {
                         border-radius: 8px;
-                        &.default      { background-color: #3562cc; }
-                        &.btrn         { background-color: #408a08; }
-                        &.media        { background-color: #cc355d; }
-                        &.notification { background-color: #825e1b; }
+                        &.default      { background-color: var(--label-color-follow-bg); }
+                        &.btrn         { background-color: var(--label-color-reblog-bg); }
+                        &.media        { background-color: var(--label-color-reply-bg); }
+                        &.notification { background-color: var(--label-color-favorite-bg); }
                     }
                     & button.__on_layout_close { width: 100%; }
                 }
@@ -254,13 +262,13 @@
                             background-image: url("../resources/ic_sort_move.png");
                             background-position: right 32px bottom 4px;
                             background-repeat: no-repeat;
-                            color: #ffffff;
+                            color: var(--core-color-text);
                             font-family: Arial, "メイリオ", sans-selif;
                             font-size: 18px;
                             font-weight: bold;
                             margin: -12px -12px 12px;
                             padding: 6px 24px;
-                            background-color: #808080;
+                            background-color: var(--core-color-header-bg);
                             cursor: move;
                             > a {
                                 display: inline-block;
@@ -279,7 +287,7 @@
                             > div { margin: 12px 0px; }
                             .lbl_external_instance {
                                 > .instance_info {
-                                    background-color: rgba(255,255,255,0.08);
+                                    background-color: var(--tl-color-quote-bg);
                                     background-size: auto 64px;
                                     background-position: center center;
                                     background-repeat: no-repeat;
@@ -295,31 +303,32 @@
                                     text-align: right;
                                 }
                             }
+                            .__pull_color_palette { width: calc(100% - 36px); }
                         }
                     }
                     > .ui-sortable-placeholder {
-                        background-color: rgba(168,72,96,0.8);
+                        background-color: var(--core-color-sort-placeholder-bg);
                         border-radius: 18px;
                         height: 160px;
                     }
                 }
             }
             > .ui-sortable-placeholder {
-                background-color: rgba(168,72,96,0.8);
+                background-color: var(--core-color-sort-placeholder-bg);
                 border-radius: 18px;
                 height: 160px;
             }
         }
     }
     > .ui-sortable-placeholder {
-        background-color: rgba(168,72,96,0.8);
+        background-color: var(--core-color-sort-placeholder-bg);
         border-radius: 18px;
         width: 300px;
     }
 }
 a.ic_button:hover>img {
     border-radius: 12px;
-    background-color: rgba(255,255,255,0.2);
+    background-color: var(--core-color-imgbutton-hoverbg);
     cursor: pointer;
 }
 label { font-size: 12px; }

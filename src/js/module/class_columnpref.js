@@ -49,7 +49,7 @@ class TimelinePref {
                         <input type="hidden" class="__hdn_external_platform" value="null"/>
                         <div class="instance_info">(URLを入力してください)</div>
                         <div class="color_info">
-                            色: #<input type="text" class="__txt_external_color __pull_color_palette" size="6"/>
+                            色: <input type="text" class="__txt_external_color __pull_color_palette"/>
                         </div>
                     </div>
                     <div class="lbl_tl_type">
@@ -71,7 +71,7 @@ class TimelinePref {
                         対象チャンネル:<br/><select class="__cmb_tl_channel">
                         </select>
                         <div class="color_info">
-                            色: #<input type="text" class="__txt_channel_color __pull_color_palette" size="6"/>
+                            色: <input type="text" class="__txt_channel_color __pull_color_palette"/>
                         </div>
                     </div>
                     <div class="lbl_antenna">
@@ -96,7 +96,7 @@ class TimelinePref {
         if (this.pref?.key_address) { // 表示対象アカウント
             const account = Account.get(this.pref.key_address)
             jqelm.find(`.__cmb_tl_account>option[value="${this.pref.key_address}"]`).prop("selected", true)
-            jqelm.find("h4").css("background-color", `#${account?.pref.acc_color}`)
+            jqelm.find("h4").css("background-color", account?.pref.acc_color)
             jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
             jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
             jqelm.find(".__txt_channel_color").val(this.pref.color)
@@ -106,7 +106,7 @@ class TimelinePref {
             jqelm.find(".__txt_external_instance").val(this.pref.host)
             jqelm.find(".__hdn_external_platform").val(this.pref.platform)
             jqelm.find(".__txt_external_color").val(this.pref.color)
-            jqelm.find("h4").css("background-color", `#${this.pref.color}`)
+            jqelm.find("h4").css("background-color", this.pref.color)
             jqelm.find(".lbl_external_instance").show()
             jqelm.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
             jqelm.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
@@ -153,7 +153,7 @@ class TimelinePref {
         if (!this.pref) {
             if (!Account.isEmpty()) {  // アカウント情報があれば背景色は先頭にしてホスト情報を非表示
                 const account = Account.get(0)
-                jqelm.find("h4").css("background-color", `#${account.pref.acc_color}`)
+                jqelm.find("h4").css("background-color", account.pref.acc_color)
                 jqelm.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
                 jqelm.find(".lbl_list").hide()
@@ -184,9 +184,9 @@ class TimelinePref {
      */
     static changeAccountEvent(target) {
         const target_li = target.closest("li")
-        const account = Account.get(target.find("option:selected").val())
+        const account = Account.get(target.val())
         if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
-            target_li.find("h4").css("background-color", `#${account.pref.acc_color}`)
+            target_li.find("h4").css("background-color", account.pref.acc_color)
             target_li.find(".lbl_external_instance").hide()
             target_li.find('.__cmb_tl_type>option').prop("disabled", false)
             target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
@@ -386,7 +386,7 @@ class GroupPref {
                         <option value="gallery">ギャラリー</option>
                         <option value="multi">マルチ</option>
                     </select>
-                    色: #<input type="text" class="__txt_group_color __pull_color_palette" size="6"/>
+                    色: <input type="text" class="__txt_group_color __pull_color_palette"/>
                 </div>
                 <table class="tl_layout_options"><tbody>
                     <tr>
@@ -442,7 +442,7 @@ class GroupPref {
         }
         if (this.pref?.gp_color) { // グループカラー
             jqelm.find(".__txt_group_color").val(this.pref.gp_color)
-            jqelm.find(".group_head").css("background-color", `#${this.pref.gp_color}`)
+            jqelm.find(".group_head").css("background-color", this.pref.gp_color)
         }
         if (this.pref?.tl_layout) // タイムラインレイアウト
             jqelm.find(`.__cmb_tl_layout>option[value="${this.pref.tl_layout}"]`).prop("selected", true)
@@ -468,7 +468,6 @@ class GroupPref {
         const jqelm = tl.create()
         $(`#${this.id}>ul`).append(jqelm)
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>ul>li:last-child`))
     }
 
     /**
@@ -605,10 +604,12 @@ class ColumnPref {
                 </div>
                 <div class="col_option">
                     <input type="checkbox" id="dh_${this.id}" class="__chk_default_hide"/>
-                    <label for="dh_${this.id}">デフォルトで閉じる</label><br/>
+                    <label for="dh_${this.id}" class="tooltip" title="デフォルトで閉じる"><img
+                        src="resources/ic_left.png" alt="デフォルトで閉じる"/></label>
                     <input type="checkbox" id="df_${this.id}" class="__chk_default_flex"/>
-                    <label for="df_${this.id}">デフォルトで可変幅にする</label><br/>
-                    色: #<input type="text" class="__txt_col_color __pull_color_palette" size="6"/>
+                    <label for="df_${this.id}" class="tooltip" title="デフォルトで可変幅にする"><img
+                        src="resources/ic_flex_off.png" alt="デフォルトで可変幅にする"/></label>
+                    色: <input type="text" class="__txt_col_color __pull_color_palette"/>
                 </div>
                 <div class="col_tl_groups __ui_gp_sortable">
                 </div>
@@ -627,7 +628,7 @@ class ColumnPref {
             jqelm.find(".__chk_default_flex").prop("checked", true)
         if (this.pref?.col_color) { // カラムカラー
             jqelm.find(".__txt_col_color").val(this.pref.col_color)
-            jqelm.find(".col_head").css("background-color", `#${this.pref.col_color}`)
+            jqelm.find(".col_head").css("background-color", this.pref.col_color)
         }
         // タイムラインの設定値をDOMと共に生成
         this.tl_groups.forEach((v, k) => jqelm.find(".col_tl_groups").append(v.create()))
@@ -646,7 +647,6 @@ class ColumnPref {
         column.create()
         column.addGroup()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${column.id}>.col_option`))
         ColumnPref.setInnerSortable()
         $(`#${column.id}`).get(0).scrollIntoView({ inline: 'nearest' })
     }
@@ -673,7 +673,6 @@ class ColumnPref {
         // グループの高さを再設定
         this.resetHeight()
         ColumnPref.setButtonPermission()
-        setColorPalette($(`#${this.id}>.col_tl_groups>.tl_group:last-child>.group_option`))
         ColumnPref.setInnerSortable()
     }
 
@@ -832,6 +831,7 @@ class ColumnPref {
      * タイムラインやグループが存在しないカラムを削除して正常な状態にする
      */
     static normalize() {
+        trimHexColor() // 色情報を変換
         // DOM要素から不正な空データを除外する
         $("#columns>.column_box").each((col_index, col_elm) => { // カラムイテレータ
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
@@ -891,8 +891,7 @@ class ColumnPref {
                     // デフォルトグループ名は「Group XX」
                     'label_head': $(gp_elm).find(".__txt_group_head").val() || `Group ${gp_index + 1}`,
                     'timelines': tl_list,
-                    // デフォルトグループカラーは#777777(グレー)
-                    'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
+                    'gp_color': $(gp_elm).find(".__txt_group_color").val() || getRandomColor(),
                     'gp_height': $(gp_elm).find(".__txt_group_height").val(),
                     'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val(),
                     'multi_layout_option': multi_layout
@@ -902,8 +901,7 @@ class ColumnPref {
                 // デフォルトカラム名は「Column XX」
                 'label_head': $(col_elm).find(".__txt_col_head").val() || `Column ${col_index + 1}`,
                 'groups': group_list,
-                // デフォルトカラムカラーは#808080(グレー)
-                'col_color': $(col_elm).find(".__txt_col_color").val() || '808080',
+                'col_color': $(col_elm).find(".__txt_col_color").val() || getRandomColor(),
                 // デフォルトカラム長は330px
                 'col_width': $(col_elm).find(".__txt_col_width").val() || '330',
                 'd_hide': $(col_elm).find(".__chk_default_hide").prop("checked"),

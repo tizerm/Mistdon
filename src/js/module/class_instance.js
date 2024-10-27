@@ -533,7 +533,7 @@ class Instance {
                     </div>
                 </div>
             `,
-            color: getRandomColor(),
+            color: getHashColor(this.host),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"

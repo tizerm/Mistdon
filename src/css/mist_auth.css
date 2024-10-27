@@ -1,11 +1,6 @@
 ﻿/*=== General Stylesheet =========================================================================*/
 
-input[type="text"] {
-    font-family: Arial, "メイリオ", sans-selif;
-    background-color: #434343;
-    border: solid 1px #aaaaaa;
-    color: #ffffff;
-}
+input[type="text"] { font-family: Arial, "メイリオ", sans-selif; }
 
 /*=== Content Layout =============================================================================*/
 
@@ -29,7 +24,7 @@ input[type="text"] {
         position: relative;
 
         > .tool_section {
-            background-color: rgba(34,34,34,0.717);
+            background-color: var(--core-color-ui-bg);
             > button.icon_label_set {
                 border-radius: 18px;
                 border-style: none;
@@ -57,18 +52,18 @@ input[type="text"] {
             padding: 24px;
             right: 0px;
             left: 0px;
-            background-color: rgba(62,62,62,0.92);
+            background-color: var(--tl-color-bg);
             border-radius: 12px;
             text-align: center;
-            color: #dddddd;
+            color: var(--tl-color-sublabel-text);
             font-family: Arial, "メイリオ", sans-selif;
             font-size: 14px;
         }
         > h2 {
             border-radius: 18px;
-            background-color: #638042;
+            background-color: var(--label-color-account-list-bg);
             text-align: center;
-            color: #ffffff;
+            color: var(--core-color-text);
             margin: 0px;
             padding: 4px 24px;
         }
@@ -80,7 +75,7 @@ input[type="text"] {
             overflow-x: hidden;
             &::-webkit-scrollbar { width: 8px; }
             > li {
-                background-color: rgba(67,67,67,0.92);
+                background-color: var(--tl-color-bg);
                 border-radius: 18px;
                 list-style-type: none;
                 margin: 4px;
@@ -90,13 +85,13 @@ input[type="text"] {
                 > h3 {
                     border-top-left-radius: 18px;
                     border-top-right-radius: 18px;
-                    background-color: #808080;
+                    background-color: var(--core-color-header-bg);
                     background-image: url("../resources/ic_sort_y.png");
                     background-position: right 12px center;
                     background-repeat: no-repeat;
                     font-size: 18px;
                     font-family: Arial, "メイリオ", sans-selif;
-                    color: #ffffff;
+                    color: var(--core-color-text);
                     margin: -8px -12px 8px;
                     padding: 6px 32px;
                     cursor: move;
@@ -110,7 +105,7 @@ input[type="text"] {
                         float: left;
                     }
                     > .username {
-                        color: #ffffff;
+                        color: var(--core-color-text);
                         font-size: 18px;
                         font-weight: bold;
                         margin: 0px;
@@ -121,7 +116,7 @@ input[type="text"] {
                     }
                     > .userid {
                         font-family: Arial, "メイリオ", sans-selif;
-                        color: #cccccc;
+                        color: var(--tl-color-userlink-text);
                         font-size: 14px;
                     }
                     & .inline_emoji {
@@ -139,6 +134,7 @@ input[type="text"] {
                         margin: 0px;
                         padding: 0px;
                     }
+                    .__pull_color_palette { width: calc(100% - 48px); }
                 }
                 > .foot_button {
                     text-align: right;
@@ -146,7 +142,6 @@ input[type="text"] {
 
                     & button {
                         border-radius: 6px;
-                        border: solid 1px #ffffff;
                         padding: 2px 8px;
                         font-size: 13px;
                         font-weight: bold;
@@ -164,21 +159,21 @@ input[type="text"] {
 
         > h2 {
             border-radius: 18px;
-            background-color: #42718a;
-            color: #ffffff;
+            background-color: var(--label-color-account-auth-bg);
+            color: var(--core-color-text);
             margin: 0px;
             padding: 4px 24px;
         }
         > #transition_section {
             position: relative;
             border-radius: 24px;
-            background-color: rgba(48,48,48,0.92);
+            background-color: var(--core-color-ui-bg);
             margin-top: 8px;
             width: 100%;
             height: calc(100vh - 112px);
             & button {
                 border-radius: 8px;
-                border: solid 2px #cccccc;
+                border: solid 2px var(--core-color-border);
                 font-family: Arial, "メイリオ", sans-selif;
                 font-size: 18px;
                 margin: 6px 12px;
@@ -187,7 +182,7 @@ input[type="text"] {
         }
         #select_platform {
             position: absolute;
-            background-color: rgba(255,255,255,0.08);
+            background-color: var(--tl-color-bg);
             border-radius: 16px;
             margin: 18px;
             padding: 32px 12px;
@@ -197,7 +192,7 @@ input[type="text"] {
             left: 0px;
             > .instance_box {
                 border-radius: 12px;
-                background-color: rgba(255,255,255,0.1);
+                background-color: var(--tl-color-quote-bg);
                 font-size: 16px;
                 font-family: Arial, "メイリオ", sans-selif;
                 margin: 6px;
@@ -205,7 +200,7 @@ input[type="text"] {
                 > input { width: calc(100% - 96px); }
             }
             > .instance_info {
-                background-color: rgba(255,255,255,0.08);
+                background-color: var(--tl-color-quote-bg);
                 background-size: auto 64px;
                 background-position: center center;
                 background-repeat: no-repeat;
@@ -237,7 +232,7 @@ input[type="text"] {
             }
             > .bottom_auth_warn {
                 display: block;
-                color: #ffd561;
+                color: var(--help-color-text-strong);
             }
         }
         .platform_section {
@@ -250,14 +245,13 @@ input[type="text"] {
             display: none;
             > h3 {
                 border-radius: 12px;
-                background-color: #666666;
-                color: #ffffff;
+                background-color: var(--core-color-header-bg);
+                color: var(--core-color-text);
                 margin: 12px 0px;
                 padding: 8px 24px;
             }
             & button {
                 border-radius: 6px;
-                border: solid 2px #ffffff;
                 font-family: Arial, "メイリオ", sans-selif;
                 font-size: 18px;
                 margin: 6px 12px;
@@ -265,14 +259,14 @@ input[type="text"] {
             }
             .instance_box {
                 border-radius: 6px;
-                background-color: rgba(255,255,255,0.1);
+                background-color: var(--tl-color-quote-bg);
                 font-size: 16px;
                 font-family: Arial, "メイリオ", sans-selif;
                 margin: 6px 12px;
                 padding: 8px 24px;
             }
             > .instance_form, > .auth_form {
-                background-color: rgba(255,255,255,0.1);
+                background-color: var(--tl-color-bg);
                 border-radius: 16px;
                 padding: 24px 12px;
             }
