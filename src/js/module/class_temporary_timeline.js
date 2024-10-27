@@ -259,8 +259,9 @@ class TemporaryTimeline extends Timeline {
 
     // Getter: 一時タイムラインお気に入りを一覧に表示する際の項目DOM
     get element() {
+        const label = this.temptl_pref.timeline_type != 'channel' ? this.temptl_pref.timeline_type : this.temptl_pref.channel_name
         const jqelm = $($.parseHTML(`<li class="temptl_list" name="${this.temptl_pref.ttl_id}">
-            ${this.temptl_pref.key_address ?? this.temptl_pref.ex_host} - ${this.temptl_pref.timeline_type}
+            ${this.temptl_pref.key_address ?? this.temptl_pref.ex_host} - ${label}
             <button type="button" class="delele_tempfav_button" title="削除"><img
                 src="resources/ic_not.png" alt="削除"/></button>
 

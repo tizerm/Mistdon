@@ -1314,6 +1314,10 @@
                 margin: 2px;
                 padding: 4px 8px;
                 padding-left: 32px;
+                padding-right: 32px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
                 list-style-type: none;
                 border-radius: 12px;
                 font-size: 14px;
