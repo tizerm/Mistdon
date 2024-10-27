@@ -831,6 +831,7 @@ class ColumnPref {
      * タイムラインやグループが存在しないカラムを削除して正常な状態にする
      */
     static normalize() {
+        trimHexColor() // 色情報を変換
         // DOM要素から不正な空データを除外する
         $("#columns>.column_box").each((col_index, col_elm) => { // カラムイテレータ
             $(col_elm).find(".col_tl_groups>.tl_group").each((gp_index, gp_elm) => { // タイムライングループイテレータ
@@ -890,8 +891,7 @@ class ColumnPref {
                     // デフォルトグループ名は「Group XX」
                     'label_head': $(gp_elm).find(".__txt_group_head").val() || `Group ${gp_index + 1}`,
                     'timelines': tl_list,
-                    // デフォルトグループカラーは#777777(グレー)
-                    'gp_color': $(gp_elm).find(".__txt_group_color").val() || '777777',
+                    'gp_color': $(gp_elm).find(".__txt_group_color").val() || getRandomColor(),
                     'gp_height': $(gp_elm).find(".__txt_group_height").val(),
                     'tl_layout': $(gp_elm).find(".__cmb_tl_layout").val(),
                     'multi_layout_option': multi_layout
@@ -901,8 +901,7 @@ class ColumnPref {
                 // デフォルトカラム名は「Column XX」
                 'label_head': $(col_elm).find(".__txt_col_head").val() || `Column ${col_index + 1}`,
                 'groups': group_list,
-                // デフォルトカラムカラーは#808080(グレー)
-                'col_color': $(col_elm).find(".__txt_col_color").val() || '808080',
+                'col_color': $(col_elm).find(".__txt_col_color").val() || getRandomColor(),
                 // デフォルトカラム長は330px
                 'col_width': $(col_elm).find(".__txt_col_width").val() || '330',
                 'd_hide': $(col_elm).find(".__chk_default_hide").prop("checked"),

@@ -38,14 +38,30 @@ class TemporaryTimeline extends Timeline {
     // Getter: グループオブジェクトへの参照
     get group() { return this.ref_group }
 
+    /**
+     * #StaticMethod
+     * お気に入りに登録した一時タイムラインを取得.
+     * 
+     * @param id お気に入りしたときの一意ID
+     */
     static get(id) {
         return TemporaryTimeline.map.get(id)
     }
 
+    /**
+     * #StaticMethod
+     * お気に入りに登録した一時タイムラインをインデクスから取得.
+     * 
+     * @param index インデクス
+     */
     static getIndex(index) {
         return [...TemporaryTimeline.map.values()][index]
     }
 
+    /**
+     * #StaticMethod
+     * 画面で入力した一時タイムライン設定を設定JSONとして生成.
+     */
     static getPrefForm() {
         const opt_elm = $("#pop_temporary_option")
         const account_address = opt_elm.find(".__cmb_tl_account").val()
@@ -67,6 +83,12 @@ class TemporaryTimeline extends Timeline {
         }
     }
 
+    /**
+     * #StaticMethod
+     * 設定JSONから一時タイムラインのオブジェクトを生成..
+     * 
+     * @param pref 一時タイムラインの設定JSON
+     */
     static async create(pref) {
         // オブジェクト生成に必要なパラメータを設定JSONから取得
         const account = Account.get(pref.key_address)
@@ -99,6 +121,10 @@ class TemporaryTimeline extends Timeline {
         })
     }
 
+    /**
+     * #StaticMethod
+     * お気に入りの一時タイムライン一覧を生成.
+     */
     static createFavoriteMenu() {
         const target = $("#pop_temporary_option>.temp_favorite")
         if (TemporaryTimeline.map.size == 0) { // お気に入りがなかったら空にする
@@ -110,6 +136,10 @@ class TemporaryTimeline extends Timeline {
         TemporaryTimeline.map.forEach((v, k) => target.append(v.element))
     }
 
+    /**
+     * #Method
+     * この一時タイムラインを起動してウィンドウを表示する.
+     */
     createTemporaryTimeline() {
         super.createScrollableWindow(null, (tl, empty, window_key) => {
             // 一時タイムライン独自のウィンドウボタンを追加
@@ -124,6 +154,12 @@ class TemporaryTimeline extends Timeline {
         })
     }
 
+    /**
+     * #Method
+     * 対象のウィンドウに対してタイムラインを読み込んで表示する.
+     * 
+     * @param window_key 表示する対象のウィンドウキー
+     */
     loadTemporaryTimeline(window_key) {
         this.group.status_map = new Map()
         this.status_key_map = new Map()
@@ -142,6 +178,10 @@ class TemporaryTimeline extends Timeline {
         })
     }
 
+    /**
+     * #Method
+     * 先頭から先のタイムラインを読み込む.
+     */
     async loadTop() {
         // ボタンをロード画面に変更
         $(`#${this.timeline_key}>.__on_temp_top_loader`).empty().addClass('loader_loading')
@@ -160,6 +200,10 @@ class TemporaryTimeline extends Timeline {
         top_elm.get(0).scrollIntoView({ block: 'center' })
     }
 
+    /**
+     * #Method
+     * タイムラインを再読み込みする.
+     */
     reload() {
         // ロードウィンドウを生成
         $(`#${this.timeline_key}`).empty().before(`
@@ -172,12 +216,20 @@ class TemporaryTimeline extends Timeline {
         this.loadTemporaryTimeline(this.window_key)
     }
 
+    /**
+     * #Method
+     * この一時タイムラインをお気に入りに登録する.
+     */
     async favorite() {
         TemporaryTimeline.map.set(this.temptl_pref.ttl_id, this)
         await TemporaryTimeline.writeFile()
         Notification.info(`対象の一時タイムラインをお気に入りに登録しました.`)
     }
 
+    /**
+     * #Method
+     * この一時タイムラインをお気に入りにから削除する.
+     */
     async delete() {
         TemporaryTimeline.map.delete(this.temptl_pref.ttl_id)
         await TemporaryTimeline.writeFile()
@@ -185,6 +237,10 @@ class TemporaryTimeline extends Timeline {
         Notification.info(`対象の一時タイムラインをお気に入りから削除しました.`)
     }
 
+    /**
+     * #StaticMethod
+     * キャッシュされている一時タイムラインお気に入りマップをJSONファイルに書き出す.
+     */
     static async writeFile() {
         const temptls = []
         TemporaryTimeline.map.forEach((v, k) => temptls.push(v.temptl_pref))
@@ -205,6 +261,12 @@ class TemporaryTimeline extends Timeline {
         return jqelm
     }
 
+    /**
+     * #StaticMethod
+     * ローカルにキャッシュされている一時タイムラインウィンドウオブジェクトを取得する.
+     * 
+     * @param target 取得対象のターゲットDOM
+     */
     static getTempWindow(target) {
         return Timeline.TIMELINE_WINDOW_MAP.get(target.closest(".timeline_window").find("ul.scrollable_tl").attr("id"))
     }

@@ -242,6 +242,12 @@
                     return false
                 }
                 break
+            case 85: // Ctrl+U: 一時タイムライン表示
+                if (is_control) {
+                    $("#navi .navi_show_temporary").click()
+                    return false
+                }
+                break
             case 116: // F5: カーソルのカラムをリロードする
                 if (is_control || event.shiftKey) {
                     // Ctrl(or Shift)+F5: 画面そのものを読み込みなおす(ブラウザリロード)

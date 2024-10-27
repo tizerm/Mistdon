@@ -14,6 +14,7 @@ class Preference {
             "history"                   : pref?.navigation_visible?.history         ?? true, // 送信履歴
             "profile"                   : pref?.navigation_visible?.profile         ?? true, // 認証アカウントプロフィール
             "bookmark"                  : pref?.navigation_visible?.bookmark        ?? true, // ブックマーク/お気に入り
+            "temptl"                    : pref?.navigation_visible?.temptl          ?? true, // 一時タイムライン表示
             "emoji_cache"               : pref?.navigation_visible?.emoji_cache     ?? true, // 絵文字キャッシュ
             "help_keyborad"             : pref?.navigation_visible?.help_keyborad   ?? true, // ショートカット早見表
             "help"                      : pref?.navigation_visible?.help            ?? true  // ヘルプ
@@ -32,6 +33,7 @@ class Preference {
         this.enable_list_action_palette = pref?.enable_list_action_palette  ?? false, // 簡易アクションパレット(リスト)
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
+        this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
         this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
@@ -265,6 +267,7 @@ class Preference {
         $("#__chk_gen_navi_history")        .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.history)
         $("#__chk_gen_navi_profile")        .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.profile)
         $("#__chk_gen_navi_bookmark")       .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.bookmark)
+        $("#__chk_gen_navi_temptl")         .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.temptl)
         $("#__chk_gen_navi_emoji")          .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.emoji_cache)
         $("#__chk_gen_navi_help_keyborad")  .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help_keyborad)
         $("#__chk_gen_navi_help")           .prop("checked", Preference.GENERAL_PREFERENCE.navigation_visible?.help)
@@ -285,6 +288,7 @@ class Preference {
         $("#__chk_gen_use_list_action_palette")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_list_action_palette)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
+        $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
         $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
@@ -372,6 +376,7 @@ class Preference {
                 "history"                   : $("#__chk_gen_navi_history").prop("checked"),
                 "profile"                   : $("#__chk_gen_navi_profile").prop("checked"),
                 "bookmark"                  : $("#__chk_gen_navi_bookmark").prop("checked"),
+                "temptl"                    : $("#__chk_gen_navi_temptl").prop("checked"),
                 "emoji_cache"               : $("#__chk_gen_navi_emoji").prop("checked"),
                 "help_keyborad"             : $("#__chk_gen_navi_help_keyborad").prop("checked"),
                 "help"                      : $("#__chk_gen_navi_help").prop("checked")
@@ -390,6 +395,7 @@ class Preference {
             "enable_list_action_palette"    : $("#__chk_gen_use_list_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
+            "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
             "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
@@ -483,6 +489,7 @@ class Preference {
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.history) $("#navi .li_history").hide()
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.profile) $("#navi .li_profile").hide()
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.bookmark) $("#navi .li_bookmark").hide()
+        if (!Preference.GENERAL_PREFERENCE.navigation_visible.temptl) $("#navi .li_temporary").hide()
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.emoji_cache) $("#navi .li_emoji").hide()
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.help_keyborad) $("#navi .li_keyborad").hide()
         if (!Preference.GENERAL_PREFERENCE.navigation_visible.help) $("#navi .li_help").hide()

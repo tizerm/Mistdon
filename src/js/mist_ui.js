@@ -1,10 +1,4 @@
-﻿const color_palette = [
-    // デフォルトで選択できるカラーパレット(15色)
-    'b53a2a', 'bf7a41', '56873b', '428a6f', '42809e', '3b5da1', '564391', '933ba1', 'b53667', '666666',
-    '997460', '87995f', '738c83', '676a82', '996a88', '694444', '693147', '3b3e63', '3b634b', '4a4a4a'
-]
-
-$(() => {
+﻿$(() => {
     // ナビゲーションメニューホバー時にツールチップ表示
     $("#navi").tooltip(Preference.getUIPref("RIGHT", "UI_DROP_ANIMATION"))
 
@@ -173,8 +167,11 @@ function createWindow(arg) {
  * ランダムでカラーパレットの色を取得する.
  */
 function getRandomColor() {
-    const index = Math.floor(Math.random() * color_palette.length)
-    return color_palette[index]
+    const hue = Math.floor(Math.random() * 360)
+    const light = 45 + Math.floor(Math.random() * 11)
+    const chroma = 10 + Math.floor(Math.random() * 61)
+
+    return `lch(${light}% ${chroma}% ${hue})`
 }
 
 /**

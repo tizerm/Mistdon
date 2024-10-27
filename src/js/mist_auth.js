@@ -51,6 +51,7 @@
      */
     $("#on_save_account_info").on("click", e => (async () => {
         const notification = Notification.progress("アカウント設定を保存中です...")
+        trimHexColor() // 色情報を変換
 
         const param_json = []
         const profile_update = $("#__chk_update_profile").prop("checked")

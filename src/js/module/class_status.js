@@ -766,8 +766,8 @@ class Status {
                 </div>
             `
         }
-        // リモートラベルを表示
-        if (this.remote_flg) html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
+            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
         { // 投稿本文領域
             html += '<div class="content">'
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -910,8 +910,8 @@ class Status {
             jqelm.find('.post_footer>.from_address').css("background-color", getHashColor(this.channel_id))
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
-        // リモートラベルをカラーリング
-        if (this.remote_flg) jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルをカラーリング
+            jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
         // 期限切れ、投票済み、詳細表示のいずれかの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && (this.detail_flg || this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
@@ -984,8 +984,8 @@ class Status {
                 <a class="created_at __on_datelink">${this.date_text}</a>
             </div>
         `
-        // リモートラベルを表示
-        if (this.remote_flg) html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
+            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
         html += '<div class="content">'
         { // 投稿本文領域
             // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -1054,8 +1054,8 @@ class Status {
             jqelm.closest('li').addClass('rebloged_post')
             jqelm.find('.label_head.label_reblog').css("background-image", `url("${this.reblog_by_icon}")`)
         }
-        // リモートラベルをカラーリング
-        if (this.remote_flg) jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルをカラーリング
+            jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
         // 期限切れか投票済みの場合は投票ボタンを消して結果を表示する
         if (this.poll_options && !this.detail_flg && (this.poll_voted || (!this.poll_unlimited && this.poll_expired)))
             jqelm.find('.post_poll').after(this.poll_graph).remove()
@@ -1209,8 +1209,8 @@ class Status {
                 </div>
             </div>
         `
-        // リモートラベルを表示
-        if (this.remote_flg) html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
+            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
         if (this.medias.length > 0) { // メディアセクション
             let img_class = 'img_grid_single'
             if (this.medias.length > 4) img_class = 'img_grid_16'
@@ -1262,8 +1262,8 @@ class Status {
         jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
-        // リモートラベルをカラーリング
-        if (this.remote_flg) jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
+        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルをカラーリング
+            jqelm.find('.remote_label').css("background-color", getHashColor(this.user_host))
         // フォロ限の場合はブースト/リノート禁止クラスを付与
         if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // 自分の投稿にはクラスをつける

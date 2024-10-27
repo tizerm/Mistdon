@@ -943,6 +943,10 @@
                 }
                 &:has(>.from_address) { padding-bottom: 16px; }
             }
+            > .post_quote {
+                > .main_content { font-size: var(--font-size-chat-quote); }
+                > .hidden_content { font-size: var(--font-size-chat-quote); }
+            }
             > .label_head {
                 font-size: 11px;
                 border-radius: 6px;

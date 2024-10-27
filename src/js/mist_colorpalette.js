@@ -189,3 +189,13 @@
     })
 })
 
+/**
+ * #Renderer
+ * #のついていない16進数の色を#が付いた状態にコンバートする.
+ */
+function trimHexColor() {
+    $('.__pull_color_palette').each((index, elm) => {
+        const color = $(elm).val()
+        if (color.match(/^[0-9a-f]{6}$/g)) $(elm).val(`#${color}`)
+    })
+}

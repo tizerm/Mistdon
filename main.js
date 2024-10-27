@@ -74,8 +74,7 @@ async function writePrefMstdAccs(event, json_data) {
         'access_token': json_data.access_token,
         'avatar_url': json_data.avatar_url,
         'post_maxlength': json_data.post_maxlength,
-        // アカウントカラーは初期値グレー
-        'acc_color': '808080'
+        'acc_color': getRandomColor()
     }
 
     // ファイルに書き込み
@@ -116,8 +115,7 @@ async function writePrefMskyAccs(event, json_data) {
         'access_token': i,
         'avatar_url': json_data.user.avatarUrl,
         'post_maxlength': json_data.post_maxlength,
-        // アカウントカラーは初期値グレー
-        'acc_color': '808080'
+        'acc_color': getRandomColor()
     }
 
     // ファイルに書き込み
@@ -285,8 +283,7 @@ async function authorizeMastodon(auth_code) {
             'access_token': access_token,
             'avatar_url': user_data?.body?.avatar,
             'post_maxlength': oauth_session.post_maxlength,
-            // アカウントカラーは初期値グレー
-            'acc_color': '808080'
+            'acc_color': getRandomColor()
         }
         // ファイルに書き込み
         const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
@@ -332,8 +329,7 @@ async function authorizeMisskey(session) {
             'access_token': access_token,
             'avatar_url': user_data.avatarUrl,
             'post_maxlength': oauth_session.post_maxlength,
-            // アカウントカラーは初期値グレー
-            'acc_color': '808080'
+            'acc_color': getRandomColor()
         }
         // ファイルに書き込み
         const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
@@ -461,12 +457,18 @@ async function writePrefCols(event, json_data) {
     pref_columns = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * タイムライン情報のJSONをもとにAPIのURLとパラメータを返す.
+ * 
+ * @param event イベント
+ * @param arg 呼び出しパラメータ
+ */
 function getAPIParams(event, arg) {
     let rest_url = null
     let socket_url = null
     let query_param = null
     let socket_param = null
-    console.log("$$$ param setting")
 
     // プラットフォームの種類によってAPIの形式が違うので個別に設定
     switch (arg.platform) {
@@ -695,6 +697,13 @@ async function overwriteDraft(event, data) {
     cache_draft = JSON.parse(content)
 }
 
+/**
+ * #IPC
+ * 保存してある一時タイムラインのお気に入り情報を読み込む.
+ * アプリケーションキャッシュがあるばあいはそちらを優先
+ * 
+ * @return 一時タイムラインお気に入り情報
+ */
 async function readTemptl() {
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_temptl_fav) {
@@ -711,6 +720,14 @@ async function readTemptl() {
     return pref_temptl_fav
 }
 
+/**
+ * #IPC
+ * 一時タイムラインお気に入りを設定ファイルに書き込む.
+ * 書き込んだ後アプリケーションキャッシュを更新
+ * 
+ * @param event イベント
+ * @param data 書き込むJSONデータ
+ */
 async function overwriteTemptl(event, data) {
     const content = await overwriteFile('app_prefs/temptl_fav.json', data)
     console.log('@INF: finish write app_prefs/temptl_fav.json')
@@ -978,6 +995,21 @@ async function ajax(arg) {
         return Promise.reject(err)
     }
 }
+
+/**
+ * #Utils
+ * ランダムで色を返却する.
+ * 
+ * @return CIELCHでの色情報
+ */
+function getRandomColor() {
+    const hue = Math.floor(Math.random() * 360)
+    const light = 45 + Math.floor(Math.random() * 11)
+    const chroma = 10 + Math.floor(Math.random() * 61)
+
+    return `lch(${light}% ${chroma}% ${hue})`
+}
+
 
 /*====================================================================================================================*/
 

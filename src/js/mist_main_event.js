@@ -64,6 +64,10 @@
         $("#pop_bookmark_option").show(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    /**
+     * #Event
+     * 一時タイムライン表示ボタン.
+     */
     $("#navi .navi_show_temporary").on("click", e => {
         const mouse_y = e.pageY
         if (window.innerHeight / 2 < mouse_y) // ウィンドウの下の方にある場合は下から展開
@@ -1570,12 +1574,27 @@
     $(document).on("click", ".__on_flash_prev",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
+    /**
+     * #Event
+     * 一時タイムラインウィンドウ: リロードボタン.
+     * => 一時タイムラインを再読み込みする.
+     */
     $(document).on("click", "#pop_multi_window .window_temp_reload_button",
         e => TemporaryTimeline.getTempWindow($(e.target)).reload())
 
+    /**
+     * #Event
+     * 一時タイムラインウィンドウ: リロードボタン.
+     * => 一時タイムラインを再読み込みする.
+     */
     $(document).on("click", "#pop_multi_window .window_temp_favorite_button",
         e => TemporaryTimeline.getTempWindow($(e.target)).favorite())
 
+    /**
+     * #Event
+     * 一時タイムラインウィンドウ: 続きをロードボタン.
+     * => 一時タイムラインのトップから先の投稿を取得する.
+     */
     $(document).on("click", ".__on_temp_top_loader", e => TemporaryTimeline.getTempWindow($(e.target)).loadTop())
 
     /**
@@ -1612,6 +1631,11 @@
         }
     })
 
+    /**
+     * #Event #Change
+     * 一時タイムライン: アカウント変更時.
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     */
     $(document).on("change", "#pop_temporary_option .__cmb_tl_account", e => {
         const target_li = $("#pop_temporary_option")
         const account = Account.get($(e.target).val())
@@ -1637,6 +1661,11 @@
         target_li.find(".lbl_antenna").hide()
     })
 
+    /**
+     * #Event #Change
+     * 一時タイムライン: その他のインスタンスドメイン変更時.
+     * => インスタンスの簡易情報を取得
+     */
     $(document).on("change", "#pop_temporary_option .__txt_external_instance", e => {
         const target_external = $(e.target).closest(".lbl_external_instance")
         const domain = $(e.target).val()
@@ -1645,6 +1674,11 @@
             .then(instance => target_external.find(".__hdn_external_platform").val(instance?.platform))
     })
 
+    /**
+     * #Event #Change
+     * 一時タイムライン: タイムラインの種類変更時.
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     */
     $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => {
         const li_dom = $("#pop_temporary_option")
         let notification = null
@@ -1729,6 +1763,11 @@
         }
     })
 
+    /**
+     * #Event
+     * 一時タイムライン: お気に入りクリック時.
+     * => お気に入りの設定をロードして一時タイムラインを開く..
+     */
     $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list", e => {
         TemporaryTimeline.get($(e.target).attr("name")).createTemporaryTimeline()
         // ミニウィンドウを閉じる
@@ -1754,6 +1793,11 @@
         $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
     })
 
+    /**
+     * #Event
+     * 一時タイムライン: OKボタン.
+     * => 入力した設定内容で一時タイムラインを展開.
+     */
     $(document).on("click", "#pop_temporary_option #__on_ex_temporary_confirm", e => {
         const temptl_pref = TemporaryTimeline.getPrefForm()
         TemporaryTimeline.create(temptl_pref).then(tl => tl.createTemporaryTimeline())
