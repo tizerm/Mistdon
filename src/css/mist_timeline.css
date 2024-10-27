@@ -292,6 +292,16 @@
                     height: 48px;
                     cursor: pointer;
                 }
+                > .user_role {
+                    position: absolute;
+                    top: 0px;
+                    right: 0px;
+                    opacity: 0.4;
+                    > img {
+                        width: 24px;
+                        height: 24px;
+                    }
+                }
                 > .name_info {
                     position: absolute;
                     top: 0px;
@@ -856,6 +866,13 @@
                     width: 32px;
                     height: 32px;
                 }
+                > .user_role {
+                    z-index: 1;
+                    > img {
+                        width: 16px;
+                        height: 16px;
+                    }
+                }
                 > .userid {
                     display: inline-block;
                     font-size: 11px;
@@ -938,11 +955,14 @@
                 max-height: var(--media-size-chat);
                 .media_preview { border-radius: 6px; }
             }
-        }
-        > li.chat_timeline.self_post {
-            .usericon { left: auto; right: 0px; }
-            .content { left: 0px; }
-            > .post_attributes { right: 34px; }
+
+            &:has(>.remote_label)>.post_attributes { top: 20px; }
+            &.self_post {
+                .usericon { left: auto; right: 0px; }
+                .content { left: 0px; }
+                .user_role { right: 34px; }
+                > .post_attributes { right: 34px; }
+            }
         }
 
         /*=== List Layout Style ==================================================================*/
@@ -1291,6 +1311,31 @@
     }
     > .profile_detail {
         > li.profile_userinfo>.content>.main_content { font-size: var(--font-size-default); }
+        .prof_role {
+            height: auto;
+            background-color: transparent;
+            > li {
+                background-color: transparent;
+                margin: 2px;
+                padding: 0px;
+                font-size: 14px;
+                font-weight: bold;
+                > img {
+                    width: 24px;
+                    height: 24px;
+                    vertical-align: text-bottom;
+                }
+                > span {
+                    display: inline-block;
+                    width: calc(100% - 72px);
+                    background-color: var(--user-color-table-bg);
+                    padding: 2px 16px;
+                    margin-left: 8px;
+                    border-radius: 8px;
+                    border: solid 1px var(--core-color-border);
+                }
+            }
+        }
         .prof_field {
             width: 100%;
             & th, & td {

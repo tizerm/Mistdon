@@ -72,6 +72,9 @@ class User {
                 this.hide_follow = (arg.json.followingVisibility ?? 'public') != 'public'
                 this.hide_follower = (arg.json.followersVisibility ?? 'public') != 'public'
 
+                // ロールセット
+                this.roles = arg.json.badgeRoles
+
                 // フィールドをセット
                 if (arg.json.fields) arg.json.fields.forEach(f => this.fields.push({
                     label: f.name,
@@ -354,6 +357,14 @@ class User {
             <div class="content">
                 <div class="main_content">${target_emojis.replace(this.profile)}</div>
         `
+        if ((this.roles?.length ?? 0) > 0) { // ロールが存在する場合は表示
+            html += '<ul class="prof_role">'
+            this.roles.forEach(r => html += `<li>
+                <img src="${r.iconUrl}" alt="${r.name}"/>
+                <span>${r.name}</span>
+            </li>`)
+            html += '</ul>'
+        }
         if (this.fields.length > 0) { // フィールドが存在する場合は表示
             html += '<table class="prof_field"><tbody>'
             this.fields.forEach(f => html += `<tr>
@@ -379,14 +390,23 @@ class User {
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         const target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        html /* ユーザーアカウント情報 */ += `
-            <div class="user">
-                <img src="${this.avatar_url}" class="usericon"/>
-                <div class="name_info">
-                    <h4 class="username">${target_emojis.replace(this.username)}</h4>
-                    <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
-                </div>
-        `
+        { // ロールが存在する場合はロールをプロフィールに埋め込む
+            let roles = ''
+            if ((this.roles?.length ?? 0) > 0) {
+                roles = '<div class="user_role">'
+                this.roles.forEach(role => roles += `<img src="${role.iconUrl}" alt="${role.name}"/>`)
+                roles += '</div>'
+            }
+            html /* ユーザーアカウント情報 */ += `
+                <div class="user">
+                    <img src="${this.avatar_url}" class="usericon"/>
+                    ${roles}
+                    <div class="name_info">
+                        <h4 class="username">${target_emojis.replace(this.username)}</h4>
+                        <a href="${this.url}" class="userid __lnk_external">${this.full_address}</a>
+                    </div>
+            `
+        }
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'

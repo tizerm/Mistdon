@@ -177,6 +177,7 @@ class Status {
                     id: data.user?.username + (data.user?.host ? ('@' + data.user?.host) : ''),
                     full_address: `${data.user?.username}@${data.user?.host ? data.user?.host : host}`,
                     avatar_url: data.user?.avatarUrl,
+                    roles: data.user?.badgeRoles,
                     emojis: new Emojis({
                         host: host,
                         platform: 'Misskey',
@@ -714,6 +715,7 @@ class Status {
                 html += `
                     <div class="user prof_normal2">
                         <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                        ${this.role_section}
                         <div class="name_info">
                 `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
                     case 'both_prename': // ユーザーネーム+ユーザーID
@@ -752,6 +754,7 @@ class Status {
             } else html /* ノーマルレイアウトの場合 */ += `
                 <div class="user">
                     <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                    ${this.role_section}
                     <div class="name_info">
                         <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                         <span class="userid">
@@ -950,6 +953,7 @@ class Status {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                ${this.role_section}
                 <span class="userid">
                     <a class="__lnk_userdetail" name="@${this.user.full_address}">
         `; switch (Preference.GENERAL_PREFERENCE.chat_name_format) {
@@ -1194,6 +1198,7 @@ class Status {
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
                 <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                ${this.role_section}
                 <div class="name_info">
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
                     <span class="userid">
@@ -1381,6 +1386,15 @@ class Status {
         `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
         html += '</div>'
 
+        return html
+    }
+
+    // Getter: Misskeyのロール表示セクション
+    get role_section() {
+        if ((this.user.roles?.length ?? 0) == 0) return ''
+        let html = '<div class="user_role">'
+        this.user.roles.forEach(role => html += `<img src="${role.iconUrl}" alt="${role.name}"/>`)
+        html += '</div>'
         return html
     }
 
