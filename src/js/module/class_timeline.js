@@ -88,12 +88,14 @@ class Timeline {
                     })
                     break
                 case 'Bluesky': // Bluesky
+                    // アクセストークンのセッション取得
+                    const jwt = await window.accessApi.refreshBlueskySession(this.target_account.pref.user_id)
                     // REST APIで最新TLを30件取得、する処理をプロミスとして格納
                     response = await $.ajax({
                         type: "GET",
                         url: this.pref.rest_url,
                         dataType: "json",
-                        headers: { "Authorization": `Bearer ${this.target_account.__access_jwt}` },
+                        headers: { "Authorization": `Bearer ${jwt}` },
                         data: query_param
                     })
 

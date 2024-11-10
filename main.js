@@ -22,7 +22,7 @@ var pref_temptl_fav = null
 var cache_history = null
 var cache_draft = null
 var cache_emoji_history = null
-var cache_bsky_session = null
+var cache_bsky_session = new Map()
 var oauth_session = null
 
 const is_windows = process.platform === 'win32'
@@ -42,12 +42,14 @@ app.disableHardwareAcceleration()
  */
 async function readPrefAccs() {
     // Blueskyのセッション情報を先に読み込む
-    if (!cache_bsky_session) {
-        const content = readFile('app_prefs/bsky_session.json')
-        if (content) {
-            cache_bsky_session = jsonToMap(JSON.parse(content), elm => elm.handle)
-            console.log('@INF: read app_prefs/bsky_session.json.')
-        } else cache_bsky_session = new Map()
+    if (cache_bsky_session.size == 0) {
+        const content_map = readDirFile('app_prefs/bsky_sessions')
+
+        if (content_map.size > 0) // ハッシュキーから拡張子を抜いてドメイン名にする
+            content_map.forEach((v, k) => cache_bsky_session.set(k.substring(0, k.lastIndexOf('.')), JSON.parse(v)))
+        else cache_bsky_session.set('0', {}) // 空のキャッシュエントリを作成(ロードしないため)
+
+        console.log('@INF: read app_prefs/emojis/.')
     }
 
     // 変数キャッシュがある場合はキャッシュを使用
@@ -158,8 +160,7 @@ async function writePrefBskyAccs(event, json_data) {
         'access_token': null,
         'avatar_url': json_data.avatar_url,
         'post_maxlength': json_data.post_maxlength,
-        // アカウントカラーは初期値グレー
-        'acc_color': '808080'
+        'acc_color': getRandomColor()
     }
 
     // ユーザー情報をファイルに書き込み
@@ -182,15 +183,10 @@ async function writePrefBskyAccs(event, json_data) {
     }
 
     // セッション情報をファイルに書き込み
-    const session = await writeFileArrayJson('app_prefs/bsky_session.json', write_session)
+    const session = await overwriteFile(`app_prefs/bsky_sessions/${json_data.user_id}.json`, write_session)
 
-    // Blueskyのキャッシュを更新
-    if (!cache_bsky_session) {
-        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
-        cache_bsky_session = jsonToMap(JSON.parse(session), elm => elm.handle)
-    } else {
-        cache_bsky_session.set(write_session.handle, write_session)
-    }
+    // セッションキャッシュを更新
+    cache_bsky_session.set(json_data.user_id, write_session)
 }
 
 /**
@@ -420,11 +416,13 @@ async function refreshBlueskySession(event, handle) {
             headers: { 'Authorization': `Bearer ${session.access_token}` }
         })
 
+        // 有効なセッションの場合はキャッシュされたアクセストークンを返す
         return session.access_token
     } catch (err) {
-        console.log(err)
-        // Bad Request以外はトークンの取得に失敗
-        if (err.message != '400') return null
+        if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+            console.log(err)
+            return null
+        }
     }
 
     try {
@@ -437,14 +435,13 @@ async function refreshBlueskySession(event, handle) {
         // セッション情報のJSONを生成
         const write_session = {
             'handle': session.handle,
-            'pds': session.handle,
+            'pds': session.pds,
             'refresh_token': session_info.refreshJwt,
             'access_token': session_info.accessJwt
         }
 
         // セッション情報をファイルに書き込み
-        const writer = await writeFileArrayJson('app_prefs/bsky_session.json', write_session)
-
+        const writer = await overwriteFile(`app_prefs/bsky_sessions/${write_session.handle}.json`, write_session)
         cache_bsky_session.set(write_session.handle, write_session)
 
         return session_info.accessJwt
@@ -680,14 +677,14 @@ function getAPIParams(event, arg) {
             break
         case 'Bluesky': // Bluesky
             // タイムラインタイプによって設定値を変える
-            switch (tl.timeline_type) {
+            switch (arg.timeline.timeline_type) {
                 case 'home': // ホームタイムライン
-                    rest_url = `https://${host}/xrpc/app.bsky.feed.getTimeline`
+                    rest_url = `https://${arg.host}/xrpc/app.bsky.feed.getTimeline`
                     query_param = {}
                     socket_param = {}
                     break
                 case 'notification': // 通知
-                    rest_url = `https://${host}/xrpc/app.bsky.notification.listNotifications`
+                    rest_url = `https://${arg.host}/xrpc/app.bsky.notification.listNotifications`
                     query_param = {}
                     socket_param = {}
                     break

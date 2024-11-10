@@ -268,17 +268,46 @@ class Status {
                 break
             case 'Bluesky': // Bluesky
                 this.notif_type = this.type == 'notification' ? json.reason : null
+                this.medias = []
 
-                // リポスト判定とデータの参照
-                this.reblog = !!json.reason
-                this.reblog_by = this.reblog ? json.reason.by.handle : null
-                this.reblog_by_icon = this.reblog ? json.reason.by.avatar : null
-                data = json.post
+                if (json.post) { // 投稿データ
+                    // リポスト判定とデータの参照
+                    this.reblog = !!json.reason
+                    this.reblog_by = this.reblog ? json.reason.by.handle : null
+                    this.reblog_by_icon = this.reblog ? json.reason.by.avatar : null
+                    data = json.post
 
-                original_date = this.reblog ? json.reason.indexedAt : data.indexedAt
-                this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(data.indexedAt)) : null
-                this.uri = data.uri // 投稿URL(前はリプライ時のURL)
-                this.id = data.cid // 投稿ID
+                    original_date = this.reblog ? json.reason.indexedAt : data.indexedAt
+                    this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(data.indexedAt)) : null
+                    this.uri = data.uri // 投稿URL(前はリプライ時のURL)
+                    this.id = data.cid // 投稿ID
+
+                    // 投稿コンテンツに関するデータ
+                    this.visibility = "public"
+                    this.allow_reblog = true
+                    this.reply_to = json.reply?.parent?.cid
+
+                    this.content = data.record.text
+                    this.content_length = this.content.length
+
+                    // 添付メディア
+                    //this.sensitive = data.sensitive // 閲覧注意設定
+                    data.embed?.images?.forEach(media => this.medias.push({
+                        id: null,
+                        type: data.embed?.$type,
+                        url: media.fullsize,
+                        thumbnail: media.thumb,
+                        sensitive: false,
+                        aspect: media.aspectRatio?.width / media.aspectRatio?.height ?? 1
+                    }))
+                } else { // 通知データ
+                    data = json
+                    original_date = data.indexedAt
+                    this.id = data.cid // 投稿ID
+                    this.notif_id = json.record?.subject?.cid // 通知のID
+
+                    this.content = json.record?.subject?.uri
+                }
 
                 // ユーザーに関するデータ
                 this.user = {
@@ -286,29 +315,10 @@ class Status {
                     id: data.author.handle,
                     full_address: data.author.handle,
                     avatar_url: data.author.avatar,
-                    profile: null,
+                    profile: data.author.description,
                     emojis: Emojis.THRU
                 }
-                // 投稿コンテンツに関するデータ
-                this.visibility = "public"
-                this.allow_reblog = true
-                this.reply_to = json.reply?.parent?.cid
-
-                this.content = data.record.text
-                this.content_length = this.content.length
-                this.emojis = Emojis.THRU
-
-                // 添付メディア
-                //this.sensitive = data.sensitive // 閲覧注意設定
-                this.medias = []
-                data.embed?.images?.forEach(media => this.medias.push({
-                    id: null,
-                    type: data.embed?.$type,
-                    url: media.fullsize,
-                    thumbnail: media.thumb,
-                    sensitive: false,
-                    aspect: media.aspectRatio?.width / media.aspectRatio?.height ?? 1
-                }))
+                this.emojis = Emojis.THRU // カスタム絵文字はないのでスルー
 
                 break
             default:

@@ -374,6 +374,8 @@ class Account {
                     response = response.createdNote
                     break
                 case 'Bluesky': // Bluesky(alpha)
+                    // アクセストークンのセッション取得
+                    const jwt = await window.accessApi.refreshBlueskySession(this.pref.user_id)
                     request_param = {
                         "repo": this.pref.user_id,
                         "collection": 'app.bsky.feed.post',
@@ -389,12 +391,13 @@ class Account {
                         dataType: "json",
                         headers: {
                             "Content-Type": "application/json",
-                            "Authorization": `Bearer ${this.__access_jwt}`
+                            "Authorization": `Bearer ${jwt}`
                         },
                         data: JSON.stringify(request_param)
                     })
 
                     console.log(response)
+                    break
                 default:
                     break
             }
