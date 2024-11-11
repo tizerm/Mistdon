@@ -12,6 +12,7 @@ class Timeline {
         if (group.__column_id) this.__column_id = group.__column_id
         else this.__dummy_col = {}
         this.status_key_map = new Map()
+        this.capture_queue = []
         this.ref_group = group
     }
 
@@ -153,6 +154,9 @@ class Timeline {
 
                     // TLと違うStreamは無視
                     if (data.body.id != uuid) return
+
+                    console.log(data)
+
                     if (data.body.type == "note"
                         || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
                         this.parent_group.prepend(new Status(data.body.body, this, this.target_account))
@@ -268,6 +272,31 @@ class Timeline {
         })
         // 受信処理を設定
         this.socket.addEventListener("message", arg.messageFunc)
+    }
+
+    captureNote(post) {
+        if (this.platform != 'Misskey' || this.pref.external || this.pref.timeline_type == 'notification') return
+
+        const socket = this.target_account.socket
+        // キューの先頭に対象の投稿データを追加
+        this.capture_queue.unshift(post)
+
+        let sender = JSON.stringify({ // WebSocketにCaptureリクエストを送信
+            "type": "channel",
+            "body": {
+                "id": this.pref.socket_param.id,
+                "type": "subNote",
+                "body": { "id": post.id }
+            }
+        })
+
+        socket.send(sender)
+
+        // キャプチャキューが30超えてる場合PopしてWebSocketにUnCaptureリクエストを送信
+        if (this.capture_queue.length > 30) socket.send(JSON.stringify({
+            "type": "unsubNote",
+            "body": { "id": this.capture_queue.pop().id }
+        }))
     }
 
     /**

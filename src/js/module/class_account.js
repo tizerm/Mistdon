@@ -855,6 +855,8 @@ class Account {
             arg.openFunc()
             // ソケットに受信設定を送信
             this.socket_prefs.forEach(p => this.socket.send(p.send_param))
+
+            console.log(this.socket_prefs)
         })
         // エラーハンドラ
         this.socket.addEventListener("error", (event) => {

@@ -261,6 +261,7 @@ class Group {
             // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
             this.status_map.set(post.status_key, post)
             post.from_timeline.id_list = post
+            post.from_timeline.captureNote(post)
             callback()
         }
     }
