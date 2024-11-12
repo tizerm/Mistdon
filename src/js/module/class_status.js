@@ -12,7 +12,7 @@ class Status {
         this.from_timeline = timeline
         this.user_profile_flg = timeline?.parent_column == null
         this.from_account = account
-        this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
+        this.type = this.from_timeline?.is_notification ? 'notification' : 'post'
         this.status_id = json.id // 投稿ではなく元のステータスデータに対応するID
         this.platform = this.from_account?.platform ?? this.from_timeline?.platform
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
@@ -22,10 +22,10 @@ class Status {
         else if (timeline?.__extended_timeline == 'detail_post') // 詳細表示の場合
             this.detail_flg = true
 
-        // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
+        // プラットフォーム判定
         switch (this.platform) {
             case 'Mastodon': // Mastodon
                 this.notif_type = this.type == 'notification' ? json.type : null

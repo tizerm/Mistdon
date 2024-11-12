@@ -19,6 +19,8 @@ class Timeline {
     get host() { return this.pref.host }
     // Getter: このタイムラインのホスト(サーバードメイン)
     get platform() { return this.pref.platform }
+    // Getter: 通知タイムライン判定
+    get is_notification() { return this.pref.timeline_type == "notification" }
     // Getter: このタイムラインのアカウントのフルアドレス
     get account_key() { return this.pref.key_address }
     // Getter: このタイムラインのアカウント
@@ -93,7 +95,9 @@ class Timeline {
 
             // 投稿データをソートマップ可能なオブジェクトにして返却
             const posts = []
-            response.forEach(p => posts.push(new Status(p, this, this.target_account)))
+            if (this.is_notification) // 通知タイムラインの場合は専用クラスで生成
+                response.forEach(p => posts.push(new NotificationStatus(p, this, this.target_account)))
+            else response.forEach(p => posts.push(new Status(p, this, this.target_account)))
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
@@ -130,9 +134,10 @@ class Timeline {
                     if (this.pref.socket_param.stream == 'list' && data.stream[1] != this.pref.socket_param.list) return
 
                     // タイムラインの更新通知
-                    if (data.event == "update"
-                        || (this.pref.timeline_type == "notification" && data.event == "notification"))
+                    if (data.event == "update") // 通常の投稿
                         this.parent_group.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
+                    else if (this.is_notification && data.event == "notification") // 通知
+                        this.parent_group.prepend(new NotificationStatus(JSON.parse(data.payload), this, this.target_account))
                     // 削除された投稿を検知
                     else if (data.event == "delete") this.removeStatus(data.payload)
                     // 更新された投稿を検知
@@ -153,9 +158,10 @@ class Timeline {
 
                     // TLと違うStreamは無視
                     if (data.body.id != uuid) return
-                    if (data.body.type == "note"
-                        || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
+                    if (data.body.type == "note") // 通常の投稿
                         this.parent_group.prepend(new Status(data.body.body, this, this.target_account))
+                    else if (this.is_notification && data.body.type == "notification") // 通知
+                        this.parent_group.prepend(new NotificationStatus(data.body.body, this, this.target_account))
                 }
                 // !==========> ここまで
 
@@ -207,8 +213,7 @@ class Timeline {
      * インプレッション自動マージタイマーをセットする
      */
     async initAutoMerger() {
-        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled
-            || this.pref.timeline_type == 'notification'
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled || this.is_notification
             || this.target_account.is_skybridge
             || this.parent_group.pref.tl_layout == 'gallery') return // 通知とギャラリーは実行しない
         if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
