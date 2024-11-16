@@ -1055,7 +1055,11 @@ class User {
                 data: body,
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.datas.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    data.datas.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                    }))
                     // Headerを経由して取得されたmax_idを返却
                     return data?.max_id
                 },

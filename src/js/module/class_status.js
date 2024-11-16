@@ -1,6 +1,6 @@
 ﻿/**
  * #Class
- * 投稿、通知データを管理するクラス
+ * 投稿データを管理するクラス
  *
  * @author @tizerm@misskey.dev
  */

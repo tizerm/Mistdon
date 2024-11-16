@@ -177,7 +177,11 @@ class TemporaryTimeline extends Timeline {
             data: body,
             target: $(`#${window_key}>.timeline>ul`),
             bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                data.forEach(p => this.group.addStatus(p, () => target.append(p.timeline_element)))
+                data.forEach(p => this.group.addStatus({
+                    post: p,
+                    target_elm: target,
+                    callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                }))
                 // max_idとして取得データの最終IDを指定
                 return data.pop()?.id
             },
@@ -203,7 +207,11 @@ class TemporaryTimeline extends Timeline {
         // ローダーを消して投稿をバインド
         const ul_elm = $(`#${this.timeline_key}`)
         $(`#${this.timeline_key}>.__on_temp_top_loader`).remove()
-        data.forEach(p => this.group.addStatus(p, () => ul_elm.prepend(p.timeline_element)))
+        data.forEach(p => this.group.addStatus({
+            post: p,
+            target_elm: ul_elm,
+            callback: (st, tgelm) => tgelm.prepend(st.timeline_element)
+        }))
 
         ul_elm.prepend(`<li class="__on_temp_top_loader">続きをロード</li>`)
         // スクロール位置を調整

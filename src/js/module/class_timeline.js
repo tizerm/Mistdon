@@ -354,8 +354,12 @@ class Timeline {
     createLoadableTimeline(post) {
         this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
             // 起点の投稿を表示して変数にマークする
-            tl.ref_group.addStatus(post, () => post.getLayoutElement(tl.ref_group.pref.tl_layout)
-                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`))
+            tl.ref_group.addStatus({
+                post: post,
+                target_elm: $(`#${window_key}>.timeline>ul`),
+                callback: (st, tgelm) => st.getLayoutElement(tl.ref_group.pref.tl_layout)
+                    .closest('li').addClass('mark_target_post').appendTo(tgelm)
+            })
             const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
 
             // 上下方向のローダーを生成
@@ -363,7 +367,11 @@ class Timeline {
                 data: body,
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    data.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                    }))
                     // max_idとして取得データの最終IDを指定
                     return data.pop()?.id
                 },
@@ -373,7 +381,11 @@ class Timeline {
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
                     const first_elm = target.find('li:first-child').get(0)
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.prepend(p.timeline_element)))
+                    data.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => tgelm.prepend(st.timeline_element)
+                    }))
                     first_elm.scrollIntoView({ block: 'center' })
                     // since_idとして取得データの最終IDを指定
                     return data.pop()?.id
