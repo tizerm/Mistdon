@@ -8,9 +8,6 @@ class NotificationStatus extends Status {
     // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
     constructor(json, timeline, account) {
         const platform = account.platform ?? timeline.platform
-
-        console.log(json)
-
         let original_date = null
 
         switch (platform) {
@@ -76,6 +73,7 @@ class NotificationStatus extends Status {
         this.user_summary = [this.action_user]
 
         // マージ用の通知キー
+        this.mergable = true
         switch (this.notification_type) {
             case 'favourite': // お気に入り
             case 'reaction': // 絵文字リアクション
@@ -91,6 +89,7 @@ class NotificationStatus extends Status {
                 break
             default: // リプライの場合は固有
                 this.notification_key = `pst_${this.notification_id}_${this.id}`
+                this.mergable = false
                 break
         }
     }
@@ -103,12 +102,22 @@ class NotificationStatus extends Status {
         const merge_from = this.sort_date < another.sort_date ? this : another
         merge_at.user_summary.push(...merge_from.user_summary)
         if (this.is_reaction) { // リアクションの場合はリアクションマップにもマージする
-            const merge_react_at = this.reaction_summary.size > 1 ? this.reaction_summary : another.reaction_summary
-            const merge_react_from = this.reaction_summary.size == 1 ? this : another
-            const user_list = merge_react_at.get(merge_react_from.reaction_emoji)
-            // マッピングの数が多いマップに対してリアクションユーザーを追加
-            if (user_list) user_list.push(merge_react_from.action_user)
-            else merge_react_at.set(merge_react_from.reaction_emoji, [merge_react_from.action_user])
+            let merge_react_at = null
+            let merge_react_from = null
+            if (this.reaction_summary.size == 1 && another.reaction_summary.size == 1) {
+                // 両方容量1の場合は日付が新しい方に向かってマージする
+                merge_react_at = merge_at.reaction_summary
+                merge_react_from = merge_from
+            } else { // どちらか容量が多い場合は多い方へマージする
+                merge_react_at = this.reaction_summary.size > 1 ? this.reaction_summary : another.reaction_summary
+                merge_react_from = this.reaction_summary.size == 1 ? this : another
+            }
+            const reaction = merge_react_from.reaction_emoji
+            const merge_list = merge_react_from.reaction_summary.get(reaction)
+            const user_list = merge_react_at.get(reaction)
+            // リアクションユーザーをマップにマージ
+            if (user_list) user_list.push(...merge_list)
+            else merge_react_at.set(reaction, merge_list)
             // 多い方のマップをマージ先のオブジェクトにセット
             merge_at.reaction_summary = merge_react_at
         }
@@ -122,53 +131,6 @@ class NotificationStatus extends Status {
 
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="normal_layout">`
-        if (this.type == 'notification') { // 通知タイプによって表示を変更
-            switch (this.notification_type) {
-                case 'favourite': // お気に入り
-                    html += `
-                        <div class="label_head label_favorite">
-                            <span>Favorited by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'reblog': // ブースト
-                    html += `
-                        <div class="label_head label_reblog">
-                            <span>Boosted by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'reaction': // 絵文字リアクション
-                    html += `
-                        <div class="label_head label_favorite">
-                            <span>Reaction from @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'renote': // リノート
-                    html += `
-                        <div class="label_head label_reblog">
-                            <span>Renoted by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'follow': // フォロー通知
-                    html += `
-                        <div class="label_head label_follow">
-                            <span>Followed by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'follow_request': // フォローリクエスト
-                    html += `
-                        <div class="label_head label_follow">
-                            <span>Followe Requested by @${this.user.id}</span>
-                        </div>
-                    `
-                default: // リプライの場合はヘッダ書かない
-                    break
-            }
-        }
 
         // プロフィール表示の場合はユーザーアカウント情報を省略
         if (!this.profile_post_flg || this.reblog) {
@@ -259,22 +221,12 @@ class NotificationStatus extends Status {
         }
         if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
-        if (this.reaction_emoji) { // リアクション絵文字がある場合`
-            let alias = null
-            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
-                else alias = `${this.reaction_emoji} (未キャッシュです)`
-            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-            html += `<div class="reaction_emoji">${alias}</div>`
-        }
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
-        // 投稿属性セクション
+
+        // 投稿属性/インプレッション/通知サマリセクション
         html += this.attribute_section
-
         html += this.impression_section
-
         html += this.summary_section
 
         html /* 投稿(ステータス)日付 */ += `
@@ -329,40 +281,30 @@ class NotificationStatus extends Status {
         let target_emojis = null
         let html = `
             <li id="${this.status_key}" name="${this.uri}" class="short_timeline short_notification">
-                <img src="${this.action_user.avatar_url}" class="usericon" name="@${this.action_user.full_address}"/>
+                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
                 <div class="content">
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CW時はCWのみ */ += `
                     <span class="main_content label_cw">${target_emojis.replace(this.cw_text)}</span>
-        `; else if (['follow', 'follow_request'].includes(this.notification_type))
-            html /* フォローの場合はユーザーアドレス */ += `
-                    <span class="main_content">@${this.user.full_address}</span>
-        `; else html /* 本文(マークアップを無視して1行だけ) */ += `
+        `; else if (['follow', 'follow_request'].includes(this.notification_type)) { // フォローの場合
+            if (this.user_summary.length > 1) html /* 人数が複数の場合は人数を表示 */ += `
+                    <span class="main_content">New ${this.user_summary.length} Followers</span>
+            `; else html /* 人数が1人の場合はユーザーアドレス */ += `
+                    <span class="main_content">@${this.action_user.full_address}</span>
+            `
+        } else html /* 本文(マークアップを無視して1行だけ) */ += `
                     <span class="main_content">${target_emojis.replace(this.content_text)}</span>
         `
-        html += '</div>'
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
-            const media = this.medias[0]
-            let thumbnail = media.thumbnail
-            if (this.sensitive) thumbnail = 'resources/ic_warn.png'
-            else if (!thumbnail) thumbnail = 'resources/illust/mitlin_404.jpg'
-            html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
-                <div class="list_media">
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
-                        <img src="${thumbnail}" class="media_preview"/>
-                    </a>
+        html /* フッタのアイコン表示 */ += `
                 </div>
-            `
-        }
-        html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
-            <div class="notif_footer">
-                <img src="" class="ic_notif_type"/>
-        `; if (this.from_group?.pref?.multi_user) // マルチアカウントカラムの場合は後ろにアイコン表示
-            html += `<img src="${this.from_account?.pref.avatar_url}" class="ic_target_account"/>`
-        html += '</div>'
-        html += `
+                <div class="notif_footer">
+                    <img src="" class="ic_notif_type"/>
+                    <img class="ic_target_account"
+                        src="${this.user_summary.length > 1 ? 'resources/ic_folder.png' : this.action_user.avatar_url}"
+                        />
+                </div>
             </li>
         `
 
@@ -391,25 +333,29 @@ class NotificationStatus extends Status {
                 jqelm.closest('li').addClass('favorited_post')
                 jqelm.find('.ic_notif_type').remove() // 一旦消す
                 let alias = null
-                if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
+                if (this.reaction_summary.size > 1) // リアクションの種類が複数ある場合
+                    alias = '<img src="resources/ic_emoji.png" class="ic_notif_type"/>'
+                else if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
                     const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
                     if (emoji) alias = `<img src="${emoji.url}" class="ic_notif_type"/>`
-                    else alias = '×'
+                    else alias = '<span>×</span>'
                 } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.\-:@_]+$/g)) // リモートの絵文字
                     alias = '<img src="resources/ic_emoji_remote.png" class="ic_notif_type"/>'
-                else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
+                else alias = `<span>${this.reaction_emoji}</span>` // Unicode絵文字はそのまま渡す
                 jqelm.find('.notif_footer').prepend(alias)
                 break
             case 'follow':
             case 'follow_request': // フォロー通知
                 jqelm.closest('li').addClass('self_post')
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
+                jqelm.find('.usericon').attr('src', this.from_account?.pref.avatar_url)
                 break
             case 'poll': // 投票終了
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_poll.png')
                 break
             default: // リプライ、引用の場合はアイコン削除
                 jqelm.find('.ic_notif_type').remove()
+                jqelm.find('.ic_target_account').attr('src', this.from_account?.pref.avatar_url)
                 break
         }
 
@@ -418,18 +364,36 @@ class NotificationStatus extends Status {
 
     // Getter: 投稿属性セクション
     get summary_section() {
-        // お気に入り/BTRN/リアクション以外は表示しない
-        if (!['favourite', 'reblog', 'reaction', 'renote'].includes(this.notification_type)) return ''
+        if (!this.mergable) return '' // お気に入り/BTRN/リアクション以外は表示しない
 
         let html = '<div class="notification_summary">'
+        switch (this.notification_type) {
+            case 'favourite': // お気に入り
+                html += '<h6 class="label_favorite">Favorited Users</h6>'
+                break
+            case 'reblog': // ブースト
+                html += '<h6 class="label_reblog">Boosted Users</h6>'
+                break
+            case 'reaction': // 絵文字リアクション
+                html += '<h6 class="label_favorite">Reacted Users</h6>'
+                break
+            case 'renote': // リノート
+                html += '<h6 class="label_reblog">Renoted Users</h6>'
+                break
+            case 'follow': // フォロー通知
+            case 'follow_request': // フォローリクエスト
+                html += '<h6 class="label_follow">Followed Users</h6>'
+            default: // リプライの場合はヘッダ書かない
+                break
+        }
         // リアクションの場合はリアクションごとにまとめて列挙する
         if (this.is_reaction) this.reaction_summary.forEach((v, k) => {
             html += '<div class="reaction_section"><span class="reaction_head">'
             if (k.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
                 const emoji = this.host_emojis.emoji_map.get(k)
                 if (emoji) html += `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
-                else html += `${this.reaction_emoji} (未キャッシュです)`
-            } else html += this.reaction_emoji // Unicode絵文字はそのまま渡す
+                else html += `${k} (未キャッシュです)`
+            } else html += k // Unicode絵文字はそのまま渡す
             html += '</span>'
             // 対象リアクションを行ったユーザーを列挙
             v.forEach(u => html += `<a class="notification_user" id="${u.full_address}">

@@ -595,6 +595,14 @@
             /*=== Notification Impression Info ===================================================*/
             > .notification_summary {
                 font-size: 1px;
+                > h6 {
+                    padding: 3px 16px;
+                    margin: 2px;
+                    border-radius: 8px;
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 12px;
+                    text-align: right;
+                }
                 & img {
                     display: inline-block;
                     height: 24px;
@@ -1031,7 +1039,12 @@
                 top: 0px;
                 right: 0px;
                 display: inline-block;
-                > .ic_target_account { border-radius: 12px; }
+                font-size: 1px;
+                > span { font-size: 14px; }
+                > .ic_target_account {
+                    border-radius: 12px;
+                    margin-left: 2px;
+                }
             }
         }
         > li.short_timeline.short_notification>.content { width: calc(100% - 88px); }
