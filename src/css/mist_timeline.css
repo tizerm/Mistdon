@@ -593,23 +593,16 @@
             }
 
             /*=== Notification Impression Info ===================================================*/
-            > .notified_impression {
-                text-align: center;
-                & span {
+            > .notification_summary {
+                font-size: 1px;
+                & img {
                     display: inline-block;
-                    border-radius: 12px;
-                    padding: 2px 18px;
-                    margin: 2px;
-                    width: calc(50% - 64px);
-                    background-position: center right;
-                    background-repeat: no-repeat;
-                    background-size: 24px 24px;
-                    padding-right: 32px;
-                    font-family: Arial, "メイリオ", sans-selif;
-                    font-size: 18px;
-                    font-weight: bold;
-                    text-align: right;
+                    height: 24px;
+                    width: auto;
+                    vertical-align: text-bottom;
+                    &.usericon { border-radius: 12px; }
                 }
+                .reaction_head { font-size: 11px; }
             }
 
             /*=== Attributes Info ================================================================*/

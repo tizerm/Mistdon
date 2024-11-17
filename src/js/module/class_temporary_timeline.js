@@ -183,7 +183,8 @@ class TemporaryTimeline extends Timeline {
                     callback: (st, tgelm) => tgelm.append(st.timeline_element)
                 }))
                 // max_idとして取得データの最終IDを指定
-                return data.pop()?.id
+                if (this.is_notification) return data.pop()?.notification_id
+                else return data.pop()?.id
             },
             load: async max_id => super.getTimeline(max_id)
         })).then(() => { // ロードが終わったらロード画面を削除してトップローダーを生成

@@ -266,25 +266,31 @@ class Group {
      */
     addStatus(arg) {
         // 重複している、もしくはミュート対象の場合はコールバック関数の実行を無視する
-        if (!this.status_map.has(arg.post.status_key) && !arg.post.muted) {
-            // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
-            this.status_map.set(arg.post.status_key, arg.post)
-            arg.post.from_timeline.id_list = arg.post
-            if (arg.post.notification_key) { // 通知の場合
-                const merge_from = this.notification_map.get(arg.post.notification_key)
-                if (merge_from) { // マージできる通知が存在する場合
-                    const [at, from] = merge_from.merge(arg.post)
-                    if (merge_from.status_key != at.status_key) { // 新しい方が追加された場合
-                        this.notification_map.set(at.notification_key, at)
-                        arg.target_elm.find(`#${from.status_key}`).remove()
-                        arg.callback(at, arg.target_elm)
-                    }
-                } else { // 初めて登場する通知の場合
-                    this.notification_map.set(arg.post.notification_key, arg.post)
-                    arg.callback(arg.post, arg.target_elm)
+        if (this.status_map.has(arg.post.status_key) || arg.post.muted) return
+
+        if (arg.post.notification_key) { // 通知の場合
+            const merge_from = this.notification_map.get(arg.post.notification_key)
+            if (merge_from) { // マージできる通知が存在する場合
+                const [at, from] = merge_from.merge(arg.post)
+                if (merge_from.status_key != at.status_key) { // マージ先の通知が既存の通知より新しい場合
+                    // 通知キーとステータスキーをマップにセット
+                    this.notification_map.set(at.notification_key, at)
+                    this.status_map.set(at.status_key, at)
+                    arg.post.from_timeline.id_list = at
+                    // 既存の通知をマップとDOMから消去してコールバックを実行
+                    arg.target_elm?.find(`li[id="${from.status_key}"]`).remove()
+                    this.status_map.delete(from.status_key)
+                    arg.callback(at, arg.target_elm)
                 }
-            } else arg.callback(arg.post, arg.target_elm)
+                return // マージ対象の場合は後続処理は無視
+                // マージできる通知が存在しない場合はマップにセットして後続処理へ
+            } else this.notification_map.set(arg.post.notification_key, arg.post)
         }
+
+        // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
+        this.status_map.set(arg.post.status_key, arg.post)
+        arg.post.from_timeline.id_list = arg.post
+        arg.callback(arg.post, arg.target_elm)
     }
 
     /**

@@ -59,8 +59,11 @@ class NotificationStatus extends Status {
                     }),
                     acted_date: original_date
                 }
-                // リアクション絵文字
-                if (json.type == 'reaction') this.reaction_emoji = json.reaction
+                if (json.type == 'reaction') { // リアクション絵文字
+                    this.reaction_emoji = json.reaction
+                    this.reaction_summary = new Map()
+                    this.reaction_summary.set(json.reaction, [this.action_user])
+                }
                 break
             default:
                 break
@@ -90,14 +93,25 @@ class NotificationStatus extends Status {
                 this.notification_key = `pst_${this.notification_id}_${this.id}`
                 break
         }
-
     }
+    // Getter: リアクション判定
+    get is_reaction() { return this.notification_type == 'reaction' }
 
     merge(another) {
         // 日付が新しい方に対して通知をマージする
         const merge_at = this.sort_date > another.sort_date ? this : another
         const merge_from = this.sort_date < another.sort_date ? this : another
         merge_at.user_summary.push(...merge_from.user_summary)
+        if (this.is_reaction) { // リアクションの場合はリアクションマップにもマージする
+            const merge_react_at = this.reaction_summary.size > 1 ? this.reaction_summary : another.reaction_summary
+            const merge_react_from = this.reaction_summary.size == 1 ? this : another
+            const user_list = merge_react_at.get(merge_react_from.reaction_emoji)
+            // マッピングの数が多いマップに対してリアクションユーザーを追加
+            if (user_list) user_list.push(merge_react_from.action_user)
+            else merge_react_at.set(merge_react_from.reaction_emoji, [merge_react_from.action_user])
+            // 多い方のマップをマージ先のオブジェクトにセット
+            merge_at.reaction_summary = merge_react_at
+        }
         // マージされたほうを返却
         return [merge_at, merge_from]
     }
@@ -404,12 +418,93 @@ class NotificationStatus extends Status {
 
     // Getter: 投稿属性セクション
     get summary_section() {
-        let html = '<div class="notification_summary">'
+        // お気に入り/BTRN/リアクション以外は表示しない
+        if (!['favourite', 'reblog', 'reaction', 'renote'].includes(this.notification_type)) return ''
 
-        this.user_summary.forEach(u => html += `<span class="user"><img src="${u.avatar_url}" class="inline_emoji"/></span>`)
+        let html = '<div class="notification_summary">'
+        // リアクションの場合はリアクションごとにまとめて列挙する
+        if (this.is_reaction) this.reaction_summary.forEach((v, k) => {
+            html += '<div class="reaction_section"><span class="reaction_head">'
+            if (k.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
+                const emoji = this.host_emojis.emoji_map.get(k)
+                if (emoji) html += `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
+                else html += `${this.reaction_emoji} (未キャッシュです)`
+            } else html += this.reaction_emoji // Unicode絵文字はそのまま渡す
+            html += '</span>'
+            // 対象リアクションを行ったユーザーを列挙
+            v.forEach(u => html += `<a class="notification_user" id="${u.full_address}">
+                <img src="${u.avatar_url}" class="usericon"/>
+            </a>`)
+            html += '</div>'
+        })
+        // リアクション以外の場合は普通にユーザーを列挙する
+        else this.user_summary.forEach(u => html += `<a class="notification_user" id="${u.full_address}">
+            <img src="${u.avatar_url}" class="usericon"/>
+        </a>`)
 
         html += '</div>'
         return html
+    }
+
+    // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
+    get notification() {
+        let title = null
+        let body = null
+        switch (this.platform) {
+            case 'Mastodon': // Mastodon
+                // 通知タイプによって表示を変更
+                switch (this.notification_type) {
+                    case 'favourite': // お気に入り
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からお気に入り`
+                        body = this.content
+                        break
+                    case 'reblog': // ブースト
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からブースト`
+                        body = this.content
+                        break
+                    case 'follow':
+                    case 'follow_request': // フォロー通知
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からフォロー`
+                        body = this.action_user.profile
+                        break
+                    default: // リプライ
+                        title = `${this.from_account.full_address}: ${this.action_user.username}から返信`
+                        body = this.content
+                        break
+                }
+                break
+            case 'Misskey': // Misskey
+                // 通知タイプによって表示を変更
+                switch (this.notification_type) {
+                    case 'reaction': // 絵文字リアクション
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からリアクション`
+                        body = this.content
+                        break
+                    case 'renote': // リノート
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からリノート`
+                        body = this.content
+                        break
+                    case 'follow': // フォロー通知
+                        title = `${this.from_account.full_address}: ${this.action_user.username}からフォロー`
+                        body = `@${this.action_user.id} - ${this.action_user.username}`
+                        break
+                    default: // リプライ
+                        title = `${this.from_account.full_address}: ${this.action_user.username}から返信`
+                        body = this.content
+                        break
+                }
+                break;
+            default:
+                break;
+        }
+
+        // 画面側にも通知を出して通知オブジェクトを返却
+        Notification.info(title)
+        return {
+            title: title,
+            // HTMLとして解析して中身の文章だけを取り出す
+            body: $($.parseHTML(body)).text()
+        }
     }
 
 }

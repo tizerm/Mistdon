@@ -352,7 +352,8 @@ class Timeline {
      * @param post 取得の起点にするStatusオブジェクト
      */
     createLoadableTimeline(post) {
-        this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
+        // 通知の場合は参照IDを通知のIDにする
+        this.createScrollableWindow(post.notification_id ?? post.id, (tl, ref_id, window_key) => {
             // 起点の投稿を表示して変数にマークする
             tl.ref_group.addStatus({
                 post: post,
@@ -373,7 +374,8 @@ class Timeline {
                         callback: (st, tgelm) => tgelm.append(st.timeline_element)
                     }))
                     // max_idとして取得データの最終IDを指定
-                    return data.pop()?.id
+                    if (tl.is_notification) return data.pop()?.notification_id
+                    else return data.pop()?.id
                 },
                 load: async max_id => tl.getTimeline(max_id)
             })), tl.getTimeline(null, ref_id).then(body => createTopLoader({ // 上方向のローダーを生成
@@ -388,7 +390,8 @@ class Timeline {
                     }))
                     first_elm.scrollIntoView({ block: 'center' })
                     // since_idとして取得データの最終IDを指定
-                    return data.pop()?.id
+                    if (tl.is_notification) return data.pop()?.notification_id
+                    else return data.pop()?.id
                 },
                 load: async since_id => tl.getTimeline(null, since_id)
             }))]).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる

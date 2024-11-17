@@ -41,7 +41,6 @@ class Status {
                 data = this.reblog ? json.reblog : json
                 this.uri = json.status?.url ?? data.url // 投稿URL(前はリプライ時のURL)
                 this.id = data.id // 投稿ID
-                this.notif_id = json.status?.id // 通知のID
 
                 this.use_emoji_cache = false // Mastodonの場合絵文字キャッシュは使わない
                 this.remote_flg = data.account.acct.match(/@/)
@@ -194,11 +193,9 @@ class Status {
                 this.cw_text = data.cw // CWテキスト
                 if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
                     this.content = data.note.renote.text
-                    this.notif_id = data.note.renote.id // 通知のID
                     data = data.note.renote
                 } else if (this.notif_type) { // リノート以外の通知の場合は本文を対象ノートにする
                     this.content = data.note?.text
-                    this.notif_id = data.note?.id // 通知のID
                     data = data?.note ?? data
                 } else this.content = data.text // それ以外は通常の本文テキストを参照
 
@@ -2168,64 +2165,4 @@ class Status {
         return replied_post
     }
 
-    // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
-    get notification() {
-        let title = null
-        let body = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                // 通知タイプによって表示を変更
-                switch (this.notif_type) {
-                    case 'favourite': // お気に入り
-                        title = `${this.from_account.full_address}: ${this.user.username}からお気に入り`
-                        body = this.content
-                        break
-                    case 'reblog': // ブースト
-                        title = `${this.from_account.full_address}: ${this.user.username}からブースト`
-                        body = this.content
-                        break
-                    case 'follow':
-                    case 'follow_request': // フォロー通知
-                        title = `${this.from_account.full_address}: ${this.user.username}からフォロー`
-                        body = this.user.profile
-                        break
-                    default: // リプライ
-                        title = `${this.from_account.full_address}: ${this.user.username}から返信`
-                        body = this.content
-                        break
-                }
-                break
-            case 'Misskey': // Misskey
-                // 通知タイプによって表示を変更
-                switch (this.notif_type) {
-                    case 'reaction': // 絵文字リアクション
-                        title = `${this.from_account.full_address}: ${this.user.username}からリアクション`
-                        body = this.content
-                        break
-                    case 'renote': // リノート
-                        title = `${this.from_account.full_address}: ${this.user.username}からリノート`
-                        body = this.content
-                        break
-                    case 'follow': // フォロー通知
-                        title = `${this.from_account.full_address}: ${this.user.username}からフォロー`
-                        body = `@${this.user.id} - ${this.user.username}`
-                        break
-                    default: // リプライ
-                        title = `${this.from_account.full_address}: ${this.user.username}から返信`
-                        body = this.content
-                        break
-                }
-                break;
-            default:
-                break;
-        }
-
-        // 画面側にも通知を出して通知オブジェクトを返却
-        Notification.info(title)
-        return {
-            title: title,
-            // HTMLとして解析して中身の文章だけを取り出す
-            body: $($.parseHTML(body)).text()
-        }
-    }
 }
