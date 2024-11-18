@@ -180,7 +180,10 @@ class TemporaryTimeline extends Timeline {
                 data.forEach(p => this.group.addStatus({
                     post: p,
                     target_elm: target,
-                    callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                    callback: (st, tgelm) => {
+                        tgelm.append(st.timeline_element)
+                        st.bindAdditionalInfoAsync(tgelm)
+                    }
                 }))
                 // max_idとして取得データの最終IDを指定
                 if (this.is_notification) return data.pop()?.notification_id

@@ -397,8 +397,7 @@ class Account {
         let target_post = null
         let notification = null
         const target_url = url ?? obj.uri
-        if (obj && obj.type != 'notification') {
-            // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用(通知は除外)
+        if (obj) { // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用
             if (!['__menu_reply', '__menu_quote', '__menu_reaction'].includes(mode))
                 notification = Notification.progress("実行中です...")
             target_post = obj

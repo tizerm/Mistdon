@@ -185,6 +185,7 @@ class Group {
      */
     append(post) {
         $(`#${this.id}>ul`).append(post.timeline_element)
+        post.bindAdditionalInfoAsync($(`#${this.id}>ul`))
     }
 
     /**
@@ -222,8 +223,12 @@ class Group {
                 // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
                 let remove_flg = false
                 if (tgelm.find("li").length >= limit) remove_flg = true
+
+                // 投稿を先頭に追加
                 tgelm.prepend(st.timeline_element)
                 tgelm.find('li:first-child').hide().show(...Preference.getAnimation("TIMELINE_APPEND"))
+                st.bindAdditionalInfoAsync(tgelm)
+
                 // 未読カウンターを上げる
                 $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
                     .text(++this.unread)

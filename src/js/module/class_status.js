@@ -253,6 +253,9 @@ class Status {
         this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
         //this.status_key = `${original_date}@${this.user?.full_address}`
+
+        // 追加で取得する情報がある場合はHTTP Requestで取得
+        this.fetchAdditionalInfoAsync()
     }
 
     // Getter: 挿入先カラム
@@ -363,18 +366,36 @@ class Status {
         History.pushPost(this)
     }
 
+    async fetchAdditionalInfoAsync() {
+        if (this.reblog && this.remote_flg) // リモートのBTRNは現地情報を直接取得
+            this.__prm_remote_status = Status.getStatus(this.uri, true)
+    }
+
+    async bindAdditionalInfoAsync(tgul) {
+        const target_li = tgul.find(`li[id="${this.status_key}"]`)
+
+        // リモートのBTRNのインプレッションを現地直接表示
+        this.__prm_remote_status?.then(post => {
+            // インプレッションセクションを最新の状態で置き換える
+            target_li.find('.impressions').replaceWith(post.impression_section)
+            // Misskeyの場合未変換のカスタム絵文字を置換
+            if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
+        })
+    }
+
     /**
      * #StaticMethod
      * URLから投稿データをリモートから直接取得する
      * 
      * @param url ステータスURL
      */
-    static async getStatus(url) {
+    static async getStatus(url, ignore_notify) {
         if (url.indexOf('/') < 0) { // URLの様式になっていない場合は無視
             Notification.error("詳細表示のできない投稿です.")
             return
         }
-        const notification = Notification.progress("投稿の取得中です...")
+        let notification = null
+        if (!ignore_notify) notification = Notification.progress("投稿の取得中です...")
         // URLパターンからプラットフォームを判定
         const spl_url = url.split('/')
         let platform = null
@@ -394,10 +415,10 @@ class Status {
 
         try { // URL解析した情報からステータス取得処理を呼び出し
             const post = await Status.getStatusById(domain, platform, id)
-            notification.done()
+            notification?.done()
             return post
         } catch (err) {
-            notification.error(err)
+            notification?.error(err)
         }
     }
 
@@ -1166,10 +1187,10 @@ class Status {
         // メディア(無視する場合は後続の設定を使う)
         if (this.medias.length > 0 && this.from_group.pref.multi_layout_option.media != 'ignore')
             return this.getLayoutElement(this.from_group.pref.multi_layout_option.media)
-        // ブースト/リノート(メディアの次に優先)
-        else if (this.reblog) return this.getLayoutElement(this.from_group.pref.multi_layout_option.reblog)
         else if (this.mergable) // 通知のうちまとめ表示可能なもの
             return this.getLayoutElement(this.from_group.pref.multi_layout_option.notification)
+        // ブースト/リノート(メディアの次に優先)
+        else if (this.reblog) return this.getLayoutElement(this.from_group.pref.multi_layout_option.reblog)
         // 通常の投稿
         else return this.getLayoutElement(this.from_group.pref.multi_layout_option.default)
     }

@@ -233,8 +233,8 @@ class Timeline {
         recent.forEach(post => {
             if (!group.status_map.has(post.status_key)) return // ないときは省略
             group.status_map.set(post.status_key, post) // ステータスを更新
-            // インプレッションの表示内容を更新
-            group.getStatusElement(post.status_key).find('.impressions').replaceWith(post.impression_section)
+            if (!post.__prm_remote_status) // インプレッションの表示内容を更新(BTRNを除外)
+                group.getStatusElement(post.status_key).find('.impressions').replaceWith(post.impression_section)
         })
     }
 
@@ -371,7 +371,10 @@ class Timeline {
                     data.forEach(p => tl.ref_group.addStatus({
                         post: p,
                         target_elm: target,
-                        callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                        callback: (st, tgelm) => {
+                            tgelm.append(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
                     }))
                     // max_idとして取得データの最終IDを指定
                     if (tl.is_notification) return data.pop()?.notification_id

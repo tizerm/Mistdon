@@ -840,7 +840,10 @@ class User {
                 data: response[0],
                 target: target_elm.find(".posts"),
                 bind: (data, target) => {
-                    data.forEach(p => target.append(p.element))
+                    data.forEach(p => {
+                        target.append(p.element)
+                        p.bindAdditionalInfoAsync(target)
+                    })
                     if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
                         Emojis.replaceDomAsync(target.find(".username"), this.host) // ユーザー名
                         Emojis.replaceDomAsync(target.find(".label_cw"), this.host) // CWテキスト
@@ -1058,7 +1061,10 @@ class User {
                     data.datas.forEach(p => tl.ref_group.addStatus({
                         post: p,
                         target_elm: target,
-                        callback: (st, tgelm) => tgelm.append(st.timeline_element)
+                        callback: (st, tgelm) => {
+                            tgelm.append(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
                     }))
                     // Headerを経由して取得されたmax_idを返却
                     return data?.max_id
