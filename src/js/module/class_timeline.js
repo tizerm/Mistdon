@@ -358,8 +358,11 @@ class Timeline {
             tl.ref_group.addStatus({
                 post: post,
                 target_elm: $(`#${window_key}>.timeline>ul`),
-                callback: (st, tgelm) => st.getLayoutElement(tl.ref_group.pref.tl_layout)
-                    .closest('li').addClass('mark_target_post').appendTo(tgelm)
+                callback: (st, tgelm) => {
+                    st.getLayoutElement(tl.ref_group.pref.tl_layout)
+                        .closest('li').addClass('mark_target_post').appendTo(tgelm)
+                    st.bindAdditionalInfoAsync(tgelm)
+                }
             })
             const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
 
@@ -389,7 +392,10 @@ class Timeline {
                     data.forEach(p => tl.ref_group.addStatus({
                         post: p,
                         target_elm: target,
-                        callback: (st, tgelm) => tgelm.prepend(st.timeline_element)
+                        callback: (st, tgelm) => {
+                            tgelm.prepend(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
                     }))
                     first_elm.scrollIntoView({ block: 'center' })
                     // since_idとして取得データの最終IDを指定

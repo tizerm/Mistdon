@@ -200,6 +200,7 @@ class Status {
                     platform: 'Misskey',
                     emojis: data.note?.renote?.emojis ?? data.note?.emojis ?? data.emojis
                 })
+
                 // 引用ノートがある場合は引用先を設定
                 if (this.quote_flg) this.quote = new Status(data.renote, timeline, account)
 
@@ -381,6 +382,14 @@ class Status {
             // Misskeyの場合未変換のカスタム絵文字を置換
             if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
         })
+
+        // 外部インスタンスの投稿はカスタム絵文字を現地から非同期取得
+        if (this.from_timeline?.pref.external && this.platform == 'Misskey') {
+            Emojis.replaceDomAsync(target_li.find(".username"), this.host) // ユーザー名
+            Emojis.replaceDomAsync(target_li.find(".label_cw"), this.host) // CWテキスト
+            Emojis.replaceDomAsync(target_li.find(".main_content"), this.host) // 本文
+            Emojis.replaceDomAsync(target_li.find(".reaction_section"), this.host) // リアクション
+        }
     }
 
     /**
@@ -1905,8 +1914,9 @@ class Status {
         const pos = target.offset()
         const outer_width = target.closest('ul').outerWidth()
         $("#pop_expand_post>ul").html(pop_type == 'reply' ? this.chat_elm : this.element).css('width', `${outer_width}px`)
+        this.bindAdditionalInfoAsync($("#pop_expand_post>ul"))
         // リアクション絵文字はリモートから直接取得
-        Emojis.replaceRemoteAsync($("#pop_expand_post .notification_summary .reaction_head"))
+        //Emojis.replaceRemoteAsync($("#pop_expand_post .notification_summary .reaction_head"))
 
         $("#pop_expand_post").removeClass("reply_pop")
         const mouse_x = e.pageX
