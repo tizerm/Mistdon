@@ -140,7 +140,7 @@ class NotificationStatus extends Status {
             if (this.mini_normal) { // ノーマル2レイアウトの場合
                 html += `
                     <div class="user prof_normal2">
-                        <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                        <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                         ${this.role_section}
                         <div class="name_info">
                 `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
@@ -179,7 +179,7 @@ class NotificationStatus extends Status {
                 html += '</div></div>'
             } else html /* ノーマルレイアウトの場合 */ += `
                 <div class="user">
-                    <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                    <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                     ${this.role_section}
                     <div class="name_info">
                         <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
@@ -281,7 +281,7 @@ class NotificationStatus extends Status {
         let target_emojis = null
         let html = `
             <li id="${this.status_key}" name="${this.uri}" class="short_timeline short_notification">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                 <div class="content">
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -301,8 +301,9 @@ class NotificationStatus extends Status {
                 </div>
                 <div class="notif_footer">
                     <img src="" class="ic_notif_type"/>
-                    <img class="ic_target_account"
+                    <img class="ic_target_account __pop_userinfo"
                         src="${this.user_summary.length > 1 ? 'resources/ic_folder.png' : this.action_user.avatar_url}"
+                        name="@${this.action_user.full_address}"
                         />
                 </div>
             </li>
@@ -395,16 +396,12 @@ class NotificationStatus extends Status {
                 else html += `${k} (未キャッシュです)`
             } else html += k // Unicode絵文字はそのまま渡す
             html += '</span>'
-            // 対象リアクションを行ったユーザーを列挙
-            v.forEach(u => html += `<a class="notification_user" id="${u.full_address}">
-                <img src="${u.avatar_url}" class="usericon"/>
-            </a>`)
+            v.forEach(u => html /* 対象リアクションを行ったユーザーを列挙 */ += `<img
+                src="${u.avatar_url}" class="usericon __pop_userinfo" name="@${u.full_address}"/>`)
             html += '</div>'
         })
-        // リアクション以外の場合は普通にユーザーを列挙する
-        else this.user_summary.forEach(u => html += `<a class="notification_user" id="${u.full_address}">
-            <img src="${u.avatar_url}" class="usericon"/>
-        </a>`)
+        else this.user_summary.forEach(u => html /* リアクション以外の場合は普通にユーザーを列挙 */ += `<img
+            src="${u.avatar_url}" class="usericon __pop_userinfo" name="@${u.full_address}"/>`)
 
         html += '</div>'
         return html

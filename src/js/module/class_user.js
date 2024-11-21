@@ -119,8 +119,9 @@ class User {
      * 
      * @param address ユーザーアカウントのフルアドレス
      */
-    static async getByAddress(address) {
-        const notification = Notification.progress("対象ユーザーのリモートIDを取得中です...")
+    static async getByAddress(address, ignore_notify) {
+        let notification = null
+        if (!ignore_notify) notification = Notification.progress("対象ユーザーのリモートIDを取得中です...")
         const user_id = address.substring(1, address.lastIndexOf('@'))
         const host = address.substring(address.lastIndexOf('@') + 1)
 
@@ -149,13 +150,13 @@ class User {
                 id: data.id
             }})
         ]).then(info => {
-            notification.done()
+            notification?.done()
             return User.get({
                 id: info.id,
                 platform: info.platform,
                 host: host
             })
-        }).catch(jqXHR => notification.error(`
+        }).catch(jqXHR => notification?.error(`
             ユーザーIDの取得でエラーが発生しました. 
             サポート外のプラットフォームの可能性があります.
         `))

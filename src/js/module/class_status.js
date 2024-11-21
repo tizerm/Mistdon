@@ -670,7 +670,7 @@ class Status {
             if (this.mini_normal) { // ノーマル2レイアウトの場合
                 html += `
                     <div class="user prof_normal2">
-                        <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                        <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                         ${this.role_section}
                         <div class="name_info">
                 `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
@@ -709,7 +709,7 @@ class Status {
                 html += '</div></div>'
             } else html /* ノーマルレイアウトの場合 */ += `
                 <div class="user">
-                    <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                    <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                     ${this.role_section}
                     <div class="name_info">
                         <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
@@ -891,7 +891,7 @@ class Status {
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="chat_timeline">`
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                 ${this.role_section}
                 <span class="userid">
                     <a class="__lnk_userdetail" name="@${this.user.full_address}">
@@ -1021,7 +1021,7 @@ class Status {
         let target_emojis = null
         let html = `
             <li id="${this.status_key}" name="${this.uri}" class="short_timeline">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                 <div class="content">
         `
         // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
@@ -1082,7 +1082,7 @@ class Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         html /* ユーザーアカウント情報 */ += `
             <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
+                <img src="${this.user.avatar_url}" class="usericon __pop_userinfo" name="@${this.user.full_address}"/>
                 ${this.role_section}
                 <div class="name_info">
                     <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
