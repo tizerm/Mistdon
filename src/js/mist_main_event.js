@@ -1325,19 +1325,6 @@
     })
 
     /**
-     * #Event #Delayhover
-     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー.
-     * => 上部に簡易プロフィールを表示
-     */
-    delayHoverEvent({
-        selector: ".account_timeline .ff_nametags>li",
-        enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
-            .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
-        leaveFunc: e => {},
-        delay: 700
-    })
-
-    /**
      * #Event
      * ユーザープロフィール: フォロー/フォロワーのネームタグ.
      * => フルプロフィールを新しくウィンドウを生成して表示
