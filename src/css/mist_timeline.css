@@ -815,6 +815,7 @@
                 }
             }
         }
+        > li .__pop_userinfo { cursor: pointer; }
         > li.self_post,
         > li.chat_timeline.self_post>.content { background-color: var(--tl-color-self-bg); }
         > li.rebloged_post,
