@@ -210,6 +210,9 @@ class Emojis {
     static async replaceRemoteAsync(jqelm) {
         if (jqelm.length == 0) return // マッチしてなかったらなにもしない
 
+        // TODO: 通知のリモートリアクションをどう取得するかあとで考える
+
+        /*
         let text = jqelm.html()
         // 文章中に存在するショートコードを抽出
         const shortcodes = text.match(/:[a-zA-Z0-9_]+@.+:/g)
@@ -231,7 +234,7 @@ class Emojis {
                 .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
                     `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
         })
-        jqelm.html(replace_text)
+        jqelm.html(replace_text)//*/
     }
 
     /**

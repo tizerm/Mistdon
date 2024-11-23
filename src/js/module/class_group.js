@@ -10,6 +10,7 @@ class Group {
         if (!column) { // 特殊グループ(検索、履歴など)
             this.pref = pref
             this.status_map = new Map()
+            this.notification_map = new Map()
             this.search_flg = true
             return
         }
@@ -17,6 +18,7 @@ class Group {
         this.index = pref.index
         this.__column_id = column.id
         this.status_map = new Map()
+        this.notification_map = new Map()
         this.unread = 0
         this.counter = 0
         this.ppm_que = []
@@ -144,7 +146,11 @@ class Group {
             const postlist = []
             // 取得に成功したPromiseだけで処理を実行
             results.filter(res => res.status == 'fulfilled').map(res => res.value).forEach(posts => {
-                posts.forEach(p => this.addStatus(p, () => postlist.push(p)))
+                posts.forEach(p => this.addStatus({
+                    post: p,
+                    target_elm: null,
+                    callback: (st, tgelm) => postlist.push(st)
+                }))
                 all_rejected_flg = false
             })
             if (results.some(res => res.status == 'rejected')) // 取得に失敗したTLがひとつでもある場合
@@ -179,6 +185,7 @@ class Group {
      */
     append(post) {
         $(`#${this.id}>ul`).append(post.timeline_element)
+        post.bindAdditionalInfoAsync($(`#${this.id}>ul`))
     }
 
     /**
@@ -189,7 +196,6 @@ class Group {
      * @param post カラムに追加するステータスデータ
      */
     prepend(post) {
-        const ul = $(`#${this.id}>ul`)
         let limit = null
         switch (this.pref.tl_layout) {
             case 'chat': // チャット
@@ -210,20 +216,28 @@ class Group {
         }
 
         // 重複している投稿を除外する
-        this.addStatus(post, () => {
-            // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
-            let remove_flg = false
-            if (ul.find("li").length >= limit) remove_flg = true
-            ul.prepend(post.timeline_element)
-            ul.find('li:first-child').hide().show(...Preference.getAnimation("TIMELINE_APPEND"))
-            // 未読カウンターを上げる
-            $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
-                .text(++this.unread)
-            this.counter++
-            if (remove_flg) this.removeStatus(ul.find("li:last-child"), false)
+        this.addStatus({
+            post: post,
+            target_elm: $(`#${this.id}>ul`),
+            callback: (st, tgelm) => {
+                // タイムラインキャッシュが限界に到達していたら後ろから順にキャッシュクリアする
+                let remove_flg = false
+                if (tgelm.find("li").length >= limit) remove_flg = true
 
-            // 通知が来た場合は通知ウィンドウに追加
-            if (post.type == 'notification') window.accessApi.notification(post.notification)
+                // 投稿を先頭に追加
+                tgelm.prepend(st.timeline_element)
+                tgelm.find('li:first-child').hide().show(...Preference.getAnimation("TIMELINE_APPEND"))
+                st.bindAdditionalInfoAsync(tgelm)
+
+                // 未読カウンターを上げる
+                $(`#${this.parent_column.id}_closed>.rotate_head>.group_label[name="${this.id}"]>.unread_count`)
+                    .text(++this.unread)
+                this.counter++
+                if (remove_flg) this.removeStatus(tgelm.find("li:last-child"), false)
+
+                // 通知が来た場合は通知ウィンドウに追加
+                if (st.type == 'notification') window.accessApi.notification(st.notification)
+            }
         })
     }
 
@@ -255,15 +269,34 @@ class Group {
      * @param post カラムに追加するステータスデータ
      * @param callback 重複していなかった時に実行するコールバック関数
      */
-    addStatus(post, callback) {
+    addStatus(arg) {
         // 重複している、もしくはミュート対象の場合はコールバック関数の実行を無視する
-        if (!this.status_map.has(post.status_key) && !post.muted) {
-            // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
-            this.status_map.set(post.status_key, post)
-            post.from_timeline.id_list = post
-            post.from_timeline.captureNote(post)
-            callback()
+        if (this.status_map.has(arg.post.status_key) || arg.post.muted) return
+
+        if (arg.post.notification_key) { // 通知の場合
+            const merge_from = this.notification_map.get(arg.post.notification_key)
+            if (merge_from) { // マージできる通知が存在する場合
+                const [at, from] = merge_from.merge(arg.post)
+                if (merge_from.status_key != at.status_key) { // マージ先の通知が既存の通知より新しい場合
+                    // 通知キーとステータスキーをマップにセット
+                    this.notification_map.set(at.notification_key, at)
+                    this.status_map.set(at.status_key, at)
+                    arg.post.from_timeline.id_list = at
+                    // 既存の通知をマップとDOMから消去してコールバックを実行
+                    arg.target_elm?.find(`li[id="${from.status_key}"]`).remove()
+                    this.status_map.delete(from.status_key)
+                    arg.callback(at, arg.target_elm)
+                }
+                return // マージ対象の場合は後続処理は無視
+                // マージできる通知が存在しない場合はマップにセットして後続処理へ
+            } else this.notification_map.set(arg.post.notification_key, arg.post)
         }
+
+        // ユニークキーをキーに、ステータスインスタンスを持つ(Timelineと相互参照するため)
+        this.status_map.set(arg.post.status_key, arg.post)
+        arg.post.from_timeline.id_list = arg.post
+        arg.post.from_timeline.captureNote(arg.post)
+        arg.callback(arg.post, arg.target_elm)
     }
 
     /**

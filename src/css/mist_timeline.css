@@ -593,23 +593,24 @@
             }
 
             /*=== Notification Impression Info ===================================================*/
-            > .notified_impression {
-                text-align: center;
-                & span {
-                    display: inline-block;
-                    border-radius: 12px;
-                    padding: 2px 18px;
+            > .notification_summary {
+                font-size: 1px;
+                > h6 {
+                    padding: 3px 16px;
                     margin: 2px;
-                    width: calc(50% - 64px);
-                    background-position: center right;
-                    background-repeat: no-repeat;
-                    background-size: 24px 24px;
-                    padding-right: 32px;
+                    border-radius: 8px;
                     font-family: Arial, "メイリオ", sans-selif;
-                    font-size: 18px;
-                    font-weight: bold;
+                    font-size: 12px;
                     text-align: right;
                 }
+                & img {
+                    display: inline-block;
+                    height: 24px;
+                    width: auto;
+                    vertical-align: text-bottom;
+                    &.usericon { border-radius: 12px; }
+                }
+                .reaction_head { font-size: 11px; }
             }
 
             /*=== Attributes Info ================================================================*/
@@ -814,6 +815,7 @@
                 }
             }
         }
+        > li .__pop_userinfo { cursor: pointer; }
         > li.self_post,
         > li.chat_timeline.self_post>.content { background-color: var(--tl-color-self-bg); }
         > li.rebloged_post,
@@ -1038,7 +1040,12 @@
                 top: 0px;
                 right: 0px;
                 display: inline-block;
-                > .ic_target_account { border-radius: 12px; }
+                font-size: 1px;
+                > span { font-size: 14px; }
+                > .ic_target_account {
+                    border-radius: 12px;
+                    margin-left: 2px;
+                }
             }
         }
         > li.short_timeline.short_notification>.content { width: calc(100% - 88px); }
@@ -1403,37 +1410,53 @@
     .posts, .media_post, .channel_post { height: calc((100vh - 310px) * 0.6); }
     > .user_bookmark_elm, > .user_ff_elm { display: none; }
 
-    .ff_short_profile {
-        height: 212px;
-        > .__initial_text {
-            height: 104px;
-            padding-top: 82px;
-            font-size: 13px;
-            text-align: center;
-        }
-    }
     .bookmarks { height: calc((100vh - 310px) * 0.8); }
     .ff_nametags {
         height: calc((100vh - 310px) * 0.8 - 212px);
+        container-type: inline-size;
+        container-name: profileNameTags;
         > li.user_nametag {
             display: inline-block;
-            width: calc(50% - 28px);
-            height: 32px;
+            width: calc(50% - 8px);
+            padding: 2px;
             margin: 2px 0px;
-            .usericon {
-                width: 36px;
-                height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            > .user {
+                position: relative;
+                padding: 0px;
+                margin: 0px;
+                margin-top: 4px;
+                > .usericon {
+                    width: 48px;
+                    height: 48px;
+                }
+                > .name_info {
+                    position: absolute;
+                    left: 54px;
+                    top: 2px;
+                    > .username, > .userid, > .detail_info { font-size: 11px; }
+                    > .username>.inline_emoji { height: 14px; }
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    > .detail_info>.counter {
+                        display: inline-block;
+                        border-radius: 4px;
+                        padding: 1px 3px;
+                        margin: 0px;
+                    }
+                }
+                > .instance_icon {
+                    width: 28px;
+                    height: 28px;
+                }
             }
-            .username, .userid { font-size: 12px; }
-            .username {
-                left: 46px;
-                top: 2px;
+            &.ignored_user { opacity: 0.35; }
+            &:hover {
+                background-color: var(--tl-color-hoverbg);
+                opacity: 1.0;
             }
-            .userid {
-                left: 46px;
-                top: 20px;
-            }
-            &:hover { background-color: var(--tl-color-hoverbg); }
         }
     }
 }
@@ -1463,13 +1486,21 @@
 }
 @container profileHeader (width < 380px) {
     .timeline>ul>li.short_userinfo,
-    .user_ff_elm>ul>li.short_userinfo,
     .column_profile>ul.profile_header>li.header_userinfo {
         > .detail_info>.counter {
             padding: 4px 28px 4px 2px;
             font-weight: normal;
         }
     }
+}
+@container profileNameTags (width < 420px) {
+    .column_profile>.user_ff_elm>.ff_nametags>li.user_nametag { width: calc(100% - 6px); }
+}
+@container profileNameTags (width > 720px) {
+    .column_profile>.user_ff_elm>.ff_nametags>li.user_nametag { width: calc(33% - 6px); }
+}
+@container profileNameTags (width > 980px) {
+    .column_profile>.user_ff_elm>.ff_nametags>li.user_nametag { width: calc(25% - 10px); }
 }
 
 /*=== Instance Info Layout =======================================================================*/

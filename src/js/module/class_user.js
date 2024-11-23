@@ -90,11 +90,15 @@ class User {
                 break
         }
         this.host = host
+        this.ff_remote_flg = arg.remote != host
         this.all_account_flg = arg.auth
         // Mistdonに認証情報のあるホストの場合は対象アカウントを引っ張ってくる
         this.authorized = Account.getByDomain(host)
         if (this.platform == 'Misskey') this.use_emoji_cache = !!this.authorized
         this.user_uuid = crypto.randomUUID()
+
+        if (!arg.remote && this.ff_remote_flg) // フォローフォロワー表示でリモートアカウントを引いた場合
+            this.__prm_remote_user = User.getByAddress(this.full_address, true)
     }
 
     // 画面に表示したユーザーのオブジェクトをキャッシュするマップ
@@ -119,8 +123,9 @@ class User {
      * 
      * @param address ユーザーアカウントのフルアドレス
      */
-    static async getByAddress(address) {
-        const notification = Notification.progress("対象ユーザーのリモートIDを取得中です...")
+    static async getByAddress(address, ignore_notify) {
+        let notification = null
+        if (!ignore_notify) notification = Notification.progress("対象ユーザーのリモートIDを取得中です...")
         const user_id = address.substring(1, address.lastIndexOf('@'))
         const host = address.substring(address.lastIndexOf('@') + 1)
 
@@ -149,13 +154,13 @@ class User {
                 id: data.id
             }})
         ]).then(info => {
-            notification.done()
+            notification?.done()
             return User.get({
                 id: info.id,
                 platform: info.platform,
                 host: host
             })
-        }).catch(jqXHR => notification.error(`
+        }).catch(jqXHR => notification?.error(`
             ユーザーIDの取得でエラーが発生しました. 
             サポート外のプラットフォームの可能性があります.
         `))
@@ -262,11 +267,6 @@ class User {
                     </div>
                 </div>
                 <div class="user_ff_elm">
-                    <ul class="ff_short_profile">
-                        <li class="__initial_text">
-                            ※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。
-                        </li>
-                    </ul>
                     <ul class="ff_nametags"></ul>
                 </div>
             </div>
@@ -444,19 +444,73 @@ class User {
 
     // Getter: インラインで名前だけ表示するネームタグ表示用DOM
     get inline_nametag() {
+        let cnt_pst = Number(this.count_post)
+        let cnt_flw = Number(this.count_follow)
+        let cnt_flr = Number(this.count_follower)
+        cnt_pst = cnt_pst < 1000 ? cnt_pst : `${floor(cnt_pst / 1000, 0)}k`
+        cnt_flw = cnt_flw < 1000 ? cnt_flw : `${floor(cnt_flw / 1000, 0)}k`
+        cnt_flr = cnt_flr < 1000 ? cnt_flr : `${floor(cnt_flr / 1000, 0)}k`
+
+        const target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(`
             <li class="user_nametag" name="${this.full_address}">
                 <div class="user">
                     <img src="${this.avatar_url}" class="usericon"/>
                     <div class="name_info">
-                        <h4 class="username">${this.username}</h4>
-                        <span class="userid">${this.full_address}</a>
+                        <h4 class="username">${target_emojis.replace(this.username)}</h4>
+                        <span class="userid">${this.full_address}</span>
+                        <div class="detail_info">
+                            <span class="counter label_postcount" title="投稿数">${cnt_pst}</span>
+                            <span class="counter ${this.hide_follow || this.hide_ff ? 'label_private' : 'label_follow'}"
+                                title="${this.hide_follow || this.hide_ff ? '(フォロー非公開ユーザーです)' : 'フォロー'}">
+                                ${this.hide_follow || this.hide_ff ? '??' : cnt_flw}
+                            </span>
+                            <span class="counter ${this.hide_follower || this.hide_ff ? 'label_private' : 'label_follower'}"
+                                title="${this.hide_follower || this.hide_ff ? '(フォロワー非公開ユーザーです)' : 'フォロワー'}">
+                                ${this.hide_follower || this.hide_ff ? '??' : cnt_flr}
+                            </span>
+                            <span class="short_profile"></span>
+                        </div>
                     </div>
                 </div>
             </li>
         `))
+
+        // プロフィールは一行表示にする
+        jqelm.find(".short_profile").html($($.parseHTML(this.profile)).text())
+        // 投稿数が10以下のユーザーを半透明にする
+        if (cnt_pst < 10) jqelm.closest("li").addClass("ignored_user")
+
         return jqelm
+    }
+
+    async bindRemoteNametagAsync(tgul) {
+        const target_li = tgul.find(`li[name="${this.full_address}"]`)
+
+        // リモートのフォローフォロワーの情報を表示
+        this.__prm_remote_user?.then(user => {
+            const jqelm = user.inline_nametag
+            let html = ''
+            switch (user.platform) {
+                case 'Mastodon': // Mastodon
+                    html += '<img src="resources/ic_mastodon.png" class="instance_icon"/>'
+                    break
+                case 'Misskey': // Misskey
+                    html += '<img src="resources/ic_misskey.png" class="instance_icon"/>'
+                    break
+                default:
+                    break
+            }
+            jqelm.find(".user").append(html)
+            target_li.replaceWith(jqelm)
+
+            // 外部インスタンスのユーザーはカスタム絵文字を現地から非同期取得
+            if (user.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find(".username"), user.host)
+        }).catch(err => { // リモートの対象外プラットフォームは警告表示
+            target_li.find(".user").append('<img src="resources/ic_warn.png" class="instance_icon"/>')
+            target_li.closest("li").removeClass("ignored_user")
+        })
     }
 
     /**
@@ -840,7 +894,10 @@ class User {
                 data: response[0],
                 target: target_elm.find(".posts"),
                 bind: (data, target) => {
-                    data.forEach(p => target.append(p.element))
+                    data.forEach(p => {
+                        target.append(p.element)
+                        p.bindAdditionalInfoAsync(target)
+                    })
                     if (this.platform == 'Misskey') { // Misskeyの場合非同期絵文字置換を実行
                         Emojis.replaceDomAsync(target.find(".username"), this.host) // ユーザー名
                         Emojis.replaceDomAsync(target.find(".label_cw"), this.host) // CWテキスト
@@ -889,7 +946,7 @@ class User {
         target_elm.find("ul.channel_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
         target_elm.find("ul.media_post").css('height', `calc(100vh - ${320 + detail_height}px)`)
         target_elm.find("ul.bookmarks").css('height', `calc(100vh - ${290 + detail_height}px)`)
-        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${500 + detail_height}px)`)
+        target_elm.find("ul.ff_nametags").css('height', `calc(100vh - ${290 + detail_height}px)`)
     }
 
     /**
@@ -942,9 +999,6 @@ class User {
         `)
         target_td.find(".user_post_elm").hide()
         target_td.find(".user_bookmark_elm").hide()
-        target_td.find(".user_ff_elm>ul.ff_short_profile").html(`
-            <li class="__initial_text">※ユーザーにしばらくマウスを乗せるとここに簡易プロフィールが表示されます。</li>
-        `)
         target_td.find(".user_ff_elm>ul.ff_nametags").empty()
         target_td.find(".user_ff_elm").show()
 
@@ -955,7 +1009,10 @@ class User {
             data: response,
             target: target_td.find(".user_ff_elm>.ff_nametags"),
             bind: (data, target) => {
-                data.datas.forEach(u => target.append(u.inline_nametag))
+                data.datas.forEach(u => {
+                    target.append(u.inline_nametag)
+                    u.bindRemoteNametagAsync(target)
+                })
                 // Headerを経由して取得されたmax_idを返却
                 return data?.max_id
             },
@@ -1055,7 +1112,14 @@ class User {
                 data: body,
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.datas.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    data.datas.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => {
+                            tgelm.append(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
+                    }))
                     // Headerを経由して取得されたmax_idを返却
                     return data?.max_id
                 },
