@@ -356,6 +356,9 @@ class Timeline {
     }
 
     updateReaction(id, body) {
+        // インプレッション表示をしないならなにもしない
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return
+
         const status_key = this.status_key_map.get(id)
         if (!status_key) return // タイムラインに存在する場合のみ
 
@@ -363,7 +366,6 @@ class Timeline {
         const jqelm = group.getStatusElement(status_key)
         const target_post = group.status_map.get(status_key)
         target_post.updateReaction(body, jqelm)
-
     }
 
     /**

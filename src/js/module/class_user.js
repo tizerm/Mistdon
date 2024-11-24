@@ -90,7 +90,7 @@ class User {
                 break
         }
         this.host = host
-        this.ff_remote_flg = arg.remote != host
+        this.ff_remote_flg = arg.host != host
         this.all_account_flg = arg.auth
         // Mistdonに認証情報のあるホストの場合は対象アカウントを引っ張ってくる
         this.authorized = Account.getByDomain(host)
