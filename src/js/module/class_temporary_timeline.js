@@ -214,7 +214,10 @@ class TemporaryTimeline extends Timeline {
         data.forEach(p => this.group.addStatus({
             post: p,
             target_elm: ul_elm,
-            callback: (st, tgelm) => tgelm.prepend(st.timeline_element)
+            callback: (st, tgelm) => {
+                tgelm.prepend(st.timeline_element)
+                st.bindAdditionalInfoAsync(tgelm)
+            }
         }))
 
         ul_elm.prepend(`<li class="__on_temp_top_loader">続きをロード</li>`)

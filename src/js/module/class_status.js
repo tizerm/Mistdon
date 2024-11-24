@@ -1986,6 +1986,21 @@ class Status {
         }
     }
 
+    bindSentReactions() {
+        // ローカルのリアクションのみ取得
+        const local_reactions = this.reactions.filter(r => r.shortcode.match(/^:[a-zA-Z0-9_]+@?\.?:$/g))
+        if (local_reactions.length == 0) { // なかったら閉じて終了
+            $("#pop_expand_action>.sent_reactions").hide()
+            return
+        }
+        let html = ''
+        local_reactions.map(r => this.host_emojis.get(`:${r.shortcode.substring(1, r.shortcode.lastIndexOf('@'))}:`))
+            .filter(f => f).forEach(emoji => html /* ローカルリアクション一覧 */ += `
+            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+        `)
+        $("#pop_expand_action>.sent_reactions").html(html).show()
+    }
+
     /**
      * #Method
      * この投稿よりも前のタイムラインを取得するウィンドウを生成
