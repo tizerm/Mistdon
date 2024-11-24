@@ -231,8 +231,7 @@ class Status {
                 this.hashtags = data.tags
                 this.count_reply = data.repliesCount
                 this.count_reblog = data.renoteCount
-                // リアクションがある場合はリアクション一覧をリスト化する
-                if (data.reactions) {
+                if (data.reactions) { // リアクションがある場合はリアクション一覧をリスト化する
                     const reactions = []
                     Object.keys(data.reactions).forEach(key => reactions.push({
                         shortcode: key,
@@ -241,6 +240,9 @@ class Status {
                     }))
                     this.reactions = reactions
                     this.count_fav = reactions.reduce((sum, react) => sum + Number(react.count), 0)
+                } else { // なかったら空のリストを作成
+                    this.reactions = []
+                    this.count_fav = 0
                 }
                 this.reaction_self = data.myReaction
                 break
@@ -751,15 +753,6 @@ class Status {
         }
         if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
-        if (this.reaction_emoji) { // リアクション絵文字がある場合`
-            let alias = null
-            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
-                else alias = `${this.reaction_emoji} (未キャッシュです)`
-            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-            html += `<div class="reaction_emoji">${alias}</div>`
-        }
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
         // 投稿属性セクション
@@ -1666,18 +1659,18 @@ class Status {
 
         // メインコンテンツを書き換える
         if (jqelm.is('.short_timeline') || jqelm.is('.media_timeline')) // リストとメディアは1行で書き換え
-            jqelm.find('.main_content').hide("fade", 1500,
-                () => jqelm.find('.main_content').html(this.emojis.replace(this.content_text)).show("fade", 1500))
-        else jqelm.find('.main_content').hide("fade", 1500,
-            () => jqelm.find('.main_content').html(this.emojis.replace(this.content)).show("fade", 1500))
+            jqelm.find('.main_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.main_content')
+                .html(this.emojis.replace(this.content_text)).show(...Preference.getAnimation("TIMELINE_EDIT")))
+        else jqelm.find('.main_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.main_content')
+            .html(this.emojis.replace(this.content)).show(...Preference.getAnimation("TIMELINE_EDIT")))
 
         if (this.medias.length > 0) { // メディアコンテンツを書き換える
             if (jqelm.is('.short_timeline')) // リストレイアウトのときは最初の一枚だけ書き換え
-                jqelm.find('.list_media').hide("fade", 1500, () => jqelm.find('.list_media').html(`
+                jqelm.find('.list_media').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.list_media').html(`
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
                         <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
                     </a>
-                `).show("fade", 1500))
+                `).show(...Preference.getAnimation("TIMELINE_EDIT")))
             else { // それ以外は各レイアウトに合わせて書き換え
                 let img_class = 'img_grid_single'
                 if (jqelm.is('.media_timeline')) { // メディアタイムライン
@@ -1686,7 +1679,7 @@ class Status {
                 } else if (jqelm.is('.chat_timeline')) // チャットタイムライン
                     img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
                 else img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
-                jqelm.find('.media_content').hide("fade", 1500, () => {
+                jqelm.find('.media_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => {
                     let html = ''
                     // アスペクト比をリンクオプションとして設定
                     this.medias.forEach(media => {
@@ -1699,10 +1692,37 @@ class Status {
                             </a>
                         `
                     })
-                    jqelm.find('.media_content').html(html).show("fade", 1500)
+                    jqelm.find('.media_content').html(html).show(...Preference.getAnimation("TIMELINE_EDIT"))
                 })
             }
         }
+    }
+
+    updateReaction(body, jqelm) {
+        const reaction = {
+            shortcode: body.reaction,
+            count: 1,
+            url: body.emoji?.url ?? null
+        }
+        // リアクションカウントをリアクションリストに追記
+        const merge_at = this.reactions.find(r => r.shortcode == body.reaction)
+        if (merge_at) merge_at.count = Number(merge_at.count) + 1
+        else this.reactions.push(reaction)
+        this.count_fav++
+
+        // リアクションをDOMに反映
+        jqelm.find(".impressions").replaceWith(this.impression_section)
+        // アニメーション設定が有効の場合はポップアニメーションを追加
+        /* TODO: 一旦実装しないことにする
+        if (Preference.GENERAL_PREFERENCE.enable_animation) {
+            const uuid = crypto.randomUUID()
+            jqelm.find(".content").append(`<img src="${reaction.url}" id="${uuid}" class="poped_reaction">`)
+            const target = $(`#${uuid}`)
+            // 1秒で消去
+            target.show(...Preference.getAnimation("REACTION_SHOW"),
+                () => setTimeout(() => target.hide(...Preference.getAnimation("REACTION_HIDE"),
+                    () => target.remove()), 1000))
+        }//*/
     }
 
     /**

@@ -113,6 +113,7 @@ class Preference {
 
         animation_map.set("TIMELINE_APPEND"  , ["drop" , { direction: "left"  }, 250])
         animation_map.set("TIMELINE_DELETE"  , ["fade"                         , 2500])
+        animation_map.set("TIMELINE_EDIT"    , ["fade"                         , 1500])
         animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
         animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
         animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
@@ -124,6 +125,8 @@ class Preference {
         animation_map.set("FADE_STD"         , ["fade"                         , 160])
         animation_map.set("POP_FOLD"         , ["fold" , { size : 32          }, 80])
         animation_map.set("WINDOW_FOLD"      , ["fold" , { size : 32          }, 160])
+        animation_map.set("REACTION_SHOW"    , ["slide", { direction: "up"    }, 750])
+        animation_map.set("REACTION_HIDE"    , ["fade"                         , 1500])
 
         Preference.ANIMATION_MAP = animation_map
 

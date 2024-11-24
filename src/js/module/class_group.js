@@ -365,22 +365,6 @@ class Group {
 
     /**
      * #Method
-     * 引数のjQueryオブジェクトに該当する投稿データを編集後の内容に書き換える
-     * 
-     * @param status_key 投稿ステータスのユニークキー
-     * @param post 編集後の投稿Statusオブジェクト
-     */
-    updateStatus(status_key, post) {
-        const jqelm = this.getStatusElement(status_key)
-        const pre_post = this.status_map.get(status_key)
-        const key = jqelm.attr("id")
-
-        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
-        pre_post.update(post, jqelm.parent().find(`li[id="${key}"]`))
-    }
-
-    /**
-     * #Method
      * このグループにカーソルを設定
      */
     setCursor() {

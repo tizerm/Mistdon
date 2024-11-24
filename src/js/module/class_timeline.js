@@ -277,28 +277,53 @@ class Timeline {
     }
 
     captureNote(post) {
-        if (this.platform != 'Misskey' || this.pref.external || this.pref.timeline_type == 'notification') return
+        if (this.platform != 'Misskey' || this.pref.external || this.is_notification) return
 
         const socket = this.target_account.socket
+        const captured_notes = this.target_account.captured_notes
+
+        // アカウントのノートマップにタイムラインセットをセット
+        let tl_set = new Set()
+        if (captured_notes.has(post.id)) tl_set = captured_notes.get(post.id)
+        else captured_notes.set(post.id, tl_set)
+        tl_set.add(this)
+
         // キューの先頭に対象の投稿データを追加
         this.capture_queue.unshift(post)
 
-        let sender = JSON.stringify({ // WebSocketにCaptureリクエストを送信
-            "type": "channel",
-            "body": {
-                "id": this.pref.socket_param.id,
-                "type": "subNote",
-                "body": { "id": post.id }
-            }
-        })
-
-        socket.send(sender)
-
-        // キャプチャキューが30超えてる場合PopしてWebSocketにUnCaptureリクエストを送信
-        if (this.capture_queue.length > 30) socket.send(JSON.stringify({
-            "type": "unsubNote",
-            "body": { "id": this.capture_queue.pop().id }
+        socket.send(JSON.stringify({ // WebSocketにCaptureリクエストを送信
+            "type": "subNote",
+            "body": { "id": post.id }
         }))
+
+        // キャプチャキューが30超えてる場合uncaptureする
+        if (this.capture_queue.length > 30) this.uncaptureNote(this.capture_queue.pop().id)
+    }
+
+    uncaptureNote(id) {
+        const captured_notes = this.target_account.captured_notes
+        this.target_account.socket.send(JSON.stringify({ // WebSocketにUnCaptureリクエストを送信
+            "type": "unsubNote",
+            "body": { "id": id }
+        }))
+        // アカウントのノートマップからキャプチャ先のタイムラインを削除
+        const del_set = captured_notes.get(id)
+        del_set.delete(this)
+        if (del_set.size == 0) captured_notes.delete(id)
+    }
+
+    updateNote(body) {
+        switch (body.type) {
+            case 'reacted': // リアクション受信
+                this.updateReaction(body.id, body.body)
+                break
+            case 'deleted': // 削除受信
+                this.removeStatus(body.id)
+                this.uncaptureNote(body.id)
+                break
+            default:
+                break
+        }
     }
 
     /**
@@ -309,9 +334,8 @@ class Timeline {
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
-
-        // タイムラインに存在する投稿だけ削除対象とする
-        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
+        if (status_key) // タイムラインに存在する投稿だけ削除対象とする
+            this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
     }
 
     /**
@@ -322,9 +346,24 @@ class Timeline {
      */
     updateStatus(post) {
         const status_key = this.status_key_map.get(post.id)
+        if (!status_key) return // タイムラインに存在する場合のみ
 
-        // タイムラインに存在する投稿だけ修正対象とする
-        if (status_key) this.parent_group.updateStatus(status_key, post)
+        const group = this.parent_group
+        const jqelm = group.getStatusElement(status_key)
+        const pre_post = group.status_map.get(status_key)
+        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
+        pre_post.update(post, jqelm.parent().find(`li[id="${status_key}"]`))
+    }
+
+    updateReaction(id, body) {
+        const status_key = this.status_key_map.get(id)
+        if (!status_key) return // タイムラインに存在する場合のみ
+
+        const group = this.parent_group
+        const jqelm = group.getStatusElement(status_key)
+        const target_post = group.status_map.get(status_key)
+        target_post.updateReaction(body, jqelm)
+
     }
 
     /**

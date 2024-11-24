@@ -420,15 +420,15 @@
                     overflow-wrap: break-word;
                     font-size: var(--font-size-default-omit);
                 }
-            }
-
-            /*=== Reaction Emoji Info ============================================================*/
-            > .reaction_emoji {
-                text-align: right;
-                margin: 4px 8px;
-                > .inline_emoji {
-                    height: 32px;
+                > img.poped_reaction {
+                    display: none;
+                    background-color: var(--core-color-window-bg);
+                    z-index: 9;
+                    position: absolute;
+                    right: 0px;
+                    bottom: -16px;
                     width: auto;
+                    height: 32px;
                 }
             }
 

@@ -20,6 +20,7 @@ class Account {
 
         this.emoji_history = []
         this.reaction_history = []
+        this.captured_notes = new Map()
     }
 
     // Getter: プラットフォーム
@@ -854,8 +855,6 @@ class Account {
             arg.openFunc()
             // ソケットに受信設定を送信
             this.socket_prefs.forEach(p => this.socket.send(p.send_param))
-
-            console.log(this.socket_prefs)
         })
         // エラーハンドラ
         this.socket.addEventListener("error", (event) => {
@@ -880,6 +879,16 @@ class Account {
         })
         // 受信処理を設定
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
+
+        // Misskeyの場合はCaptureをキャッチする受信イベントを定義
+        if (this.platform == 'Misskey') this.socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data)
+            if (data.type != 'noteUpdated') return
+
+            // アカウントのノートマップから対象のタイムラインを検索して
+            const tl_set = this.captured_notes.get(data.body.id)
+            tl_set.forEach(tl => tl.updateNote(data.body))
+        })
     }
 
     /**
