@@ -596,12 +596,18 @@
             > .notification_summary {
                 font-size: 1px;
                 > h6 {
-                    padding: 3px 16px;
+                    background-position: center left 8px;
+                    background-repeat: no-repeat;
+                    background-size: 24px 24px;
+                    padding: 2px 16px;
                     margin: 2px;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     font-family: Arial, "メイリオ", sans-selif;
-                    font-size: 12px;
+                    font-size: 16px;
                     text-align: right;
+                    &.fav      { background-image: url("../resources/ic_favorite.png"); }
+                    &.reaction { background-image: url("../resources/ic_emoji.png"); }
+                    &.reblog   { background-image: url("../resources/ic_reblog.png"); }
                 }
                 & img {
                     display: inline-block;
@@ -1501,6 +1507,9 @@
 }
 @container profileNameTags (width > 980px) {
     .column_profile>.user_ff_elm>.ff_nametags>li.user_nametag { width: calc(25% - 10px); }
+}
+@container profileNameTags (width > 1240px) {
+    .column_profile>.user_ff_elm>.ff_nametags>li.user_nametag { width: calc(20% - 10px); }
 }
 
 /*=== Instance Info Layout =======================================================================*/

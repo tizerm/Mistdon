@@ -97,7 +97,8 @@ class User {
         if (this.platform == 'Misskey') this.use_emoji_cache = !!this.authorized
         this.user_uuid = crypto.randomUUID()
 
-        if (!arg.remote && this.ff_remote_flg) // フォローフォロワー表示でリモートアカウントを引いた場合
+        if (Preference.GENERAL_PREFERENCE.remote_fetch?.profile_ff && !arg.remote && this.ff_remote_flg)
+            // フォローフォロワー表示でリモートアカウントを引いた場合
             this.__prm_remote_user = User.getByAddress(this.full_address, true)
     }
 
@@ -479,8 +480,8 @@ class User {
 
         // プロフィールは一行表示にする
         jqelm.find(".short_profile").html($($.parseHTML(this.profile)).text())
-        // 投稿数が10以下のユーザーを半透明にする
-        if (cnt_pst < 10) jqelm.closest("li").addClass("ignored_user")
+        if (Preference.GENERAL_PREFERENCE.blur_suspend_user && cnt_pst < 10) // 投稿数が10以下のユーザーを半透明にする
+            jqelm.closest("li").addClass("ignored_user")
 
         return jqelm
     }

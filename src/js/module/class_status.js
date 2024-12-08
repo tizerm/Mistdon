@@ -370,7 +370,8 @@ class Status {
     }
 
     async fetchAdditionalInfoAsync() {
-        if (this.reblog && this.remote_flg) // リモートのBTRNは現地情報を直接取得
+        if (Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression && this.reblog && this.remote_flg)
+            // リモートのBTRNは現地情報を直接取得
             this.__prm_remote_status = Status.getStatus(this.uri, true)
     }
 

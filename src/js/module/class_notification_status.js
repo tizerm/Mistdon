@@ -128,6 +128,8 @@ class NotificationStatus extends Status {
     // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
         if (this.notification_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
+        // フォロー通知の場合は専用レイアウトを使用
+        if (['follow', 'follow_request'].includes(this.notification_type)) return this.followers_elm
 
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="normal_layout">`
@@ -271,6 +273,19 @@ class NotificationStatus extends Status {
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
 
+        switch (this.notification_type) {
+            case 'favourite': // お気に入り
+            case 'reaction': // 絵文字リアクション
+                jqelm.closest('li').addClass('favorited_post')
+                break
+            case 'reblog': // ブースト
+            case 'renote': // リノート
+                jqelm.closest('li').addClass('rebloged_post')
+                break
+            default:
+                break
+        }
+
         return jqelm
     }
 
@@ -370,16 +385,16 @@ class NotificationStatus extends Status {
         let html = '<div class="notification_summary">'
         switch (this.notification_type) {
             case 'favourite': // お気に入り
-                html += '<h6 class="label_favorite">Favorited Users</h6>'
+                html += '<h6 class="fav label_favorite">Favorited Users</h6>'
                 break
             case 'reblog': // ブースト
-                html += '<h6 class="label_reblog">Boosted Users</h6>'
+                html += '<h6 class="reblog label_reblog">Boosted Users</h6>'
                 break
             case 'reaction': // 絵文字リアクション
-                html += '<h6 class="label_favorite">Reacted Users</h6>'
+                html += '<h6 class="reaction label_favorite">Reacted Users</h6>'
                 break
             case 'renote': // リノート
-                html += '<h6 class="label_reblog">Renoted Users</h6>'
+                html += '<h6 class="reblog label_reblog">Renoted Users</h6>'
                 break
             case 'follow': // フォロー通知
             case 'follow_request': // フォローリクエスト
@@ -405,6 +420,60 @@ class NotificationStatus extends Status {
 
         html += '</div>'
         return html
+    }
+
+    get followers_elm() {
+        let html /* name属性にURLを設定 */ = `
+            <li id="${this.status_key}" name="${this.uri}" class="normal_layout self_post followers">
+            <div class="label_head label_follow">
+                <span>New ${this.user_summary.length} Followers of @${this.from_account?.full_address}</span>
+            </div>
+        `
+        this.user_summary.forEach(u => { // フォローユーザー一覧表示
+            const target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : u.emojis
+            html += `
+                <div class="user prof_normal2">
+                    <img src="${u.avatar_url}" class="usericon __pop_userinfo" name="@${u.full_address}"/>
+                    <div class="name_info">
+            `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
+                case 'both_prename': // ユーザーネーム+ユーザーID
+                    html += `
+                        <h4 class="username">${target_emojis.replace(u.username)}</h4>
+                        <span class="userid">
+                            <a class="__lnk_userdetail" name="@${u.full_address}">@${u.id}</a>
+                        </span>
+                    `
+                    break
+                case 'both_preid': // ユーザーID+ユーザーネーム
+                    html += `
+                        <span class="userid">
+                            <a class="__lnk_userdetail" name="@${u.full_address}">@${u.id}</a>
+                        </span>
+                        <h4 class="username">${target_emojis.replace(u.username)}</h4>
+                    `
+                    break
+                case 'id': // ユーザーIDのみ
+                    html += `
+                        <span class="userid">
+                            <a class="__lnk_userdetail" name="@${u.full_address}">@${u.id}</a>
+                        </span>
+                    `
+                    break
+                case 'name': // ユーザーネームのみ
+                    html += `
+                        <h4 class="username">
+                            <a class="__lnk_userdetail" name="@${u.full_address}">${target_emojis.replace(u.username)}</a>
+                        </h4>`
+                    break
+                default:
+                    break
+            }
+            html += '</div></div>'
+        })
+        html += '</li>'
+        // 生成したHTMLをjQueryオブジェクトとして返却
+        const jqelm = $($.parseHTML(html))
+        return jqelm
     }
 
     // Getter: Electronの通知コンストラクタに送る通知文を生成して返却

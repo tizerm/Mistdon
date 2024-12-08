@@ -907,9 +907,7 @@
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         $("#pop_expand_post").hide() // 一旦閉じる
         const target_li = $(e.target).closest("li")
-        if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
-            User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
-        else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合

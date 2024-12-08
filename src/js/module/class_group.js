@@ -286,7 +286,10 @@ class Group {
                     arg.target_elm?.find(`li[id="${from.status_key}"]`).remove()
                     this.status_map.delete(from.status_key)
                     arg.callback(at, arg.target_elm)
-                }
+                } else arg.target_elm?.find(`li[id="${at.status_key}"]>.notification_summary`)
+                    // TODO: フォローのときの制御がうまくいってない
+                    // マージ先の通知が既存の通知より古い場合は既存の方を更新
+                    .replaceWith(at.summary_section)
                 return // マージ対象の場合は後続処理は無視
                 // マージできる通知が存在しない場合はマップにセットして後続処理へ
             } else this.notification_map.set(arg.post.notification_key, arg.post)
