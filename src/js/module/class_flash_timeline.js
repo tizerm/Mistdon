@@ -95,6 +95,7 @@ class FlashTimeline {
             post.detail_flg = false
             post.popout_flg = true
             $(`#${this.flash_key}`).html(post.element)
+            post.bindAdditionalInfoAsync($(`#${this.flash_key}`))
 
             // ページを計算してグラフ化
             const rate = floor(((this.index + 1) / this.key_list.length) * 100, 1)

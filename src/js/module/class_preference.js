@@ -34,7 +34,7 @@ class Preference {
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
-        this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
+        this.blur_suspend_user          = pref?.blur_suspend_user           ?? true,  // FF一覧の休止ユーザーの半透明化
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
         this.disable_disconnect_pop     = pref?.disable_disconnect_pop      ?? false, // 一時切断通知
@@ -84,6 +84,10 @@ class Preference {
             "default"                   : pref?.contents_limit?.default     ?? 250, // ノーマル
             "chat"                      : pref?.contents_limit?.chat        ?? 140  // チャット
         },
+        this.remote_fetch = {           // リモートの情報取得
+            "btrn_impression"           : pref?.remote_fetch?.btrn_impression   ?? true, // BTRNのリモートインプレッション
+            "profile_ff"                : pref?.remote_fetch?.profile_ff        ?? true  // プロフィールウィンドウのFF表示
+        },
         this.tl_impression = {          // タイムラインインプレッション表示
             "enabled"                   : pref?.tl_impression?.enabled      ?? false, // 有効/無効
             "span"                      : pref?.tl_impression?.span         ?? 3      // 更新間隔
@@ -113,6 +117,7 @@ class Preference {
 
         animation_map.set("TIMELINE_APPEND"  , ["drop" , { direction: "left"  }, 250])
         animation_map.set("TIMELINE_DELETE"  , ["fade"                         , 2500])
+        animation_map.set("TIMELINE_EDIT"    , ["fade"                         , 1500])
         animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
         animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
         animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
@@ -124,6 +129,8 @@ class Preference {
         animation_map.set("FADE_STD"         , ["fade"                         , 160])
         animation_map.set("POP_FOLD"         , ["fold" , { size : 32          }, 80])
         animation_map.set("WINDOW_FOLD"      , ["fold" , { size : 32          }, 160])
+        animation_map.set("REACTION_SHOW"    , ["slide", { direction: "up"    }, 750])
+        animation_map.set("REACTION_HIDE"    , ["fade"                         , 1500])
 
         Preference.ANIMATION_MAP = animation_map
 
@@ -289,7 +296,7 @@ class Preference {
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
-        $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
+        $("#__chk_gen_blur_suspend_user")               .prop("checked", Preference.GENERAL_PREFERENCE.blur_suspend_user)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_disable_disconnect_notification") .prop("checked", Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
@@ -342,6 +349,10 @@ class Preference {
         // コンテンツの文字数制限
         $("#__txt_gen_content_limit_default")   .val(Preference.GENERAL_PREFERENCE.contents_limit?.default)
         $("#__txt_gen_content_limit_chat")      .val(Preference.GENERAL_PREFERENCE.contents_limit?.chat)
+
+        // リモート情報取得設定
+        $("#__chk_gen_fetch_btrn_impression")  .prop("checked", Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression)
+        $("#__chk_gen_fetch_ff_profile")       .prop("checked", Preference.GENERAL_PREFERENCE.remote_fetch?.profile_ff)
 
         // タイムラインインプレッション表示
         $("#__chk_gen_show_tl_impression")  .prop("checked", Preference.GENERAL_PREFERENCE.tl_impression?.enabled)
@@ -396,7 +407,7 @@ class Preference {
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
-            "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
+            "blur_suspend_user"             : $("#__chk_gen_blur_suspend_user").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
@@ -445,6 +456,10 @@ class Preference {
             "contents_limit": {             // 文字数制限
                 "default"                   : $("#__txt_gen_content_limit_default").val(),
                 "chat"                      : $("#__txt_gen_content_limit_chat").val(),
+            },
+            "remote_fetch": {               // リモート情報取得設定
+                "btrn_impression"           : $("#__chk_gen_fetch_btrn_impression").prop("checked"),
+                "profile_ff"                : $("#__chk_gen_fetch_ff_profile").prop("checked")
             },
             "tl_impression": {              // タイムラインインプレッション表示
                 "enabled"                   : $("#__chk_gen_show_tl_impression").prop("checked"),
