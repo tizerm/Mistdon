@@ -273,7 +273,8 @@ class Group {
         // 重複している、もしくはミュート対象の場合はコールバック関数の実行を無視する
         if (this.status_map.has(arg.post.status_key) || arg.post.muted) return
 
-        if (arg.post.notification_key) { // 通知の場合
+        // 通知の場合(オプションで有効にしている場合のみマージ)
+        if (arg.post.notification_key && Preference.GENERAL_PREFERENCE.enable_merge_notification) {
             const merge_from = this.notification_map.get(arg.post.notification_key)
             if (merge_from) { // マージできる通知が存在する場合
                 const [at, from] = merge_from.merge(arg.post)

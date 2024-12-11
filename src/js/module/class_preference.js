@@ -33,6 +33,7 @@ class Preference {
         this.enable_list_action_palette = pref?.enable_list_action_palette  ?? false, // 簡易アクションパレット(リスト)
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
+        this.enable_merge_notification  = pref?.enable_merge_notification   ?? true,  // 通知まとめ
         this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
         this.blur_suspend_user          = pref?.blur_suspend_user           ?? true,  // FF一覧の休止ユーザーの半透明化
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
@@ -295,6 +296,7 @@ class Preference {
         $("#__chk_gen_use_list_action_palette")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_list_action_palette)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
+        $("#__chk_gen_use_summary_notification")        .prop("checked", Preference.GENERAL_PREFERENCE.enable_merge_notification)
         $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
         $("#__chk_gen_blur_suspend_user")               .prop("checked", Preference.GENERAL_PREFERENCE.blur_suspend_user)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
@@ -406,6 +408,7 @@ class Preference {
             "enable_list_action_palette"    : $("#__chk_gen_use_list_action_palette").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
+            "enable_merge_notification"     : $("#__chk_gen_use_summary_notification").prop("checked"),
             "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
             "blur_suspend_user"             : $("#__chk_gen_blur_suspend_user").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),

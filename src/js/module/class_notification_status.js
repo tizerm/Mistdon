@@ -125,6 +125,15 @@ class NotificationStatus extends Status {
         return [merge_at, merge_from]
     }
 
+    async bindAdditionalInfoAsync(tgul) {
+        //super.bindAdditionalInfoAsync(tgul)
+        // Misskeyのリアクションの場合は外部インスタンスのショートコードを取得
+        if (this.platform == 'Misskey' && this.notification_type == 'reaction') {
+            const target_li = tgul.find(`li[id="${this.status_key}"]`)
+            Emojis.replaceRemoteAsync(target_li.find(".notification_summary .reaction_head"))
+        }
+    }
+
     // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
         if (this.notification_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
