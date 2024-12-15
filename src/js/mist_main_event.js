@@ -1025,7 +1025,8 @@
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
                 $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
-                target_post.bindSentReactions() // 既についてるリアクションを表示
+                // 既についてるリアクションを表示(オプションが有効な場合)
+                if (Preference.GENERAL_PREFERENCE.enable_already_reaction) target_post.bindSentReactions()
                 $("#pop_expand_action .__short_quote").prop("disabled", !target_post.allow_reblog)
                 $("#pop_expand_action .__short_bookmark").hide()
                 $("#pop_expand_action .__short_quote").show()

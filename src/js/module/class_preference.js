@@ -31,6 +31,7 @@ class Preference {
         this.enable_emoji_suggester     = pref?.enable_emoji_suggester      ?? true,  // カスタム絵文字サジェスター
         this.enable_action_palette      = pref?.enable_action_palette       ?? true,  // 簡易アクションパレット
         this.enable_list_action_palette = pref?.enable_list_action_palette  ?? false, // 簡易アクションパレット(リスト)
+        this.enable_already_reaction    = pref?.enable_already_reaction     ?? true,  // 既に付いているリアクション表示
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_merge_notification  = pref?.enable_merge_notification   ?? true,  // 通知まとめ
@@ -294,6 +295,7 @@ class Preference {
         $("#__chk_gen_use_emoji_suggester")             .prop("checked", Preference.GENERAL_PREFERENCE.enable_emoji_suggester)
         $("#__chk_gen_use_action_palette")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_use_list_action_palette")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_list_action_palette)
+        $("#__chk_gen_use_already_reaction")            .prop("checked", Preference.GENERAL_PREFERENCE.enable_already_reaction)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_summary_notification")        .prop("checked", Preference.GENERAL_PREFERENCE.enable_merge_notification)
@@ -406,6 +408,7 @@ class Preference {
             "enable_emoji_suggester"        : $("#__chk_gen_use_emoji_suggester").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_list_action_palette"    : $("#__chk_gen_use_list_action_palette").prop("checked"),
+            "enable_already_reaction"       : $("#__chk_gen_use_already_reaction").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_merge_notification"     : $("#__chk_gen_use_summary_notification").prop("checked"),
