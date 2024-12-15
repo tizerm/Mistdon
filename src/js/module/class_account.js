@@ -20,6 +20,7 @@ class Account {
 
         this.emoji_history = []
         this.reaction_history = []
+        this.captured_notes = new Map()
     }
 
     // Getter: プラットフォーム
@@ -397,8 +398,7 @@ class Account {
         let target_post = null
         let notification = null
         const target_url = url ?? obj.uri
-        if (obj && obj.type != 'notification') {
-            // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用(通知は除外)
+        if (obj) { // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用
             if (!['__menu_reply', '__menu_quote', '__menu_reaction'].includes(mode))
                 notification = Notification.progress("実行中です...")
             target_post = obj
@@ -879,6 +879,16 @@ class Account {
         })
         // 受信処理を設定
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
+
+        // Misskeyの場合はCaptureをキャッチする受信イベントを定義
+        if (this.platform == 'Misskey') this.socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data)
+            if (data.type != 'noteUpdated') return
+
+            // アカウントのノートマップから対象のタイムラインを検索して
+            const tl_set = this.captured_notes.get(data.body.id)
+            tl_set.forEach(tl => tl.updateNote(data.body))
+        })
     }
 
     /**

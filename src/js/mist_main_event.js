@@ -701,8 +701,45 @@
      * ユーザーアドレス.
      * => リモートのユーザー情報を右ウィンドウに表示
      */
-    $(document).on("click", ".__lnk_userdetail, .usericon",
+    $(document).on("click", ".__lnk_userdetail, .__pop_userinfo",
         e => User.getByAddress($(e.currentTarget).attr("name")).then(user => user.createDetailWindow()))
+
+    delayHoverEvent({
+        selector: ".__pop_userinfo",
+        enterFunc: e => {
+            $("#pop_expand_user>ul").empty()
+
+            // ポップする座標を決定
+            const mouse_x = e.pageX
+            const mouse_y = e.pageY
+            let css = {}
+            if (window.innerHeight / 2 < mouse_y) { // ウィンドウの下の方にある場合は下から展開
+                css.top = 'auto'
+                css.bottom = Math.round(window.innerHeight - mouse_y - 32)
+            } else { // 通常は上から展開
+                css.top = mouse_y - 32
+                css.bottom = 'auto'
+            }
+            if (window.innerWidth / 2 < mouse_x) { // ウィンドウの右側にある場合は左に展開
+                css.left = 'auto'
+                css.right = Math.round(window.innerWidth - mouse_x + 24)
+            } else { // 通常は左から展開
+                css.left = mouse_x + 24
+                css.right = 'auto'
+            }
+
+            $("#pop_expand_user").css(css).show(...Preference.getAnimation("POP_FOLD")).prepend(`
+                <div class="col_loading">
+                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/>
+                </div>`)
+            User.getByAddress($(e.target).attr("name"), true).then(user => {
+                $("#pop_expand_user>.col_loading").remove()
+                $("#pop_expand_user>ul").html(user.short_elm)
+            })
+        },
+        leaveFunc: e => $("#pop_expand_user").hide(...Preference.getAnimation("POP_FOLD")),
+        delay: 750
+    })
 
     /**
      * #Event
@@ -870,9 +907,7 @@
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         $("#pop_expand_post").hide() // 一旦閉じる
         const target_li = $(e.target).closest("li")
-        if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
-            User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
-        else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
@@ -990,6 +1025,8 @@
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
                 $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+                // 既についてるリアクションを表示(オプションが有効な場合)
+                if (Preference.GENERAL_PREFERENCE.enable_already_reaction) target_post.bindSentReactions()
                 $("#pop_expand_action .__short_quote").prop("disabled", !target_post.allow_reblog)
                 $("#pop_expand_action .__short_bookmark").hide()
                 $("#pop_expand_action .__short_quote").show()
@@ -998,6 +1035,7 @@
                 $("#pop_expand_action .__short_bookmark").show()
                 $("#pop_expand_action .__short_quote").hide()
                 $("#pop_expand_action .__short_open_reaction").hide()
+                $("#pop_expand_action>.sent_reactions").hide()
             }
             $("#pop_expand_action .__short_reblog").prop("disabled", !target_post.allow_reblog)
             $("#pop_expand_action>.reactions").hide()
@@ -1097,7 +1135,7 @@
      */
     $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
         e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
-            id: Status.TEMPORARY_ACTION_STATUS.notif_id ?? Status.TEMPORARY_ACTION_STATUS.id,
+            id: Status.TEMPORARY_ACTION_STATUS.id,
             shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
             success: () => $("#pop_expand_action").hide()
         }))
@@ -1285,19 +1323,6 @@
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
         $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
-    })
-
-    /**
-     * #Event #Delayhover
-     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー.
-     * => 上部に簡易プロフィールを表示
-     */
-    delayHoverEvent({
-        selector: ".account_timeline .ff_nametags>li",
-        enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
-            .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
-        leaveFunc: e => {},
-        delay: 700
     })
 
     /**
@@ -1575,6 +1600,13 @@
      */
     $(document).on("click", ".__on_flash_prev",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
+
+    window.addEventListener("wheel", e => {
+        if ($(e.target).closest(".flash_tl").length == 0) return
+        // 下スクロールで過去へ、上スクロールで現在へ
+        if (e.deltaY > 0) FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind()
+        else FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind()
+    })
 
     /**
      * #Event

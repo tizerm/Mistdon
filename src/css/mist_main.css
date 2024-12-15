@@ -685,6 +685,35 @@
             > .user>*:not(.usericon) { display: none; }
         }
     }
+    > #pop_expand_user {
+        display: none;
+        z-index: 65;
+        position: absolute;
+        width: min(400px,calc(100vw - 64px));
+
+        & ul {
+            background-color: transparent;
+            height: auto;
+            > li, > li:hover {
+                border: solid 2px var(--core-color-border);
+                border-radius: 12px;
+                background-color: var(--tl-color-popbg);
+                > .label_head {
+                    border-radius: 12px;
+                    height: 24px;
+                }
+                .main_content { font-size: var(--font-size-chat); }
+            }
+        }
+        > .col_loading {
+            border: solid 2px var(--core-color-border);
+            border-radius: 12px;
+            > img {
+                height: 64px;
+                width: auto;
+            }
+        }
+    }
 
     /*=== Post Default Action Pop Layout =========================================================*/
     > #pop_expand_action {

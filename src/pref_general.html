@@ -154,6 +154,12 @@
                             <img src="resources/ic_help.png" class="tooltip_help"
                             title="オンにするとリストレイアウトの投稿に対してもアクションパレットが表示されるようになります。他のUIと干渉する場合があるので煩わしい場合はオフにしてください。"/>
                         </li>
+                        <li>
+                            <input type="checkbox" id="__chk_gen_use_already_reaction"/>
+                            <label for="__chk_gen_use_already_reaction">既に付いているリアクションの送信ボタンを表示する(Misskey)</label>
+                            <img src="resources/ic_help.png" class="tooltip_help"
+                            title="オンにするとMisskeyのノートに対して既に付いているリアクションがアクションパレットに表示されてワンタッチでリアクション送信が可能になります。"/>
+                        </li>
                     </ul>
                     <li>
                         <input type="checkbox" id="__chk_gen_use_prev_relpy"/>
@@ -168,16 +174,22 @@
                         title="オンにするとリストレイアウトのタイムラインで、マウスをホバーするだけでロードレスで詳細ポップアップを表示するようになります。検索カラムでは使えません。"/>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_use_summary_notification"/>
+                        <label for="__chk_gen_use_summary_notification">通知のまとめ表示を有効にする</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにすると同一の投稿に対して複数のユーザーから反応があった場合、まとめて表示されます。"/>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_use_remote_label"/>
                         <label for="__chk_gen_use_remote_label">リモートインスタンスの投稿にラベルを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="オンにするとタイムライン上の投稿に対して、そのタイムラインのインスタンス外の投稿に対してインスタンスドメインのラベルが表示されるようになります。"/>
                     </li>
                     <li>
-                        <input type="checkbox" id="__chk_gen_use_notified_impression"/>
-                        <label for="__chk_gen_use_notified_impression">通知タイムラインで累計反応数を表示する</label>
+                        <input type="checkbox" id="__chk_gen_blur_suspend_user"/>
+                        <label for="__chk_gen_blur_suspend_user">1桁投稿ユーザーを半透明表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
-                        title="オンにすると通知タイムラインのブースト/リノート/お気に入り/リアクション通知に対して累計のインプレッション数が表示されるようになります。ただし、リアルタイム更新で新たに通知が来た場合、同じ投稿の既にある通知の数は変わりません。"/>
+                        title="オンにするとフォロー/フォロワー一覧表示で総投稿数1桁のユーザーを半透明表示します。休止ユーザーがわかりやすくなるかもしれません。リモート先のユーザーには適用されません。"/>
                     </li>
                     <li>
                         <input type="checkbox" id="__chk_gen_use_shift_confirm"/>
@@ -489,6 +501,26 @@
                         <td><input type="text" id="__txt_gen_content_limit_chat" size="6" maxlength="4"/>文字</td>
                     </tr>
                 </tbody></table>
+            </dd>
+            <dt>リモート情報取得設定
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="タイムライン上などの複数のデータをまとめて取得するところでリモートの情報を非同期で取得するかどうかの設定をします。都度連合先との通信が発生しますが正確な情報を表示できます(Mastodon/Misskey以外の連合先には効果がないのでご注意ください)。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="checkbox" id="__chk_gen_fetch_btrn_impression"/>
+                        <label for="__chk_gen_fetch_btrn_impression">リモートのブースト/リノートのインプレッションを取得する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとタイムライン上でブースト/リノートされた投稿がリモートのものだった場合、リモート先の正確なインプレッションを表示します。リモート先がMisskeyの場合、受信側がMastodonであってもリアクションが表示されます。"/>
+                    </li>
+                    <li>
+                        <input type="checkbox" id="__chk_gen_fetch_ff_profile"/>
+                        <label for="__chk_gen_fetch_ff_profile">フォロー/フォロワー一覧のリモートユーザーの情報を取得する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとユーザープロフィールウィンドウからフォロー/フォロワー一覧を表示した時に、ユーザーのサーバーから見てリモートにあたるユーザーの情報を正確に表示します。"/>
+                    </li>
+                </ul>
             </dd>
             <dt>タイムラインインプレッション表示
                 <img src="resources/ic_help.png" class="tooltip_help"
