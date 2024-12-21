@@ -93,6 +93,9 @@ class NotificationStatus extends Status {
                 break
         }
     }
+
+    // Getter: フォロー通知判定
+    get is_follow() { return ['follow', 'follow_request'].includes(this.notification_type) }
     // Getter: リアクション判定
     get is_reaction() { return this.notification_type == 'reaction' }
 
@@ -130,7 +133,20 @@ class NotificationStatus extends Status {
         // Misskeyのリアクションの場合は外部インスタンスのショートコードを取得
         if (this.platform == 'Misskey' && this.notification_type == 'reaction') {
             const target_li = tgul.find(`li[id="${this.status_key}"]`)
-            Emojis.replaceRemoteAsync(target_li.find(".notification_summary .reaction_head"))
+            // Intersection Observerを生成(表示されたときだけ取得)
+            const observer = new IntersectionObserver((entries, obs) => (async () => {
+                const e = entries[0]
+                if (!e.isIntersecting) return // 見えていないときは実行しない
+                console.log('Async Reaction: ' + this.id)
+                obs.disconnect()
+
+                Emojis.replaceRemoteAsync(target_li.find(".notification_summary .reaction_head"))
+            })(), {
+                root: tgul.get(0),
+                rootMargin: "0px",
+                threshold: 0.25,
+            })
+            observer.observe(target_li.get(0))
         }
     }
 
@@ -138,7 +154,7 @@ class NotificationStatus extends Status {
     get element() {
         if (this.notification_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
         // フォロー通知の場合は専用レイアウトを使用
-        if (['follow', 'follow_request'].includes(this.notification_type)) return this.followers_elm
+        if (this.is_follow) return this.followers_elm
 
         // ベースレイアウトHTMLを生成
         const jqelm = $($.parseHTML(super.getHtmlNormal(true)))
@@ -172,6 +188,10 @@ class NotificationStatus extends Status {
             case 'renote': // リノート
                 jqelm.closest('li').addClass('rebloged_post')
                 break
+            case 'follow': // フォロー通知
+            case 'follow_request': // フォローリクエスト
+                jqelm.closest('li').addClass('followed_info')
+                break
             default:
                 break
         }
@@ -203,6 +223,23 @@ class NotificationStatus extends Status {
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
 
+        switch (this.notification_type) {
+            case 'favourite': // お気に入り
+            case 'reaction': // 絵文字リアクション
+                jqelm.closest('li').addClass('favorited_post')
+                break
+            case 'reblog': // ブースト
+            case 'renote': // リノート
+                jqelm.closest('li').addClass('rebloged_post')
+                break
+            case 'follow': // フォロー通知
+            case 'follow_request': // フォローリクエスト
+                jqelm.closest('li').addClass('followed_info')
+                break
+            default:
+                break
+        }
+
         return jqelm
     }
 
@@ -220,7 +257,7 @@ class NotificationStatus extends Status {
         target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
         if (this.cw_text) html /* CW時はCWのみ */ += `
                     <span class="main_content label_cw">${target_emojis.replace(this.cw_text)}</span>
-        `; else if (['follow', 'follow_request'].includes(this.notification_type)) { // フォローの場合
+        `; else if (this.is_follow) { // フォローの場合
             if (this.user_summary.length > 1) html /* 人数が複数の場合は人数を表示 */ += `
                     <span class="main_content">New ${this.user_summary.length} Followers</span>
             `; else html /* 人数が1人の場合はユーザーアドレス */ += `
@@ -279,7 +316,7 @@ class NotificationStatus extends Status {
                 break
             case 'follow':
             case 'follow_request': // フォロー通知
-                jqelm.closest('li').addClass('self_post')
+                jqelm.closest('li').addClass('followed_info')
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
                 jqelm.find('.usericon').attr('src', this.from_account?.pref.avatar_url)
                 break
@@ -363,9 +400,9 @@ class NotificationStatus extends Status {
 
     get followers_elm() {
         let html /* name属性にURLを設定 */ = `
-            <li id="${this.status_key}" name="${this.uri}" class="normal_layout self_post followers">
+            <li id="${this.status_key}" name="${this.uri}" class="normal_layout followed_info followers">
             <div class="label_head label_follow">
-                <span>New ${this.user_summary.length} Followers of @${this.from_account?.full_address}</span>
+                <span>New ${this.user_summary.length} Followers of ${this.from_account?.full_address}</span>
             </div>
         `
         this.user_summary.forEach(u => { // フォローユーザー一覧表示

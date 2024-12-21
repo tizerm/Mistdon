@@ -114,8 +114,9 @@
     --tl-color-bg:                 #383838af;
     --tl-color-hoverbg:            #4c4c4cea;
     --tl-color-self-bg:            #3e4452af;
-    --tl-color-reblog-bg:          #3e4c42af;
-    --tl-color-favorite-bg:        #4c4c3eaf;
+    --tl-color-reblog-bg:          #3b4c28ea;
+    --tl-color-favorite-bg:        #5a4226ea;
+    --tl-color-follow-bg:          #224b68ea;
     --tl-color-userlink-text:      #b5a5ab;
     --tl-color-userlink-hovertext: #dddddd;
     --tl-color-quote-bg:           #4c4c4caf;

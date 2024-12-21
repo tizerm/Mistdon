@@ -171,7 +171,8 @@ class TemporaryTimeline extends Timeline {
      * @param window_key 表示する対象のウィンドウキー
      */
     loadTemporaryTimeline(window_key) {
-        this.group.status_map = new Map()
+        this.group.status_map.clear()
+        this.group.notification_map.clear()
         this.status_key_map = new Map()
         super.getTimeline().then(body => createScrollLoader({ // 下方向のローダーを生成
             data: body,

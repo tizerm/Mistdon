@@ -826,7 +826,10 @@
         > li.chat_timeline.self_post>.content { background-color: var(--tl-color-self-bg); }
         > li.rebloged_post,
         > li.chat_timeline.rebloged_post>.content { background-color: var(--tl-color-reblog-bg); }
-        > li.favorited_post { background-color: var(--tl-color-favorite-bg); }
+        > li.favorited_post,
+        > li.chat_timeline.favorited_post>.content { background-color: var(--tl-color-favorite-bg); }
+        > li.followed_info,
+        > li.chat_timeline.followed_info>.content { background-color: var(--tl-color-follow-bg); }
 
         /*=== Short User Infomation Style ========================================================*/
         > li.short_userinfo {

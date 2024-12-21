@@ -199,7 +199,7 @@ function createScrollLoader(arg) {
     const observer = new IntersectionObserver((entries, obs) => (async () => {
         const e = entries[0]
         if (!e.isIntersecting) return // 見えていないときは実行しない
-        console.log('ローダー表示: ' + max_id)
+        console.log('Bottom Loader: ' + max_id)
         // Loaderを一旦解除してロード画面に変更
         obs.disconnect()
         $(e.target).css('background-image', 'url("resources/illust/ani_wait.png")')
@@ -231,7 +231,7 @@ function createTopLoader(arg) {
     // Loader Elementを生成してクリックイベントを生成(一回だけ実行)
     arg.target.prepend(`<li id="${since_id}" class="__on_top_loader">続きをロード</li>`)
     arg.target.find(".__on_top_loader").get(0).addEventListener('click', e => (async () => {
-        console.log('トップリロード: ' + since_id)
+        console.log('Top Loader: ' + since_id)
         // ボタンをロード画面に変更
         $(e.target).empty().addClass('loader_loading')
 

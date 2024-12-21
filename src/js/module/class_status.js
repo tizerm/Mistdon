@@ -389,10 +389,23 @@ class Status extends StatusLayout {
 
         // 外部インスタンスの投稿はカスタム絵文字を現地から非同期取得
         if (this.from_timeline?.pref.external && this.platform == 'Misskey') {
-            Emojis.replaceDomAsync(target_li.find(".username"), this.host) // ユーザー名
-            Emojis.replaceDomAsync(target_li.find(".label_cw"), this.host) // CWテキスト
-            Emojis.replaceDomAsync(target_li.find(".main_content"), this.host) // 本文
-            Emojis.replaceDomAsync(target_li.find(".reaction_section"), this.host) // リアクション
+            // Intersection Observerを生成(表示されたときだけ取得)
+            const observer = new IntersectionObserver((entries, obs) => (async () => {
+                const e = entries[0]
+                if (!e.isIntersecting) return // 見えていないときは実行しない
+                console.log('Async Bind: ' + this.uri)
+                obs.disconnect()
+
+                Emojis.replaceDomAsync(target_li.find(".username"), this.host) // ユーザー名
+                Emojis.replaceDomAsync(target_li.find(".label_cw"), this.host) // CWテキスト
+                Emojis.replaceDomAsync(target_li.find(".main_content"), this.host) // 本文
+                Emojis.replaceDomAsync(target_li.find(".reaction_section"), this.host) // リアクション
+            })(), {
+                root: tgul.get(0),
+                rootMargin: "0px",
+                threshold: 0.25,
+            })
+            observer.observe(target_li.get(0))
         }
     }
 

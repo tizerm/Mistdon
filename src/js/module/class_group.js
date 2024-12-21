@@ -287,10 +287,12 @@ class Group {
                     arg.target_elm?.find(`li[id="${from.status_key}"]`).remove()
                     this.status_map.delete(from.status_key)
                     arg.callback(at, arg.target_elm)
-                } else arg.target_elm?.find(`li[id="${at.status_key}"]>.notification_summary`)
-                    // TODO: フォローのときの制御がうまくいってない
-                    // マージ先の通知が既存の通知より古い場合は既存の方を更新
-                    .replaceWith(at.summary_section)
+                } else { // マージ先の通知が既存の通知より古い場合は既存の方を更新
+                    if (at.is_follow) // フォローの場合は要素全体丸ごと書き換える
+                        arg.target_elm?.find(`li[id="${at.status_key}"]`).replaceWith(at.timeline_element)
+                    else arg.target_elm?.find(`li[id="${at.status_key}"]>.notification_summary`)
+                        .replaceWith(at.summary_section)
+                }
                 return // マージ対象の場合は後続処理は無視
                 // マージできる通知が存在しない場合はマップにセットして後続処理へ
             } else this.notification_map.set(arg.post.notification_key, arg.post)
@@ -441,7 +443,8 @@ class Group {
         `)
 
         const rest_promises = []
-        this.status_map = new Map()
+        this.status_map.clear()
+        this.notification_map.clear()
         // カラムのタイムラインを走査して配列のAPI呼び出しパラメータを使ってタイムラインを生成
         this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
         // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
