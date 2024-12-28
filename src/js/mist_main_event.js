@@ -1666,34 +1666,28 @@
     })
 
     /**
+     * #Event
+     * ブックマーク/お気に入り: OKボタン.
+     * => ブックマークを展開
+     */
+    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
+        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
+            type: $("input.__opt_ex_bookmark_type:checked").val(),
+            layout: $("#__cmb_ex_bookmark_layout").val(),
+            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
+            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
+        }))
+        // ミニウィンドウを閉じる
+        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
+
+    /**
      * #Event #Change
      * 一時タイムライン: アカウント変更時.
-     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御(mist_ui.js)
      */
-    $(document).on("change", "#pop_temporary_option .__cmb_tl_account", e => {
-        const target_li = $("#pop_temporary_option")
-        const account = Account.get($(e.target).val())
-        if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
-            target_li.find(".lbl_external_instance").hide()
-            target_li.find('.__cmb_tl_type>option').prop("disabled", false)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-        } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
-            target_li.find(".lbl_external_instance").show()
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
-        }
-        // リスト/チャンネルは一律非表示
-        target_li.find(".lbl_list").hide()
-        target_li.find(".lbl_channel").hide()
-        target_li.find(".lbl_antenna").hide()
-    })
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_account",
+        e => changeColAccountEvent($("#pop_temporary_option"), Account.get($(e.target).val())))
 
     /**
      * #Event #Change
@@ -1711,92 +1705,9 @@
     /**
      * #Event #Change
      * 一時タイムライン: タイムラインの種類変更時.
-     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御(mist_ui.js)
      */
-    $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => {
-        const li_dom = $("#pop_temporary_option")
-        let notification = null
-        switch ($(e.target).val()) {
-            case 'list': // リスト
-                notification = Notification.progress("対象アカウントのリストを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
-                    const list_id = li_dom.find(".__cmb_tl_list").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    lists.forEach(l => options += `
-                        <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
-                    li_dom.find(".lbl_list").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // リストを持っていない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                        notification.error("このアカウントにはリストがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("リストの取得で問題が発生しました.")
-                })
-                break
-            case 'channel': // チャンネル
-                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
-                    const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    channels.forEach(c => options += `
-                        <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
-                    li_dom.find(".lbl_channel").show()
-                    li_dom.find(".lbl_list").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // お気に入りのチャンネルがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("チャンネルの取得で問題が発生しました.")
-                })
-                break
-            case 'antenna': // アンテナ
-                notification = Notification.progress("対象アカウントの登録アンテナを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
-                    const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    antennas.forEach(a => options += `
-                        <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
-                    li_dom.find(".lbl_antenna").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_list").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // 作成済みのアンテナがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-                        notification.error("このアカウントにはアンテナがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("アンテナの取得で問題が発生しました.")
-                })
-                break
-            default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
-                li_dom.find(".lbl_list").hide()
-                li_dom.find(".lbl_channel").hide()
-                li_dom.find(".lbl_antenna").hide()
-                break
-        }
-    })
-
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => changeColTypeEvent($("#pop_temporary_option"), $(e.target).val()))
 
     /**
      * #Event #Change
@@ -1826,22 +1737,6 @@
      */
     $(document).on("click", "#pop_temporary_option>.temp_favorite>.temptl_list>.delele_tempfav_button",
         e => TemporaryTimeline.get($(e.target).closest(".temptl_list").attr("name")).delete())
-
-    /**
-     * #Event
-     * ブックマーク/お気に入り: OKボタン.
-     * => ブックマークを展開
-     */
-    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
-        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
-            type: $("input.__opt_ex_bookmark_type:checked").val(),
-            layout: $("#__cmb_ex_bookmark_layout").val(),
-            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
-            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
-        }))
-        // ミニウィンドウを閉じる
-        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
-    })
 
     /**
      * #Event

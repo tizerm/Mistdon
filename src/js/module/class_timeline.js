@@ -277,7 +277,10 @@ class Timeline {
     }
 
     captureNote(post) {
-        if (this.platform != 'Misskey' || this.pref.external || this.is_notification) return
+        if (this.platform != 'Misskey' // Misskeyではない場合
+            || this.temptl_pref // 一時タイムラインの場合
+            || this.pref.external // 外部インスタンスの場合
+            || this.is_notification) return // そして通知の場合はキャプチャしない
 
         const socket = this.target_account.socket
         const captured_notes = this.target_account.captured_notes

@@ -243,3 +243,130 @@ function createTopLoader(arg) {
     })(), { once: true })
 }
 
+function changeColAccountEvent(target, account) {
+    if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
+        target.find("h4").css("background-color", account.pref.acc_color)
+        target.find(".lbl_external_instance").hide()
+        target.find('.__cmb_tl_type>option').prop("disabled", false)
+        target.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
+        target.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
+        target.find('.__cmb_tl_type>option[value="clip"]').prop("disabled", account?.pref.platform != 'Misskey')
+        target.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+    } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
+        target.find("h4").css("background-color", `#999999`)
+        target.find(".lbl_external_instance").show()
+        target.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="clip"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
+        target.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
+    }
+    // リスト/チャンネルは一律非表示
+    target.find(".lbl_list").hide()
+    target.find(".lbl_channel").hide()
+    target.find(".lbl_antenna").hide()
+    target.find(".lbl_clip").hide()
+}
+
+function changeColTypeEvent(li_dom, type) {
+    switch (type) {
+        case 'list': // リスト
+            li_dom.find(".lbl_load_progress").show()
+            Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
+                const list_id = li_dom.find(".__cmb_tl_list").attr("value")
+                // リストのコンボ値のDOMを生成
+                let options = ''
+                lists.forEach(l => options += `
+                    <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
+                `)
+                li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
+                li_dom.find(".lbl_list").show()
+                li_dom.find(".lbl_channel").hide()
+                li_dom.find(".lbl_antenna").hide()
+                li_dom.find(".lbl_clip").hide()
+            }).catch(error => {
+                if (error == 'empty') { // リストを持っていない
+                    li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                    li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
+                    Notification.error("このアカウントにはリストがありません.")
+                } else // それ以外は単にリストの取得エラー
+                    Notification.error("リストの取得で問題が発生しました.")
+            }).finally(() => li_dom.find(".lbl_load_progress").hide())
+            break
+        case 'channel': // チャンネル
+            li_dom.find(".lbl_load_progress").show()
+            Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
+                const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
+                // リストのコンボ値のDOMを生成
+                let options = ''
+                channels.forEach(c => options += `
+                    <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
+                `)
+                li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
+                li_dom.find(".lbl_channel").show()
+                li_dom.find(".lbl_list").hide()
+                li_dom.find(".lbl_antenna").hide()
+                li_dom.find(".lbl_clip").hide()
+            }).catch(error => {
+                if (error == 'empty') { // お気に入りのチャンネルがない
+                    li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                    li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
+                    Notification.error("このアカウントがお気に入りしているチャンネルがありません.")
+                } else // それ以外は単にリストの取得エラー
+                    Notification.error("チャンネルの取得で問題が発生しました.")
+            }).finally(() => li_dom.find(".lbl_load_progress").hide())
+            break
+        case 'antenna': // アンテナ
+            li_dom.find(".lbl_load_progress").show()
+            Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
+                const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
+                // リストのコンボ値のDOMを生成
+                let options = ''
+                antennas.forEach(a => options += `
+                    <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
+                `)
+                li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
+                li_dom.find(".lbl_antenna").show()
+                li_dom.find(".lbl_channel").hide()
+                li_dom.find(".lbl_list").hide()
+                li_dom.find(".lbl_clip").hide()
+            }).catch(error => {
+                if (error == 'empty') { // 作成済みのアンテナがない
+                    li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                    li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
+                    Notification.error("このアカウントにはアンテナがありません.")
+                } else // それ以外は単にリストの取得エラー
+                    Notification.error("アンテナの取得で問題が発生しました.")
+            }).finally(() => li_dom.find(".lbl_load_progress").hide())
+            break
+        case 'clip': // クリップ
+            li_dom.find(".lbl_load_progress").show()
+            Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getClips().then(clips => {
+                // リストのコンボ値のDOMを生成
+                let options = ''
+                clips.forEach(c => options += `<option value="${c.id}">${c.name}</option>`)
+                li_dom.find('.__cmb_tl_clip').removeAttr("value").html(options)
+                li_dom.find(".lbl_clip").show()
+                li_dom.find(".lbl_antenna").hide()
+                li_dom.find(".lbl_channel").hide()
+                li_dom.find(".lbl_list").hide()
+            }).catch(error => {
+                if (error == 'empty') { // 作成済みのクリップがない
+                    li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
+                    li_dom.find('.__cmb_tl_type>option[value="clip"]').prop("disabled", true)
+                    Notification.error("このアカウントにはクリップがありません.")
+                } else // それ以外は単にリストの取得エラー
+                    Notification.error("クリップの取得で問題が発生しました.")
+            }).finally(() => li_dom.find(".lbl_load_progress").hide())//*/
+            break
+        default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
+            li_dom.find(".lbl_list").hide()
+            li_dom.find(".lbl_channel").hide()
+            li_dom.find(".lbl_antenna").hide()
+            li_dom.find(".lbl_clip").hide()
+            break
+    }
+}

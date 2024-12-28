@@ -1415,6 +1415,18 @@
                 &.notification { background-color: var(--label-color-favorite-bg); }
             }
         }
+        .lbl_load_progress {
+            background-color: var(--tl-color-quote-bg);
+            background-image: url("../resources/illust/ani_wait.png");
+            background-size: auto 64px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            border-radius: 18px;
+            margin: 6px 0px;
+            padding: 8px;
+            text-align: center;
+            display: none;
+        }
         & button.__open_multi_tl_layout {
             vertical-align: text-bottom;
             > img {
@@ -1422,7 +1434,7 @@
                 height: 24px;
             }
         }
-        .lbl_external_instance, .lbl_list, .lbl_channel, .lbl_antenna { display: none; }
+        .lbl_external_instance, .lbl_list, .lbl_channel, .lbl_antenna, .lbl_clip { display: none; }
     }
 
     /*=== Lastest Release Notification Layout ====================================================*/

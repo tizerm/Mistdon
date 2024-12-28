@@ -552,6 +552,7 @@ class Preference {
 
         options += `<option value="__external">その他のインスタンス</option>`
         $("#pop_temporary_option .__cmb_tl_account").html(options)
+        changeColAccountEvent($("#pop_temporary_option"), Account.get($("#pop_temporary_option .__cmb_tl_account").val()))
     }
 
     /**

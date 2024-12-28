@@ -303,6 +303,18 @@
                                     text-align: right;
                                 }
                             }
+                            .lbl_load_progress {
+                                background-color: var(--tl-color-quote-bg);
+                                background-image: url("../resources/illust/ani_wait.png");
+                                background-size: auto 64px;
+                                background-position: center center;
+                                background-repeat: no-repeat;
+                                border-radius: 18px;
+                                margin: 6px 0px;
+                                padding: 8px;
+                                text-align: center;
+                                display: none;
+                            }
                             .__pull_color_palette { width: calc(100% - 36px); }
                         }
                     }

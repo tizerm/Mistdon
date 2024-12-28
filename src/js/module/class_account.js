@@ -1180,7 +1180,6 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントが作成したクリップ一覧を取得する(Misskey専用)
      */
-    /*
     async getClips() {
         try {
             const response = await $.ajax({
@@ -1190,15 +1189,19 @@ class Account {
                 headers: { "Content-Type": "application/json" },
                 data: JSON.stringify({ "i": this.pref.access_token })
             })
-            // チャンネルをお気に入りしていない場合はreject
+            // クリップを作っていない場合はreject
+            if (response.length == 0) return Promise.reject('empty')
             const clips = []
-            response.forEach(c => clips.push(new Clip(c, this)))
+            response.forEach(c => clips.push({
+                "name": c.name,
+                "id": c.id
+            }))
             return clips
         } catch (err) {
             console.log(err)
             return Promise.reject(err)
         }
-    }//*/
+    }
 
     /**
      * #Method #Ajax
