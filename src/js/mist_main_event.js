@@ -549,15 +549,15 @@
      * 添付メディア-ドライブウィンドウ: フォルダ一覧項目.
      * => 対象のフォルダを開く
      */
-    $(document).on("click", "#pop_dirve_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
-        $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target).attr("name")))
+    $(document).on("click", ".drive_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
+        $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target)))
 
     /**
      * #Event
      * 添付メディア-ドライブウィンドウ: OKボタン.
      * => 選択したメディアを添付メディアに追加する
      */
-    $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
+    $(document).on("click", ".__on_drive_media_confirm", e => Media.attachDriveMedia($(e.target).closest(".drive_window")))
 
     /**
      * #Event #Dragenter
@@ -1756,7 +1756,7 @@
      */
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
-    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
+    $(document).on("click", ".__on_drive_media_cancel", e => $(e.target).closest(".drive_window").find(".window_close_button").click())
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_ex_temporary_cancel", e => $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",

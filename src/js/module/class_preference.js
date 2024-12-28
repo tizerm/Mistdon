@@ -599,14 +599,22 @@ class Preference {
                 &.fixed_col { max-width: ${col.pref.col_width}px; }
             }`)
 
-        // ギャラリーレイアウトのコンテナクエリを定義
+        // 画像サムネイル一覧のコンテナクエリを定義
         const width_limit = Number(Preference.GENERAL_PREFERENCE.gallery_width_limit)
-        let containers = ''
-        for (let i = 1; i <= 16; i++) containers += `
-            @container gallery (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
-                > li.gallery_timeline { width: calc(${100 / (i + 1)}% - 6px); }
-            }
-        `
+        let gallary_containers = ''
+        let drive_containers = ''
+        for (let i = 1; i <= 16; i++) {
+            gallary_containers /* ギャラリーレイアウトのコンテナクエリ定義 */ += `
+                @container gallery (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
+                    > li.gallery_timeline { width: calc(${100 / (i + 1)}% - 6px); }
+                }
+            `
+            drive_containers /* ドライブウィンドウのコンテナクエリ定義 */ += `
+                @container driveMedia (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
+                    > li { width: calc(${100 / (i + 1)}% - 2px); }
+                }
+            `
+        }
         // CSSをバインド
         $('style').html(`
             :root {
@@ -628,9 +636,18 @@ class Preference {
                 @container gallery (width <= ${width_limit}px) {
                     > li.gallery_timeline { width: calc(100% - 2px); }
                 }
-                ${containers}
+                ${gallary_containers}
                 @container gallery (width > ${width_limit * 17}px) {
                     > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
+                }
+            }
+            #pop_multi_window>.drive_window.ex_window>ul.drive_media_list {
+                @container driveMedia (width <= ${width_limit}px) {
+                    > li { width: calc(100% - 2px); }
+                }
+                ${drive_containers}
+                @container driveMedia (width > ${width_limit * 17}px) {
+                    > li { width: calc(${100 / 18}% - 2px); }
                 }
             }
         `)

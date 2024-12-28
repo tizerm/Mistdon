@@ -788,125 +788,6 @@
         }
     }
 
-    /*=== Drive Window Layout ====================================================================*/
-    > #pop_dirve_window {
-        display: none;
-        background-color: var(--core-color-dialog-bg);
-        padding: 4px;
-        border-radius: 12px;
-        width: min(800px,90vw);
-        height: calc(100vh - 380px);
-        position: absolute;
-        top: 320px;
-        left: 50vw;
-        transform: translate(-50%, 0%);
-        z-index: 71;
-        > ul.drive_folder_list {
-            height: 48px;
-            white-space: nowrap;
-            overflow-x: auto;
-            margin: 0px;
-            padding: 0px;
-            &::-webkit-scrollbar { height: 8px; }
-            > li {
-                display: inline-block;
-                margin: 0px;
-                padding: 12px;
-                border-radius: 12px;
-                background-color: var(--head-color-drive-folder-bg);
-                background-image: url("../resources/ic_folder.png");
-                background-position: center left 8px;
-                background-repeat: no-repeat;
-                background-size: 32px 32px;
-                padding-left: 48px;
-                width: 160px;
-                height: calc(100% - 32px);
-                font-size: 16px;
-                font-family: Arial, "メイリオ", sans-selif;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                &[name="__root"] { background-image: url("../resources/ic_top.png"); }
-                &:hover {
-                    filter: brightness(var(--core-brightness-hover));
-                    cursor: pointer;
-                }
-            }
-        }
-        > ul.drive_media_list {
-            height: calc(100% - 108px);
-            overflow-y: auto;
-            margin: 0px;
-            padding: 0px;
-            &::-webkit-scrollbar { width: 8px; }
-            > li {
-                display: inline-block;
-                list-style-type: none;
-                width: 25%;
-                > label {
-                    display: inline-block;
-                    width: 100%;
-                    padding: 0px;
-                    position: relative;
-                    overflow: hidden;
-                    margin: 0px;
-                    &::before {
-                        content: "";
-                        padding-top: 100%;
-                        display: block;
-                    }
-                    > img {
-                        border-radius: 8px;
-                        width: 100%;
-                        height: 100%;
-                        position: absolute;
-                        top: 0px;
-                        left: 0px;
-                        object-fit: cover;
-                        vertical-align: text-bottom;
-                    }
-                    &.label_video::after {
-                        content: "";
-                        background-image: url("../resources/ic_video.png");
-                        background-repeat: no-repeat;
-                        background-size: 32px 32px;
-                        z-index: 1;
-                        position: absolute;
-                        top: 2px;
-                        right: 2px;
-                        width: 32px;
-                        height: 32px;
-                    }
-                    &.warn_sensitive::after {
-                        content: "";
-                        z-index: 1;
-                        position: absolute;
-                        top: 0px;
-                        right: 0px;
-                        background-color: var(--core-color-warn-bg);
-                        background-image: url("../resources/ic_warn.png");
-                        background-repeat: no-repeat;
-                        background-size: 32px 32px;
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 16px;
-                    }
-                }
-                &.__scroll_loader {
-                    display: block;
-                    background-color: var(--tl-color-loader-bg);
-                    margin: 6px;
-                    padding: 8px 12px;
-                }
-            }
-        }
-        > .footer>button {
-            display: inline-block;
-            width: calc(50% - 4px);
-            height: 48px;
-        }
-    }
-
     /*=== Extra Timeline Window Layout ===========================================================*/
     > #pop_ex_timeline {
         display: none;
@@ -1139,6 +1020,122 @@
                 text-align: center;
                 font-family: Arial, "メイリオ", sans-selif;
             }
+        }
+    }
+    .drive_window.ex_window {
+        width: min(800px,100vw);
+        height: calc(100vh - 348px);
+        max-height: 100vh;
+        z-index: 71;
+        top: 328px;
+        right: 32px;
+        > ul.drive_folder_list {
+            height: 48px;
+            white-space: nowrap;
+            overflow-x: auto;
+            margin: 0px;
+            padding: 0px;
+            &::-webkit-scrollbar { height: 8px; }
+            > li {
+                display: inline-block;
+                margin: 0px;
+                padding: 12px;
+                border-radius: 12px;
+                background-color: var(--head-color-drive-folder-bg);
+                background-image: url("../resources/ic_folder.png");
+                background-position: center left 8px;
+                background-repeat: no-repeat;
+                background-size: 32px 32px;
+                padding-left: 48px;
+                width: 160px;
+                height: calc(100% - 32px);
+                font-size: 16px;
+                font-family: Arial, "メイリオ", sans-selif;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                &[name="__root"] { background-image: url("../resources/ic_top.png"); }
+                &:hover {
+                    filter: brightness(var(--core-brightness-hover));
+                    cursor: pointer;
+                }
+            }
+        }
+        > ul.drive_media_list {
+            container-type: inline-size;
+            container-name: driveMedia;
+            height: calc(100% - 132px);
+            overflow-y: auto;
+            margin: 0px;
+            padding: 0px;
+            &::-webkit-scrollbar { width: 8px; }
+            > li {
+                display: inline-block;
+                list-style-type: none;
+                width: 25%;
+                vertical-align: text-bottom;
+                > label {
+                    display: inline-block;
+                    width: 100%;
+                    padding: 0px;
+                    position: relative;
+                    overflow: hidden;
+                    margin: 0px;
+                    vertical-align: text-bottom;
+                    &::before {
+                        content: "";
+                        padding-top: 100%;
+                        display: block;
+                    }
+                    > img {
+                        border-radius: 8px;
+                        width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        top: 0px;
+                        left: 0px;
+                        object-fit: cover;
+                        vertical-align: text-bottom;
+                    }
+                    &.label_video::after {
+                        content: "";
+                        background-image: url("../resources/ic_video.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
+                        z-index: 1;
+                        position: absolute;
+                        top: 2px;
+                        right: 2px;
+                        width: 32px;
+                        height: 32px;
+                    }
+                    &.warn_sensitive::after {
+                        content: "";
+                        z-index: 1;
+                        position: absolute;
+                        top: 0px;
+                        right: 0px;
+                        background-color: var(--core-color-warn-bg);
+                        background-image: url("../resources/ic_warn.png");
+                        background-repeat: no-repeat;
+                        background-size: 32px 32px;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 16px;
+                    }
+                }
+                &.__scroll_loader {
+                    display: block;
+                    background-color: var(--tl-color-loader-bg);
+                    margin: 6px;
+                    padding: 8px 12px;
+                }
+            }
+        }
+        > .footer>button {
+            display: inline-block;
+            width: calc(50% - 4px);
+            height: 48px;
         }
     }
     #singleton_emoji_window.ex_window {
