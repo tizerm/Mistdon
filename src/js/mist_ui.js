@@ -243,6 +243,13 @@ function createTopLoader(arg) {
     })(), { once: true })
 }
 
+/**
+ * #Event #General
+ * タイムライン設定の表示アカウントを変更したときの汎用イベント関数.
+ * 
+ * @param target 対象の設定ブロックElement
+ * @param account 変更したアカウント
+ */
 function changeColAccountEvent(target, account) {
     if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
         target.find("h4").css("background-color", account.pref.acc_color)
@@ -271,6 +278,13 @@ function changeColAccountEvent(target, account) {
     target.find(".lbl_clip").hide()
 }
 
+/**
+ * #Event #General
+ * タイムライン設定のタイムラインタイプを変更したときの汎用イベント関数.
+ * 
+ * @param li_dom 対象の設定ブロックElement
+ * @param type タイムラインの種類
+ */
 function changeColTypeEvent(li_dom, type) {
     switch (type) {
         case 'list': // リスト

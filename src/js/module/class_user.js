@@ -123,6 +123,7 @@ class User {
      * リモートホストも含めたユーザーアドレスからリモートのユーザー情報を取得する
      * 
      * @param address ユーザーアカウントのフルアドレス
+     * @param ignore_notify 左上の通知を表示しない場合はtrue
      */
     static async getByAddress(address, ignore_notify) {
         let notification = null
@@ -165,7 +166,6 @@ class User {
             ユーザーIDの取得でエラーが発生しました. 
             サポート外のプラットフォームの可能性があります.
         `))
-
     }
 
     /**
@@ -486,6 +486,13 @@ class User {
         return jqelm
     }
 
+    /**
+     * #Method #Async
+     * このユーザー情報をDOMに反映したあとにあとから非同期で取得して表示する情報を追加でバインドする.
+     * (フォロー/フォロワー表示内の処理)
+     * 
+     * @param tgul この情報をアペンドした親のDOM Element
+     */
     async bindRemoteNametagAsync(tgul) {
         const target_li = tgul.find(`li[name="${this.full_address}"]`)
 

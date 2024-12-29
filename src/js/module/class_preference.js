@@ -611,7 +611,7 @@ class Preference {
             `
             drive_containers /* ドライブウィンドウのコンテナクエリ定義 */ += `
                 @container driveMedia (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
-                    > li { width: calc(${100 / (i + 1)}% - 2px); }
+                    > li { width: calc(${100 / (i + 1)}% - 1px); }
                 }
             `
         }
@@ -647,7 +647,7 @@ class Preference {
                 }
                 ${drive_containers}
                 @container driveMedia (width > ${width_limit * 17}px) {
-                    > li { width: calc(${100 / 18}% - 2px); }
+                    > li { width: calc(${100 / 18}% - 1px); }
                 }
             }
         `)

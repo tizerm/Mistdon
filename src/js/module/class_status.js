@@ -370,12 +370,22 @@ class Status extends StatusLayout {
         History.pushPost(this)
     }
 
+    /**
+     * #Method #Async
+     * この投稿に対して追加でサーバーから取得する情報の取得を実行して内部Promiseに保持する.
+     */
     async fetchAdditionalInfoAsync() {
         if (Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression && this.reblog && this.remote_flg)
             // リモートのBTRNは現地情報を直接取得
             this.__prm_remote_status = Status.getStatus(this.uri, true)
     }
 
+    /**
+     * #Method #Async
+     * この投稿をDOMに反映したあとにあとから非同期で取得して表示する情報を追加でバインドする.
+     * 
+     * @param tgul この通知をアペンドした親のDOM Element
+     */
     async bindAdditionalInfoAsync(tgul) {
         const target_li = tgul.find(`li[id="${this.status_key}"]`)
 
@@ -1079,6 +1089,13 @@ class Status extends StatusLayout {
         }
     }
 
+    /**
+     * #Method
+     * この投稿がWebSocketでリアクションを受け取った時に、DOMに反映する.
+     * 
+     * @param body WebSocketで受け取ったリアクションデータ
+     * @param jqelm 反映対象のjQuery Element
+     */
     updateReaction(body, jqelm) {
         const reaction = {
             shortcode: body.reaction,
@@ -1367,6 +1384,10 @@ class Status extends StatusLayout {
         }
     }
 
+    /**
+     * #Method
+     * この投稿に既に付いているリアクションのカスタム絵文字を簡易アクションバーに表示する.
+     */
     bindSentReactions() {
         // ローカルのリアクションのみ取得
         const local_reactions = this.reactions.filter(r => r.shortcode.match(/^:[a-zA-Z0-9_]+@?\.?:$/g))

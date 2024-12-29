@@ -704,6 +704,11 @@
     $(document).on("click", ".__lnk_userdetail, .__pop_userinfo",
         e => User.getByAddress($(e.currentTarget).attr("name")).then(user => user.createDetailWindow()))
 
+    /**
+     * #Event #Hover
+     * ユーザーアイコン(遅延ホバーイベント).
+     * => リモートからユーザー情報を取得して簡易表示ウィンドウを開く
+     */
     delayHoverEvent({
         selector: ".__pop_userinfo",
         enterFunc: e => {
@@ -1601,9 +1606,13 @@
     $(document).on("click", ".__on_flash_prev",
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
+    /**
+     * #Event #Wheel
+     * フラッシュウィンドウ: マウスホイール移動.
+     * => 下スクロールで過去へ、上スクロールで現在へ向かって投稿を送る
+     */
     window.addEventListener("wheel", e => {
         if ($(e.target).closest(".flash_tl").length == 0) return
-        // 下スクロールで過去へ、上スクロールで現在へ
         if (e.deltaY > 0) FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind()
         else FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind()
     })

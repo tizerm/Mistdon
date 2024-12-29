@@ -5,7 +5,7 @@
  * @author @tizerm@misskey.dev
  */
 class NotificationStatus extends Status {
-    // コンストラクタ: 設定ファイルにあるカラム設定値を使って初期化
+    // コンストラクタ: APIから来た通知ステータスデータを受け取って生成
     constructor(json, timeline, account) {
         const platform = account.platform ?? timeline.platform
         let original_date = null
@@ -99,6 +99,13 @@ class NotificationStatus extends Status {
     // Getter: リアクション判定
     get is_reaction() { return this.notification_type == 'reaction' }
 
+    /**
+     * #Method
+     * この通知と対象の通知をひとつにしてマージする.
+     * その後、残った通知とマージされた通知を返却する.
+     * 
+     * @param another マージ対象の通知オブジェクト
+     */
     merge(another) {
         // 日付が新しい方に対して通知をマージする
         const merge_at = this.sort_date > another.sort_date ? this : another
@@ -128,6 +135,12 @@ class NotificationStatus extends Status {
         return [merge_at, merge_from]
     }
 
+    /**
+     * #Method #Async
+     * この通知をDOMに反映したあとにあとから非同期で取得して表示する情報を追加でバインドする.
+     * 
+     * @param tgul この通知をアペンドした親のDOM Element
+     */
     async bindAdditionalInfoAsync(tgul) {
         //super.bindAdditionalInfoAsync(tgul)
         // Misskeyのリアクションの場合は外部インスタンスのショートコードを取得
@@ -354,7 +367,7 @@ class NotificationStatus extends Status {
         return jqelm
     }
 
-    // Getter: 投稿属性セクション
+    // Getter: まとめられた通知のユーザーを表示するセクション
     get summary_section() {
         if (!this.mergable) return '' // お気に入り/BTRN/リアクション以外は表示しない
 
@@ -398,6 +411,7 @@ class NotificationStatus extends Status {
         return html
     }
 
+    // Getter: フォロワー通知のHTMLを生成して返却
     get followers_elm() {
         let html /* name属性にURLを設定 */ = `
             <li id="${this.status_key}" name="${this.uri}" class="normal_layout followed_info followers">
@@ -512,6 +526,5 @@ class NotificationStatus extends Status {
             body: $($.parseHTML(body)).text()
         }
     }
-
 }
 

@@ -276,6 +276,12 @@ class Timeline {
         this.socket.addEventListener("message", arg.messageFunc)
     }
 
+    /**
+     * #Method
+     * 対象の投稿をキャプチャする(Misskey専用機能).
+     * 
+     * @param post キャプチャ対象のノート
+     */
     captureNote(post) {
         if (this.platform != 'Misskey' // Misskeyではない場合
             || this.temptl_pref // 一時タイムラインの場合
@@ -303,6 +309,12 @@ class Timeline {
         if (this.capture_queue.length > 30) this.uncaptureNote(this.capture_queue.pop().id)
     }
 
+    /**
+     * #Method
+     * 対象の投稿をキャプチャから外す(Misskey専用機能).
+     * 
+     * @param id キャプチャから外すノートID
+     */
     uncaptureNote(id) {
         const captured_notes = this.target_account.captured_notes
         this.target_account.socket.send(JSON.stringify({ // WebSocketにUnCaptureリクエストを送信
@@ -315,6 +327,12 @@ class Timeline {
         if (del_set.size == 0) captured_notes.delete(id)
     }
 
+    /**
+     * #Method
+     * キャプチャイベントを受け取った時に対象のノート情報を更新する.
+     * 
+     * @param body キャプチャイベントからのメッセージ
+     */
     updateNote(body) {
         switch (body.type) {
             case 'reacted': // リアクション受信
@@ -358,6 +376,13 @@ class Timeline {
         pre_post.update(post, jqelm.parent().find(`li[id="${status_key}"]`))
     }
 
+    /**
+     * #Method
+     * このタイムラインに保存してあるノートについているリアクション情報を更新する.
+     * 
+     * @param id 更新対象のノートID
+     * @param body キャプチャイベントからのメッセージ
+     */
     updateReaction(id, body) {
         // インプレッション表示をしないならなにもしない
         if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return

@@ -8,6 +8,12 @@
     // コンストラクタ: 定義しない
     constructor() { }
 
+    /**
+     * #Default #Method
+     * ノーマルレイアウトのベースHTMLを返却する.
+     * 
+     * @param isNotification 通知の場合はtrue
+     */
     getHtmlNormal(isNotification) {
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="normal_layout">`
@@ -197,6 +203,13 @@
         return html
     }
 
+    /**
+     * #Default #Method
+     * チャットレイアウトのベースHTMLを返却する.
+     * 
+     * @param isNotification 通知の場合はtrue
+     * @param self_flg 自分の投稿の場合はtrue
+     */
     getHtmlChat(isNotification, self_flg) {
         let target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="chat_timeline">`
@@ -298,7 +311,10 @@
         return html
     }
 
-    // Getter: リストタイプの投稿HTMLを生成して返却
+    /**
+     * #Default #Method
+     * リストレイアウトのベースHTMLを返却する.
+     */
     getHtmlList() {
         let target_emojis = null
         let html = `
@@ -332,7 +348,12 @@
         return html
     }
 
-    // Getter: メディアタイプのHTMLを生成して返却
+    /**
+     * #Default #Method
+     * メディアレイアウトのベースHTMLを返却する.
+     * 
+     * @param isNotification 通知の場合はtrue
+     */
     getHtmlMedia(isNotification) {
         let target_emojis = null
         let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="media_timeline">`
@@ -412,6 +433,10 @@
         return html
     }
 
+    /**
+     * #Default #Method
+     * ギャラリーレイアウトのベースHTMLを返却する.
+     */
     getHtmlGallery() {
         // メディアごとにタイルブロックを生成
         let html = ''
@@ -432,6 +457,10 @@
         return html
     }
 
+    /**
+     * #Default #Method
+     * Mastodonのフィルター対象の投稿のベースHTMLを返却する.
+     */
     getHtmlFiltered() {
         return `
             <li id="${this.status_key}" name="${this.uri}" class="filtered_timeline">
@@ -441,7 +470,7 @@
     }
 
     /**
-     * #Method
+     * #Default #Method
      * メディア表示セクションのHTMLを返却.
      * 
      * @param img_class 付与するグリッドサイズクラス
@@ -471,7 +500,7 @@
     }
 
     /**
-     * #Method
+     * #Default #Method
      * 引用表示セクションのHTMLを返却.
      * 
      * @param contents_limit コンテンツ本文の文字数制限

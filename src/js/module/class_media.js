@@ -141,6 +141,8 @@ class Media {
     /**
      * #StaticMethod
      * Misskeyのドライブから参照したメディアファイルを追加してサムネイル表示する.
+     * 
+     * @param target 反映対象のドライブウィンドウのElement
      */
     static async attachDriveMedia(target) {
         const medias = []
@@ -448,7 +450,7 @@ class Media {
      * 対象のMisskeyアカウントのドライブからフォルダを開いて表示する.
      * 
      * @param address ドライブを開くアカウント
-     * @param folder_id MisskeyドライブのフォルダID
+     * @param target 反映対象のドライブウィンドウのElement
      */
     static openFolder(address, target) {
         const folder_id = target.attr("name")
