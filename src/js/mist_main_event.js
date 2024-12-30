@@ -1703,13 +1703,8 @@
      * 一時タイムライン: その他のインスタンスドメイン変更時.
      * => インスタンスの簡易情報を取得
      */
-    $(document).on("change", "#pop_temporary_option .__txt_external_instance", e => {
-        const target_external = $(e.target).closest(".lbl_external_instance")
-        const domain = $(e.target).val()
-        const info_dom = target_external.find(".instance_info")
-        Instance.showInstanceName(domain, info_dom)
-            .then(instance => target_external.find(".__hdn_external_platform").val(instance?.platform))
-    })
+    $(document).on("change", "#pop_temporary_option .__txt_external_instance",
+        e => changeColExternalHostEvent($(e.target).val(), $(e.target).closest(".lbl_external_instance")))
 
     /**
      * #Event #Change

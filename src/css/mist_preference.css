@@ -50,7 +50,7 @@
 /*=== Popup Window Area ==========================================================================*/
 
 #pop {
-    /*=== Internal Extend Timeline Window Layout =================================================*/
+    /*=== General Preference Window Layout =======================================================*/
     .pref_window.ex_window {
         z-index: 31;
         width: min(480px,100vw);
@@ -118,6 +118,123 @@
                     white-space: nowrap;
                     text-overflow: ellipsis;
                 }
+            }
+        }
+        > .footer>button {
+            display: inline-block;
+            width: calc(50% - 4px);
+            height: 48px;
+        }
+    }
+
+    /*=== Temporary Timeline Preference Layout ===================================================*/
+    .temptlpref_window.ex_window {
+        z-index: 32;
+        width: min(480px,100vw);
+        height: min(960px,calc(100vh - 48px));
+        right: 0px;
+        top: 32px;
+        > ul.temptl_fav_list {
+            overflow-y: auto;
+            background-color: var(--core-color-ui-bg);
+            margin: 0px;
+            padding: 0px;
+            font-size: 13px;
+            height: calc(100% - 92px);
+
+            &::-webkit-scrollbar { width: 8px; }
+            > li {
+                background-color: var(--tl-color-bg);
+                list-style-type: none;
+                margin: 4px;
+                padding: 0px;
+                border-radius: 16px;
+                > h4 {
+                    position: relative;
+                    border-top-left-radius: 16px;
+                    border-top-right-radius: 16px;
+                    background-image: url("../resources/ic_sort_move.png");
+                    background-position: right 32px bottom 4px;
+                    background-repeat: no-repeat;
+                    color: var(--core-color-text);
+                    font-family: Arial, "メイリオ", sans-selif;
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin: 2px;
+                    padding: 6px 24px;
+                    background-color: var(--core-color-header-bg);
+                    cursor: move;
+                    > a {
+                        display: inline-block;
+                        position: absolute;
+                        top: 4px;
+                        right: 4px;
+                        > img {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                }
+                > .tl_option {
+                    font-size: 14px;
+                    margin: 2px;
+                    padding: 8px 16px;
+                    > div { margin: 12px 0px; }
+                    & select {
+                        padding: 2px 8px;
+                        width: 100%;
+                    }
+                    .lbl_external_instance {
+                        > .instance_info {
+                            background-color: var(--tl-color-quote-bg);
+                            background-size: auto 64px;
+                            background-position: center center;
+                            background-repeat: no-repeat;
+                            border-radius: 12px;
+                            margin: 6px 0px;
+                            padding: 2px;
+                            font-weight: bold;
+                            font-size: 15px;
+                            text-align: center;
+                        }
+                        > .color_info {
+                            font-size: 13px;
+                            text-align: right;
+                        }
+                    }
+                    > table.tl_layout_options {
+                        background-color: var(--core-color-ui-bg);
+                        display: none;
+                        width: 100%;
+                        font-size: 12px;
+                        & th {
+                            border-radius: 8px;
+                            &.default      { background-color: var(--label-color-follow-bg); }
+                            &.btrn         { background-color: var(--label-color-reblog-bg); }
+                            &.media        { background-color: var(--label-color-reply-bg); }
+                            &.notification { background-color: var(--label-color-favorite-bg); }
+                        }
+                    }
+                    .lbl_load_progress {
+                        background-color: var(--tl-color-quote-bg);
+                        background-image: url("../resources/illust/ani_wait.png");
+                        background-size: auto 64px;
+                        background-position: center center;
+                        background-repeat: no-repeat;
+                        border-radius: 18px;
+                        margin: 6px 0px;
+                        padding: 8px;
+                        text-align: center;
+                        display: none;
+                    }
+                    .__pull_color_palette { width: calc(100% - 36px); }
+                    .lbl_external_instance, .lbl_list, .lbl_channel, .lbl_antenna, .lbl_clip { display: none; }
+                }
+            }
+            > .ui-sortable-placeholder {
+                background-color: var(--core-color-sort-placeholder-bg);
+                border-radius: 18px;
+                height: 160px;
             }
         }
         > .footer>button {

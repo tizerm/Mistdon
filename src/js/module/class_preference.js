@@ -228,7 +228,7 @@ class Preference {
                     </div>
                 </div>
             `,
-            color: '42809e',
+            color: getRandomColor(),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"
@@ -493,7 +493,7 @@ class Preference {
             title: "全体設定",
             text: "全体設定を保存しました。",
             // サブウィンドウを閉じる
-            accept: () => $("#pop_multi_window").empty()
+            accept: () => $("#singleton_pref_window .window_close_button").click()
         })
     }
 

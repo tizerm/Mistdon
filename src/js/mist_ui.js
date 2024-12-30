@@ -280,6 +280,19 @@ function changeColAccountEvent(target, account) {
 
 /**
  * #Event #General
+ * タイムライン設定の外部インスタンスホストを変更したときの汎用イベント関数.
+ * 
+ * @param domain 入力されたホスト名
+ * @param target 対象の設定ブロックElement
+ */
+async function changeColExternalHostEvent(domain, target) {
+    const info_dom = target.find(".instance_info")
+    const instance = await Instance.showInstanceName(domain, info_dom)
+    target.find(".__hdn_external_platform").val(instance?.platform)
+}
+
+/**
+ * #Event #General
  * タイムライン設定のタイムラインタイプを変更したときの汎用イベント関数.
  * 
  * @param li_dom 対象の設定ブロックElement

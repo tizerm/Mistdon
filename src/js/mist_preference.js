@@ -18,6 +18,7 @@
 
     /*=== UI Setting Process =====================================================================================*/
 
+    $("#header>h1").css("background-color", getRandomColor())
     // カラムをSortableにする(これはカラムの有無にかかわらず実行)
     $(".__ui_col_sortable").sortable({
         axis: "x",
@@ -135,7 +136,14 @@
      * グループ: グループのタイムラインレイアウト変更イベント.
      * => マルチタイムラインレイアウトボタンの有効無効制御を行う
      */
-    $(document).on("change", ".__cmb_tl_layout", e => GroupPref.changeLayoutEvent($(e.target)))
+    $(document).on("change", ".__cmb_tl_layout", e => {
+        if ($(e.target).closest("#singleton_temptlpref_window").length > 0) {
+            // 一時タイムラインのタイムラインレイアウトの場合
+            const target = $(e.target).closest(".tl_option").find(".tl_layout_options")
+            if ($(e.target).val() == 'multi') target.show()
+            else target.hide()
+        } else GroupPref.changeLayoutEvent($(e.target))
+    })
 
     /**
      * #Event
@@ -157,14 +165,32 @@
      * タイムライン: 対象アカウント変更イベント.
      * => アカウント変更による表示制御を行う
      */
-    $(document).on("change", ".__cmb_tl_account", e => TimelinePref.changeAccountEvent($(e.target)))
+    $(document).on("change", ".__cmb_tl_account", e => {
+        if ($(e.target).closest("#singleton_temptlpref_window").length > 0) {
+            // 一時タイムラインのタイムラインレイアウトの場合
+            const target_li = $(e.target).closest("li")
+            const account = Account.get($(e.target).val())
+            changeColAccountEvent(target_li, account)
+            if (account) target_li.find(".tl_header_label").text(account.full_address)
+            else target_li.find(".tl_header_label").text(target_li.find(".__txt_external_instance").val() || 'External Instance')
+        } else TimelinePref.changeAccountEvent($(e.target))
+    })
 
     /**
      * #Event #Change
      * タイムライン: 外部インスタンスアドレス変更イベント.
      * => インスタンス情報を取得して名称表示する
      */
-    $(document).on("change", ".__txt_external_instance", e => TimelinePref.changeExternalHostEvent($(e.target)))
+    $(document).on("change", ".__txt_external_instance", e => {
+        if ($(e.target).closest("#singleton_temptlpref_window").length > 0) {
+            // 一時タイムラインのタイムラインレイアウトの場合
+            const domain = $(e.target).val()
+            const target = $(e.target).closest("li")
+            changeColExternalHostEvent(domain, target)
+            target.find(".tl_header_label").text(domain)
+            target.find("h4").css('background-color', getHashColor(domain))
+        } else TimelinePref.changeExternalHostEvent($(e.target))
+    })
 
     /**
      * #Event #Change
@@ -186,6 +212,13 @@
      * => メイン画面に戻る
      */
     $("#on_close").on("click", e => window.open("index.html", "_self"))
+
+    /**
+     * #Event
+     * ヘッダボタン: 一時タイムライン設定ボタン.
+     * => 一時タイムライン設定ウィンドウを開く
+     */
+    $("#on_temptl_pref").on("click", e => TempTLPref.openTemptlPrefConfig())
 
     /**
      * #Event
@@ -249,7 +282,24 @@
      * 全体設定: ウィンドウ閉じるボタン.
      * => 全体設定を保存せずにウィンドウを閉じる
      */
-    $(document).on("click", "#pop_multi_window .window_close_button, #__on_pref_close", e => {
+    $(document).on("click", "#singleton_pref_window .window_close_button, #__on_pref_close", e => {
+        const target_window = $(e.target).closest(".ex_window")
+        target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
+    })
+
+    /**
+     * #Event
+     * 一時タイムライン設定: 保存して閉じるボタン.
+     * => 一時タイムラインを保存してウィンドウを閉じる
+     */
+    $(document).on("click", "#__on_tamptl_save", e => TempTLPref.save())
+
+    /**
+     * #Event
+     * 一時タイムライン設定: ウィンドウ閉じるボタン.
+     * => 一時タイムラインを保存せずにウィンドウを閉じる
+     */
+    $(document).on("click", "#singleton_temptlpref_window .window_close_button, #__on_tamptl_close", e => {
         const target_window = $(e.target).closest(".ex_window")
         target_window.hide(...Preference.getAnimation("WINDOW_FOLD"), () => target_window.remove())
     })

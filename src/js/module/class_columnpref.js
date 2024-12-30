@@ -23,10 +23,10 @@ class TimelinePref {
         // コンボボックスのアカウントリストを先に生成
         let account_list = ''
         if (!Account.isEmpty()) Account.each(account => account_list += `
-                <option value="${account.full_address}">
-                    ${account.pref.username} - ${account.full_address}
-                </option>
-            `)
+            <option value="${account.full_address}">
+                ${account.pref.username} - ${account.full_address}
+            </option>
+        `)
 
         // タイムラインの設定ブロックをjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
@@ -195,11 +195,9 @@ class TimelinePref {
      * 
      * @param target イベントが発火したテキストボックスのjQueryオブジェクト
      */
-    static async changeExternalHostEvent(target) {
-        const domain = target.val()
-        const info_dom = target.closest(".lbl_external_instance").find(".instance_info")
-        const instance = await Instance.showInstanceName(domain, info_dom)
-        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance?.platform)
+    static changeExternalHostEvent(target) {
+        // mist_ui.jsのイベント関数を実行
+        changeColExternalHostEvent(target.val(), target.closest(".lbl_external_instance"))
     }
 
     /**
