@@ -179,17 +179,38 @@ input[type="text"] { font-family: Arial, "メイリオ", sans-selif; }
                 margin: 6px 12px;
                 padding: 4px 32px;
             }
+            > #pre_section {
+                position: absolute;
+                top: 50%;
+                transform: translate(0%, -50%);
+                right: 0px;
+                left: 0px;
+                > div {
+                    background-color: var(--tl-color-bg);
+                    border-radius: 16px;
+                    margin: 18px;
+                    padding: 24px 12px;
+                    > button.icon_label_set {
+                        border-radius: 18px;
+                        border-style: none;
+                        margin: 8px;
+                        padding: 7px 24px;
+                        padding-left: 48px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        > img {
+                            height: 36px;
+                            width: 36px;
+                        }
+                    }
+                    > .bottom_auth_warn {
+                        display: block;
+                        color: var(--help-color-text-strong);
+                    }
+                }
+            }
         }
         #select_platform {
-            position: absolute;
-            background-color: var(--tl-color-bg);
-            border-radius: 16px;
-            margin: 18px;
-            padding: 32px 12px;
-            top: 50%;
-            transform: translate(0%, -50%);
-            right: 0px;
-            left: 0px;
             > .instance_box {
                 border-radius: 12px;
                 background-color: var(--tl-color-quote-bg);
@@ -217,23 +238,18 @@ input[type="text"] { font-family: Arial, "メイリオ", sans-selif; }
                     vertical-align: text-bottom;
                 }
             }
-            > button.icon_label_set {
-                border-radius: 18px;
-                border-style: none;
-                margin: 8px;
-                padding: 7px 24px;
-                padding-left: 48px;
-                font-size: 16px;
-                font-weight: bold;
-                > img {
-                    height: 36px;
-                    width: 36px;
-                }
+        }
+        #bluesky_login>table {
+            & td, & th {
+                background-color: var(--tl-color-quote-bg);
+                border-radius: 8px;
             }
-            > .bottom_auth_warn {
-                display: block;
-                color: var(--help-color-text-strong);
-            }
+            & th { width: 140px; }
+            & input[type="text"] { width: calc(100% - 48px); }
+        }
+        #select_platform>.instance_box, #select_platform>.instance_info, #bluesky_login>table {
+            width: min(640px, calc(100% - 48px));
+            margin: 8px auto;
         }
         .platform_section {
             position: absolute;
