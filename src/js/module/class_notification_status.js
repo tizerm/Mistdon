@@ -284,7 +284,7 @@ class NotificationStatus extends Status {
                 <div class="notif_footer">
                     <img src="" class="ic_notif_type"/>
                     <img class="ic_target_account __pop_userinfo"
-                        src="${this.user_summary.length > 1 ? 'resources/ic_folder.png' : this.action_user.avatar_url}"
+                        src="${this.user_summary.length > 1 ? 'resources/ic_perad.png' : this.action_user.avatar_url}"
                         name="@${this.action_user.full_address}"
                         />
                 </div>
