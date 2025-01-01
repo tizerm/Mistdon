@@ -1126,9 +1126,13 @@
                 }
                 &.__scroll_loader {
                     display: block;
-                    background-color: var(--tl-color-loader-bg);
-                    margin: 6px;
-                    padding: 8px 12px;
+                    border-radius: 16px;
+                    width: 100%;
+                    background-color: var(--tl-color-bg);
+                    background-image: url("../resources/ic_reload.png");
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    height: 32px;
                 }
             }
         }

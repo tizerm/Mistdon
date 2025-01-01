@@ -1182,20 +1182,32 @@ class Account {
      */
     async getClips() {
         try {
-            const response = await $.ajax({
-                type: "POST",
-                url: `https://${this.pref.domain}/api/clips/list`,
-                dataType: "json",
-                headers: { "Content-Type": "application/json" },
-                data: JSON.stringify({ "i": this.pref.access_token })
-            })
-            // クリップを作っていない場合はreject
-            if (response.length == 0) return Promise.reject('empty')
+            const response = await Promise.allSettled([
+                $.ajax({ // 自分の作ったクリップ
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/clips/list`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                }), $.ajax({ // お気に入りしたクリップ
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/clips/my-favorites`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                })
+            ])
+
+            // TODO: お気に入りしたクリップは現状アクセス権がないので取得できない！
+            // 成功したステータスからクリップ情報をリスト化
             const clips = []
-            response.forEach(c => clips.push({
+            response.filter(res => res.status == 'fulfilled').map(res => res.value).forEach(r => r.forEach(c => clips.push({
                 "name": c.name,
                 "id": c.id
-            }))
+            })))
+            // クリップを作っていない場合はreject
+            if (clips.length == 0) return Promise.reject('empty')
+
             return clips
         } catch (err) {
             console.log(err)
