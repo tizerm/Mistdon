@@ -23,10 +23,10 @@ class TimelinePref {
         // コンボボックスのアカウントリストを先に生成
         let account_list = ''
         if (!Account.isEmpty()) Account.each(account => account_list += `
-                <option value="${account.full_address}">
-                    ${account.pref.username} - ${account.full_address}
-                </option>
-            `)
+            <option value="${account.full_address}">
+                ${account.pref.username} - ${account.full_address}
+            </option>
+        `)
 
         // タイムラインの設定ブロックをjQueryオブジェクトとして生成
         const jqelm = $($.parseHTML(`
@@ -63,6 +63,7 @@ class TimelinePref {
                             <option value="notification">通知</option>
                         </select>
                     </div>
+                    <div class="lbl_load_progress">&nbsp;</div>
                     <div class="lbl_list">
                         対象リスト:<br/><select class="__cmb_tl_list">
                         </select>
@@ -183,30 +184,8 @@ class TimelinePref {
      * @param target イベントが発火したコンボボックスのjQueryオブジェクト
      */
     static changeAccountEvent(target) {
-        const target_li = target.closest("li")
-        const account = Account.get(target.val())
-        if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
-            target_li.find("h4").css("background-color", account.pref.acc_color)
-            target_li.find(".lbl_external_instance").hide()
-            target_li.find('.__cmb_tl_type>option').prop("disabled", false)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-        } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
-            target_li.find("h4").css("background-color", `#999999`)
-            target_li.find(".lbl_external_instance").show()
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
-        }
-        // リスト/チャンネルは一律非表示
-        target_li.find(".lbl_list").hide()
-        target_li.find(".lbl_channel").hide()
-        target_li.find(".lbl_antenna").hide()
+        // mist_ui.jsのイベント関数を実行
+        changeColAccountEvent(target.closest("li"), Account.get(target.val()))
         ColumnPref.setButtonPermission()
     }
 
@@ -216,11 +195,9 @@ class TimelinePref {
      * 
      * @param target イベントが発火したテキストボックスのjQueryオブジェクト
      */
-    static async changeExternalHostEvent(target) {
-        const domain = target.val()
-        const info_dom = target.closest(".lbl_external_instance").find(".instance_info")
-        const instance = await Instance.showInstanceName(domain, info_dom)
-        target.closest(".lbl_external_instance").find(".__hdn_external_platform").val(instance?.platform)
+    static changeExternalHostEvent(target) {
+        // mist_ui.jsのイベント関数を実行
+        changeColExternalHostEvent(target.val(), target.closest(".lbl_external_instance"))
     }
 
     /**
@@ -230,87 +207,8 @@ class TimelinePref {
      * @param target イベントが発火したコンボボックスのjQueryオブジェクト
      */
     static async changeTypeEvent(target) {
-        const li_dom = target.closest("li")
-        let notification = null
-        switch (target.val()) {
-            case 'list': // リスト
-                notification = Notification.progress("対象アカウントのリストを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
-                    const list_id = li_dom.find(".__cmb_tl_list").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    lists.forEach(l => options += `
-                        <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
-                    li_dom.find(".lbl_list").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // リストを持っていない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                        notification.error("このアカウントにはリストがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("リストの取得で問題が発生しました.")
-                })
-                break
-            case 'channel': // チャンネル
-                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
-                    const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    channels.forEach(c => options += `
-                        <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
-                    li_dom.find(".lbl_channel").show()
-                    li_dom.find(".lbl_list").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // お気に入りのチャンネルがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("チャンネルの取得で問題が発生しました.")
-                })
-                break
-            case 'antenna': // アンテナ
-                notification = Notification.progress("対象アカウントの登録アンテナを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
-                    const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    antennas.forEach(a => options += `
-                        <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
-                    li_dom.find(".lbl_antenna").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_list").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // 作成済みのアンテナがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-                        notification.error("このアカウントにはアンテナがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("アンテナの取得で問題が発生しました.")
-                })
-                break
-            default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
-                li_dom.find(".lbl_list").hide()
-                li_dom.find(".lbl_channel").hide()
-                li_dom.find(".lbl_antenna").hide()
-                break
-        }
+        // mist_ui.jsのイベント関数を実行
+        changeColTypeEvent(target.closest("li"), target.val())
     }
 }
 

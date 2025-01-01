@@ -549,15 +549,15 @@
      * 添付メディア-ドライブウィンドウ: フォルダ一覧項目.
      * => 対象のフォルダを開く
      */
-    $(document).on("click", "#pop_dirve_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
-        $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target).attr("name")))
+    $(document).on("click", ".drive_window>ul.drive_folder_list>.__on_select_folder", e => Media.openFolder(
+        $("#header>#head_postarea .__lnk_postuser>img").attr("name"), $(e.target)))
 
     /**
      * #Event
      * 添付メディア-ドライブウィンドウ: OKボタン.
      * => 選択したメディアを添付メディアに追加する
      */
-    $(document).on("click", "#__on_drive_media_confirm", e => Media.attachDriveMedia())
+    $(document).on("click", ".__on_drive_media_confirm", e => Media.attachDriveMedia($(e.target).closest(".drive_window")))
 
     /**
      * #Event #Dragenter
@@ -701,8 +701,50 @@
      * ユーザーアドレス.
      * => リモートのユーザー情報を右ウィンドウに表示
      */
-    $(document).on("click", ".__lnk_userdetail, .usericon",
+    $(document).on("click", ".__lnk_userdetail, .__pop_userinfo",
         e => User.getByAddress($(e.currentTarget).attr("name")).then(user => user.createDetailWindow()))
+
+    /**
+     * #Event #Hover
+     * ユーザーアイコン(遅延ホバーイベント).
+     * => リモートからユーザー情報を取得して簡易表示ウィンドウを開く
+     */
+    delayHoverEvent({
+        selector: ".__pop_userinfo",
+        enterFunc: e => {
+            $("#pop_expand_user>ul").empty()
+
+            // ポップする座標を決定
+            const mouse_x = e.pageX
+            const mouse_y = e.pageY
+            let css = {}
+            if (window.innerHeight / 2 < mouse_y) { // ウィンドウの下の方にある場合は下から展開
+                css.top = 'auto'
+                css.bottom = Math.round(window.innerHeight - mouse_y - 32)
+            } else { // 通常は上から展開
+                css.top = mouse_y - 32
+                css.bottom = 'auto'
+            }
+            if (window.innerWidth / 2 < mouse_x) { // ウィンドウの右側にある場合は左に展開
+                css.left = 'auto'
+                css.right = Math.round(window.innerWidth - mouse_x + 24)
+            } else { // 通常は左から展開
+                css.left = mouse_x + 24
+                css.right = 'auto'
+            }
+
+            $("#pop_expand_user").css(css).show(...Preference.getAnimation("POP_FOLD")).prepend(`
+                <div class="col_loading">
+                    <img src="resources/illust/ani_wait.png" alt="Now Loading..."/>
+                </div>`)
+            User.getByAddress($(e.target).attr("name"), true).then(user => {
+                $("#pop_expand_user>.col_loading").remove()
+                $("#pop_expand_user>ul").html(user.short_elm)
+            })
+        },
+        leaveFunc: e => $("#pop_expand_user").hide(...Preference.getAnimation("POP_FOLD")),
+        delay: 750
+    })
 
     /**
      * #Event
@@ -870,9 +912,7 @@
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         $("#pop_expand_post").hide() // 一旦閉じる
         const target_li = $(e.target).closest("li")
-        if (target_li.is('.context_disabled')) // フォロー通知の場合はユーザーを直接表示
-            User.getByAddress(target_li.find("img.usericon").attr("name")).then(user => user.createDetailWindow())
-        else if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
             Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
                 .getStatus(target_li).createExpandWindow(target_li, e, "under")
         else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
@@ -990,6 +1030,8 @@
             // プラットフォームによって初期表示を変更
             if (target_post.from_account.platform == 'Misskey') { // Misskey
                 $("#pop_expand_action>.reactions>.recent").html(target_post.from_account.recent_reaction_html)
+                // 既についてるリアクションを表示(オプションが有効な場合)
+                if (Preference.GENERAL_PREFERENCE.enable_already_reaction) target_post.bindSentReactions()
                 $("#pop_expand_action .__short_quote").prop("disabled", !target_post.allow_reblog)
                 $("#pop_expand_action .__short_bookmark").hide()
                 $("#pop_expand_action .__short_quote").show()
@@ -998,6 +1040,7 @@
                 $("#pop_expand_action .__short_bookmark").show()
                 $("#pop_expand_action .__short_quote").hide()
                 $("#pop_expand_action .__short_open_reaction").hide()
+                $("#pop_expand_action>.sent_reactions").hide()
             }
             $("#pop_expand_action .__short_reblog").prop("disabled", !target_post.allow_reblog)
             $("#pop_expand_action>.reactions").hide()
@@ -1097,7 +1140,7 @@
      */
     $(document).on("click", "#pop_expand_action .__on_emoji_reaction",
         e => Status.TEMPORARY_ACTION_STATUS.from_account.sendReaction({
-            id: Status.TEMPORARY_ACTION_STATUS.notif_id ?? Status.TEMPORARY_ACTION_STATUS.id,
+            id: Status.TEMPORARY_ACTION_STATUS.id,
             shortcode: $(e.target).closest(".__on_emoji_reaction").attr("name"),
             success: () => $("#pop_expand_action").hide()
         }))
@@ -1285,19 +1328,6 @@
         $(e.target).closest(".user_post_elm").find(".post_uls").hide()
         $(e.target).closest(".user_post_elm").find(".channel_uls").hide()
         $(e.target).closest(".user_post_elm").find(".media_uls").show()
-    })
-
-    /**
-     * #Event #Delayhover
-     * ユーザープロフィール: フォロー/フォロワーのネームタグに遅延ホバー.
-     * => 上部に簡易プロフィールを表示
-     */
-    delayHoverEvent({
-        selector: ".account_timeline .ff_nametags>li",
-        enterFunc: e => User.getByAddress($(e.target).closest("li").attr("name"))
-            .then(user => $(e.target).closest(".user_ff_elm").find(".ff_short_profile").html(user.short_elm)),
-        leaveFunc: e => {},
-        delay: 700
     })
 
     /**
@@ -1577,6 +1607,17 @@
         e => FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind())
 
     /**
+     * #Event #Wheel
+     * フラッシュウィンドウ: マウスホイール移動.
+     * => 下スクロールで過去へ、上スクロールで現在へ向かって投稿を送る
+     */
+    window.addEventListener("wheel", e => {
+        if ($(e.target).closest(".flash_tl").length == 0) return
+        if (e.deltaY > 0) FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).prev().bind()
+        else FlashTimeline.getWindow($(e.target).closest(".flash_window").find("ul.flash_tl")).next().bind()
+    })
+
+    /**
      * #Event
      * 一時タイムラインウィンドウ: リロードボタン.
      * => 一時タイムラインを再読み込みする.
@@ -1634,137 +1675,43 @@
     })
 
     /**
+     * #Event
+     * ブックマーク/お気に入り: OKボタン.
+     * => ブックマークを展開
+     */
+    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
+        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
+            type: $("input.__opt_ex_bookmark_type:checked").val(),
+            layout: $("#__cmb_ex_bookmark_layout").val(),
+            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
+            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
+        }))
+        // ミニウィンドウを閉じる
+        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
+    })
+
+    /**
      * #Event #Change
      * 一時タイムライン: アカウント変更時.
-     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御(mist_ui.js)
      */
-    $(document).on("change", "#pop_temporary_option .__cmb_tl_account", e => {
-        const target_li = $("#pop_temporary_option")
-        const account = Account.get($(e.target).val())
-        if (account) { // 対象アカウントが存在する場合はアカウントカラーを変更してホスト画面を非表示
-            target_li.find(".lbl_external_instance").hide()
-            target_li.find('.__cmb_tl_type>option').prop("disabled", false)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", account?.pref.platform != 'Misskey')
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-        } else { // 「その他のインスタンス」を選択している場合はホスト画面を出して一部項目を無効化
-            target_li.find(".lbl_external_instance").show()
-            target_li.find('.__cmb_tl_type>option[value="home"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="notification"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="mention"]').prop("disabled", true)
-            target_li.find('.__cmb_tl_type>option[value="local"]').prop("selected", true)
-        }
-        // リスト/チャンネルは一律非表示
-        target_li.find(".lbl_list").hide()
-        target_li.find(".lbl_channel").hide()
-        target_li.find(".lbl_antenna").hide()
-    })
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_account",
+        e => changeColAccountEvent($("#pop_temporary_option"), Account.get($(e.target).val())))
 
     /**
      * #Event #Change
      * 一時タイムライン: その他のインスタンスドメイン変更時.
      * => インスタンスの簡易情報を取得
      */
-    $(document).on("change", "#pop_temporary_option .__txt_external_instance", e => {
-        const target_external = $(e.target).closest(".lbl_external_instance")
-        const domain = $(e.target).val()
-        const info_dom = target_external.find(".instance_info")
-        Instance.showInstanceName(domain, info_dom)
-            .then(instance => target_external.find(".__hdn_external_platform").val(instance?.platform))
-    })
+    $(document).on("change", "#pop_temporary_option .__txt_external_instance",
+        e => changeColExternalHostEvent($(e.target).val(), $(e.target).closest(".lbl_external_instance")))
 
     /**
      * #Event #Change
      * 一時タイムライン: タイムラインの種類変更時.
-     * => タイプ/リスト/チャンネルコンボボックスの表示制御
+     * => タイプ/リスト/チャンネルコンボボックスの表示制御(mist_ui.js)
      */
-    $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => {
-        const li_dom = $("#pop_temporary_option")
-        let notification = null
-        switch ($(e.target).val()) {
-            case 'list': // リスト
-                notification = Notification.progress("対象アカウントのリストを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getLists().then(lists => {
-                    const list_id = li_dom.find(".__cmb_tl_list").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    lists.forEach(l => options += `
-                        <option value="${l.id}"${l.id == list_id ? ' selected' : ''}>${l.listname}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_list').removeAttr("value").html(options)
-                    li_dom.find(".lbl_list").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // リストを持っていない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="list"]').prop("disabled", true)
-                        notification.error("このアカウントにはリストがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("リストの取得で問題が発生しました.")
-                })
-                break
-            case 'channel': // チャンネル
-                notification = Notification.progress("対象アカウントのお気に入りチャンネルを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getChannels().then(channels => {
-                    const channel_id = li_dom.find(".__cmb_tl_channel").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    channels.forEach(c => options += `
-                        <option value="${c.id}"${c.id == channel_id ? ' selected' : ''}>${c.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_channel').removeAttr("value").html(options)
-                    li_dom.find(".lbl_channel").show()
-                    li_dom.find(".lbl_list").hide()
-                    li_dom.find(".lbl_antenna").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // お気に入りのチャンネルがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="channel"]').prop("disabled", true)
-                        notification.error("このアカウントがお気に入りしているチャンネルがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("チャンネルの取得で問題が発生しました.")
-                })
-                break
-            case 'antenna': // アンテナ
-                notification = Notification.progress("対象アカウントの登録アンテナを取得中です...")
-
-                Account.get(li_dom.find(".__cmb_tl_account>option:selected").val()).getAntennas().then(antennas => {
-                    const antenna_id = li_dom.find(".__cmb_tl_antenna").attr("value")
-                    // リストのコンボ値のDOMを生成
-                    let options = ''
-                    antennas.forEach(a => options += `
-                        <option value="${a.id}"${a.id == antenna_id ? ' selected' : ''}>${a.name}</option>
-                    `)
-                    li_dom.find('.__cmb_tl_antenna').removeAttr("value").html(options)
-                    li_dom.find(".lbl_antenna").show()
-                    li_dom.find(".lbl_channel").hide()
-                    li_dom.find(".lbl_list").hide()
-                    notification.done()
-                }).catch(error => {
-                    if (error == 'empty') { // 作成済みのアンテナがない
-                        li_dom.find('.__cmb_tl_type>option[value="home"]').prop("selected", true)
-                        li_dom.find('.__cmb_tl_type>option[value="antenna"]').prop("disabled", true)
-                        notification.error("このアカウントにはアンテナがありません.")
-                    } else // それ以外は単にリストの取得エラー
-                        notification.error("アンテナの取得で問題が発生しました.")
-                })
-                break
-            default: // リスト/チャンネル/アンテナ以外はウィンドウを閉じて終了
-                li_dom.find(".lbl_list").hide()
-                li_dom.find(".lbl_channel").hide()
-                li_dom.find(".lbl_antenna").hide()
-                break
-        }
-    })
-
+    $(document).on("change", "#pop_temporary_option .__cmb_tl_type", e => changeColTypeEvent($("#pop_temporary_option"), $(e.target).val()))
 
     /**
      * #Event #Change
@@ -1797,22 +1744,6 @@
 
     /**
      * #Event
-     * ブックマーク/お気に入り: OKボタン.
-     * => ブックマークを展開
-     */
-    $(document).on("click", "#pop_bookmark_option #__on_ex_bookmark_confirm", e => {
-        Account.get($("#__cmb_ex_bookmark_account").val()).getUserCache().then(user => user.createBookmarkWindow({
-            type: $("input.__opt_ex_bookmark_type:checked").val(),
-            layout: $("#__cmb_ex_bookmark_layout").val(),
-            expand_cw: $("#__chk_ex_bookmark_cw").prop("checked"),
-            expand_media: $("#__chk_ex_bookmark_media").prop("checked")
-        }))
-        // ミニウィンドウを閉じる
-        $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP"))
-    })
-
-    /**
-     * #Event
      * 一時タイムライン: OKボタン.
      * => 入力した設定内容で一時タイムラインを展開.
      */
@@ -1829,7 +1760,7 @@
      */
     $(document).on("click", "#__on_reply_close", e => $("#pop_extend_column").hide(...Preference.getAnimation("EXTEND_DROP")))
     $(document).on("click", "#__on_search_close", e => $("#pop_ex_timeline").hide(...Preference.getAnimation("EXTEND_DROP")))
-    $(document).on("click", "#__on_drive_media_cancel", e => $("#pop_dirve_window").hide(...Preference.getAnimation("FADE_STD")))
+    $(document).on("click", ".__on_drive_media_cancel", e => $(e.target).closest(".drive_window").find(".window_close_button").click())
     $(document).on("click", "#__on_ex_bookmark_cancel", e => $("#pop_bookmark_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#__on_ex_temporary_cancel", e => $("#pop_temporary_option").hide(...Preference.getAnimation("LEFT_DROP")))
     $(document).on("click", "#pop_lastest_release .window_close_button",

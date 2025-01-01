@@ -215,28 +215,30 @@ class Emojis {
     static async replaceRemoteAsync(jqelm) {
         if (jqelm.length == 0) return // マッチしてなかったらなにもしない
 
-        let text = jqelm.html()
-        // 文章中に存在するショートコードを抽出
-        const shortcodes = text.match(/:[a-zA-Z0-9_]+@.+:/g)
-        if (!shortcodes) return text // 絵文字がない場合はそのまま返却
-        const emoji_promises = []
-        shortcodes.forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
-            type: "POST",
-            url: `https://${code.substring(code.indexOf('@'), code.length -1)}/api/emoji`,
-            dataType: "json",
-            headers: { "Content-Type": "application/json" },
-            data: JSON.stringify({ "name": code.substring(1, code.indexOf('@')) })
-        }).then(data => { return {
-            shortcode: code,
-            url: data.url
-        }})))
-        // 取得に成功したショートコードを抜き出して置換処理を実行
-        const replace_text = await Promise.allSettled(emoji_promises).then(results => {
-            return results.filter(res => res.status == 'fulfilled').map(res => res.value)
-                .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
-                    `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
+        jqelm.each((index, elm) => {
+            let text = $(elm).html()
+            // 文章中に存在するショートコードを抽出
+            const shortcodes = text.match(/:[a-zA-Z0-9_]+@.+:/g)
+            if (!shortcodes) return text // 絵文字がない場合はそのまま返却
+
+            const emoji_promises = []
+            shortcodes.forEach(code => emoji_promises.push($.ajax({ // ショートコード毎にリクエスト送信
+                type: "POST",
+                url: `https://${code.substring(code.indexOf('@'), code.length -1)}/api/emoji`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({ "name": code.substring(1, code.indexOf('@')) })
+            }).then(data => { return {
+                shortcode: code,
+                url: data.url
+            }})))
+            // 取得に成功したショートコードを抜き出して置換処理を実行
+            Promise.allSettled(emoji_promises).then(results => {
+                return results.filter(res => res.status == 'fulfilled').map(res => res.value)
+                    .reduce((str, emoji) => str.replace(new RegExp(emoji.shortcode, 'g'),
+                        `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`), text)
+            }).then(replace => $(elm).html(replace))
         })
-        jqelm.html(replace_text)
     }
 
     /**

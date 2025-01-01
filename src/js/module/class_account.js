@@ -26,6 +26,7 @@ class Account {
 
         this.emoji_history = []
         this.reaction_history = []
+        this.captured_notes = new Map()
     }
 
     // Getter: プラットフォーム
@@ -429,8 +430,7 @@ class Account {
         let target_post = null
         let notification = null
         const target_url = url ?? obj.uri
-        if (obj && obj.type != 'notification') {
-            // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用(通知は除外)
+        if (obj) { // キャッシュオブジェクトを直接参照する場合はキャッシュオブジェクトを使用
             if (!['__menu_reply', '__menu_quote', '__menu_reaction'].includes(mode))
                 notification = Notification.progress("実行中です...")
             target_post = obj
@@ -911,6 +911,16 @@ class Account {
         })
         // 受信処理を設定
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
+
+        // Misskeyの場合はCaptureをキャッチする受信イベントを定義
+        if (this.platform == 'Misskey') this.socket.addEventListener("message", (event) => {
+            const data = JSON.parse(event.data)
+            if (data.type != 'noteUpdated') return
+
+            // アカウントのノートマップから対象のタイムラインを検索して
+            const tl_set = this.captured_notes.get(data.body.id)
+            tl_set.forEach(tl => tl.updateNote(data.body))
+        })
     }
 
     /**
@@ -1202,25 +1212,40 @@ class Account {
      * #Method #Ajax #jQuery
      * このアカウントが作成したクリップ一覧を取得する(Misskey専用)
      */
-    /*
     async getClips() {
         try {
-            const response = await $.ajax({
-                type: "POST",
-                url: `https://${this.pref.domain}/api/clips/list`,
-                dataType: "json",
-                headers: { "Content-Type": "application/json" },
-                data: JSON.stringify({ "i": this.pref.access_token })
-            })
-            // チャンネルをお気に入りしていない場合はreject
+            const response = await Promise.allSettled([
+                $.ajax({ // 自分の作ったクリップ
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/clips/list`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                }), $.ajax({ // お気に入りしたクリップ
+                    type: "POST",
+                    url: `https://${this.pref.domain}/api/clips/my-favorites`,
+                    dataType: "json",
+                    headers: { "Content-Type": "application/json" },
+                    data: JSON.stringify({ "i": this.pref.access_token })
+                })
+            ])
+
+            // TODO: お気に入りしたクリップは現状アクセス権がないので取得できない！
+            // 成功したステータスからクリップ情報をリスト化
             const clips = []
-            response.forEach(c => clips.push(new Clip(c, this)))
+            response.filter(res => res.status == 'fulfilled').map(res => res.value).forEach(r => r.forEach(c => clips.push({
+                "name": c.name,
+                "id": c.id
+            })))
+            // クリップを作っていない場合はreject
+            if (clips.length == 0) return Promise.reject('empty')
+
             return clips
         } catch (err) {
             console.log(err)
             return Promise.reject(err)
         }
-    }//*/
+    }
 
     /**
      * #Method #Ajax

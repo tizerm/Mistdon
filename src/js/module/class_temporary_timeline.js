@@ -85,6 +85,7 @@ class TemporaryTimeline extends Timeline {
             'channel_id': opt_elm.find(".__cmb_tl_channel").val(),
             'channel_name': opt_elm.find(".__cmb_tl_channel>option:checked").text(),
             'antenna_id': opt_elm.find(".__cmb_tl_antenna").val(),
+            'clip_id': opt_elm.find(".__cmb_tl_clip").val(),
             'exclude_reblog': opt_elm.find(".__chk_exclude_reblog").prop("checked"),
             'expand_cw': opt_elm.find(".__chk_expand_cw").prop("checked"),
             'expand_media': opt_elm.find(".__chk_expand_media").prop("checked"),
@@ -121,6 +122,7 @@ class TemporaryTimeline extends Timeline {
             'channel_id': pref.timeline_type == 'channel' ? pref.channel_id : null,
             'channel_name': pref.timeline_type == 'channel' ? pref.channel_name : null,
             'antenna_id': pref.timeline_type == 'antenna' ? pref.antenna_id : null,
+            'clip_id': pref.timeline_type == 'clip' ? pref.clip_id : null,
             'rest_url': tl_param.url,
             'socket_url': tl_param.socket_url,
             'query_param': tl_param.query_param,
@@ -171,15 +173,24 @@ class TemporaryTimeline extends Timeline {
      * @param window_key 表示する対象のウィンドウキー
      */
     loadTemporaryTimeline(window_key) {
-        this.group.status_map = new Map()
+        this.group.status_map.clear()
+        this.group.notification_map.clear()
         this.status_key_map = new Map()
         super.getTimeline().then(body => createScrollLoader({ // 下方向のローダーを生成
             data: body,
             target: $(`#${window_key}>.timeline>ul`),
             bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                data.forEach(p => this.group.addStatus(p, () => target.append(p.timeline_element)))
+                data.forEach(p => this.group.addStatus({
+                    post: p,
+                    target_elm: target,
+                    callback: (st, tgelm) => {
+                        tgelm.append(st.timeline_element)
+                        st.bindAdditionalInfoAsync(tgelm)
+                    }
+                }))
                 // max_idとして取得データの最終IDを指定
-                return data.pop()?.id
+                if (this.is_notification) return data.pop()?.notification_id
+                else return data.pop()?.id
             },
             load: async max_id => super.getTimeline(max_id)
         })).then(() => { // ロードが終わったらロード画面を削除してトップローダーを生成
@@ -203,7 +214,14 @@ class TemporaryTimeline extends Timeline {
         // ローダーを消して投稿をバインド
         const ul_elm = $(`#${this.timeline_key}`)
         $(`#${this.timeline_key}>.__on_temp_top_loader`).remove()
-        data.forEach(p => this.group.addStatus(p, () => ul_elm.prepend(p.timeline_element)))
+        data.forEach(p => this.group.addStatus({
+            post: p,
+            target_elm: ul_elm,
+            callback: (st, tgelm) => {
+                tgelm.prepend(st.timeline_element)
+                st.bindAdditionalInfoAsync(tgelm)
+            }
+        }))
 
         ul_elm.prepend(`<li class="__on_temp_top_loader">続きをロード</li>`)
         // スクロール位置を調整

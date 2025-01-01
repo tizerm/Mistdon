@@ -263,29 +263,6 @@ class Column {
         Column.setWidthLimit()
     }
 
-    /**
-     * #Method
-     * このカラムをリロードする
-     */
-    reload() {
-        // 一旦中身を全消去する
-        this.element.find(".col_loading").remove()
-        this.element.find("ul").empty()
-        this.element.find("ul").before(`
-            <div class="col_loading">
-                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                <span class="loading_text">Now Loading...</span>
-            </div>
-        `)
-
-        const rest_promises = []
-        this.status_map = new Map()
-        // カラムのタイムラインを走査して配列のAPI呼び出しパラメータを使ってタイムラインを生成
-        this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
-        // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
-        this.onLoadTimeline(rest_promises)
-    }
-
     // Getter: このカラムの右横のカラムを取得(ローテーション)
     get next() {
         let index = this.element.index(".column_box") + 1

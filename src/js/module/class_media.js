@@ -141,10 +141,12 @@ class Media {
     /**
      * #StaticMethod
      * Misskeyのドライブから参照したメディアファイルを追加してサムネイル表示する.
+     * 
+     * @param target 反映対象のドライブウィンドウのElement
      */
-    static async attachDriveMedia() {
+    static async attachDriveMedia(target) {
         const medias = []
-        $("#pop_dirve_window ul.drive_media_list input.__chk_drive_media:checked")
+        target.find("ul.drive_media_list input.__chk_drive_media:checked")
             .each((index, elm) => medias.push({
                 id: $(elm).val(),
                 url: $(elm).next().find("img").attr("src"),
@@ -159,7 +161,8 @@ class Media {
                 <img src="${media.url}" class="__img_attach media_from_drive" name="${media.id}"/>
             </li>
         `))
-        $("#pop_dirve_window").hide(...Preference.getAnimation("SLIDE_DOWN"))
+
+        target.closest(".drive_window").find(".window_close_button").click()
         $("#header>#post_options").show(...Preference.getAnimation("SLIDE_DOWN"))
     }
 
@@ -380,15 +383,39 @@ class Media {
      * @param address ドライブを開くアカウント
      */
     static openDriveWindow(address) {
-        // 一旦中身を消去
-        $("#pop_dirve_window>ul.drive_folder_list").empty()
-        $("#pop_dirve_window>ul.drive_media_list").empty()
-        $("#pop_dirve_window").prepend(`
-            <div class="col_loading">
-                <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
-                <span class="loading_text">Now Loading...</span>
-            </div>
-        `)
+        const uuid = crypto.randomUUID()
+        const window_key = `drive_window_${uuid}`
+        const account = Account.get(address)
+
+        createWindow({ // ウィンドウを生成
+            window_key: window_key,
+            html: `
+                <div id="${window_key}" class="drive_window __ignore_close_option ex_window">
+                    <h2><span>${address}</span></h2>
+                    <div class="window_buttons">
+                        <input type="checkbox" class="__window_opacity" id="__window_opacity_${uuid}"/>
+                        <label for="__window_opacity_${uuid}" class="window_opacity_button" title="透過"><img
+                            src="resources/ic_alpha.png" alt="透過"/></label>
+                        <button type="button" class="window_close_button" title="閉じる"><img
+                            src="resources/ic_not.png" alt="閉じる"/></button>
+                    </div>
+                    <ul class="drive_folder_list"></ul>
+                    <ul class="drive_media_list"></ul>
+                    <div class="col_loading">
+                        <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
+                        <span class="loading_text">Now Loading...</span>
+                    </div>
+                    <div class="footer">
+                        <button type="button" class="__on_drive_media_confirm close_button">OK</button>
+                        <button type="button" class="__on_drive_media_cancel close_button">キャンセル</button>
+                    </div>
+                </div>
+            `,
+            color: account.pref.acc_color,
+            resizable: true,
+            drag_axis: false,
+            resize_axis: "all"
+        })
 
         // フォルダを取得して表示
         Media.getFolders(address).then(body => {
@@ -398,16 +425,16 @@ class Media {
                     ${folder.name}
                 </li>
             `)
-            $("#pop_dirve_window>.drive_folder_list").html(html)
+            $(`#${window_key}>.drive_folder_list`).html(html)
         })
 
         // 参照したアドレスから過去のメディア(ドライブ)を取得
         Media.getRecentMedia(address, null, null).then(body => {
             // ロード画面を削除
-            $("#pop_dirve_window>.col_loading").remove()
+            $(`#${window_key}>.col_loading`).remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $("#pop_dirve_window>ul.drive_media_list"),
+                target: $(`#${window_key}>ul.drive_media_list`),
                 bind: (data, target) => {
                     data.forEach(m => target.append(m.li_element))
                     // max_idとして取得データの最終IDを指定
@@ -416,7 +443,6 @@ class Media {
                 load: async max_id => Media.getRecentMedia(address, null, max_id)
             })
         })
-        $("#pop_dirve_window").show(...Preference.getAnimation("FADE_STD"))
     }
 
     /**
@@ -424,12 +450,14 @@ class Media {
      * 対象のMisskeyアカウントのドライブからフォルダを開いて表示する.
      * 
      * @param address ドライブを開くアカウント
-     * @param folder_id MisskeyドライブのフォルダID
+     * @param target 反映対象のドライブウィンドウのElement
      */
-    static openFolder(address, folder_id) {
+    static openFolder(address, target) {
+        const folder_id = target.attr("name")
+        const target_window = target.closest(".drive_window")
         // 一旦中身を消去
-        $("#pop_dirve_window>ul.drive_media_list").empty()
-        $("#pop_dirve_window").prepend(`
+        target_window.find("ul.drive_media_list").empty()
+        target_window.prepend(`
             <div class="col_loading">
                 <img src="resources/illust/ani_wait.png" alt="Now Loading..."/><br/>
                 <span class="loading_text">Now Loading...</span>
@@ -440,10 +468,10 @@ class Media {
         const id = folder_id != '__root' ? folder_id : null
         Media.getRecentMedia(address, id, null).then(body => {
             // ロード画面を削除
-            $("#pop_dirve_window>.col_loading").remove()
+            target_window.find(".col_loading").remove()
             createScrollLoader({ // スクロールローダーを生成
                 data: body,
-                target: $("#pop_dirve_window>ul.drive_media_list"),
+                target: target_window.find("ul.drive_media_list"),
                 bind: (data, target) => {
                     data.forEach(m => target.append(m.li_element))
                     // max_idとして取得データの最終IDを指定
