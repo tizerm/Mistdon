@@ -22,6 +22,9 @@
                 target.closest(".account_box").find("h3").css("background-color", target.val())
             })
         })()
+        $("#header>h1").css("background-color", getRandomColor())
+        $("#account_list>h2").css("background-color", getRandomColor())
+        $("#account_auth>h2").css("background-color", getRandomColor())
         $(".__ui_sortable").sortable({
             axis: "y",
             delay: 100,

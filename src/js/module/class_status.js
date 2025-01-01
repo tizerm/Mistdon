@@ -1,18 +1,19 @@
 ﻿/**
  * #Class
- * 投稿、通知データを管理するクラス
+ * 投稿データを管理するクラス
  *
  * @author @tizerm@misskey.dev
  */
-class Status {
+class Status extends StatusLayout {
     // コンストラクタ: APIから来たステータスデータを受け取って生成
     constructor(json, timeline, account) {
+        super() // StatusLayoutのコンストラクタを呼び出し(何もしない)
         // タイムラインから呼び出す場合はtimelineとaccountが渡ってくる
         // 個別の投稿をAPIから呼び出した場合はtimelineがnullで渡ってくる(accountは呼び出し元アカウント)
         this.from_timeline = timeline
         this.user_profile_flg = timeline?.parent_column == null
         this.from_account = account
-        this.type = this.from_timeline?.pref?.timeline_type == 'notification' ? 'notification' : 'post'
+        this.type = this.from_timeline?.is_notification ? 'notification' : 'post'
         this.status_id = json.id // 投稿ではなく元のステータスデータに対応するID
         this.platform = this.from_account?.platform ?? this.from_timeline?.platform
         const host = this.from_timeline?.host ?? this.from_account.pref.domain
@@ -22,13 +23,12 @@ class Status {
         else if (timeline?.__extended_timeline == 'detail_post') // 詳細表示の場合
             this.detail_flg = true
 
-        // プラットフォーム判定
         let original_date = null // 生成キーに使用するのでJSON日付のほうも一時保存
         let data = null
 
+        // プラットフォーム判定
         switch (this.platform) {
             case 'Mastodon': // Mastodon
-                this.notif_type = this.type == 'notification' ? json.type : null
                 this.allow_context = !(this.type == 'notification' && ['follow', 'follow_request'].includes(json.type))
                 original_date = json.created_at
                 // ブーストフラグとブースト関係の専用項目
@@ -41,7 +41,6 @@ class Status {
                 data = this.reblog ? json.reblog : json
                 this.uri = json.status?.url ?? data.url // 投稿URL(前はリプライ時のURL)
                 this.id = data.id // 投稿ID
-                this.notif_id = json.status?.id // 通知のID
 
                 this.use_emoji_cache = false // Mastodonの場合絵文字キャッシュは使わない
                 this.remote_flg = data.account.acct.match(/@/)
@@ -68,15 +67,7 @@ class Status {
                 this.allow_reblog = this.visibility == 'public' || this.visibility == 'unlisted'
                 this.reply_to = data.in_reply_to_id
                 this.cw_text = data.spoiler_text // CWテキスト
-                if (this.notif_type && !['follow', 'follow_request'].includes(this.notif_type)) {
-                     // 本文(通知の場合はstatusから)
-                    this.content = data.status?.content
-                    if (data.status) data = data.status
-                    else { // TODO: statusがnullになる場合は一旦表示をやめる
-                        this.__internal_error = true
-                        return
-                    }
-                } else this.content = data.content
+                this.content = data.content
                 this.emojis = new Emojis({
                     host: host,
                     platform: 'Mastodon',
@@ -139,9 +130,8 @@ class Status {
 
                 break
             case 'Misskey': // Misskey
-                this.notif_type = this.type == 'notification' ? json.type : null
                 this.allow_context = !(this.type == 'notification' && json.type == 'follow')
-                if (this.notif_type == 'achievementEarned') return // TODO: 実績は一旦除外
+                if (json.type == 'achievementEarned') return // TODO: 実績は一旦除外
 
                 original_date = json.createdAt
                 // リノートフラグとリノート関係の専用項目
@@ -156,11 +146,9 @@ class Status {
 
                 // ノートURL生成
                 // uriが入っていない場合は自鯖の投稿なのでホストからURIを生成
-                if (!data.uri) { // uriが入っていない場合は自鯖の投稿
-                    // 通知の場合は本体のIDを参照
-                    if (this.notif_type) this.uri = `https://${host}/notes/${data.note?.renote?.id ?? data.note?.id}`
-                    else this.uri = `https://${host}/notes/${data.id}`
-                } // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
+                if (!data.uri) // uriが入っていない場合は自鯖の投稿
+                    this.uri = `https://${host}/notes/${data.id}`
+                // URIが入っていてプラットフォームがMisskeyの場合はuriを参照
                 else if (data.user?.instance?.softwareName == "misskey") this.uri = data.uri
                 // TODO: それ以外は一旦Mastodonとして解釈する(Misskey v11も同じ)
                 else this.uri = data.url ?? data.uri
@@ -168,7 +156,6 @@ class Status {
 
                 // Misskeyの場合、自鯖の絵文字が渡ってこないのでキャッシュを利用する
                 this.use_emoji_cache = !data.uri
-                if (this.notif_type == 'reaction') this.reaction_emoji = data.reaction // リアクションを保存
                 this.remote_flg = !!data.user?.host
 
                 // ユーザーに関するデータ
@@ -192,16 +179,7 @@ class Status {
                 this.channel_name = data.channel?.name
                 this.reply_to = data.replyId
                 this.cw_text = data.cw // CWテキスト
-                if (this.notif_type == 'renote') { // リノート通知の場合は本文をリノート対象ノートにする
-                    this.content = data.note.renote.text
-                    this.notif_id = data.note.renote.id // 通知のID
-                    data = data.note.renote
-                } else if (this.notif_type) { // リノート以外の通知の場合は本文を対象ノートにする
-                    this.content = data.note?.text
-                    this.notif_id = data.note?.id // 通知のID
-                    data = data?.note ?? data
-                } else this.content = data.text // それ以外は通常の本文テキストを参照
-
+                this.content = data.text // それ以外は通常の本文テキストを参照
                 if (this.content) { // 投稿本文の整形と字数計測
                     this.content_length = this.content // カスタム絵文字は4文字、URLは20字扱い
                         .replace(new RegExp('https?://[^ 　\n]+', 'g'), '12345678901234567890')
@@ -223,6 +201,7 @@ class Status {
                     platform: 'Misskey',
                     emojis: data.note?.renote?.emojis ?? data.note?.emojis ?? data.emojis
                 })
+
                 // 引用ノートがある場合は引用先を設定
                 if (this.quote_flg) this.quote = new Status(data.renote, timeline, account)
 
@@ -253,8 +232,7 @@ class Status {
                 this.hashtags = data.tags
                 this.count_reply = data.repliesCount
                 this.count_reblog = data.renoteCount
-                // リアクションがある場合はリアクション一覧をリスト化する
-                if (data.reactions) {
+                if (data.reactions) { // リアクションがある場合はリアクション一覧をリスト化する
                     const reactions = []
                     Object.keys(data.reactions).forEach(key => reactions.push({
                         shortcode: key,
@@ -263,6 +241,9 @@ class Status {
                     }))
                     this.reactions = reactions
                     this.count_fav = reactions.reduce((sum, react) => sum + Number(react.count), 0)
+                } else { // なかったら空のリストを作成
+                    this.reactions = []
+                    this.count_fav = 0
                 }
                 this.reaction_self = data.myReaction
                 break
@@ -276,6 +257,9 @@ class Status {
         this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${original_date.substring(0, original_date.lastIndexOf('.'))}@${this.user?.full_address}`
         //this.status_key = `${original_date}@${this.user?.full_address}`
+
+        // 追加で取得する情報がある場合はHTTP Requestで取得
+        this.fetchAdditionalInfoAsync()
     }
 
     // Getter: 挿入先カラム
@@ -387,17 +371,67 @@ class Status {
     }
 
     /**
+     * #Method #Async
+     * この投稿に対して追加でサーバーから取得する情報の取得を実行して内部Promiseに保持する.
+     */
+    async fetchAdditionalInfoAsync() {
+        if (Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression && this.reblog && this.remote_flg)
+            // リモートのBTRNは現地情報を直接取得
+            this.__prm_remote_status = Status.getStatus(this.uri, true)
+    }
+
+    /**
+     * #Method #Async
+     * この投稿をDOMに反映したあとにあとから非同期で取得して表示する情報を追加でバインドする.
+     * 
+     * @param tgul この通知をアペンドした親のDOM Element
+     */
+    async bindAdditionalInfoAsync(tgul) {
+        const target_li = tgul.find(`li[id="${this.status_key}"]`)
+
+        // リモートのBTRNのインプレッションを現地直接表示
+        this.__prm_remote_status?.then(post => {
+            // インプレッションセクションを最新の状態で置き換える
+            target_li.find('.impressions').replaceWith(post.impression_section)
+            // Misskeyの場合未変換のカスタム絵文字を置換
+            if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
+        })
+
+        // 外部インスタンスの投稿はカスタム絵文字を現地から非同期取得
+        if (this.from_timeline?.pref.external && this.platform == 'Misskey') {
+            // Intersection Observerを生成(表示されたときだけ取得)
+            const observer = new IntersectionObserver((entries, obs) => (async () => {
+                const e = entries[0]
+                if (!e.isIntersecting) return // 見えていないときは実行しない
+                console.log('Async Bind: ' + this.uri)
+                obs.disconnect()
+
+                Emojis.replaceDomAsync(target_li.find(".username"), this.host) // ユーザー名
+                Emojis.replaceDomAsync(target_li.find(".label_cw"), this.host) // CWテキスト
+                Emojis.replaceDomAsync(target_li.find(".main_content"), this.host) // 本文
+                Emojis.replaceDomAsync(target_li.find(".reaction_section"), this.host) // リアクション
+            })(), {
+                root: tgul.get(0),
+                rootMargin: "0px",
+                threshold: 0.25,
+            })
+            observer.observe(target_li.get(0))
+        }
+    }
+
+    /**
      * #StaticMethod
      * URLから投稿データをリモートから直接取得する
      * 
      * @param url ステータスURL
      */
-    static async getStatus(url) {
+    static async getStatus(url, ignore_notify) {
         if (url.indexOf('/') < 0) { // URLの様式になっていない場合は無視
             Notification.error("詳細表示のできない投稿です.")
             return
         }
-        const notification = Notification.progress("投稿の取得中です...")
+        let notification = null
+        if (!ignore_notify) notification = Notification.progress("投稿の取得中です...")
         // URLパターンからプラットフォームを判定
         const spl_url = url.split('/')
         let platform = null
@@ -417,10 +451,10 @@ class Status {
 
         try { // URL解析した情報からステータス取得処理を呼び出し
             const post = await Status.getStatusById(domain, platform, id)
-            notification.done()
+            notification?.done()
             return post
         } catch (err) {
-            notification.error(err)
+            notification?.error(err)
         }
     }
 
@@ -621,16 +655,12 @@ class Status {
         if (!this.popout_flg && !this.detail_flg && this.mute_warning) return this.filtered_elm
         switch (pref) {
             case 'chat': // チャット
-                if (this.type != 'notification' || this.notif_type == 'poll'
-                    || this.notif_type == 'mention' || this.notif_type == 'reply' || this.notif_type == 'quote')
-                    return this.chat_elm
-                else this.list_elm // 通知はリスト表示にする
+                return this.chat_elm
             case 'list': // リスト
                 return this.list_elm
             case 'media': // メディア
-                // 通知は通常と同じ、メディアがあるときだけ専用の様式、あとはリストと同じ
-                if (this.type == 'notification') return this.element
-                else if (this.medias.length > 0) return this.media_elm
+                // メディアがあるときだけ専用の様式、あとはリストと同じ
+                if (this.medias.length > 0) return this.media_elm
                 else return this.list_elm
             case 'gallery': // ギャラリー
                 return this.gallery_elm
@@ -647,264 +677,9 @@ class Status {
 
     // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
     get element() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
+        // ベースレイアウトHTMLを生成
+        const jqelm = $($.parseHTML(super.getHtmlNormal(false)))
 
-        let target_emojis = null
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="normal_layout">`
-        if (this.type == 'notification') { // 通知タイプによって表示を変更
-            switch (this.notif_type) {
-                case 'favourite': // お気に入り
-                    html += `
-                        <div class="label_head label_favorite">
-                            <span>Favorited by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'reblog': // ブースト
-                    html += `
-                        <div class="label_head label_reblog">
-                            <span>Boosted by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'reaction': // 絵文字リアクション
-                    html += `
-                        <div class="label_head label_favorite">
-                            <span>Reaction from @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'renote': // リノート
-                    html += `
-                        <div class="label_head label_reblog">
-                            <span>Renoted by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'follow': // フォロー通知
-                    html += `
-                        <div class="label_head label_follow">
-                            <span>Followed by @${this.user.id}</span>
-                        </div>
-                    `
-                    break
-                case 'follow_request': // フォローリクエスト
-                    html += `
-                        <div class="label_head label_follow">
-                            <span>Followe Requested by @${this.user.id}</span>
-                        </div>
-                    `
-                default: // リプライの場合はヘッダ書かない
-                    break
-            }
-        } else if (this.reblog) { // ブースト/リノートのヘッダ
-            const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
-             html += `
-                <div class="label_head label_reblog">
-                    <span>${label} by @${this.reblog_by}</span>
-                </div>
-            `
-        }
-
-        // プロフィール表示の場合はユーザーアカウント情報を省略
-        if (!this.profile_post_flg || this.reblog) {
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-            // ユーザーアカウント情報
-            if (this.mini_normal) { // ノーマル2レイアウトの場合
-                html += `
-                    <div class="user prof_normal2">
-                        <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                        ${this.role_section}
-                        <div class="name_info">
-                `; switch (Preference.GENERAL_PREFERENCE.normal_name_format) {
-                    case 'both_prename': // ユーザーネーム+ユーザーID
-                        html += `
-                            <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                            <span class="userid">
-                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
-                            </span>
-                        `
-                        break
-                    case 'both_preid': // ユーザーID+ユーザーネーム
-                        html += `
-                            <span class="userid">
-                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
-                            </span>
-                            <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                        `
-                        break
-                    case 'id': // ユーザーIDのみ
-                        html += `
-                            <span class="userid">
-                                <a class="__lnk_userdetail" name="@${this.user.full_address}">@${this.user.id}</a>
-                            </span>
-                        `
-                        break
-                    case 'name': // ユーザーネームのみ
-                        html += `
-                            <h4 class="username">
-                                <a class="__lnk_userdetail" name="@${this.user.full_address}">${target_emojis.replace(this.user.username)}</a>
-                            </h4>`
-                        break
-                    default:
-                        break
-                }
-                html += '</div></div>'
-            } else html /* ノーマルレイアウトの場合 */ += `
-                <div class="user">
-                    <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                    ${this.role_section}
-                    <div class="name_info">
-                        <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                        <span class="userid">
-                            <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                                @${this.detail_flg || this.popout_flg ? this.user.full_address : this.user.id}
-                            </a>
-                        </span>
-                    </div>
-                </div>
-            `
-        }
-        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
-            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
-        { // 投稿本文領域
-            html += '<div class="content">'
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-            if (this.cw_text) html /* CWテキスト */ += `
-                <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
-            `; if (!this.popout_flg && !this.profile_post_flg && !this.detail_flg // 文字数制限
-                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.default) html += `
-                <div class="hidden_content"><p>
-                    ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.default))}...
-                </p></div>
-                <div class="content_length_limit warn_label label_limitover">省略: ${this.content_length}字</div>
-            `; else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
-            html += '</div>'
-        }
-        if (this.poll_options) { // 投票
-            const label_limit = this.poll_unlimited // 投票期限テキスト
-                ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
-            html /* 投票ブロック */ += `
-                <div class="post_poll">
-                    <div class="options">${this.poll_buttons}</div>
-                    <div class="poll_info">${label_limit}</div>
-                </div>
-            `
-        }
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
-            html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
-        if (this.reaction_emoji) { // リアクション絵文字がある場合`
-            let alias = null
-            if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                if (emoji) alias = `<img src="${emoji.url}" class="inline_emoji" alt=":${emoji.shortcode}:"/>`
-                else alias = `${this.reaction_emoji} (未キャッシュです)`
-            } else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-            html += `<div class="reaction_emoji">${alias}</div>`
-        }
-        if (this.medias.length > 0) // メディアセクション
-            html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
-        // 投稿属性セクション
-        html += this.attribute_section
-        // 一部の通知はインプレッション数値を表示する
-        if (Preference.GENERAL_PREFERENCE.enable_notified_impression
-            && ['favourite', 'reblog', 'reaction', 'renote'].includes(this.notif_type)) {
-            html += `<div class="notified_impression">
-                <span class="count_reblog counter label_reblog" title="ブースト/リノート数">${this.count_reblog}</span>`
-            switch (this.platform) {
-                case 'Mastodon': // Mastodon
-                    html += `<span class="count_fav counter label_favorite" title="お気に入り数">${this.count_fav}</span>`
-                    break
-                case 'Misskey': // Misskey
-                    html += `<span class="count_reaction_total counter label_favorite" title="リアクション合計">${this.count_fav}</span>`
-                    break
-                default:
-                    break
-            }
-            html += '</div>'
-        } else if (!this.detail_flg) html += this.impression_section
-
-        if (this.detail_flg) { // 詳細表示の場合はリプライ、BTRN、ふぁぼ数を表示
-            html += '<div class="detail_info">'
-            // カード
-            if (this.card) html += `
-                <a href="${this.card.url}" class="card_link __lnk_external">
-                    <div class="descriptions">
-                        <h6>${this.card.title}</h6>
-                        <div class="desc_text">${this.card.description}</div>
-                    </div>
-                </a>`
-            if (this.hashtags) { // ハッシュタグ
-                html += '<div class="hashtags">'
-                this.hashtags.forEach(tag => html += `<a class="__on_detail_hashtag" name="${tag}">#${tag}</a>`)
-                html += '</div>'
-            }
-            // リプライ数とブースト/リノート数
-            html += `
-                <span class="count_reply counter label_reply" title="リプライ数">${this.count_reply}</span>
-                <span class="count_reblog counter label_reblog" title="ブースト/リノート数">${this.count_reblog}</span>
-            `; switch (this.platform) {
-                case 'Mastodon': // Mastodon
-                    // ふぁぼの表示だけする
-                    html += `<span class="count_fav counter label_favorite" title="お気に入り数">${this.count_fav}</span>`
-                    break
-                case 'Misskey': // Misskey
-                    let reaction_html = '' // リアクションHTMLは後ろにつける
-                    let reaction_count = 0 // リアクション合計値を保持
-                    this.reactions?.forEach(reaction => {
-                        if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
-                            <span class="count_reaction">${reaction.count}
-                            <img src="${reaction.url}" class="inline_emoji"/></span>
-                        `; else if (reaction.shortcode.lastIndexOf('@') > 0) reaction_html /* 取得できなかった絵文字 */ += `
-                            <span class="count_reaction __yet_replace_reaction">
-                                ${reaction.count}
-                                :${reaction.shortcode.substring(1, reaction.shortcode.lastIndexOf('@'))}:
-                            </span>
-                        `; else reaction_html /* それ以外はそのまま表示 */ += `
-                            <span class="count_reaction">
-                                ${reaction.count} ${reaction.shortcode}
-                            </span>
-                        `
-                        reaction_count += Number(reaction.count)
-                    })
-                    html /* リアクション合計とリアクション一覧を表示 */ += `
-                        <span class="count_reaction_total counter label_favorite" title="リアクション合計">
-                            ${reaction_count}
-                        </span>
-                        <div class="count_reaction_list">${reaction_html}</div>
-                    `
-                    break
-                default:
-                    break
-            }
-            html += '</div>'
-        }
-        html /* 投稿(ステータス)日付 */ += `
-            <div class="post_footer">
-                <a class="created_at __on_datelink">${this.date_text}</a>
-        `
-
-        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
-            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
-            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
-        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
-                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
-            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
-        }
-
-        if (this.profile_post_flg && this.channel_id)
-            // ユーザープロフィールのチャンネル投稿の場合はチャンネル名を表示
-            html += `<div class="from_address from_channel">${this.channel_name}</div>`
-        html += `
-                </div>
-            </li>
-        `
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         if (this.profile_post_flg && this.channel_id) // チャンネルIDから色をハッシュ化
             jqelm.find('.post_footer>.from_address').css("background-color", getHashColor(this.channel_id))
@@ -945,109 +720,10 @@ class Status {
 
     // Getter: チャットタイプの投稿HTMLを生成して返却
     get chat_elm() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
-
+        // ベースレイアウトHTMLを生成
         const self_flg = `@${this.user.full_address}` == this.from_account?.full_address
-        let target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="chat_timeline">`
-        html /* ユーザーアカウント情報 */ += `
-            <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                ${this.role_section}
-                <span class="userid">
-                    <a class="__lnk_userdetail" name="@${this.user.full_address}">
-        `; switch (Preference.GENERAL_PREFERENCE.chat_name_format) {
-            case 'both_prename': // ユーザーネーム+ユーザーID
-                html += `
-                    <span class="inner_name">${target_emojis.replace(this.user.username)}</span>
-                    <span class="inner_id">@${this.user.id}</span>
-                `
-                break
-            case 'both_preid': // ユーザーID+ユーザーネーム
-                html += `
-                    <span class="inner_id">@${this.user.id}</span>
-                    <span class="inner_name">${target_emojis.replace(this.user.username)}</span>
-                `
-                break
-            case 'id': // ユーザーIDのみ
-                html += `<span class="inner_id">@${this.user.id}</span>`
-                break
-            case 'name': // ユーザーネームのみ
-                html += `<span class="inner_name">${target_emojis.replace(this.user.username)}</span>`
-                break
-            default:
-                break
-        }
-        html /* ユーザーアカウント情報 */ += `
-                    </a>
-                </span>
-                <a class="created_at __on_datelink">${this.date_text}</a>
-            </div>
-        `
-        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
-            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
-        html += '<div class="content">'
-        { // 投稿本文領域
-            // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-            target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-            if (this.cw_text) html /* CWテキスト */ += `
-                <a class="expand_header warn_label label_cw">${target_emojis.replace(this.cw_text)}</a>
-            `; if (!this.profile_post_flg && !this.detail_flg // 文字数制限
-                && this.content_length > Preference.GENERAL_PREFERENCE.contents_limit.chat) html += `
-                <div class="hidden_content"><p>
-                    ${target_emojis.replace(this.content_text.substring(0, Preference.GENERAL_PREFERENCE.contents_limit.chat))}...
-                </p></div>
-                <div class="content_length_limit warn_label label_limitover">省略: ${this.content_length}字</div>
-            `
-            else html += `<div class="main_content">${target_emojis.replace(this.content)}</div>`
-        }
+        const jqelm = $($.parseHTML(super.getHtmlChat(false, self_flg)))
 
-        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
-            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
-            html += `<div class="from_address">
-                <div class="from_channel"><span>${this.from_timeline?.pref?.channel_name}</span></div>
-            </div>`
-        if (this.from_group?.pref?.multi_user && !self_flg) {
-            if (this.from_timeline?.pref.external) // 外部インスタンスの場合
-                html += `<div class="from_address">
-                    <div class="from_external ${this.from_timeline?.pref.platform}">
-                        <span>${this.from_timeline?.pref.host}</span>
-                    </div>
-                </div>`
-            else html += `<div class="from_address">
-                <div class="from_auth_user"><span>${this.from_account.full_address}</span></div>
-            </div>`
-        }
-
-        html += '</div>'
-        if (this.reblog) { // ブースト/リノートのヘッダ
-            const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
-            html += `
-                <div class="label_head label_reblog">
-                    <span>${label} by @${this.reblog_by}</span>
-                </div>
-            `
-        }
-        if (this.poll_options) html /* 投票ブロック */ += `
-            <div class="post_poll">
-                <div class="options">${this.poll_buttons}</div>
-            </div>
-        `
-
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
-            html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.chat)
-        if (this.medias.length > 0) // メディアセクション
-            html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
-        // 投稿属性セクション
-        html += this.attribute_section
-        // インプレッション(反応とリアクション)
-        html += this.impression_section
-        html += `
-            </li>
-        `
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
         jqelm.find('.from_address>div').css("background-color", this.account_color)
         jqelm.find('.from_address>.from_auth_user').css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
         if (this.reblog) { // BTRNにはクラスをつけて背景をセット
@@ -1079,53 +755,9 @@ class Status {
 
     // Getter: リストタイプの投稿HTMLを生成して返却
     get list_elm() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
-        const notif_flg = this.type == 'notification'
+        // ベースレイアウトHTMLを生成
+        const jqelm = $($.parseHTML(super.getHtmlList()))
 
-        let target_emojis = null
-        let html = `
-            <li id="${this.status_key}" name="${this.uri}" class="short_timeline">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                <div class="content">
-        `
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CW時はCWのみ */ += `
-                    <span class="main_content label_cw">${target_emojis.replace(this.cw_text)}</span>
-        `; else if (notif_flg && ['follow', 'follow_request'].includes(this.notif_type))
-            html /* フォローの場合はユーザーアドレス */ += `
-                    <span class="main_content">@${this.user.full_address}</span>
-        `; else html /* 本文(マークアップを無視して1行だけ) */ += `
-                    <span class="main_content">${target_emojis.replace(this.content_text)}</span>
-        `
-        html += '</div>'
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
-            const media = this.medias[0]
-            let thumbnail = media.thumbnail
-            if (this.sensitive) thumbnail = 'resources/ic_warn.png'
-            else if (!thumbnail) thumbnail = 'resources/illust/mitlin_404.jpg'
-            html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
-                <div class="list_media">
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
-                        <img src="${thumbnail}" class="media_preview"/>
-                    </a>
-                </div>
-            `
-        }
-        if (notif_flg) { // 通知の場合後ろにアイコンを配置
-            html /* 最初の1枚だけ表示(センシの場合は！アイコンのみ) */ += `
-                <div class="notif_footer">
-                    <img src="" class="ic_notif_type"/>
-            `; if (this.from_group?.pref?.multi_user) // マルチアカウントカラムの場合は後ろにアイコン表示
-                html += `<img src="${this.from_account?.pref.avatar_url}" class="ic_target_account"/>`
-            html += '</div>'
-        }
-        html += `
-            </li>
-        `
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
         // フォロ限の場合はブースト/リノート禁止クラスを付与
         if (!this.allow_reblog) jqelm.closest('li').addClass('reblog_disabled')
         // フォロー通知の場合はコンテキストメニューを禁止する
@@ -1137,128 +769,15 @@ class Status {
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         // 時間で色分け
         jqelm.closest('li').css('border-left-color', this.relative_time.color)
-        if (notif_flg) {
-            jqelm.closest('li').addClass('short_notification')
-            switch (this.notif_type) {
-                case 'favourite': // お気に入り
-                    jqelm.closest('li').addClass('favorited_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_favorite.png')
-                    break
-                case 'reblog': // ブースト
-                case 'renote': // リノート
-                    jqelm.closest('li').addClass('rebloged_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_reblog.png')
-                    break
-                case 'reaction': // 絵文字リアクション
-                    jqelm.closest('li').addClass('favorited_post')
-                    jqelm.find('.ic_notif_type').remove() // 一旦消す
-                    let alias = null
-                    if (this.reaction_emoji.match(/^:[a-zA-Z0-9_]+:$/g)) { // カスタム絵文字
-                        const emoji = this.host_emojis.emoji_map.get(this.reaction_emoji)
-                        if (emoji) alias = `<img src="${emoji.url}" class="ic_notif_type"/>`
-                        else alias = '×'
-                    } else if (this.reaction_emoji.match(/^[a-zA-Z0-9\.\-:@_]+$/g)) // リモートの絵文字
-                        alias = '<img src="resources/ic_emoji_remote.png" class="ic_notif_type"/>'
-                    else alias = this.reaction_emoji // Unicode絵文字はそのまま渡す
-                    jqelm.find('.notif_footer').prepend(alias)
-                    break
-                case 'follow':
-                case 'follow_request': // フォロー通知
-                    jqelm.closest('li').addClass('self_post')
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
-                    break
-                case 'poll': // 投票終了
-                    jqelm.find('.ic_notif_type').attr('src', 'resources/ic_poll.png')
-                    break
-                default: // リプライ、引用の場合はアイコン削除
-                    jqelm.find('.ic_notif_type').remove()
-                    break
-            }
-        }
 
         return jqelm
     }
 
     // Getter: メディアタイプのHTMLを生成して返却
     get media_elm() {
-        if (this.notif_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
+        // ベースレイアウトHTMLを生成
+        const jqelm = $($.parseHTML(super.getHtmlMedia(false)))
 
-        let target_emojis = null
-        let html /* name属性にURLを設定 */ = `<li id="${this.status_key}" name="${this.uri}" class="media_timeline">`
-        if (this.reblog) { // ブースト/リノートのヘッダ
-            const label = this.platform == 'Misskey' ? "Renoted" : "Boosted"
-             html += `
-                <div class="label_head label_reblog">
-                    <span>${label} by @${this.reblog_by}</span>
-                </div>
-            `
-        }
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.user.emojis
-        html /* ユーザーアカウント情報 */ += `
-            <div class="user">
-                <img src="${this.user.avatar_url}" class="usericon" name="@${this.user.full_address}"/>
-                ${this.role_section}
-                <div class="name_info">
-                    <h4 class="username">${target_emojis.replace(this.user.username)}</h4>
-                    <span class="userid">
-                        <a class="__lnk_userdetail" name="@${this.user.full_address}">
-                            @${this.user.id}
-                        </a>
-                    </span>
-                </div>
-            </div>
-        `
-        if (Preference.GENERAL_PREFERENCE.enable_remote_label && this.remote_flg) // リモートラベルを表示
-            html += `<div class="remote_label __on_remote_detail">${this.user_host}</div>`
-        if (this.medias.length > 0) { // メディアセクション
-            let img_class = 'img_grid_single'
-            if (this.medias.length > 4) img_class = 'img_grid_16'
-            else if (this.medias.length > 1) img_class = 'img_grid_4'
-            html += this.bindMediaSection(img_class)
-        }
-        html += `
-            <div class="content">
-        `
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.emojis
-        if (this.cw_text) html /* CWテキスト */ += `
-            <div class="main_content content_length_limit warn_label label_cw">
-                <span class="inner_content">${target_emojis.replace(this.cw_text)}</span>
-        `; else html /* 本文(絵文字を置換) */ += `
-            <div class="main_content content_length_limit expand_label label_limitover">
-                <span class="inner_content">${target_emojis.replace(this.content_text)}</span>
-        `
-
-        html += `
-                    <span class="break">&nbsp;</span>
-                </div>
-            </div>
-        `
-        // 投稿属性セクション
-        html += this.attribute_section
-        // インプレッション(反応とリアクション)
-        html += this.impression_section
-        html /* 投稿(ステータス)日付 */ += `
-            <div class="post_footer">
-                <a class="created_at __on_datelink">${this.date_text}</a>
-        `
-
-        if (this.from_group?.pref?.multi_timeline && this.from_timeline?.pref?.timeline_type == 'channel')
-            // チャンネルでタイムラインが複数ある場合、チャンネル名でフッタを生成
-            html += `<div class="from_address from_channel">${this.from_timeline?.pref?.channel_name}</div>`
-        else if (this.from_group?.pref?.multi_user) { // マルチアカウントカラムの場合は表示元ユーザーを表示
-            if (this.from_timeline?.pref?.external) // 外部インスタンスの場合はホスト名を表示
-                html += `<div class="from_address from_external ${this.from_timeline?.pref.platform}">From ${this.from_timeline?.pref.host}</div>`
-            else html += `<div class="from_address from_auth_user">From ${this.from_account.full_address}</div>`
-        }
-        html += `
-                </div>
-            </li>
-        `
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
         jqelm.find('.post_footer>.from_address').css("background-color", this.account_color)
         jqelm.find('.post_footer>.from_address.from_auth_user')
             .css("background-image", `url("${this.from_account?.pref.avatar_url}")`)
@@ -1284,222 +803,23 @@ class Status {
     }
 
     // Getter: ギャラリータイプのHTMLを生成して返却
-    get gallery_elm() {
-        // メディアごとにタイルブロックを生成
-        let html = ''
-        this.medias.forEach(media => {
-            let thumbnail = media.thumbnail
-            if (!this.from_timeline?.pref?.expand_media && media.sensitive) thumbnail = 'resources/illust/mitlin_nsfw.jpg'
-            else if (media.type == 'audio') thumbnail = 'resources/illust/ic_recode.jpg'
-            else if (!thumbnail) thumbnail = 'resources/illust/mitlin_404.jpg'
-            html /* name属性にURLを設定 */ += `
-                <li id="${this.status_key}" name="${this.uri}" class="gallery_timeline">
-                    <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                        class="__on_media_expand${media.sensitive ? ' warn_sensitive' : ''}">
-                        <img src="${thumbnail}" class="media_preview"/>
-                    </a>
-                </li>
-            `
-        })
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        return $($.parseHTML(html))
-    }
+    get gallery_elm() { return $($.parseHTML(super.getHtmlGallery())) }
 
     // Getter: マルチレイアウトのHTML返却
     get mix_element() {
         // メディア(無視する場合は後続の設定を使う)
         if (this.medias.length > 0 && this.from_group.pref.multi_layout_option.media != 'ignore')
             return this.getLayoutElement(this.from_group.pref.multi_layout_option.media)
+        else if (this.mergable) // 通知のうちまとめ表示可能なもの
+            return this.getLayoutElement(this.from_group.pref.multi_layout_option.notification)
         // ブースト/リノート(メディアの次に優先)
         else if (this.reblog) return this.getLayoutElement(this.from_group.pref.multi_layout_option.reblog)
-        else if (this.type == 'notification') // 通知
-            return this.getLayoutElement(this.from_group.pref.multi_layout_option.notification)
         // 通常の投稿
         else return this.getLayoutElement(this.from_group.pref.multi_layout_option.default)
     }
 
     // Getter: Mastodonでフィルターされた投稿を表示するHTMLを返却
-    get filtered_elm() {
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        return $($.parseHTML(`
-            <li id="${this.status_key}" name="${this.uri}" class="filtered_timeline">
-                <span>フィルター: ${this.mute_warning}</span>
-            </li>
-        `))
-    }
-
-    /**
-     * #Method
-     * メディア表示セクションのHTMLを返却.
-     * 
-     * @param img_class 付与するグリッドサイズクラス
-     */
-    bindMediaSection(img_class) {
-        let html = '<div class="media">'
-        if (this.sensitive) html /* 閲覧注意 */ += `
-            <a class="expand_header label_sensitive">閲覧注意の画像があります</a>
-            <div class="media_content">
-        `; else html += '<div class="media_content">'
-        // アスペクト比をリンクオプションとして設定
-        this.medias.forEach(media => {
-            if (media.type == 'audio') html /* 音声ファイル(サムネなしで直接埋め込む) */+= `
-                <audio controls src="${media.url}" preload="none"></audio>
-            `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
-                <a href="${media.url}" type="${media.type}" name="${media.aspect}"
-                    class="__on_media_expand ${img_class}">
-                    <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
-                </a>
-            `
-        })
-        html += `
-                </div>
-            </div>
-        `
-        return html
-    }
-
-    /**
-     * #Method
-     * 引用表示セクションのHTMLを返却.
-     * 
-     * @param contents_limit コンテンツ本文の文字数制限
-     */
-    bindQuoteSection(contents_limit) {
-        // カスタム絵文字が渡ってきていない場合はアプリキャッシュを使う
-        const target_emojis = this.use_emoji_cache && this.host_emojis ? this.host_emojis : this.quote.emojis
-        let html /* ユーザー領域 */ = `
-            <div class="post_quote">
-                <div class="quote_userarea">
-                    <span class="username">${target_emojis.replace(this.quote.user.username)}</span>
-                    <span>@${this.quote.user.id}</span>
-                </div>
-        `
-        // コンテンツ領域(文字数オーバーしている場合は文字数制限)
-        if (this.quote.cw_text) html /* CW */ += `
-            <div class="warning_content label_cw">${target_emojis.replace(this.quote.cw_text)}</div>
-        `; else if (!this.popout_flg && !this.detail_flg && this.quote.content_length > contents_limit) html += `
-            <div class="hidden_content">
-                ${target_emojis.replace(this.quote.content_text.substring(0, contents_limit))}...
-            </div>
-            <div class="hidden_text">(長いので省略)</div>
-        `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
-        html += '</div>'
-
-        return html
-    }
-
-    // Getter: Misskeyのロール表示セクション
-    get role_section() {
-        if ((this.user.roles?.length ?? 0) == 0) return ''
-        let html = '<div class="user_role">'
-        this.user.roles.forEach(role => html += `<img src="${role.iconUrl}" alt="${role.name}"/>`)
-        html += '</div>'
-        return html
-    }
-
-    // Getter: 投稿属性セクション
-    get attribute_section() {
-        let html = '<div class="post_attributes">'
-
-        if (this.flg_reblog) html += '<img src="resources/ic_reblog.png" class="flg_reblog"/>' // ブースト
-        if (this.flg_fav) html += '<img src="resources/ic_favorite.png" class="flg_fav"/>' // ふぁぼ
-        if (this.flg_bookmark) html += '<img src="resources/ic_bkm.png" class="flg_bookmark"/>'  // ブックマーク
-        if (this.flg_edit) html += '<img src="resources/ic_draft.png" class="flg_edit"/>' // 編集
-        if (this.reply_to) html += '<img src="resources/ic_rpl.png" class="flg_reply"/>' // リプライ
-        switch (this.visibility) { // 公開範囲がパブリック以外の場合は識別アイコンを配置
-            case 'unlisted':
-            case 'home': // ホーム
-                html += '<img src="resources/ic_unlisted.png" class="attr_visible"/>'
-                break
-            case 'private':
-            case 'followers': // フォロ限
-                html += '<img src="resources/ic_followers.png" class="attr_visible"/>'
-                break
-            case 'direct':
-            case 'specified': // ダイレクト
-                html += '<img src="resources/ic_direct.png" class="attr_visible"/>'
-                break
-            default:
-                break
-        }
-        if (this.from_timeline?.pref?.timeline_type != 'channel' &&
-            !(this.profile_post_flg && this.channel_id) && this.local_only) // 連合なし
-            html += '<img src="resources/ic_local.png" class="flg_local"/>'
-
-        html += '</div>'
-        return html
-    }
-
-    // Getter: タイムラインインプレッションセクション
-    get impression_section() {
-        // インプレッション表示をしない場合は無効化
-        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return ''
-
-        let html = '<div class="impressions">'
-        if ((this.reactions?.length ?? 0) > 0 || this.count_reply > 0
-            || this.count_reblog > 0 || this.count_fav > 0) { // インプレッション(反応とリアクション)
-            // リモートの投稿の場合は警告アイコンを表示
-            if (this.remote_flg) html += `
-                <span class="warn_remote" title="リモートの投稿です">
-                    <img src="resources/ic_warn.png"/>
-                </span>
-            `
-            // リプライ数とブースト/リノート数(あるやつだけ表示)
-            if (this.count_reply > 0) html += `
-                <span class="count_reply counter" title="リプライ数">${this.count_reply}</span>
-            `; if (this.count_reblog > 0) html += `
-                <span class="count_reblog counter" title="ブースト/リノート数">${this.count_reblog}</span>
-            `
-            let reaction_self = null
-            switch (this.platform) {
-                case 'Mastodon': // Mastodon
-                    // ふぁぼの表示だけする
-                    if (this.count_fav > 0) html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
-                    break
-                case 'Misskey': // Misskey
-                    let reaction_html = '' // リアクションHTMLは後ろにつける
-                    let reaction_count = 0 // リアクション合計値を保持
-                    this.reactions?.forEach(reaction => {
-                        if (reaction.url) reaction_html /* URLの取得できているカスタム絵文字 */ += `
-                            <span class="bottom_reaction"><img src="${reaction.url}" class="inline_emoji"/></span>
-                        `; else if (reaction.shortcode.lastIndexOf('@') > 0) reaction_html /* 取得できなかった絵文字 */ += `
-                            <span class="bottom_reaction">
-                                :${reaction.shortcode.substring(1, reaction.shortcode.lastIndexOf('@'))}:
-                            </span>
-                        `; else reaction_html /* それ以外はそのまま表示 */ += `
-                            <span class="bottom_reaction">${reaction.shortcode}</span>
-                        `
-                        reaction_count += Number(reaction.count)
-                    })
-                    if (reaction_count > 0) { // リアクションが存在する場合はカウンターをバインド
-                        const emojis = this.host_emojis ?? Emojis.get(this.host)
-                        // 絵文字キャッシュが取得できる場合のみ置換処理を実行
-                        if (emojis) reaction_html = emojis.replace(reaction_html)
-                        html += `
-                            <div class="reaction_section">${reaction_html}</div>
-                            <span class="count_reaction_total counter" title="リアクション合計">${reaction_count}</span>
-                        `
-                        if (this.reaction_self && emojis) reaction_self = // 自分のリアクションを表示
-                            emojis.replace(`:${this.reaction_self.substring(1, this.reaction_self.lastIndexOf('@'))}:`)
-                    }
-                    break
-                default:
-                    break
-            }
-            html += '<div class="info_section">'
-            if (reaction_self) html += `<span class="bottom_info">${reaction_self}</span>`
-            if (this.remote_flg) html /* リモートフェッチボタンの表示 */ += `
-                <button type="button" class="__fetch_remote_impression" title="リモートインプレッション表示"
-                    ><img src="resources/ic_down.png" alt="リモートインプレッション表示"/></button>
-                <span class="__tooltip">リモートのインプレッションを表示</span>
-            `
-            html += '</div>'
-
-        }
-        html += '</div>'
-        return html
-    }
+    get filtered_elm() { return $($.parseHTML(super.getHtmlFiltered())) }
 
     /**
      * #Method
@@ -1570,57 +890,6 @@ class Status {
             notification.error("投票に失敗しました.")
             console.log(err)
         }
-    }
-
-    // Getter: 投票ボタンを生成
-    get poll_buttons() {
-        let options = ''
-        if (this.poll_multiple) { // 複数回答
-            const uuid = crypto.randomUUID()
-            this.poll_options.forEach((elm, idx) => options += `
-                <input type="checkbox" id="__chk_vote_${uuid}_${idx}"
-                    name="__chk_multi_vote" class="__chk_multi_vote" value="${idx}"/>
-                <label for="__chk_vote_${uuid}_${idx}">${elm.text}</label>
-            `)
-            options += `
-                <button type="button" class="__on_poll_multi_votes"${this.poll_expired ? ' disabled' : ''}>投票</button>
-            `
-        } else this.poll_options.forEach(elm => options /* 単体回答 */ += `
-            <button type="button" class="__on_poll_vote"${this.poll_expired ? ' disabled' : ''}>${elm.text}</button>
-        `)
-
-        return options
-    }
-
-    // Getter: 投票結果のグラフのjQueryオブジェクトを返却する
-    get poll_graph() {
-        let total_vote = 0
-        let html = '<div class="poll_graph_section">'
-        this.poll_options.forEach(opt => { // 投票データを生成
-            total_vote += opt.count
-            html += `
-                <div class="poll_opt_graph">
-                    <span class="text">${opt.text}</span>
-                    <span class="rate">${opt.rate}%</span>
-                </div>
-            `
-        })
-        const label_limit = this.poll_unlimited // 投票期限テキスト
-            ? '無期限' : `${RelativeTime.DATE_FORMATTER.format(this.poll_expired_time)} まで`
-        html += `
-            <div class="poll_footer">
-                <span>${total_vote} 票</span>
-                <span>${label_limit}</span>
-            </div>
-        </div>`
-
-        // 生成したHTMLをjQueryオブジェクトとして返却
-        const jqelm = $($.parseHTML(html))
-        this.poll_options.forEach((opt, index) => // 投票データからグラフCSSを生成
-            jqelm.find(`.poll_opt_graph:nth-child(${index + 1})`).css('background-image',
-                `linear-gradient(to right, #3c5f7a ${opt.rate}%, transparent ${opt.rate}%)`))
-
-        return jqelm
     }
 
     /**
@@ -1781,18 +1050,18 @@ class Status {
 
         // メインコンテンツを書き換える
         if (jqelm.is('.short_timeline') || jqelm.is('.media_timeline')) // リストとメディアは1行で書き換え
-            jqelm.find('.main_content').hide("fade", 1500,
-                () => jqelm.find('.main_content').html(this.emojis.replace(this.content_text)).show("fade", 1500))
-        else jqelm.find('.main_content').hide("fade", 1500,
-            () => jqelm.find('.main_content').html(this.emojis.replace(this.content)).show("fade", 1500))
+            jqelm.find('.main_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.main_content')
+                .html(this.emojis.replace(this.content_text)).show(...Preference.getAnimation("TIMELINE_EDIT")))
+        else jqelm.find('.main_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.main_content')
+            .html(this.emojis.replace(this.content)).show(...Preference.getAnimation("TIMELINE_EDIT")))
 
         if (this.medias.length > 0) { // メディアコンテンツを書き換える
             if (jqelm.is('.short_timeline')) // リストレイアウトのときは最初の一枚だけ書き換え
-                jqelm.find('.list_media').hide("fade", 1500, () => jqelm.find('.list_media').html(`
+                jqelm.find('.list_media').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => jqelm.find('.list_media').html(`
                     <a href="${media.url}" type="${media.type}" name="${media.aspect}" class="__on_media_expand">
                         <img src="${this.sensitive ? 'resources/ic_warn.png' : media.thumbnail}" class="media_preview"/>
                     </a>
-                `).show("fade", 1500))
+                `).show(...Preference.getAnimation("TIMELINE_EDIT")))
             else { // それ以外は各レイアウトに合わせて書き換え
                 let img_class = 'img_grid_single'
                 if (jqelm.is('.media_timeline')) { // メディアタイムライン
@@ -1801,7 +1070,7 @@ class Status {
                 } else if (jqelm.is('.chat_timeline')) // チャットタイムライン
                     img_class = this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16'
                 else img_class = this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4'
-                jqelm.find('.media_content').hide("fade", 1500, () => {
+                jqelm.find('.media_content').hide(...Preference.getAnimation("TIMELINE_EDIT"), () => {
                     let html = ''
                     // アスペクト比をリンクオプションとして設定
                     this.medias.forEach(media => {
@@ -1814,10 +1083,44 @@ class Status {
                             </a>
                         `
                     })
-                    jqelm.find('.media_content').html(html).show("fade", 1500)
+                    jqelm.find('.media_content').html(html).show(...Preference.getAnimation("TIMELINE_EDIT"))
                 })
             }
         }
+    }
+
+    /**
+     * #Method
+     * この投稿がWebSocketでリアクションを受け取った時に、DOMに反映する.
+     * 
+     * @param body WebSocketで受け取ったリアクションデータ
+     * @param jqelm 反映対象のjQuery Element
+     */
+    updateReaction(body, jqelm) {
+        const reaction = {
+            shortcode: body.reaction,
+            count: 1,
+            url: body.emoji?.url ?? null
+        }
+        // リアクションカウントをリアクションリストに追記
+        const merge_at = this.reactions.find(r => r.shortcode == body.reaction)
+        if (merge_at) merge_at.count = Number(merge_at.count) + 1
+        else this.reactions.push(reaction)
+        this.count_fav++
+
+        // リアクションをDOMに反映
+        jqelm.find(".impressions").replaceWith(this.impression_section)
+        // アニメーション設定が有効の場合はポップアニメーションを追加
+        /* TODO: 一旦実装しないことにする
+        if (Preference.GENERAL_PREFERENCE.enable_animation) {
+            const uuid = crypto.randomUUID()
+            jqelm.find(".content").append(`<img src="${reaction.url}" id="${uuid}" class="poped_reaction">`)
+            const target = $(`#${uuid}`)
+            // 1秒で消去
+            target.show(...Preference.getAnimation("REACTION_SHOW"),
+                () => setTimeout(() => target.hide(...Preference.getAnimation("REACTION_HIDE"),
+                    () => target.remove()), 1000))
+        }//*/
     }
 
     /**
@@ -2029,8 +1332,9 @@ class Status {
         const pos = target.offset()
         const outer_width = target.closest('ul').outerWidth()
         $("#pop_expand_post>ul").html(pop_type == 'reply' ? this.chat_elm : this.element).css('width', `${outer_width}px`)
+        this.bindAdditionalInfoAsync($("#pop_expand_post>ul"))
         // リアクション絵文字はリモートから直接取得
-        Emojis.replaceRemoteAsync($("#pop_expand_post .reaction_emoji"))
+        //Emojis.replaceRemoteAsync($("#pop_expand_post .notification_summary .reaction_head"))
 
         $("#pop_expand_post").removeClass("reply_pop")
         const mouse_x = e.pageX
@@ -2078,6 +1382,25 @@ class Status {
             default:
                 break
         }
+    }
+
+    /**
+     * #Method
+     * この投稿に既に付いているリアクションのカスタム絵文字を簡易アクションバーに表示する.
+     */
+    bindSentReactions() {
+        // ローカルのリアクションのみ取得
+        const local_reactions = this.reactions.filter(r => r.shortcode.match(/^:[a-zA-Z0-9_]+@?\.?:$/g))
+        if (local_reactions.length == 0) { // なかったら閉じて終了
+            $("#pop_expand_action>.sent_reactions").hide()
+            return
+        }
+        let html = ''
+        local_reactions.map(r => this.host_emojis.get(`:${r.shortcode.substring(1, r.shortcode.lastIndexOf('@'))}:`))
+            .filter(f => f).forEach(emoji => html /* ローカルリアクション一覧 */ += `
+            <a class="__on_emoji_reaction" name="${emoji.shortcode}"><img src="${emoji.url}" alt="${emoji.name}"/></a>
+        `)
+        $("#pop_expand_action>.sent_reactions").html(html).show()
     }
 
     /**
@@ -2168,64 +1491,4 @@ class Status {
         return replied_post
     }
 
-    // Getter: Electronの通知コンストラクタに送る通知文を生成して返却
-    get notification() {
-        let title = null
-        let body = null
-        switch (this.platform) {
-            case 'Mastodon': // Mastodon
-                // 通知タイプによって表示を変更
-                switch (this.notif_type) {
-                    case 'favourite': // お気に入り
-                        title = `${this.from_account.full_address}: ${this.user.username}からお気に入り`
-                        body = this.content
-                        break
-                    case 'reblog': // ブースト
-                        title = `${this.from_account.full_address}: ${this.user.username}からブースト`
-                        body = this.content
-                        break
-                    case 'follow':
-                    case 'follow_request': // フォロー通知
-                        title = `${this.from_account.full_address}: ${this.user.username}からフォロー`
-                        body = this.user.profile
-                        break
-                    default: // リプライ
-                        title = `${this.from_account.full_address}: ${this.user.username}から返信`
-                        body = this.content
-                        break
-                }
-                break
-            case 'Misskey': // Misskey
-                // 通知タイプによって表示を変更
-                switch (this.notif_type) {
-                    case 'reaction': // 絵文字リアクション
-                        title = `${this.from_account.full_address}: ${this.user.username}からリアクション`
-                        body = this.content
-                        break
-                    case 'renote': // リノート
-                        title = `${this.from_account.full_address}: ${this.user.username}からリノート`
-                        body = this.content
-                        break
-                    case 'follow': // フォロー通知
-                        title = `${this.from_account.full_address}: ${this.user.username}からフォロー`
-                        body = `@${this.user.id} - ${this.user.username}`
-                        break
-                    default: // リプライ
-                        title = `${this.from_account.full_address}: ${this.user.username}から返信`
-                        body = this.content
-                        break
-                }
-                break;
-            default:
-                break;
-        }
-
-        // 画面側にも通知を出して通知オブジェクトを返却
-        Notification.info(title)
-        return {
-            title: title,
-            // HTMLとして解析して中身の文章だけを取り出す
-            body: $($.parseHTML(body)).text()
-        }
-    }
 }

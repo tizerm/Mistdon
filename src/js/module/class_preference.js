@@ -31,10 +31,12 @@ class Preference {
         this.enable_emoji_suggester     = pref?.enable_emoji_suggester      ?? true,  // カスタム絵文字サジェスター
         this.enable_action_palette      = pref?.enable_action_palette       ?? true,  // 簡易アクションパレット
         this.enable_list_action_palette = pref?.enable_list_action_palette  ?? false, // 簡易アクションパレット(リスト)
+        this.enable_already_reaction    = pref?.enable_already_reaction     ?? true,  // 既に付いているリアクション表示
         this.enable_pop_prev_reply      = pref?.enable_pop_prev_reply       ?? false, // 簡易リプライ表示
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
+        this.enable_merge_notification  = pref?.enable_merge_notification   ?? true,  // 通知まとめ
         this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
-        this.enable_notified_impression = pref?.enable_notified_impression  ?? true,  // 通知欄のインプレッション表示
+        this.blur_suspend_user          = pref?.blur_suspend_user           ?? true,  // FF一覧の休止ユーザーの半透明化
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
         this.disable_disconnect_pop     = pref?.disable_disconnect_pop      ?? false, // 一時切断通知
@@ -84,6 +86,10 @@ class Preference {
             "default"                   : pref?.contents_limit?.default     ?? 250, // ノーマル
             "chat"                      : pref?.contents_limit?.chat        ?? 140  // チャット
         },
+        this.remote_fetch = {           // リモートの情報取得
+            "btrn_impression"           : pref?.remote_fetch?.btrn_impression   ?? true, // BTRNのリモートインプレッション
+            "profile_ff"                : pref?.remote_fetch?.profile_ff        ?? true  // プロフィールウィンドウのFF表示
+        },
         this.tl_impression = {          // タイムラインインプレッション表示
             "enabled"                   : pref?.tl_impression?.enabled      ?? false, // 有効/無効
             "span"                      : pref?.tl_impression?.span         ?? 3      // 更新間隔
@@ -113,6 +119,7 @@ class Preference {
 
         animation_map.set("TIMELINE_APPEND"  , ["drop" , { direction: "left"  }, 250])
         animation_map.set("TIMELINE_DELETE"  , ["fade"                         , 2500])
+        animation_map.set("TIMELINE_EDIT"    , ["fade"                         , 1500])
         animation_map.set("EXTEND_DROP"      , ["drop" , { direction: "right" }, 160])
         animation_map.set("LEFT_DROP"        , ["drop" , { direction: "left"  }, 160])
         animation_map.set("NOTIFICATION_DROP", ["drop" , { direction: "left"  }, 400])
@@ -124,6 +131,8 @@ class Preference {
         animation_map.set("FADE_STD"         , ["fade"                         , 160])
         animation_map.set("POP_FOLD"         , ["fold" , { size : 32          }, 80])
         animation_map.set("WINDOW_FOLD"      , ["fold" , { size : 32          }, 160])
+        animation_map.set("REACTION_SHOW"    , ["slide", { direction: "up"    }, 750])
+        animation_map.set("REACTION_HIDE"    , ["fade"                         , 1500])
 
         Preference.ANIMATION_MAP = animation_map
 
@@ -219,7 +228,7 @@ class Preference {
                     </div>
                 </div>
             `,
-            color: '42809e',
+            color: getRandomColor(),
             resizable: true,
             drag_axis: false,
             resize_axis: "all"
@@ -286,10 +295,12 @@ class Preference {
         $("#__chk_gen_use_emoji_suggester")             .prop("checked", Preference.GENERAL_PREFERENCE.enable_emoji_suggester)
         $("#__chk_gen_use_action_palette")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_action_palette)
         $("#__chk_gen_use_list_action_palette")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_list_action_palette)
+        $("#__chk_gen_use_already_reaction")            .prop("checked", Preference.GENERAL_PREFERENCE.enable_already_reaction)
         $("#__chk_gen_use_prev_relpy")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_prev_reply)
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
+        $("#__chk_gen_use_summary_notification")        .prop("checked", Preference.GENERAL_PREFERENCE.enable_merge_notification)
         $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
-        $("#__chk_gen_use_notified_impression")         .prop("checked", Preference.GENERAL_PREFERENCE.enable_notified_impression)
+        $("#__chk_gen_blur_suspend_user")               .prop("checked", Preference.GENERAL_PREFERENCE.blur_suspend_user)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_disable_disconnect_notification") .prop("checked", Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
@@ -343,6 +354,10 @@ class Preference {
         $("#__txt_gen_content_limit_default")   .val(Preference.GENERAL_PREFERENCE.contents_limit?.default)
         $("#__txt_gen_content_limit_chat")      .val(Preference.GENERAL_PREFERENCE.contents_limit?.chat)
 
+        // リモート情報取得設定
+        $("#__chk_gen_fetch_btrn_impression")  .prop("checked", Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression)
+        $("#__chk_gen_fetch_ff_profile")       .prop("checked", Preference.GENERAL_PREFERENCE.remote_fetch?.profile_ff)
+
         // タイムラインインプレッション表示
         $("#__chk_gen_show_tl_impression")  .prop("checked", Preference.GENERAL_PREFERENCE.tl_impression?.enabled)
         $("#__txt_gen_tl_impression_span")  .val(Preference.GENERAL_PREFERENCE.tl_impression?.span)
@@ -393,10 +408,12 @@ class Preference {
             "enable_emoji_suggester"        : $("#__chk_gen_use_emoji_suggester").prop("checked"),
             "enable_action_palette"         : $("#__chk_gen_use_action_palette").prop("checked"),
             "enable_list_action_palette"    : $("#__chk_gen_use_list_action_palette").prop("checked"),
+            "enable_already_reaction"       : $("#__chk_gen_use_already_reaction").prop("checked"),
             "enable_pop_prev_reply"         : $("#__chk_gen_use_prev_relpy").prop("checked"),
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
+            "enable_merge_notification"     : $("#__chk_gen_use_summary_notification").prop("checked"),
             "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
-            "enable_notified_impression"    : $("#__chk_gen_use_notified_impression").prop("checked"),
+            "blur_suspend_user"             : $("#__chk_gen_blur_suspend_user").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
@@ -446,6 +463,10 @@ class Preference {
                 "default"                   : $("#__txt_gen_content_limit_default").val(),
                 "chat"                      : $("#__txt_gen_content_limit_chat").val(),
             },
+            "remote_fetch": {               // リモート情報取得設定
+                "btrn_impression"           : $("#__chk_gen_fetch_btrn_impression").prop("checked"),
+                "profile_ff"                : $("#__chk_gen_fetch_ff_profile").prop("checked")
+            },
             "tl_impression": {              // タイムラインインプレッション表示
                 "enabled"                   : $("#__chk_gen_show_tl_impression").prop("checked"),
                 "span"                      : ($("#__txt_gen_tl_impression_span").val() || 3)
@@ -472,7 +493,7 @@ class Preference {
             title: "全体設定",
             text: "全体設定を保存しました。",
             // サブウィンドウを閉じる
-            accept: () => $("#pop_multi_window").empty()
+            accept: () => $("#singleton_pref_window .window_close_button").click()
         })
     }
 
@@ -531,6 +552,7 @@ class Preference {
 
         options += `<option value="__external">その他のインスタンス</option>`
         $("#pop_temporary_option .__cmb_tl_account").html(options)
+        changeColAccountEvent($("#pop_temporary_option"), Account.get($("#pop_temporary_option .__cmb_tl_account").val()))
     }
 
     /**
@@ -577,14 +599,22 @@ class Preference {
                 &.fixed_col { max-width: ${col.pref.col_width}px; }
             }`)
 
-        // ギャラリーレイアウトのコンテナクエリを定義
+        // 画像サムネイル一覧のコンテナクエリを定義
         const width_limit = Number(Preference.GENERAL_PREFERENCE.gallery_width_limit)
-        let containers = ''
-        for (let i = 1; i <= 16; i++) containers += `
-            @container gallery (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
-                > li.gallery_timeline { width: calc(${100 / (i + 1)}% - 6px); }
-            }
-        `
+        let gallary_containers = ''
+        let drive_containers = ''
+        for (let i = 1; i <= 16; i++) {
+            gallary_containers /* ギャラリーレイアウトのコンテナクエリ定義 */ += `
+                @container gallery (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
+                    > li.gallery_timeline { width: calc(${100 / (i + 1)}% - 6px); }
+                }
+            `
+            drive_containers /* ドライブウィンドウのコンテナクエリ定義 */ += `
+                @container driveMedia (width > ${width_limit * i}px) and (width <= ${width_limit * (i + 1)}px) {
+                    > li { width: calc(${100 / (i + 1)}% - 1px); }
+                }
+            `
+        }
         // CSSをバインド
         $('style').html(`
             :root {
@@ -606,9 +636,18 @@ class Preference {
                 @container gallery (width <= ${width_limit}px) {
                     > li.gallery_timeline { width: calc(100% - 2px); }
                 }
-                ${containers}
+                ${gallary_containers}
                 @container gallery (width > ${width_limit * 17}px) {
                     > li.gallery_timeline { width: calc(${100 / 18}% - 6px); }
+                }
+            }
+            #pop_multi_window>.drive_window.ex_window>ul.drive_media_list {
+                @container driveMedia (width <= ${width_limit}px) {
+                    > li { width: calc(100% - 2px); }
+                }
+                ${drive_containers}
+                @container driveMedia (width > ${width_limit * 17}px) {
+                    > li { width: calc(${100 / 18}% - 1px); }
                 }
             }
         `)

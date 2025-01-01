@@ -556,6 +556,11 @@ function getAPIParams(event, arg) {
                         'params': { 'antennaId': arg.timeline.antenna_id }
                     }
                     break
+                case 'clip': // クリップ
+                    rest_url = `https://${arg.host}/api/clips/notes`
+                    query_param = { 'clipId': arg.timeline.clip_id }
+                    socket_param = {} // クリップはWebSocket接続しない
+                    break
                 case 'notification': // 通知
                     rest_url = `https://${arg.host}/api/i/notifications`
                     query_param = { 'includeTypes': ['follow', 'mention', 'reply', 'renote', 'quote', 'reaction', 'receiveFollowRequest'] }

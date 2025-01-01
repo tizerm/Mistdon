@@ -12,6 +12,7 @@ class Timeline {
         if (group.__column_id) this.__column_id = group.__column_id
         else this.__dummy_col = {}
         this.status_key_map = new Map()
+        this.capture_queue = []
         this.ref_group = group
     }
 
@@ -19,6 +20,8 @@ class Timeline {
     get host() { return this.pref.host }
     // Getter: このタイムラインのホスト(サーバードメイン)
     get platform() { return this.pref.platform }
+    // Getter: 通知タイムライン判定
+    get is_notification() { return this.pref.timeline_type == "notification" }
     // Getter: このタイムラインのアカウントのフルアドレス
     get account_key() { return this.pref.key_address }
     // Getter: このタイムラインのアカウント
@@ -93,7 +96,9 @@ class Timeline {
 
             // 投稿データをソートマップ可能なオブジェクトにして返却
             const posts = []
-            response.forEach(p => posts.push(new Status(p, this, this.target_account)))
+            if (this.is_notification) // 通知タイムラインの場合は専用クラスで生成
+                response.forEach(p => posts.push(new NotificationStatus(p, this, this.target_account)))
+            else response.forEach(p => posts.push(new Status(p, this, this.target_account)))
             return posts
         } catch (err) { // 取得失敗時、取得失敗のtoastを表示してrejectしたまま次に処理を渡す
             console.log(err)
@@ -130,9 +135,10 @@ class Timeline {
                     if (this.pref.socket_param.stream == 'list' && data.stream[1] != this.pref.socket_param.list) return
 
                     // タイムラインの更新通知
-                    if (data.event == "update"
-                        || (this.pref.timeline_type == "notification" && data.event == "notification"))
+                    if (data.event == "update") // 通常の投稿
                         this.parent_group.prepend(new Status(JSON.parse(data.payload), this, this.target_account))
+                    else if (this.is_notification && data.event == "notification") // 通知
+                        this.parent_group.prepend(new NotificationStatus(JSON.parse(data.payload), this, this.target_account))
                     // 削除された投稿を検知
                     else if (data.event == "delete") this.removeStatus(data.payload)
                     // 更新された投稿を検知
@@ -153,9 +159,10 @@ class Timeline {
 
                     // TLと違うStreamは無視
                     if (data.body.id != uuid) return
-                    if (data.body.type == "note"
-                        || (this.pref.timeline_type == "notification" && data.body.type == "notification"))
+                    if (data.body.type == "note") // 通常の投稿
                         this.parent_group.prepend(new Status(data.body.body, this, this.target_account))
+                    else if (this.is_notification && data.body.type == "notification") // 通知
+                        this.parent_group.prepend(new NotificationStatus(data.body.body, this, this.target_account))
                 }
                 // !==========> ここまで
 
@@ -207,8 +214,7 @@ class Timeline {
      * インプレッション自動マージタイマーをセットする
      */
     async initAutoMerger() {
-        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled
-            || this.pref.timeline_type == 'notification'
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled || this.is_notification
             || this.target_account.is_skybridge
             || this.parent_group.pref.tl_layout == 'gallery') return // 通知とギャラリーは実行しない
         if (!this.reload_timer_id) clearInterval(this.reload_timer_id) // 実行中の場合は一旦削除
@@ -228,8 +234,8 @@ class Timeline {
         recent.forEach(post => {
             if (!group.status_map.has(post.status_key)) return // ないときは省略
             group.status_map.set(post.status_key, post) // ステータスを更新
-            // インプレッションの表示内容を更新
-            group.getStatusElement(post.status_key).find('.impressions').replaceWith(post.impression_section)
+            if (!post.__prm_remote_status) // インプレッションの表示内容を更新(BTRNを除外)
+                group.getStatusElement(post.status_key).find('.impressions').replaceWith(post.impression_section)
         })
     }
 
@@ -272,15 +278,85 @@ class Timeline {
 
     /**
      * #Method
+     * 対象の投稿をキャプチャする(Misskey専用機能).
+     * 
+     * @param post キャプチャ対象のノート
+     */
+    captureNote(post) {
+        if (this.platform != 'Misskey' // Misskeyではない場合
+            || this.temptl_pref // 一時タイムラインの場合
+            || this.pref.external // 外部インスタンスの場合
+            || this.is_notification) return // そして通知の場合はキャプチャしない
+
+        const socket = this.target_account.socket
+        const captured_notes = this.target_account.captured_notes
+
+        // アカウントのノートマップにタイムラインセットをセット
+        let tl_set = new Set()
+        if (captured_notes.has(post.id)) tl_set = captured_notes.get(post.id)
+        else captured_notes.set(post.id, tl_set)
+        tl_set.add(this)
+
+        // キューの先頭に対象の投稿データを追加
+        this.capture_queue.unshift(post)
+
+        socket.send(JSON.stringify({ // WebSocketにCaptureリクエストを送信
+            "type": "subNote",
+            "body": { "id": post.id }
+        }))
+
+        // キャプチャキューが30超えてる場合uncaptureする
+        if (this.capture_queue.length > 30) this.uncaptureNote(this.capture_queue.pop().id)
+    }
+
+    /**
+     * #Method
+     * 対象の投稿をキャプチャから外す(Misskey専用機能).
+     * 
+     * @param id キャプチャから外すノートID
+     */
+    uncaptureNote(id) {
+        const captured_notes = this.target_account.captured_notes
+        this.target_account.socket.send(JSON.stringify({ // WebSocketにUnCaptureリクエストを送信
+            "type": "unsubNote",
+            "body": { "id": id }
+        }))
+        // アカウントのノートマップからキャプチャ先のタイムラインを削除
+        const del_set = captured_notes.get(id)
+        del_set.delete(this)
+        if (del_set.size == 0) captured_notes.delete(id)
+    }
+
+    /**
+     * #Method
+     * キャプチャイベントを受け取った時に対象のノート情報を更新する.
+     * 
+     * @param body キャプチャイベントからのメッセージ
+     */
+    updateNote(body) {
+        switch (body.type) {
+            case 'reacted': // リアクション受信
+                this.updateReaction(body.id, body.body)
+                break
+            case 'deleted': // 削除受信
+                this.removeStatus(body.id)
+                this.uncaptureNote(body.id)
+                break
+            default:
+                break
+        }
+    }
+
+    /**
+     * #Method
      * このタイムラインに保存してあるステータス情報を削除する.
      * 
      * @param id 投稿ID
      */
     removeStatus(id) {
         const status_key = this.status_key_map.get(id)
-
-        // タイムラインに存在する投稿だけ削除対象とする
-        if (status_key) this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
+        if (status_key) // タイムラインに存在する投稿だけ削除対象とする
+            this.parent_group.removeStatus(this.parent_group.getStatusElement(status_key), true)
     }
 
     /**
@@ -291,9 +367,33 @@ class Timeline {
      */
     updateStatus(post) {
         const status_key = this.status_key_map.get(post.id)
+        if (!status_key) return // タイムラインに存在する場合のみ
 
-        // タイムラインに存在する投稿だけ修正対象とする
-        if (status_key) this.parent_group.updateStatus(status_key, post)
+        const group = this.parent_group
+        const jqelm = group.getStatusElement(status_key)
+        const pre_post = group.status_map.get(status_key)
+        // ギャラリーの場合は複数のまたがる可能性があるのでid検索して削除
+        pre_post.update(post, jqelm.parent().find(`li[id="${status_key}"]`))
+    }
+
+    /**
+     * #Method
+     * このタイムラインに保存してあるノートについているリアクション情報を更新する.
+     * 
+     * @param id 更新対象のノートID
+     * @param body キャプチャイベントからのメッセージ
+     */
+    updateReaction(id, body) {
+        // インプレッション表示をしないならなにもしない
+        if (!Preference.GENERAL_PREFERENCE.tl_impression?.enabled) return
+
+        const status_key = this.status_key_map.get(id)
+        if (!status_key) return // タイムラインに存在する場合のみ
+
+        const group = this.parent_group
+        const jqelm = group.getStatusElement(status_key)
+        const target_post = group.status_map.get(status_key)
+        target_post.updateReaction(body, jqelm)
     }
 
     /**
@@ -347,10 +447,18 @@ class Timeline {
      * @param post 取得の起点にするStatusオブジェクト
      */
     createLoadableTimeline(post) {
-        this.createScrollableWindow(post.id, (tl, ref_id, window_key) => {
+        // 通知の場合は参照IDを通知のIDにする
+        this.createScrollableWindow(post.notification_id ?? post.id, (tl, ref_id, window_key) => {
             // 起点の投稿を表示して変数にマークする
-            tl.ref_group.addStatus(post, () => post.getLayoutElement(tl.ref_group.pref.tl_layout)
-                .closest('li').addClass('mark_target_post').appendTo(`#${window_key}>.timeline>ul`))
+            tl.ref_group.addStatus({
+                post: post,
+                target_elm: $(`#${window_key}>.timeline>ul`),
+                callback: (st, tgelm) => {
+                    st.getLayoutElement(tl.ref_group.pref.tl_layout)
+                        .closest('li').addClass('mark_target_post').appendTo(tgelm)
+                    st.bindAdditionalInfoAsync(tgelm)
+                }
+            })
             const mark_elm = $(`#${window_key}>.timeline>ul>li:first-child`).get(0)
 
             // 上下方向のローダーを生成
@@ -358,9 +466,17 @@ class Timeline {
                 data: body,
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.append(p.timeline_element)))
+                    data.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => {
+                            tgelm.append(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
+                    }))
                     // max_idとして取得データの最終IDを指定
-                    return data.pop()?.id
+                    if (tl.is_notification) return data.pop()?.notification_id
+                    else return data.pop()?.id
                 },
                 load: async max_id => tl.getTimeline(max_id)
             })), tl.getTimeline(null, ref_id).then(body => createTopLoader({ // 上方向のローダーを生成
@@ -368,10 +484,18 @@ class Timeline {
                 target: $(`#${window_key}>.timeline>ul`),
                 bind: (data, target) => { // ステータスマップに挿入して投稿をバインド
                     const first_elm = target.find('li:first-child').get(0)
-                    data.forEach(p => tl.ref_group.addStatus(p, () => target.prepend(p.timeline_element)))
+                    data.forEach(p => tl.ref_group.addStatus({
+                        post: p,
+                        target_elm: target,
+                        callback: (st, tgelm) => {
+                            tgelm.prepend(st.timeline_element)
+                            st.bindAdditionalInfoAsync(tgelm)
+                        }
+                    }))
                     first_elm.scrollIntoView({ block: 'center' })
                     // since_idとして取得データの最終IDを指定
-                    return data.pop()?.id
+                    if (tl.is_notification) return data.pop()?.notification_id
+                    else return data.pop()?.id
                 },
                 load: async since_id => tl.getTimeline(null, since_id)
             }))]).then(() => { // 両方ロードが終わったらロード画面を削除してマークした要素にスクロールを合わせる
