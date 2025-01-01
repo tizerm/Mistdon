@@ -1406,6 +1406,7 @@
             font-size: 12px;
             & th {
                 border-radius: 8px;
+                text-align: center;
                 &.default      { background-color: var(--label-color-follow-bg); }
                 &.btrn         { background-color: var(--label-color-reblog-bg); }
                 &.media        { background-color: var(--label-color-reply-bg); }

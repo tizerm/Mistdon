@@ -214,6 +214,10 @@ class NotificationStatus extends Status {
 
     // Getter: チャットタイプの投稿HTMLを生成して返却
     get chat_elm() {
+        if (this.notification_type == 'achievementEarned') return '' // TODO: 通知は一旦除外
+        // フォロー通知の場合は専用レイアウトを使用
+        if (this.is_follow) return this.followers_elm
+
         // ベースレイアウトHTMLを生成
         const self_flg = `@${this.user.full_address}` == this.from_account?.full_address
         const jqelm = $($.parseHTML(super.getHtmlChat(true, self_flg)))
@@ -331,7 +335,10 @@ class NotificationStatus extends Status {
             case 'follow_request': // フォロー通知
                 jqelm.closest('li').addClass('followed_info')
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_cnt_flwr.png')
-                jqelm.find('.usericon').attr('src', this.from_account?.pref.avatar_url)
+                jqelm.find('.usericon').attr({
+                    'src': this.from_account?.pref.avatar_url,
+                    'name': this.from_account?.full_address
+                })
                 break
             case 'poll': // 投票終了
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_poll.png')
@@ -463,6 +470,10 @@ class NotificationStatus extends Status {
         html += '</li>'
         // 生成したHTMLをjQueryオブジェクトとして返却
         const jqelm = $($.parseHTML(html))
+
+        // 時間で色分け
+        jqelm.closest('li').css('border-left-color', this.relative_time.color)
+
         return jqelm
     }
 

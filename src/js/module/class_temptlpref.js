@@ -287,6 +287,21 @@ class TempTLPref {
             revert: 50,
             tolerance: "pointer"
         })
+        // ツールチップを設定し直す
+        $(".tooltip").tooltip({
+            position: {
+                my: "center top",
+                at: "center bottom"
+            },
+            show: {
+                effect: "slideDown",
+                duration: 80
+            },
+            hide: {
+                effect: "slideUp",
+                duration: 80
+            }
+        })
 
         // 初期化イベントを発火
         $(`#${window_key}>ul.temptl_fav_list>li`).each((index, elm) => {
