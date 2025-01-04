@@ -11,6 +11,7 @@ const fs = require('fs')
 const http = require('http')
 const stateKeeper = require('electron-window-state')
 const FeedParser = require('feedparser')
+const AsyncLock = require('async-lock')
 const fetch = require('node-fetch')
 
 // アプリ保持用設定データの管理
@@ -24,6 +25,8 @@ var cache_draft = null
 var cache_emoji_history = null
 var cache_bsky_session = new Map()
 var oauth_session = null
+
+var lock = new AsyncLock()
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -41,17 +44,6 @@ app.disableHardwareAcceleration()
  * @return アカウント認証情報(マップで返却)
  */
 async function readPrefAccs() {
-    // Blueskyのセッション情報を先に読み込む
-    if (cache_bsky_session.size == 0) {
-        const content_map = readDirFile('app_prefs/bsky_sessions')
-
-        if (content_map.size > 0) // ハッシュキーから拡張子を抜いてドメイン名にする
-            content_map.forEach((v, k) => cache_bsky_session.set(k.substring(0, k.lastIndexOf('.')), JSON.parse(v)))
-        else cache_bsky_session.set('0', {}) // 空のキャッシュエントリを作成(ロードしないため)
-
-        console.log('@INF: read app_prefs/emojis/.')
-    }
-
     // 変数キャッシュがある場合はキャッシュを使用
     if (pref_accounts) {
         console.log('@INF: use app_prefs/auth.json cache.')
@@ -156,7 +148,7 @@ async function writePrefBskyAccs(event, json_data) {
         'username': json_data.username,
         'socket_url': null,
         'client_id': json_data.did,
-        'client_secret': null,
+        'client_secret': json_data.app_pass,
         'access_token': null,
         'avatar_url': json_data.avatar_url,
         'post_maxlength': json_data.post_maxlength,
@@ -181,9 +173,6 @@ async function writePrefBskyAccs(event, json_data) {
         'refresh_token': json_data.refresh_token,
         'access_token': json_data.access_token
     }
-
-    // セッション情報をファイルに書き込み
-    const session = await overwriteFile(`app_prefs/bsky_sessions/${json_data.user_id}.json`, write_session)
 
     // セッションキャッシュを更新
     cache_bsky_session.set(json_data.user_id, write_session)
@@ -407,48 +396,87 @@ async function authorizeMisskey(session) {
 }
 
 async function refreshBlueskySession(event, handle) {
-    const session = cache_bsky_session.get(handle)
+    console.log("#BSKY-SESSION: Exclusive Bluesky Session getted...")
+    return await lock.acquire('bluesky-session', async () => { // 同時実行しないよう排他
+        const session = cache_bsky_session.get(handle)
 
-    try {
-        const session_info = await ajax({ // セッションが有効か確認
-            method: "GET",
-            url: `https://${session.pds}/xrpc/com.atproto.server.getSession`,
-            headers: { 'Authorization': `Bearer ${session.access_token}` }
-        })
+        if (session) { // セッションキャッシュが残っている場合はセッションが生きてるかの確認から
+            try {
+                const session_info = await ajax({ // セッションが有効か確認
+                    method: "GET",
+                    url: `https://${session.pds}/xrpc/com.atproto.server.getSession`,
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                })
 
-        // 有効なセッションの場合はキャッシュされたアクセストークンを返す
-        return session.access_token
-    } catch (err) {
-        if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+                // 有効なセッションの場合はキャッシュされたアクセストークンを返す
+                console.log("#BSKY-SESSION: Access token returned.")
+                return session.access_token
+            } catch (err) {
+                if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+                    console.log(err)
+                    return null
+                }
+            }
+
+            try {
+                const session_info = await ajax({ // セッションを更新する
+                    method: "POST",
+                    url: `https://${session.pds}/xrpc/com.atproto.server.refreshSession`,
+                    headers: { 'Authorization': `Bearer ${session.refresh_token}` }
+                })
+
+                // セッション情報のJSONを生成
+                const write_session = {
+                    'handle': session.handle,
+                    'pds': session.pds,
+                    'refresh_token': session_info.body.refreshJwt,
+                    'access_token': session_info.body.accessJwt
+                }
+
+                // セッション情報のキャッシュを更新
+                cache_bsky_session.set(write_session.handle, write_session)
+
+                console.log("#BSKY-SESSION: Refresh token created.")
+                return session_info.body.accessJwt
+            } catch (err) {
+                if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+                    console.log(err)
+                    return null
+                }
+            }
+        }
+
+        try { // セッションを再取得する
+            const account = pref_accounts.get(`@${handle}`)
+            const pds = account.domain
+            const session_info = await ajax({
+                method: "POST",
+                url: `https://${pds}/xrpc/com.atproto.server.createSession`,
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    'identifier': handle,
+                    'password': account.client_secret
+                })
+            })
+
+            // セッション情報のJSONを生成
+            const write_session = {
+                'handle': handle,
+                'pds': pds,
+                'refresh_token': session_info.body.refreshJwt,
+                'access_token': session_info.body.accessJwt
+            }
+
+            // セッション情報をアプリにキャッシュする
+            cache_bsky_session.set(write_session.handle, write_session)
+
+            console.log("#BSKY-SESSION: Session Regenerated.")
+            return session_info.body.accessJwt
+        } catch (err) {
             console.log(err)
-            return null
         }
-    }
-
-    try {
-        const session_info = await ajax({ // セッションを再取得する
-            method: "GET",
-            url: `https://${session.pds}/xrpc/com.atproto.server.refreshSession`,
-            headers: { 'Authorization': `Bearer ${session.refresh_token}` }
-        })
-
-        // セッション情報のJSONを生成
-        const write_session = {
-            'handle': session.handle,
-            'pds': session.pds,
-            'refresh_token': session_info.refreshJwt,
-            'access_token': session_info.accessJwt
-        }
-
-        // セッション情報をファイルに書き込み
-        const writer = await overwriteFile(`app_prefs/bsky_sessions/${write_session.handle}.json`, write_session)
-        cache_bsky_session.set(write_session.handle, write_session)
-
-        return session_info.accessJwt
-    } catch (err) {
-        console.log(err)
-    }
-    return null
+        return null
+    })
 }
 
 /**
@@ -1099,10 +1127,13 @@ async function ajax(arg) {
             if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
                 const query_param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
                 url += `?${query_param.substring(1)}`
-            } else { // POSTはパラメータをURLSearchParamsにセットする
-                const post_params = new URLSearchParams()
-                Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
-                param.body = post_params
+            } else {
+                if (arg.headers['Content-Type'] == 'application/json') param.body = arg.data
+                else { // POSTはパラメータをURLSearchParamsにセットする
+                    const post_params = new URLSearchParams()
+                    Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
+                    param.body = post_params
+                }
             }
         }
 

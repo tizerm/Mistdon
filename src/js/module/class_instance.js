@@ -464,6 +464,7 @@ class Instance {
                 'domain': pds,
                 'user_id': token.handle,
                 'username': user_data.displayName,
+                'app_pass': app_pass,
                 'avatar_url': user_data.avatar,
                 'refresh_token': token.refreshJwt,
                 'did': token.did,
