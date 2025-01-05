@@ -295,6 +295,8 @@ class Status extends StatusLayout {
                     this.count_reply = data.replyCount
                     this.count_reblog = data.repostCount
                     this.count_fav = data.likeCount
+
+                    console.log(data)
                 } else original_date = json.indexedAt
 
                 this.emojis = Emojis.THRU // カスタム絵文字はないのでスルー
@@ -561,7 +563,7 @@ class Status extends StatusLayout {
     async getPostBsky(uri) {
         let response = null
         try {
-            console.log(uri)
+            console.log(`Fetch post: ${uri}`)
             // アクセストークンのセッション取得
             const jwt = await window.accessApi.refreshBlueskySession(this.from_account.pref.user_id)
 
