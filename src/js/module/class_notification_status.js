@@ -16,6 +16,8 @@ class NotificationStatus extends Status {
                 if (json.type == 'follow') super(json, timeline, account)
                 else super(json.status, timeline, account)
                 original_date = json.created_at
+                this.notification_id = json.id
+                this.notification_type = json.type
 
                 // アクションを起こしたユーザーの情報
                 this.action_user = {
@@ -41,6 +43,8 @@ class NotificationStatus extends Status {
                 if (json.type == 'follow') super(json, timeline, account)
                 else super(json.note, timeline, account)
                 original_date = json.createdAt
+                this.notification_id = json.id
+                this.notification_type = json.type
 
                 // アクションを起こしたユーザーの情報
                 this.action_user = {
@@ -62,11 +66,38 @@ class NotificationStatus extends Status {
                     this.reaction_summary.set(json.reaction, [this.action_user])
                 }
                 break
+            case 'Bluesky': // Bluesky
+                super(json, timeline, account)
+
+                original_date = json.indexedAt
+                this.notification_id = json.cid
+                this.notification_type = json.reason
+                this.id = json.record?.subject?.cid
+                this.uri = json.record?.subject?.uri
+
+                // アクションを起こしたユーザーの情報
+                this.action_user = {
+                    username: json.author.displayName,
+                    id: json.author.handle,
+                    full_address: json.author.handle,
+                    avatar_url: json.author.avatar,
+                    profile: json.author.description,
+                    emojis: Emojis.THRU
+                }
+
+                // 通知元ユーザーの情報
+                this.user = {
+                    username: this.from_account?.pref.username,
+                    id: this.from_account?.pref.user_id,
+                    full_address: this.from_account?.full_address,
+                    avatar_url: this.from_account?.pref.avatar_url,
+                    profile: null,
+                    emojis: Emojis.THRU
+                }
+                break
             default:
                 break
         }
-        this.notification_id = json.id
-        this.notification_type = json.type
         this.sort_date = new Date(original_date)
         this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${this.notification_id}@${this.id}@${this.user?.full_address}`
@@ -76,10 +107,12 @@ class NotificationStatus extends Status {
         this.mergable = true
         switch (this.notification_type) {
             case 'favourite': // お気に入り
+            case 'like': // お気に入り
             case 'reaction': // 絵文字リアクション
                 this.notification_key = `fav_${this.id}`
                 break
             case 'reblog': // ブースト
+            case 'repost': // ブースト
             case 'renote': // リノート
                 this.notification_key = `reb_${this.id}`
                 break
@@ -92,6 +125,9 @@ class NotificationStatus extends Status {
                 this.mergable = false
                 break
         }
+
+        // 追加で取得する情報がある場合はHTTP Requestで取得
+        this.fetchAdditionalNotifyInfoAsync()
     }
 
     // Getter: フォロー通知判定
@@ -135,6 +171,19 @@ class NotificationStatus extends Status {
         return [merge_at, merge_from]
     }
 
+    async fetchAdditionalNotifyInfoAsync() {
+        if (this.platform == 'Bluesky' && this.notification_type != 'follow') // 通知の投稿を取得
+            this.__prm_notify_status = super.getPostBsky(this.uri).then(post => { // 内容をコピーする
+                this.content = post.content
+                this.content_length = post.content_length
+                this.sensitive = post.sensitive
+                this.medias = post.medias
+                this.count_reply = post.count_reply
+                this.count_reblog = post.count_reblog
+                this.count_fav = post.count_fav
+            })
+    }
+
     /**
      * #Method #Async
      * この通知をDOMに反映したあとにあとから非同期で取得して表示する情報を追加でバインドする.
@@ -161,6 +210,9 @@ class NotificationStatus extends Status {
             })
             observer.observe(target_li.get(0))
         }
+
+        if (this.platform == 'Bluesky') this.__prm_notify_status?.then(post => tgul.find(`li[id="${this.status_key}"]`)
+            .replaceWith(this.popout_flg ? this.element : this.timeline_element))
     }
 
     // Getter: 投稿データからHTMLを生成して返却(ノーマルレイアウト)
@@ -195,10 +247,12 @@ class NotificationStatus extends Status {
         switch (this.notification_type) {
             case 'favourite': // お気に入り
             case 'reaction': // 絵文字リアクション
+            case 'like': // お気に入り(Bluesky)
                 jqelm.closest('li').addClass('favorited_post')
                 break
             case 'reblog': // ブースト
             case 'renote': // リノート
+            case 'repost': // リポスト(Bluesky)
                 jqelm.closest('li').addClass('rebloged_post')
                 break
             case 'follow': // フォロー通知
@@ -243,10 +297,12 @@ class NotificationStatus extends Status {
         switch (this.notification_type) {
             case 'favourite': // お気に入り
             case 'reaction': // 絵文字リアクション
+            case 'like': // お気に入り(Bluesky)
                 jqelm.closest('li').addClass('favorited_post')
                 break
             case 'reblog': // ブースト
             case 'renote': // リノート
+            case 'repost': // リポスト(Bluesky)
                 jqelm.closest('li').addClass('rebloged_post')
                 break
             case 'follow': // フォロー通知
@@ -308,11 +364,13 @@ class NotificationStatus extends Status {
 
         switch (this.notification_type) {
             case 'favourite': // お気に入り
+            case 'like': // お気に入り(Bluesky)
                 jqelm.closest('li').addClass('favorited_post')
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_favorite.png')
                 break
             case 'reblog': // ブースト
             case 'renote': // リノート
+            case 'repost': // リポスト(Bluesky)
                 jqelm.closest('li').addClass('rebloged_post')
                 jqelm.find('.ic_notif_type').attr('src', 'resources/ic_reblog.png')
                 break
@@ -382,6 +440,12 @@ class NotificationStatus extends Status {
         switch (this.notification_type) {
             case 'favourite': // お気に入り
                 html += '<h6 class="fav label_favorite">Favorited Users</h6>'
+                break
+            case 'like': // お気に入り(Bluesky)
+                html += '<h6 class="fav label_favorite">Liked Users</h6>'
+                break
+            case 'repost': // リポスト(Bluesky)
+                html += '<h6 class="reblog label_reblog">Reposted Users</h6>'
                 break
             case 'reblog': // ブースト
                 html += '<h6 class="reblog label_reblog">Boosted Users</h6>'

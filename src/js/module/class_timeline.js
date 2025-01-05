@@ -102,7 +102,6 @@ class Timeline {
                         data: query_param
                     })
 
-                    console.log(response)
                     // Feedの配列をステータスに渡す
                     response = response.feed ?? response.notifications
                     break
