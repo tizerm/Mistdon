@@ -286,6 +286,7 @@ class Timeline {
         if (this.platform != 'Misskey' // Misskeyではない場合
             || this.temptl_pref // 一時タイムラインの場合
             || this.pref.external // 外部インスタンスの場合
+            || this.pref.disable_websocket // WebSocketを無効化している場合
             || this.is_notification) return // そして通知の場合はキャプチャしない
 
         const socket = this.target_account.socket
