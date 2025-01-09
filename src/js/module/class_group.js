@@ -445,7 +445,10 @@ class Group {
         this.status_map.clear()
         this.notification_map.clear()
         // カラムのタイムラインを走査して配列のAPI呼び出しパラメータを使ってタイムラインを生成
-        this.timelines.forEach(tl => rest_promises.push(tl.getTimeline()))
+        this.timelines.forEach(tl => { // 再取得する前にタイムラインキャッシュをリセット
+            tl.reset()
+            rest_promises.push(tl.getTimeline())
+        })
         // カラムのすべてのタイムラインが取得し終えたらタイムラインをバインド
         this.onLoadTimeline(rest_promises)
     }
