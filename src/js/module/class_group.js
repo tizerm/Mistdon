@@ -276,6 +276,7 @@ class Group {
         if (arg.post.notification_key && Preference.GENERAL_PREFERENCE.enable_merge_notification) {
             const merge_from = this.notification_map.get(arg.post.notification_key)
             if (merge_from) { // マージできる通知が存在する場合
+                if (merge_from.contains(arg.post)) return // 通知が含まれていたら無視
                 const [at, from] = merge_from.merge(arg.post)
                 if (merge_from.status_key != at.status_key) { // マージ先の通知が既存の通知より新しい場合
                     // 通知キーとステータスキーをマップにセット

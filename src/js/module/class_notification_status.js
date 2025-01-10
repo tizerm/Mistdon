@@ -71,6 +71,9 @@ class NotificationStatus extends Status {
         this.relative_time = new RelativeTime(this.sort_date)
         this.status_key = `${this.notification_id}@${this.id}@${this.user?.full_address}`
         this.user_summary = [this.action_user]
+        const usr_key = `${original_date}@${this.action_user.full_address}`
+        this.user_key = usr_key
+        this.user_set = new Set([usr_key])
 
         // マージ用の通知キー
         this.mergable = true
@@ -111,6 +114,9 @@ class NotificationStatus extends Status {
         const merge_at = this.sort_date > another.sort_date ? this : another
         const merge_from = this.sort_date < another.sort_date ? this : another
         merge_at.user_summary.push(...merge_from.user_summary)
+        // TODO: バージョンが古くてunionが使えないので律儀に全部いれる
+        merge_from.user_set.forEach(k => merge_at.user_set.add(k))
+
         if (this.is_reaction) { // リアクションの場合はリアクションマップにもマージする
             let merge_react_at = null
             let merge_react_from = null
@@ -133,6 +139,17 @@ class NotificationStatus extends Status {
         }
         // マージされたほうを返却
         return [merge_at, merge_from]
+    }
+
+    /**
+     * #Method
+     * この通知に同一の通知情報が含まれているか判定する.
+     * 含まれていた場合はtrue.
+     * 
+     * @param another 判定対象の通知オブジェクト
+     */
+    contains(another) {
+        return this.user_set.has(another.user_key)
     }
 
     /**
