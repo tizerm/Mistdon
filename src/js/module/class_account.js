@@ -875,7 +875,8 @@ class Account {
             arg.closeFunc()
             // 自身を呼び出して再接続
             if (this.reconnect) this.connect(arg)
-            console.log(event)
+
+            console.log(`#INFO: WebSocket closed: ${this.full_address}`)
         })
         // 受信処理を設定
         this.socket_prefs.forEach(p => this.socket.addEventListener("message", p.messageFunc))
@@ -887,7 +888,7 @@ class Account {
 
             // アカウントのノートマップから対象のタイムラインを検索して
             const tl_set = this.captured_notes.get(data.body.id)
-            tl_set.forEach(tl => tl.updateNote(data.body))
+            tl_set?.forEach(tl => tl.updateNote(data.body))
         })
     }
 
