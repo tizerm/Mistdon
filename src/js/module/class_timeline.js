@@ -301,6 +301,7 @@ class Timeline {
         if (this.platform != 'Misskey' // Misskeyではない場合
             || this.temptl_pref // 一時タイムラインの場合
             || this.pref.external // 外部インスタンスの場合
+            || this.pref.disable_websocket // WebSocketを無効化している場合
             || this.is_notification) return // そして通知の場合はキャプチャしない
 
         const socket = this.target_account.socket
@@ -336,10 +337,13 @@ class Timeline {
             "type": "unsubNote",
             "body": { "id": id }
         }))
+
         // アカウントのノートマップからキャプチャ先のタイムラインを削除
         const del_set = captured_notes.get(id)
-        del_set.delete(this)
-        if (del_set.size == 0) captured_notes.delete(id)
+        if (del_set) { // マップに登録されていたノートの場合
+            del_set.delete(this)
+            if (del_set.size == 0) captured_notes.delete(id)
+        } else console.log(`#INFO: note not found: ${id} - ${this.target_account.full_address}`)
     }
 
     /**
@@ -409,6 +413,19 @@ class Timeline {
         const jqelm = group.getStatusElement(status_key)
         const target_post = group.status_map.get(status_key)
         target_post.updateReaction(body, jqelm)
+    }
+
+    /**
+     * #Method
+     * リロードする時などでキャッシュをクリアする.
+     */
+    reset() {
+        if (!(this.platform != 'Misskey' // Misskeyではない場合
+            || this.temptl_pref // 一時タイムラインの場合
+            || this.pref.external // 外部インスタンスの場合
+            || this.pref.disable_websocket // WebSocketを無効化している場合
+            || this.is_notification)) this.capture_queue.forEach(post => this.uncaptureNote(post.id))
+        this.status_key_map.clear()
     }
 
     /**
