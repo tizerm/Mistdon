@@ -67,7 +67,21 @@ class NotificationStatus extends Status {
                 }
                 break
             case 'Bluesky': // Bluesky
-                super(json, timeline, account)
+                // リプライの場合
+                if (json.reason == 'reply') super({ 'post': json }, timeline, account)
+                else { // まとめて表示できる通知の場合
+                    super(json, timeline, account)
+
+                    // 通知元ユーザーの情報
+                    this.user = {
+                        username: this.from_account?.pref.username,
+                        id: this.from_account?.pref.user_id,
+                        full_address: this.from_account?.full_address,
+                        avatar_url: this.from_account?.pref.avatar_url,
+                        profile: null,
+                        emojis: Emojis.THRU
+                    }
+                }
 
                 original_date = json.indexedAt
                 this.notification_id = json.cid
@@ -82,16 +96,6 @@ class NotificationStatus extends Status {
                     full_address: json.author.handle,
                     avatar_url: json.author.avatar,
                     profile: json.author.description,
-                    emojis: Emojis.THRU
-                }
-
-                // 通知元ユーザーの情報
-                this.user = {
-                    username: this.from_account?.pref.username,
-                    id: this.from_account?.pref.user_id,
-                    full_address: this.from_account?.full_address,
-                    avatar_url: this.from_account?.pref.avatar_url,
-                    profile: null,
                     emojis: Emojis.THRU
                 }
                 break
@@ -137,6 +141,8 @@ class NotificationStatus extends Status {
     get is_follow() { return ['follow', 'follow_request'].includes(this.notification_type) }
     // Getter: リアクション判定
     get is_reaction() { return this.notification_type == 'reaction' }
+    // Getter: フォロー通知判定
+    get is_mergable_bsky() { return ['like', 'repost'].includes(this.notification_type) }
 
     /**
      * #Method
@@ -178,7 +184,7 @@ class NotificationStatus extends Status {
     }
 
     async fetchAdditionalNotifyInfoAsync() {
-        if (this.platform == 'Bluesky' && this.notification_type != 'follow') // 通知の投稿を取得
+        if (this.platform == 'Bluesky' && this.is_mergable_bsky) // 通知の投稿を取得
             this.__prm_notify_status = super.getPostBsky(this.uri).then(post => { // 内容をコピーする
                 this.content = post.content
                 this.content_length = post.content_length

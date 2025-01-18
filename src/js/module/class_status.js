@@ -296,7 +296,7 @@ class Status extends StatusLayout {
                     this.count_reblog = data.repostCount
                     this.count_fav = data.likeCount
 
-                    console.log(data)
+                    //console.log(data)
                 } else original_date = json.indexedAt
 
                 this.emojis = Emojis.THRU // カスタム絵文字はないのでスルー
