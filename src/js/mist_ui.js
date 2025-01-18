@@ -212,7 +212,7 @@ function createScrollLoader(arg) {
     })(), {
         root: arg.target.get(0),
         rootMargin: "0px",
-        threshold: 1.0,
+        threshold: 0.75,
     })
     observer.observe(arg.target.find(".__scroll_loader").get(0))
 }
