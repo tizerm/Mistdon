@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('accessApi', {
     readEmojiHistory: () => ipcRenderer.invoke('read-emoji-history'),
     writePrefMstdAccs: (json_data) => ipcRenderer.send('write-pref-mstd-accs', json_data),
     writePrefMskyAccs: (json_data) => ipcRenderer.send('write-pref-msky-accs', json_data),
+    writePrefBskyAccs: (json_data) => ipcRenderer.send('write-pref-bsky-accs', json_data),
     writePrefAccColor: (json_data) => ipcRenderer.send('write-pref-acc-color', json_data),
     writePrefCols: (json_data) => ipcRenderer.send('write-pref-cols', json_data),
     writeGeneralPref: (json_data) => ipcRenderer.send('write-general-pref', json_data),
@@ -23,5 +24,7 @@ contextBridge.exposeInMainWorld('accessApi', {
     fetchVersion: () => ipcRenderer.invoke('fetch-version'),
     openOAuthSession: (json_data) => ipcRenderer.send('open-oauth', json_data),
     openExternalBrowser: (url) => ipcRenderer.send('open-external-browser', url),
-    notification: (arg) => ipcRenderer.send('notification', arg)
+    notification: (arg) => ipcRenderer.send('notification', arg),
+
+    refreshBlueskySession: (handle) => ipcRenderer.invoke('refresh-bsky-session', handle)
 })

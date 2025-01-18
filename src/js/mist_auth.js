@@ -149,6 +149,22 @@
                     }
                 })
                 break
+            case 'Bluesky': // Bluesky
+                dialog({ // MisskeyはDOM上から消すだけ
+                    type: 'confirm',
+                    title: "アカウント認証情報削除",
+                    text: `
+                        このアカウントの認証情報をMistdonから削除します。<br/>
+                        よろしいですか？<br/><br/>
+                        ※使用していたアプリパスワードはBlueskyの設定で削除しておいてください。
+                    `,
+                    // OKボタン押下時の処理
+                    accept: () => {
+                        target_li.remove()
+                        $("#on_save_account_info").click()
+                    }
+                })
+                break
             default:
                 break
         }
@@ -215,5 +231,11 @@
         $(".platform_section").hide()
         $("#select_platform").show("fade", 120)
     })
+
+    $("#on_auth_bluesky").on("click", e => Instance.authorizeBluesky(
+        $("#__txt_bsky_pds").val(),
+        $("#__txt_bsky_handle").val(),
+        $("#__txt_bsky_pass").val()
+    ))
 
 })

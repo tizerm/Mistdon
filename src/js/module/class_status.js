@@ -247,6 +247,61 @@ class Status extends StatusLayout {
                 }
                 this.reaction_self = data.myReaction
                 break
+            case 'Bluesky': // Bluesky
+                //this.notif_type = this.type == 'notification' ? json.reason : null
+                this.medias = []
+
+                if (json.post) { // 投稿データ
+                    // リポスト判定とデータの参照
+                    this.reblog = !!json.reason
+                    this.reblog_by = this.reblog ? json.reason.by.handle : null
+                    this.reblog_by_icon = this.reblog ? json.reason.by.avatar : null
+                    data = json.post
+
+                    original_date = this.reblog ? json.reason.indexedAt : data.indexedAt
+                    this.reblog_origin_time = this.reblog ? new RelativeTime(new Date(data.indexedAt)) : null
+                    this.uri = data.uri // 投稿URL(前はリプライ時のURL)
+                    this.id = data.cid // 投稿ID
+
+                    // ユーザーに関するデータ
+                    this.user = {
+                        username: data.author.displayName,
+                        id: data.author.handle,
+                        full_address: data.author.handle,
+                        avatar_url: data.author.avatar,
+                        profile: data.author.description,
+                        emojis: Emojis.THRU
+                    }
+
+                    // 投稿コンテンツに関するデータ
+                    this.visibility = "public"
+                    this.allow_reblog = true
+                    this.reply_to = json.reply?.parent?.cid
+
+                    this.content = data.record.text.replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
+                    this.content_length = this.content.length
+
+                    // 添付メディア
+                    this.sensitive = data.labels.length > 0 // 閲覧注意設定
+                    data.embed?.images?.forEach(media => this.medias.push({
+                        id: null,
+                        type: data.embed?.$type,
+                        url: media.fullsize,
+                        thumbnail: media.thumb,
+                        sensitive: false,
+                        aspect: media.aspectRatio?.width / media.aspectRatio?.height ?? 1
+                    }))
+
+                    this.count_reply = data.replyCount
+                    this.count_reblog = data.repostCount
+                    this.count_fav = data.likeCount
+
+                    //console.log(data)
+                } else original_date = json.indexedAt
+
+                this.emojis = Emojis.THRU // カスタム絵文字はないのでスルー
+
+                break
             default:
                 break
         }
@@ -502,6 +557,27 @@ class Status extends StatusLayout {
         } catch (err) {
             console.log(err)
             return Promise.reject("投稿の取得に失敗しました.")
+        }
+    }
+
+    async getPostBsky(uri) {
+        let response = null
+        try {
+            console.log(`Fetch post: ${uri}`)
+            // アクセストークンのセッション取得
+            const jwt = await window.accessApi.refreshBlueskySession(this.from_account.pref.user_id)
+
+            response = await $.ajax({
+                type: "GET",
+                url: `https://${this.from_account.pref.domain}/xrpc/app.bsky.feed.getPosts`,
+                dataType: "json",
+                headers: { "Authorization": `Bearer ${jwt}` },
+                data: { "uris": [uri] }
+            })
+
+            return new Status({ 'post': response.posts[0] }, this.from_timeline, this.from_account)
+        } catch (err) {
+            Notification.error("投稿の取得に失敗しました.")
         }
     }
 

@@ -9,7 +9,13 @@ class Account {
     constructor(pref) {
         this.pref = pref
         this.index = pref.index
-        this.full_address = `@${pref.user_id}@${pref.domain}`
+        this.full_address = this.pref.platform == 'Bluesky'
+            ? `@${pref.user_id}` : `@${pref.user_id}@${pref.domain}`
+
+        // Blueskyの場合は__access_jwtにトークンを一時保存
+        if (this.pref.platform == 'Bluesky') (async () => this.__access_jwt =
+            await window.accessApi.refreshBlueskySession(pref.user_id))()
+
         this.socket_prefs = []
         this.socket = null
         this.reconnect = false
@@ -182,8 +188,9 @@ class Account {
         // 背景アイコンとアカウントカラーを設定
         if (this.platform == 'Misskey') $("#header>h1>.head_user")
             .css('background-image', 'url("resources/ic_misskey.png")')
-        else $("#header>h1>.head_user").css('background-image',
-            `url("resources/${this.is_skybridge ? 'ic_bluesky' : 'ic_mastodon'}.png")`)
+        else if (this.platform == 'Bluesky' || this.is_skybridge) $("#header>h1>.head_user")
+            .css('background-image', 'url("resources/ic_bluesky.png")')
+        else $("#header>h1>.head_user").css('background-image', `url("resources/ic_mastodon.png")`)
 
         $("#header>h1>.head_user>.username").html(this.replaceEmojis(this.pref.username))
         $("#header>h1>.head_user>.channelname").empty()
@@ -367,12 +374,37 @@ class Account {
                     })
                     response = response.createdNote
                     break
+                case 'Bluesky': // Bluesky(alpha)
+                    // アクセストークンのセッション取得
+                    const jwt = await window.accessApi.refreshBlueskySession(this.pref.user_id)
+                    request_param = {
+                        "repo": this.pref.user_id,
+                        "collection": 'app.bsky.feed.post',
+                        "record": {
+                            "text": arg.content,
+                            "createdAt": new Date()
+                        }
+                    }
+
+                    response = await $.ajax({ // API呼び出し
+                        type: "POST",
+                        url: `https://${this.pref.domain}/xrpc/com.atproto.repo.createRecord`,
+                        dataType: "json",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${jwt}`
+                        },
+                        data: JSON.stringify(request_param)
+                    })
+
+                    console.log(response)
+                    break
                 default:
                     break
             }
 
-            // 投稿を履歴にスタックする
-            new Status(response, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
+            if (this.pref.platform != 'Bluesky') // 投稿を履歴にスタックする
+                new Status(response, History.HISTORY_PREF_TIMELINE, this).pushStack(arg.content)
             // 投稿成功時(コールバック関数実行)
             arg.success()
             notification.done(`${this.full_address}から投稿しました.`)
