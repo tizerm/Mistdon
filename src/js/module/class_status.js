@@ -281,6 +281,9 @@ class Status extends StatusLayout {
                     this.content = data.record.text.replace(new RegExp('\n', 'g'), '<br/>') // 改行文字をタグに置換
                     this.content_length = this.content.length
 
+                    // 引用(URIだけ保持)
+                    this.bsky_quote_uri = data.embed?.record?.uri
+
                     // 添付メディア
                     this.sensitive = data.labels.length > 0 // 閲覧注意設定
                     data.embed?.images?.forEach(media => this.medias.push({
@@ -296,7 +299,7 @@ class Status extends StatusLayout {
                     this.count_reblog = data.repostCount
                     this.count_fav = data.likeCount
 
-                    //console.log(data)
+                    //console.log(json)
                 } else original_date = json.indexedAt
 
                 this.emojis = Emojis.THRU // カスタム絵文字はないのでスルー
@@ -433,6 +436,9 @@ class Status extends StatusLayout {
         if (Preference.GENERAL_PREFERENCE.remote_fetch?.btrn_impression && this.reblog && this.remote_flg)
             // リモートのBTRNは現地情報を直接取得
             this.__prm_remote_status = Status.getStatus(this.uri, true)
+        if (this.platform == 'Bluesky' && this.bsky_quote_uri)
+            // Blueskyの引用は引用先の投稿を直接フェッチする
+            this.__prm_bsky_quote = this.getPostBsky(this.bsky_quote_uri)
     }
 
     /**
@@ -450,6 +456,12 @@ class Status extends StatusLayout {
             target_li.find('.impressions').replaceWith(post.impression_section)
             // Misskeyの場合未変換のカスタム絵文字を置換
             if (post.platform == 'Misskey') Emojis.replaceDomAsync(target_li.find('.impressions'), post.host)
+        })
+        // Blueskyの引用を表示
+        this.__prm_bsky_quote?.then(post => {
+            this.quote_flg = true
+            this.quote = post
+            target_li.find('.content').after(this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default))
         })
 
         // 外部インスタンスの投稿はカスタム絵文字を現地から非同期取得

@@ -68,7 +68,8 @@ class NotificationStatus extends Status {
                 break
             case 'Bluesky': // Bluesky
                 // リプライの場合
-                if (json.reason == 'reply') super({ 'post': json }, timeline, account)
+                //console.log(json)
+                if (['reply', 'quote'].includes(json.reason)) super({ 'post': json }, timeline, account)
                 else { // まとめて表示できる通知の場合
                     super(json, timeline, account)
 
