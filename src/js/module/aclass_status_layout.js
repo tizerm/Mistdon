@@ -594,6 +594,7 @@
             let reaction_self = null
             switch (this.platform) {
                 case 'Mastodon': // Mastodon
+                case 'Bluesky': // Bluesky
                     // ふぁぼの表示だけする
                     if (this.count_fav > 0) html += `<span class="count_fav counter" title="お気に入り数">${this.count_fav}</span>`
                     break

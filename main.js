@@ -11,6 +11,7 @@ const fs = require('fs')
 const http = require('http')
 const stateKeeper = require('electron-window-state')
 const FeedParser = require('feedparser')
+const AsyncLock = require('async-lock')
 const fetch = require('node-fetch')
 
 // アプリ保持用設定データの管理
@@ -22,7 +23,10 @@ var pref_temptl_fav = null
 var cache_history = null
 var cache_draft = null
 var cache_emoji_history = null
+var cache_bsky_session = new Map()
 var oauth_session = null
+
+var lock = new AsyncLock()
 
 const is_windows = process.platform === 'win32'
 const is_mac = process.platform === 'darwin'
@@ -48,9 +52,14 @@ async function readPrefAccs() {
     const content = readFile('app_prefs/auth.json')
     if (!content) return null // ファイルが見つからなかったらnullを返却
 
-    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
     console.log('@INF: read app_prefs/auth.json.')
     return pref_accounts
+}
+
+function getAccountKey(json) {
+    if (json.platform == 'Bluesky') return `@${json.user_id}`
+    else return `@${json.user_id}@${json.domain}`
 }
 
 /**
@@ -83,7 +92,7 @@ async function writePrefMstdAccs(event, json_data) {
     // キャッシュを更新
     if (!pref_accounts) {
         // キャッシュがない場合はファイルを読み込んでキャッシュを生成
-        pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
     } else {
         pref_accounts.set(`@${json_data.user_id}@${json_data.domain}`, write_json)
     }
@@ -124,10 +133,49 @@ async function writePrefMskyAccs(event, json_data) {
     // キャッシュを更新
     if (!pref_accounts) {
         // キャッシュがない場合はファイルを読み込んでキャッシュを生成
-        pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+        pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
     } else {
         pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
     }
+}
+
+async function writePrefBskyAccs(event, json_data) {
+    // JSONを生成(あとでキャッシュに入れるので)
+    const write_json = {
+        'domain': json_data.domain,
+        'platform': 'Bluesky',
+        'user_id': json_data.user_id,
+        'username': json_data.username,
+        'socket_url': null,
+        'client_id': json_data.did,
+        'client_secret': json_data.app_pass,
+        'access_token': null,
+        'avatar_url': json_data.avatar_url,
+        'post_maxlength': json_data.post_maxlength,
+        'acc_color': getRandomColor()
+    }
+
+    // ユーザー情報をファイルに書き込み
+    const content = await writeFileArrayJson('app_prefs/auth.json', write_json)
+
+    // ユーザー情報のキャッシュを更新
+    if (!pref_accounts) {
+        // キャッシュがない場合はファイルを読み込んでキャッシュを生成
+        pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
+    } else {
+        pref_accounts.set(`@${json_data.user_id}`, write_json)
+    }
+
+    // セッション情報のJSONを生成
+    const write_session = {
+        'handle': json_data.user_id,
+        'pds': json_data.domain,
+        'refresh_token': json_data.refresh_token,
+        'access_token': json_data.access_token
+    }
+
+    // セッションキャッシュを更新
+    cache_bsky_session.set(json_data.user_id, write_session)
 }
 
 /**
@@ -159,7 +207,7 @@ async function writePrefAccColor(event, json_data) {
     const content = await overwriteFile('app_prefs/auth.json', write_json)
 
     // キャッシュを更新
-    pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+    pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
 }
 
 /**
@@ -291,7 +339,7 @@ async function authorizeMastodon(auth_code) {
         // キャッシュを更新
         if (!pref_accounts) {
             // キャッシュがない場合はファイルを読み込んでキャッシュを生成
-            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+            pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
         } else {
             pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
         }
@@ -337,7 +385,7 @@ async function authorizeMisskey(session) {
         // キャッシュを更新
         if (!pref_accounts) {
             // キャッシュがない場合はファイルを読み込んでキャッシュを生成
-            pref_accounts = jsonToMap(JSON.parse(content), (elm) => `@${elm.user_id}@${elm.domain}`)
+            pref_accounts = jsonToMap(JSON.parse(content), getAccountKey)
         } else {
             pref_accounts.set(`@${write_json.user_id}@${write_json.domain}`, write_json)
         }
@@ -345,6 +393,90 @@ async function authorizeMisskey(session) {
         console.log(err)
         return Promise.reject(err)
     }
+}
+
+async function refreshBlueskySession(event, handle) {
+    console.log("#BSKY-SESSION: Exclusive Bluesky Session getted...")
+    return await lock.acquire('bluesky-session', async () => { // 同時実行しないよう排他
+        const session = cache_bsky_session.get(handle)
+
+        if (session) { // セッションキャッシュが残っている場合はセッションが生きてるかの確認から
+            try {
+                const session_info = await ajax({ // セッションが有効か確認
+                    method: "GET",
+                    url: `https://${session.pds}/xrpc/com.atproto.server.getSession`,
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                })
+
+                // 有効なセッションの場合はキャッシュされたアクセストークンを返す
+                console.log("#BSKY-SESSION: Access token returned.")
+                return session.access_token
+            } catch (err) {
+                if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+                    console.log(err)
+                    return null
+                }
+            }
+
+            try {
+                const session_info = await ajax({ // セッションを更新する
+                    method: "POST",
+                    url: `https://${session.pds}/xrpc/com.atproto.server.refreshSession`,
+                    headers: { 'Authorization': `Bearer ${session.refresh_token}` }
+                })
+
+                // セッション情報のJSONを生成
+                const write_session = {
+                    'handle': session.handle,
+                    'pds': session.pds,
+                    'refresh_token': session_info.body.refreshJwt,
+                    'access_token': session_info.body.accessJwt
+                }
+
+                // セッション情報のキャッシュを更新
+                cache_bsky_session.set(write_session.handle, write_session)
+
+                console.log("#BSKY-SESSION: Refresh token created.")
+                return session_info.body.accessJwt
+            } catch (err) {
+                if (err.message != '400') { // Bad Request以外はトークンの取得に失敗
+                    console.log(err)
+                    return null
+                }
+            }
+        }
+
+        try { // セッションを再取得する
+            const account = pref_accounts.get(`@${handle}`)
+            const pds = account.domain
+            const session_info = await ajax({
+                method: "POST",
+                url: `https://${pds}/xrpc/com.atproto.server.createSession`,
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    'identifier': handle,
+                    'password': account.client_secret
+                })
+            })
+
+            // セッション情報のJSONを生成
+            const write_session = {
+                'handle': handle,
+                'pds': pds,
+                'refresh_token': session_info.body.refreshJwt,
+                'access_token': session_info.body.accessJwt
+            }
+
+            // セッション情報をアプリにキャッシュする
+            cache_bsky_session.set(write_session.handle, write_session)
+
+            console.log("#BSKY-SESSION: Session Regenerated.")
+            return session_info.body.accessJwt
+        } catch (err) {
+            console.log(err)
+        }
+        return null
+    })
 }
 
 /**
@@ -575,6 +707,24 @@ function getAPIParams(event, arg) {
                     break
             }
             socket_url = `wss://${arg.host}/streaming`
+            break
+        case 'Bluesky': // Bluesky
+            // タイムラインタイプによって設定値を変える
+            switch (arg.timeline.timeline_type) {
+                case 'home': // ホームタイムライン
+                    rest_url = `https://${arg.host}/xrpc/app.bsky.feed.getTimeline`
+                    query_param = {}
+                    socket_param = {}
+                    break
+                case 'notification': // 通知
+                    rest_url = `https://${arg.host}/xrpc/app.bsky.notification.listNotifications`
+                    query_param = {}
+                    socket_param = {}
+                    break
+                default:
+                    break
+            }
+            socket_url = null
             break
         default:
             break
@@ -977,10 +1127,13 @@ async function ajax(arg) {
             if (arg.method == "GET") { // GETはパラメータをURLに埋め込む
                 const query_param = Object.keys(arg.data).reduce((str, key) => `${str}&${key}=${arg.data[key]}`, '')
                 url += `?${query_param.substring(1)}`
-            } else { // POSTはパラメータをURLSearchParamsにセットする
-                const post_params = new URLSearchParams()
-                Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
-                param.body = post_params
+            } else {
+                if (arg.headers['Content-Type'] == 'application/json') param.body = arg.data
+                else { // POSTはパラメータをURLSearchParamsにセットする
+                    const post_params = new URLSearchParams()
+                    Object.keys(arg.data).forEach(key => post_params.append(key, arg.data[key]))
+                    param.body = post_params
+                }
             }
         }
 
@@ -988,7 +1141,7 @@ async function ajax(arg) {
         response = await fetch(url, param)
 
         // ステータスコードがエラーの場合はエラーを投げる
-        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`)
+        if (!response.ok) throw new Error(response.status)
 
         // responseをjsonとheaderとHTTP Statusに分けて返却
         return {
@@ -1183,6 +1336,7 @@ app.whenReady().then(() => {
     ipcMain.handle('read-emoji-history', readEmojiHistory)
     ipcMain.on('write-pref-mstd-accs', writePrefMstdAccs)
     ipcMain.on('write-pref-msky-accs', writePrefMskyAccs)
+    ipcMain.on('write-pref-bsky-accs', writePrefBskyAccs)
     ipcMain.on('write-pref-acc-color', writePrefAccColor)
     ipcMain.on('write-pref-cols', writePrefCols)
     ipcMain.on('write-general-pref', writeGeneralPref)
@@ -1196,6 +1350,8 @@ app.whenReady().then(() => {
     ipcMain.on('open-oauth', openOAuthSession)
     ipcMain.on('open-external-browser', openExternalBrowser)
     ipcMain.on('notification', notification)
+
+    ipcMain.handle('refresh-bsky-session', refreshBlueskySession)
 
     // ウィンドウ生成
     createWindow()

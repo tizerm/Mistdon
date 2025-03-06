@@ -438,6 +438,57 @@ class Instance {
         })
     }
 
+    static async authorizeBluesky(pds, handle, app_pass) {
+        try { // アクセストークンの取得
+            const token = await $.ajax({
+                type: "POST",
+                url: `https://${pds}/xrpc/com.atproto.server.createSession`,
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    'identifier': handle,
+                    'password': app_pass
+                })
+            })
+
+            const user_data = await $.ajax({ // ユーザーデータの取得
+                type: "GET",
+                url: `https://${pds}/xrpc/app.bsky.actor.getProfile`,
+                dataType: "json",
+                headers: { "Authorization": `Bearer ${token.accessJwt}` },
+                data: { "actor": token.did }
+            })
+
+            // responseが返ってきたらアクセストークンをメインプロセスに渡す
+            await window.accessApi.writePrefBskyAccs({
+                'domain': pds,
+                'user_id': token.handle,
+                'username': user_data.displayName,
+                'app_pass': app_pass,
+                'avatar_url': user_data.avatar,
+                'refresh_token': token.refreshJwt,
+                'did': token.did,
+                'access_token': token.accessJwt,
+                'post_maxlength': 300
+            })
+
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "アカウントの認証に成功しました！",
+                // OKボタンを押してから画面をリロード
+                accept: () => location.reload()
+            })
+        } catch (err) { // 認証失敗時
+            dialog({
+                type: 'alert',
+                title: "アカウント設定",
+                text: "認証リクエスト実行中に問題が発生しました。"
+            })
+            return Promise.reject(err)
+        }
+    }
+
     // Getter: インスタンスヘッダのDOMを返却
     get header_element() {
         let target_emojis = null
