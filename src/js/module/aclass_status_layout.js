@@ -488,7 +488,8 @@
             `; else html /* 画像か動画ファイル(サムネから拡大表示) */ += `
                 <a href="${media.url}" type="${media.type}" name="${media.aspect}"
                     class="__on_media_expand ${img_class}">
-                    <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}" class="media_preview"/>
+                    <img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}"
+                    class="media_preview" alt="${media.alt}"/>
                 </a>
             `
         })
