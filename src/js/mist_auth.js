@@ -126,9 +126,18 @@
                             $("#on_save_account_info").click()
                         }
                     })).catch(err => dialog({
-                        type: 'alert',
+                        type: 'confirm',
                         title: "アカウント認証解除",
-                        text: "アカウントの認証解除に失敗しました。<br/>処理を中断します。",
+                        text: `
+                            アカウントの認証解除に失敗しました。<br/>
+                            認証解除をせずに認証情報だけをMistdonから削除しますか？<br/>
+                            ※運営を停止したインスタンスなど認証解除ができない状況の場合は「はい」をクリックしてください。
+                        `,
+                        // OKボタン押下時の処理
+                        accept: () => {
+                            target_li.remove()
+                            $("#on_save_account_info").click()
+                        }
                     }))
                 })
                 break
