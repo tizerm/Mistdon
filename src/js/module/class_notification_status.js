@@ -13,7 +13,7 @@ class NotificationStatus extends Status {
         switch (platform) {
             case 'Mastodon': // Mastodon
                 // フォローはステータスデータが存在しないので生データをそのまま渡す
-                if (json.type == 'follow') super(json, timeline, account)
+                if (json.type == 'follow' || !json.status) super(json, timeline, account)
                 else super(json.status, timeline, account)
                 original_date = json.created_at
 

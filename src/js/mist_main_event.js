@@ -816,7 +816,7 @@
      * => 画像拡大モーダルを閉じる(動画には反応しない)
      */
     $(document).on("click", "#modal_expand_image", e => {
-        if ($(e.target).is("video")) return // 動画の場合はなにもしない
+        if ($(e.target).is("video") || $(e.target).is("h6")) return // 動画かキャプションの場合は何もしない
         $("#modal_expand_image").hide(...Preference.getAnimation("FADE_STD"),
             () => $("#modal_expand_image video, #modal_expand_image audio").remove())
     })
@@ -828,10 +828,11 @@
      */
     $(document).on("mouseenter", "#modal_expand_image>#expand_thumbnail_list>li", e => {
         const url = $(e.target).closest("li").attr("name")
-        $('#modal_expand_image>#expand_image_box>li>*:visible').hide()
-        const target_media = $(`#modal_expand_image>#expand_image_box>li>*[src="${url}"]`)
-        target_media.show()
+        $('#modal_expand_image>#expand_image_box>li').hide()
+        const target_section = $('#modal_expand_image>#expand_image_box>li').has(`.expanded_media[src="${url}"]`)
+        target_section.show()
         // 動画の場合は自動再生
+        const target_media = target_section.find(`.expanded_media[src="${url}"]`)
         if (target_media.is("video")) target_media.get(0).play()
         $('#modal_expand_image>#expand_thumbnail_list>*').removeClass("selected_image")
         $(e.target).closest("li").addClass("selected_image")
@@ -1049,7 +1050,7 @@
             // 一時データに設定してアクションバーを開く
             Status.TEMPORARY_ACTION_STATUS = target_post
             $("#pop_expand_action").css({
-                "top": `${pos.top + height - 4}px`,
+                "top": `${pos.top + height - 6}px`,
                 "left": `${pos.left}px`,
             }).show()
         })

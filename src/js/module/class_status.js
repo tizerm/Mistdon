@@ -104,6 +104,7 @@ class Status extends StatusLayout {
                     url: media.url,
                     thumbnail: media.preview_url,
                     sensitive: this.sensitive,
+                    alt: media.description,
                     aspect: media.meta?.original?.aspect ?? 1
                 }))
 
@@ -224,6 +225,7 @@ class Status extends StatusLayout {
                     url: media.url,
                     thumbnail: media.thumbnailUrl,
                     sensitive: media.isSensitive,
+                    alt: media.comment,
                     aspect: media.properties.width / media.properties.height
                 }))
 
@@ -1134,29 +1136,33 @@ class Status extends StatusLayout {
         // 一旦全部クリア
         $("#modal_expand_image>*").empty()
         this.medias.forEach(media => {
+            const h_html = media.alt ? `<h6>${media.alt}</h6>` : ''
             // 動画ファイルの場合はvideoを使う
             if (media.type == 'video' || media.type == 'gifv') $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}">
-                    <video src="${media.url}" class="expanded_media" preload controls loop></video>
+                    ${h_html}<video src="${media.url}" class="expanded_media" preload controls loop></video>
                 </li>
             `); else if (media.type == 'audio') /* オーディオ */ $("#modal_expand_image>#expand_image_box").append(`
                 <li name="${this.uri}">
-                    <audio controls src="${media.url}" class="expanded_media" preload="none"></audio>
+                    ${h_html}<audio controls src="${media.url}" class="expanded_media" preload="none"></audio>
                 </li>
-            `);
-            else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
-                <li name="${this.uri}"><img src="${media.url}" class="expanded_media"/></li>
+            `); else /* それ以外は画像ファイル */ $("#modal_expand_image>#expand_image_box").append(`
+                <li name="${this.uri}">
+                    ${h_html}<img src="${media.url}" class="expanded_media"/>
+                </li>
             `)
             // サムネイルリスト
             $("#modal_expand_image>#expand_thumbnail_list").append(`
                 <li name="${media.url}"><img src="${media.thumbnail ?? 'resources/illust/mitlin_404.jpg'}"/></li>
             `)
         })
-        const target_media = index >= 0
-            ? $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})>.expanded_media`)
-            : $(`#modal_expand_image>#expand_image_box>li>.expanded_media[src="${url}"]`)
-        target_media.show()
+        $('#modal_expand_image>#expand_image_box>li').hide()
+        const target_section = index >= 0
+            ? $(`#modal_expand_image>#expand_image_box>li:nth-child(${index + 1})`)
+            : $('#modal_expand_image>#expand_image_box>li').has(`.expanded_media[src="${url}"]`)
+        target_section.show()
         // 動画の場合は自動再生
+        const target_media = target_section.find(`.expanded_media[src="${url}"]`)
         if (target_media.is("video") || target_media.is("audio")) target_media.get(0).play()
         $(`#modal_expand_image>#expand_thumbnail_list>li[name="${url}"]`).addClass("selected_image")
         $("#modal_expand_image").show(...Preference.getAnimation("FADE_STD"))
