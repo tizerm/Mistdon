@@ -172,13 +172,20 @@ function getRandomColor() {
  * 文字列からハッシュ値を生成してユニークな色を決定する.
  */
 function getHashColor(str) {
-    let sum = 0
-    for (const s of str) sum += Math.pow(s.charCodeAt(), 2)
-    const hue = sum % 360
-    const light = 45 + (sum % 11)
-    const chroma = 10 + (sum % 61)
+    switch (str) {
+        case 'threads.net': // Threads
+            return '#000000'
+        case 'bsky.brid.gy': // Bridgy Fed
+            return '#0085FF'
+        default: // 普通の文字列の場合は普通にハッシュカラーを返却
+            let sum = 0
+            for (const s of str) sum += Math.pow(s.charCodeAt(), 2)
+            const hue = sum % 360
+            const light = 45 + (sum % 11)
+            const chroma = 10 + (sum % 61)
 
-    return `lch(${light}% ${chroma}% ${hue})`
+            return `lch(${light}% ${chroma}% ${hue})`
+    }
 }
 
 /**
