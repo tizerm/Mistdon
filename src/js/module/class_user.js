@@ -147,10 +147,7 @@ class User {
                 url: `https://${host}/api/users/show`,
                 dataType: "json",
                 headers: { "Content-Type": "application/json" },
-                data: JSON.stringify({
-                    "username": user_id,
-                    "host": host
-                })
+                data: JSON.stringify({ "username": user_id })
             }).then(data => { return {
                 platform: 'Misskey',
                 id: data.id

@@ -637,7 +637,7 @@
             padding: 0px;
             > .expanded_media {
                 width: 100vw;
-                height: calc(100vh - 112px);
+                height: calc(100vh - 116px);
                 margin: 0px auto;
                 object-fit: contain;
             }
@@ -653,7 +653,7 @@
                 border-top-left-radius: 16px;
                 border-top-right-radius: 16px;
                 border-bottom: solid 2px var(--core-color-border);
-                font-size: 18px;
+                font-size: 20px;
                 transition: opacity 0.2s;
                 &:has(+.expanded_media:hover) { opacity: 0.15; }
             }
