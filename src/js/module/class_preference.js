@@ -42,6 +42,7 @@ class Preference {
         this.disable_disconnect_pop     = pref?.disable_disconnect_pop      ?? false, // 一時切断通知
         this.enable_animation           = pref?.enable_animation            ?? true,  // アニメーション
         this.enable_tips                = pref?.enable_tips                 ?? true,  // TIPS表示
+        this.reaction_bar_event         = pref?.reaction_bar_event          ?? "click", // リアクションボタンの挙動
         this.auto_expand = {            // 自動展開
             "search_cw"                 : pref?.auto_expand?.search_cw      ?? false, // 検索: CW
             "search_media"              : pref?.auto_expand?.search_media   ?? false, // 検索: メディア
@@ -307,6 +308,9 @@ class Preference {
         $("#__chk_gen_animation")                       .prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
         $("#__chk_gen_show_tips")                       .prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
 
+        // 個別オプション(複数択)
+        $(`input.__opt_gen_reaction_button[value="${Preference.GENERAL_PREFERENCE.reaction_bar_event}"]`).prop("checked", true)
+
         // 自動展開
         $("#__chk_gen_expand_cw_search")    .prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.search_cw)
         $("#__chk_gen_expand_media_search") .prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.search_media)
@@ -419,6 +423,7 @@ class Preference {
             "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
             "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
+            "reaction_bar_event"            : $("input.__opt_gen_reaction_button:checked").val(),
             "auto_expand": {                // 自動展開
                 "search_cw"                 : $("#__chk_gen_expand_cw_search").prop("checked"),
                 "search_media"              : $("#__chk_gen_expand_media_search").prop("checked"),

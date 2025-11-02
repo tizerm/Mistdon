@@ -1092,10 +1092,17 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 最近のリアクションを開く.
+     * 簡易アクションバー: 最近のリアクションを開く(全体オプションによって挙動が変化).
      */
-    $(document).on("click", ".__short_open_reaction",
-        e => $("#pop_expand_action>.reactions").show(...Preference.getAnimation("SLIDE_DOWN")))
+    if (Preference.GENERAL_PREFERENCE.reaction_bar_event == 'hover') { // ホバーで展開
+        $(document).on("mouseenter", ".__short_open_reaction", e => $("#pop_expand_action>.reactions").show())
+        $(document).on("click", ".__short_open_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account
+            .reaction('__menu_reaction', null, Status.TEMPORARY_ACTION_STATUS))
+    } else $(document).on("click", ".__short_open_reaction", e => { // クリックで展開
+        if ($("#pop_expand_action>.reactions").is(":visible")) // 表示済みは別のリアクション
+            Status.TEMPORARY_ACTION_STATUS.from_account.reaction('__menu_reaction', null, Status.TEMPORARY_ACTION_STATUS)
+        else $("#pop_expand_action>.reactions").show(...Preference.getAnimation("SLIDE_DOWN"))
+    })
 
     /**
      * #Event
