@@ -36,6 +36,7 @@ class Preference {
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_merge_notification  = pref?.enable_merge_notification   ?? true,  // 通知まとめ
         this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
+        this.show_quote_media           = pref?.show_quote_media            ?? true,  // 引用のメディア表示
         this.blur_suspend_user          = pref?.blur_suspend_user           ?? true,  // FF一覧の休止ユーザーの半透明化
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
@@ -80,7 +81,8 @@ class Preference {
             "default"                   : pref?.media_height_limit?.default ?? 240, // ノーマル
             "chat"                      : pref?.media_height_limit?.chat    ?? 160, // チャット
             "media"                     : pref?.media_height_limit?.media   ?? 320, // メディア
-            "gallery"                   : pref?.media_height_limit?.gallery ?? 240  // ギャラリー
+            "gallery"                   : pref?.media_height_limit?.gallery ?? 240, // ギャラリー
+            "quote"                     : pref?.media_height_limit?.quote   ?? 120  // 引用
         },
         this.gallery_width_limit        = pref?.gallery_width_limit         ?? 240, // ギャラリーの横幅制限
         this.contents_limit = {         // 文字数制限
@@ -301,6 +303,7 @@ class Preference {
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_summary_notification")        .prop("checked", Preference.GENERAL_PREFERENCE.enable_merge_notification)
         $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
+        $("#__chk_gen_show_quote_media")                .prop("checked", Preference.GENERAL_PREFERENCE.show_quote_media)
         $("#__chk_gen_blur_suspend_user")               .prop("checked", Preference.GENERAL_PREFERENCE.blur_suspend_user)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
@@ -351,6 +354,7 @@ class Preference {
         $("#__txt_gen_imageheight_limit_chat")      .val(Preference.GENERAL_PREFERENCE.media_height_limit?.chat)
         $("#__txt_gen_imageheight_limit_media")     .val(Preference.GENERAL_PREFERENCE.media_height_limit?.media)
         $("#__txt_gen_imageheight_limit_gallery")   .val(Preference.GENERAL_PREFERENCE.media_height_limit?.gallery)
+        $("#__txt_gen_imageheight_limit_quote")     .val(Preference.GENERAL_PREFERENCE.media_height_limit?.quote)
 
         $("#__txt_gen_imagewidth_limit")            .val(Preference.GENERAL_PREFERENCE.gallery_width_limit)
 
@@ -417,6 +421,7 @@ class Preference {
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_merge_notification"     : $("#__chk_gen_use_summary_notification").prop("checked"),
             "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
+            "show_quote_media"              : $("#__chk_gen_show_quote_media").prop("checked"),
             "blur_suspend_user"             : $("#__chk_gen_blur_suspend_user").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
@@ -462,6 +467,7 @@ class Preference {
                 "chat"                      : $("#__txt_gen_imageheight_limit_chat").val(),
                 "media"                     : $("#__txt_gen_imageheight_limit_media").val(),
                 "gallery"                   : $("#__txt_gen_imageheight_limit_gallery").val(),
+                "quote"                     : $("#__txt_gen_imageheight_limit_quote").val(),
             },
             "gallery_width_limit"           : $("#__txt_gen_imagewidth_limit").val(),
             "contents_limit": {             // 文字数制限
@@ -635,6 +641,7 @@ class Preference {
                 --media-size-chat:         ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
                 --media-size-media:        ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
                 --media-size-gallery:      ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                --media-size-quote:        ${Preference.GENERAL_PREFERENCE.media_height_limit?.quote}px;
             }
             ${columns}
             .timeline ul {

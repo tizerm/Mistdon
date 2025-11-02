@@ -237,3 +237,27 @@ function toggleTextarea() {
     })
 }
 
+function getStatusCache(e, procFunc) {
+    const target_li = $(e.target).closest("li")
+    let target_post = null
+
+    if ($(e.target).closest(".tl_group_box").length > 0) // カラム内の投稿の場合
+        target_post = Column.get($(e.target).closest(".column_box"))
+            .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
+    else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+        target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
+    else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
+        target_post = FlashTimeline.getWindow($(e.target)).current
+    else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
+        target_post = Status.TEMPORARY_CONTEXT_STATUS
+    else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
+        target_post = Trend.getStatus(target_li)
+    else { // リモートのデータを直接取得して表示する
+        Status.getStatus(target_li.attr("name")).then(post => procFunc(post, target_li))
+        return false
+    }
+
+    // 引数のラムダを実行
+    procFunc(target_post, target_li)
+    return true
+}

@@ -790,23 +790,9 @@
      * => 画像拡大モーダルを表示
      */
     $(document).on("click", ".__on_media_expand", e => {
-        const image_url = $(e.target).closest(".__on_media_expand").attr("href")
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
-            .get($(e.target).closest(".column_box"))
-            .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus(target_li).createImageModal(image_url)
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
-        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
-            FlashTimeline.getWindow($(e.target)).current.createImageModal(image_url)
-        else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
-            Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createImageModal(image_url)
-        else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
-            Status.getStatus(target_li.attr("name"))
-                .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
+        if ($(e.target).closest(".post_quote").length > 0) return false // 引用は無視(別のメソッドで定義)
+        // キャッシュから投稿を取得して画像モーダルを表示
+        getStatusCache(e, (p, t) => p.createImageModal($(e.target).closest(".__on_media_expand").attr("href")))
         return false
     })
 
@@ -846,11 +832,8 @@
      */
     $(document).on("click", ".__on_poll_vote", e => {
         const vote_target = [$(e.target).index()] // 単体投票の場合は単一配列
-        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest(".column_box"))
-                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus($(e.target).closest("li")).vote(vote_target, $(e.target))
-        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_target, $(e.target)) // ポップアップの場合は一時保存から取得
+        // キャッシュから投稿を取得して投票
+        getStatusCache(e, (p, t) => p.vote(vote_target, $(e.target)))
     })
 
     /**
@@ -862,11 +845,8 @@
         const vote_targets = []
         $(e.target).closest(".post_poll").find("input.__chk_multi_vote:checked")
             .each((index, elm) => vote_targets.push($(elm).val()))
-        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest(".column_box"))
-                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus($(e.target).closest("li")).vote(vote_targets, $(e.target))
-        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_targets, $(e.target)) // ポップアップの場合は一時保存から取得
+        // キャッシュから投稿を取得して投票
+        getStatusCache(e, (p, t) => p.vote(vote_targets, $(e.target)))
     })
 
     /**
@@ -912,16 +892,8 @@
      */
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         $("#pop_expand_post").hide() // 一旦閉じる
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li, e, "under"))
+        // キャッシュから投稿を取得して表示
+        getStatusCache(e, (p, t) => p.createExpandWindow(t, e, "under"))
     })
 
     /**
@@ -930,18 +902,15 @@
      * => 引用先をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li .post_quote", e => {
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
-            FlashTimeline.getWindow($(e.target)).current.quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li, e, "under"))
+        if ($(e.target).is(".expand_header")) return false // 展開時は無視
+        // キャッシュから投稿を取得して表示
+        getStatusCache(e, (p, t) => p.quote.createExpandWindow(t, e, "under"))
+    })
+
+    $(document).on("click", "li .post_quote .__on_media_expand", e => {
+        const image_url = $(e.target).closest(".__on_media_expand").attr("href")
+        // キャッシュから投稿を取得して画像モーダルを表示
+        getStatusCache(e, (p, t) => p.quote.createImageModal(image_url))
     })
 
     /**
@@ -960,16 +929,8 @@
      * => オプションが有効な場合は両脇サイドにポップアップを表示する
      */
     if (Preference.GENERAL_PREFERENCE.enable_pop_hover_list) { // オプションが有効な場合にイベント定義
-        $(document).on("mouseenter", "li.short_timeline", e => {
-            const target_li = $(e.target).closest("li")
-            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-                Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                    .getStatus(target_li).createExpandWindow(target_li, e, "side")
-            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-                Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "side")
-            else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-                Trend.getStatus(target_li).createExpandWindow(target_li, e, "side")
-        })
+        // キャッシュから投稿を取得して表示
+        $(document).on("mouseenter", "li.short_timeline", e => getStatusCache(e, (p, t) => p.createExpandWindow(t, e, "side")))
         // マウスを離したら閉じる
         $(document).on("mouseleave", "li.short_timeline", e => {
             // 発火した場所がポップアップした投稿の場合は無視
@@ -985,16 +946,8 @@
      */
     if (Preference.GENERAL_PREFERENCE.enable_pop_prev_reply) $(document).on("mouseenter",
         "li.replied_post:not(.chat_timeline), li.replied_post.chat_timeline>.content", e => {
-            const target_li = $(e.target).closest("li")
-            let target_post = null
-            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-                target_post = Column.get($(e.target).closest(".column_box"))
-                    .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
-            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-                target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
-
-            // 対象の投稿が取得できたらそこからリプライ先を探して表示
-            target_post?.findReplyTo()?.createExpandWindow(target_li, e, "reply")
+            // キャッシュから投稿を取得して表示
+            getStatusCache(e, (p, t) => p?.findReplyTo()?.createExpandWindow(t, e, "reply"))
         })
 
     /**

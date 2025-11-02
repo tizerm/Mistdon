@@ -180,6 +180,12 @@
                         title="オンにすると同一の投稿に対して複数のユーザーから反応があった場合、まとめて表示されます。"/>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_show_quote_media"/>
+                        <label for="__chk_gen_show_quote_media">引用投稿のメディアを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとタイムライン上の引用投稿に対して、直接サムネイルが表示されるようになります。"/>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_use_remote_label"/>
                         <label for="__chk_gen_use_remote_label">リモートインスタンスの投稿にラベルを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
@@ -494,6 +500,10 @@
                     <tr>
                         <th>ギャラリー</th>
                         <td><input type="text" id="__txt_gen_imageheight_limit_gallery" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>引用</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_quote" size="6" maxlength="3"/>px</td>
                     </tr>
                 </tbody></table>
             </dd>

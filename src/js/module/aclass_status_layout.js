@@ -525,6 +525,9 @@
             </div>
             <div class="hidden_text">(長いので省略)</div>
         `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
+
+        if (Preference.GENERAL_PREFERENCE.show_quote_media && this.quote.medias.length > 0) // メディアセクション(表示する場合のみ)
+            html += this.quote.bindMediaSection(this.quote.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
         html += '</div>'
 
         return html
