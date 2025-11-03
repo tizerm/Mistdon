@@ -716,8 +716,10 @@ class Status extends StatusLayout {
         jqelm.closest('li').css('border-left-color', this.profile_post_flg || this.detail_flg
             ? this.relative_time.ltcolor : this.relative_time.color)
         if (this.profile_post_flg) jqelm.find('.post_footer>.created_at').addClass('from_address')
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) { // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
+            jqelm.find('.media').hide() // メディア欄も非表示にする
+        }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
 
@@ -751,8 +753,10 @@ class Status extends StatusLayout {
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         // 時間で色分け
         jqelm.find('.content').css('border-left-color', this.relative_time.color)
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) { // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
+            jqelm.find('.media').hide() // メディア欄も非表示にする
+        }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
 

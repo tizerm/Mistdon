@@ -751,8 +751,11 @@
      * Contents Warningヘッダ.
      * => 非表示にしている閲覧注意情報をトグルする
      */
-    $(document).on("click", ".expand_header", e =>
-        $(e.target).closest("a").next().toggle(...Preference.getAnimation("SLIDE_DOWN")))
+    $(document).on("click", ".expand_header", e => {
+        $(e.target).closest("a").next().toggle(...Preference.getAnimation("SLIDE_DOWN"))
+        // CWラベルの場合はメディアの存在表示もトグルする
+        if ($(e.target).closest("a").is(".label_cw")) $(e.target).closest("li").find(".media").toggle()
+    })
 
     /**
      * #Event

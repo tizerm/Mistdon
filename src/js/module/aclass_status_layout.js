@@ -330,7 +330,7 @@
                     <span class="main_content">${target_emojis.replace(this.content_text)}</span>
         `
         html += '</div>'
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+        if (this.medias.length > 0 && !this.cw_text) { // 添付メディア(現状は画像のみ)
             const media = this.medias[0]
             let thumbnail = media.thumbnail
             if (this.sensitive) thumbnail = 'resources/ic_warn.png'
