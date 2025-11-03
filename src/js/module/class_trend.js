@@ -30,13 +30,15 @@ class Trend {
 
     // スタティックタイムライン情報を初期化
     static {
-        Trend.TREND_PREF_TIMELINE = {
-            "parent_group": new Group({
-                "group_id": "__trend_timeline",
-                "tl_layout": "default",
-                "multi_user": true
-            }, null)
-        }
+        Trend.TREND_PREF_TIMELINE = new Timeline({
+            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,
+            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.trend_media
+        }, new Group({
+            "group_id": "__trend_timeline",
+            "tl_layout": "default",
+            "multi_user": true
+        }, null))
+
         Trend.TREND_TAG_MAP = null
         Trend.TREND_STATUS_MAP = Trend.TREND_PREF_TIMELINE.parent_group.status_map
     }
@@ -177,7 +179,7 @@ class Trend {
         const query = new Query(`#${this.tag}`)
         // すべてのアカウントから検索処理を実行してバインド
         const promises = []
-        Account.each(account => promises.push(query.search(account)))
+        Account.each(account => promises.push(query.search(account, Trend.TREND_PREF_TIMELINE)))
         const view_group = Trend.TREND_PREF_TIMELINE.parent_group
         view_group.status_map.clear()
         view_group.onLoadTimeline(promises)

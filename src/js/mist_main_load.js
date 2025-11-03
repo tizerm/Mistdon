@@ -170,8 +170,10 @@ function enabledAdditionalAccount(enable) {
     if (Account.isMultiAccount() && enable) { // アカウントが複数ある場合のみ有効にする
         close_elm.find("button.__on_option_open").prop('disabled', false)
             .find("img").attr('src', 'resources/ic_right.png')
-        close_elm.css('background-color', '#514285').hide()
-        $('#header>#post_options .additional_users').show()
+        close_elm.css('background-color', '#514285')
+        if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 自動で閉じる設定が無効の場合は表示
+            $('#header>#post_options .additional_users').hide().next().show()
+        else $('#header>#post_options .additional_users').show().next().hide()
     } else { // 単一アカウントか無効化の設定にされた場合は追加投稿を無効化
         close_elm.find("button.__on_option_open").prop('disabled', true)
             .find("img").attr('src', 'resources/ic_not.png')

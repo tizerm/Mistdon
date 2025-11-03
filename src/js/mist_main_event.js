@@ -959,6 +959,7 @@
         "li:not(.chat_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
             // リストレイアウト無効化オプションがついているときはなにもしない
             if (!Preference.GENERAL_PREFERENCE.enable_list_action_palette && $(e.currentTarget).is(".short_timeline")) return
+            // TODO: 86e8e37で共通化したのでここの共通化できるようにする……
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
