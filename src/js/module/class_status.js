@@ -84,6 +84,10 @@ class Status extends StatusLayout {
                     .replace(/:[a-zA-Z0-9_]+:/g, '1234'))).text().length
                 else this.content_length = 0
 
+                // 引用投稿が存在する場合は引用先を設定
+                this.quote_flg = !!data.quote
+                if (this.quote_flg) this.quote = new Status(data.quote.quoted_status, timeline, account)
+
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
                     this.poll_id = data.poll.id

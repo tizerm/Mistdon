@@ -113,7 +113,7 @@
                 </div>
             `
         }
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+        if (this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
@@ -297,7 +297,7 @@
             </div>
         `
 
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+        if (this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.chat)
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
