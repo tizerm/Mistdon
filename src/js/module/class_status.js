@@ -85,8 +85,9 @@ class Status extends StatusLayout {
                 else this.content_length = 0
 
                 // 引用投稿が存在する場合は引用先を設定
-                this.quote_flg = !!data.quote
-                if (this.quote_flg) this.quote = new Status(data.quote.quoted_status, timeline, account)
+                this.quote_flg = !!data.quote && data.quote.state == 'accepted'
+                if (this.quote_flg && !data.quote.quoted_status_id) // TODO: quoted_status_idは一旦無視
+                    this.quote = new Status(data.quote.quoted_status, timeline, account)
 
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
