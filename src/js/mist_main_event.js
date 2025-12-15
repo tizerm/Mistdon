@@ -949,8 +949,17 @@
      */
     if (Preference.GENERAL_PREFERENCE.enable_pop_prev_reply) $(document).on("mouseenter",
         "li.replied_post:not(.chat_timeline), li.replied_post.chat_timeline>.content", e => {
-            // キャッシュから投稿を取得して表示
-            getStatusCache(e, (p, t) => p?.findReplyTo()?.createExpandWindow(t, e, "reply"))
+            const target_li = $(e.target).closest("li")
+            let target_post = null
+            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
+                target_post = Column.get($(e.target).closest(".column_box"))
+                    .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
+            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
+                target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
+            // 対象の投稿が取得できたらそこからリプライ先を探して表示
+            target_post?.findReplyTo()?.createExpandWindow(target_li, e, "reply")
+            // TODO: キャッシュから投稿を取得して表示
+            //getStatusCache(e, (p, t) => p?.findReplyTo()?.createExpandWindow(t, e, "reply"))
         })
 
     /**
@@ -1389,20 +1398,36 @@
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: 範囲指定リノートの各項目.
-     * => 投稿を指定した範囲にリノートする
+     * 投稿系メニュー: 範囲指定リノート-ローカルへリノート.
+     * => 投稿をローカル(連合オフ)にリノートする
      */
-    $(document).on("click",
-        "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
-            const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
-            $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
-            const clicked_elm = $(e.target).closest("li")
-            let option = null
-            if (clicked_elm.is(".__renote_send_local")) option = 'local'
-            else if (clicked_elm.is(".__renote_send_home")) option = 'home'
-            else option = clicked_elm.attr("name")
-            target_account.renote($("#pop_context_menu").attr("name"), option)
-        })
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li.__renote_send_local", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), 'local')
+    })
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 範囲指定リノート-ホームへリノート.
+     * => 投稿をホーム(ローカルタイムライン非表示)にリノートする
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li.__renote_send_home", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), 'home')
+    })
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 範囲指定リノート-チャンネルへリノート.
+     * => 投稿を指定したチャンネルにリノートする
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), $(e.target).closest("li").attr("name"))
+    })
 
     /**
      * #Event #Contextmenu
