@@ -36,12 +36,14 @@ class Preference {
         this.enable_pop_hover_list      = pref?.enable_pop_hover_list       ?? true,  // リストホバーポップ表示
         this.enable_merge_notification  = pref?.enable_merge_notification   ?? true,  // 通知まとめ
         this.enable_remote_label        = pref?.enable_remote_label         ?? true,  // リモートラベル表示
+        this.show_quote_media           = pref?.show_quote_media            ?? true,  // 引用のメディア表示
         this.blur_suspend_user          = pref?.blur_suspend_user           ?? true,  // FF一覧の休止ユーザーの半透明化
         this.enable_shift_confirm       = pref?.enable_shift_confirm        ?? true,  // Shift+Enter投稿
         this.enable_media_confirm       = pref?.enable_media_confirm        ?? true,  // メディア投稿確認
         this.disable_disconnect_pop     = pref?.disable_disconnect_pop      ?? false, // 一時切断通知
         this.enable_animation           = pref?.enable_animation            ?? true,  // アニメーション
         this.enable_tips                = pref?.enable_tips                 ?? true,  // TIPS表示
+        this.reaction_bar_event         = pref?.reaction_bar_event          ?? "click", // リアクションボタンの挙動
         this.auto_expand = {            // 自動展開
             "search_cw"                 : pref?.auto_expand?.search_cw      ?? false, // 検索: CW
             "search_media"              : pref?.auto_expand?.search_media   ?? false, // 検索: メディア
@@ -79,7 +81,8 @@ class Preference {
             "default"                   : pref?.media_height_limit?.default ?? 240, // ノーマル
             "chat"                      : pref?.media_height_limit?.chat    ?? 160, // チャット
             "media"                     : pref?.media_height_limit?.media   ?? 320, // メディア
-            "gallery"                   : pref?.media_height_limit?.gallery ?? 240  // ギャラリー
+            "gallery"                   : pref?.media_height_limit?.gallery ?? 240, // ギャラリー
+            "quote"                     : pref?.media_height_limit?.quote   ?? 120  // 引用
         },
         this.gallery_width_limit        = pref?.gallery_width_limit         ?? 240, // ギャラリーの横幅制限
         this.contents_limit = {         // 文字数制限
@@ -300,12 +303,16 @@ class Preference {
         $("#__chk_gen_use_hover_list")                  .prop("checked", Preference.GENERAL_PREFERENCE.enable_pop_hover_list)
         $("#__chk_gen_use_summary_notification")        .prop("checked", Preference.GENERAL_PREFERENCE.enable_merge_notification)
         $("#__chk_gen_use_remote_label")                .prop("checked", Preference.GENERAL_PREFERENCE.enable_remote_label)
+        $("#__chk_gen_show_quote_media")                .prop("checked", Preference.GENERAL_PREFERENCE.show_quote_media)
         $("#__chk_gen_blur_suspend_user")               .prop("checked", Preference.GENERAL_PREFERENCE.blur_suspend_user)
         $("#__chk_gen_use_shift_confirm")               .prop("checked", Preference.GENERAL_PREFERENCE.enable_shift_confirm)
         $("#__chk_gen_show_media_confirm")              .prop("checked", Preference.GENERAL_PREFERENCE.enable_media_confirm)
         $("#__chk_gen_disable_disconnect_notification") .prop("checked", Preference.GENERAL_PREFERENCE.disable_disconnect_pop)
         $("#__chk_gen_animation")                       .prop("checked", Preference.GENERAL_PREFERENCE.enable_animation)
         $("#__chk_gen_show_tips")                       .prop("checked", Preference.GENERAL_PREFERENCE.enable_tips)
+
+        // 個別オプション(複数択)
+        $(`input.__opt_gen_reaction_button[value="${Preference.GENERAL_PREFERENCE.reaction_bar_event}"]`).prop("checked", true)
 
         // 自動展開
         $("#__chk_gen_expand_cw_search")    .prop("checked", Preference.GENERAL_PREFERENCE.auto_expand?.search_cw)
@@ -347,6 +354,7 @@ class Preference {
         $("#__txt_gen_imageheight_limit_chat")      .val(Preference.GENERAL_PREFERENCE.media_height_limit?.chat)
         $("#__txt_gen_imageheight_limit_media")     .val(Preference.GENERAL_PREFERENCE.media_height_limit?.media)
         $("#__txt_gen_imageheight_limit_gallery")   .val(Preference.GENERAL_PREFERENCE.media_height_limit?.gallery)
+        $("#__txt_gen_imageheight_limit_quote")     .val(Preference.GENERAL_PREFERENCE.media_height_limit?.quote)
 
         $("#__txt_gen_imagewidth_limit")            .val(Preference.GENERAL_PREFERENCE.gallery_width_limit)
 
@@ -413,12 +421,14 @@ class Preference {
             "enable_pop_hover_list"         : $("#__chk_gen_use_hover_list").prop("checked"),
             "enable_merge_notification"     : $("#__chk_gen_use_summary_notification").prop("checked"),
             "enable_remote_label"           : $("#__chk_gen_use_remote_label").prop("checked"),
+            "show_quote_media"              : $("#__chk_gen_show_quote_media").prop("checked"),
             "blur_suspend_user"             : $("#__chk_gen_blur_suspend_user").prop("checked"),
             "enable_shift_confirm"          : $("#__chk_gen_use_shift_confirm").prop("checked"),
             "enable_media_confirm"          : $("#__chk_gen_show_media_confirm").prop("checked"),
             "disable_disconnect_pop"        : $("#__chk_gen_disable_disconnect_notification").prop("checked"),
             "enable_animation"              : $("#__chk_gen_animation").prop("checked"),
             "enable_tips"                   : $("#__chk_gen_show_tips").prop("checked"),
+            "reaction_bar_event"            : $("input.__opt_gen_reaction_button:checked").val(),
             "auto_expand": {                // 自動展開
                 "search_cw"                 : $("#__chk_gen_expand_cw_search").prop("checked"),
                 "search_media"              : $("#__chk_gen_expand_media_search").prop("checked"),
@@ -457,6 +467,7 @@ class Preference {
                 "chat"                      : $("#__txt_gen_imageheight_limit_chat").val(),
                 "media"                     : $("#__txt_gen_imageheight_limit_media").val(),
                 "gallery"                   : $("#__txt_gen_imageheight_limit_gallery").val(),
+                "quote"                     : $("#__txt_gen_imageheight_limit_quote").val(),
             },
             "gallery_width_limit"           : $("#__txt_gen_imagewidth_limit").val(),
             "contents_limit": {             // 文字数制限
@@ -529,9 +540,6 @@ class Preference {
 
         // 投稿フォームを自動的にウィンドウにする
         if (Preference.GENERAL_PREFERENCE.default_textwindow) toggleTextarea()
-        if (Preference.GENERAL_PREFERENCE.hide_additional_account) // 投稿オプションの投稿アカウントを自動で閉じる
-            $("#header>#post_options .additional_users .__on_option_close").click()
-
         if (Preference.GENERAL_PREFERENCE.tl_impression.enabled) // インプレッション表示をする場合は簡易ボタン削除
             $("#pop_expand_action>.std_action>.__short_impression").remove()
     }
@@ -560,11 +568,6 @@ class Preference {
      * 全体設定の内容からメインタイムライン以外のタイムライン設定を設定.
      */
     static initAlternateTimelinePref() {
-        // トレンドタイムライン
-        Trend.TREND_PREF_TIMELINE.pref = {
-            "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.trend_cw,
-            "expand_media": Preference.GENERAL_PREFERENCE.auto_expand?.trend_media
-        }
         // 送信履歴タイムライン
         History.HISTORY_PREF_TIMELINE.pref = {
             "expand_cw": Preference.GENERAL_PREFERENCE.auto_expand?.history_cw,
@@ -630,6 +633,7 @@ class Preference {
                 --media-size-chat:         ${Preference.GENERAL_PREFERENCE.media_height_limit?.chat}px;
                 --media-size-media:        ${Preference.GENERAL_PREFERENCE.media_height_limit?.media}px;
                 --media-size-gallery:      ${Preference.GENERAL_PREFERENCE.media_height_limit?.gallery}px;
+                --media-size-quote:        ${Preference.GENERAL_PREFERENCE.media_height_limit?.quote}px;
             }
             ${columns}
             .timeline ul {

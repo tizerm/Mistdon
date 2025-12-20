@@ -113,7 +113,7 @@
                 </div>
             `
         }
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+        if (this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.default)
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_16' : 'img_grid_4')
@@ -297,7 +297,7 @@
             </div>
         `
 
-        if (this.platform == 'Misskey' && this.quote_flg) // 引用セクション
+        if (this.quote_flg) // 引用セクション
             html += this.bindQuoteSection(Preference.GENERAL_PREFERENCE.contents_limit.chat)
         if (this.medias.length > 0) // メディアセクション
             html += this.bindMediaSection(this.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
@@ -330,7 +330,7 @@
                     <span class="main_content">${target_emojis.replace(this.content_text)}</span>
         `
         html += '</div>'
-        if (this.medias.length > 0) { // 添付メディア(現状は画像のみ)
+        if (this.medias.length > 0 && !this.cw_text) { // 添付メディア(現状は画像のみ)
             const media = this.medias[0]
             let thumbnail = media.thumbnail
             if (this.sensitive) thumbnail = 'resources/ic_warn.png'
@@ -525,6 +525,9 @@
             </div>
             <div class="hidden_text">(長いので省略)</div>
         `; else html += `<div class="main_content">${target_emojis.replace(this.quote.content)}</div>`
+
+        if (Preference.GENERAL_PREFERENCE.show_quote_media && this.quote.medias.length > 0 && !this.quote.cw_text) // メディアセクション(表示する場合のみ)
+            html += this.quote.bindMediaSection(this.quote.medias.length > 4 ? 'img_grid_64' : 'img_grid_16')
         html += '</div>'
 
         return html

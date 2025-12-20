@@ -751,8 +751,11 @@
      * Contents Warningヘッダ.
      * => 非表示にしている閲覧注意情報をトグルする
      */
-    $(document).on("click", ".expand_header", e =>
-        $(e.target).closest("a").next().toggle(...Preference.getAnimation("SLIDE_DOWN")))
+    $(document).on("click", ".expand_header", e => {
+        $(e.target).closest("a").next().toggle(...Preference.getAnimation("SLIDE_DOWN"))
+        // CWラベルの場合はメディアの存在表示もトグルする
+        if ($(e.target).closest("a").is(".label_cw")) $(e.target).closest("li").find(".media").toggle()
+    })
 
     /**
      * #Event
@@ -790,23 +793,9 @@
      * => 画像拡大モーダルを表示
      */
     $(document).on("click", ".__on_media_expand", e => {
-        const image_url = $(e.target).closest(".__on_media_expand").attr("href")
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) Column // カラム内の投稿の場合
-            .get($(e.target).closest(".column_box"))
-            .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-            .getStatus(target_li).createImageModal(image_url)
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createImageModal(image_url)
-        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
-            FlashTimeline.getWindow($(e.target)).current.createImageModal(image_url)
-        else if ($(e.target).closest("ul.expanded_post").length > 0) // ポップアップ表示投稿の場合
-            Status.TEMPORARY_CONTEXT_STATUS.createImageModal(image_url)
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createImageModal(image_url)
-        else // リモートのデータを直接取得して表示する場合はURLではなくインデクスで判定を行う
-            Status.getStatus(target_li.attr("name"))
-                .then(post => post.createImageModal(image_url, $(e.target).closest("a").index()))
+        if ($(e.target).closest(".post_quote").length > 0) return false // 引用は無視(別のメソッドで定義)
+        // キャッシュから投稿を取得して画像モーダルを表示
+        getStatusCache(e, (p, t) => p.createImageModal($(e.target).closest(".__on_media_expand").attr("href")))
         return false
     })
 
@@ -846,11 +835,8 @@
      */
     $(document).on("click", ".__on_poll_vote", e => {
         const vote_target = [$(e.target).index()] // 単体投票の場合は単一配列
-        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest(".column_box"))
-                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus($(e.target).closest("li")).vote(vote_target, $(e.target))
-        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_target, $(e.target)) // ポップアップの場合は一時保存から取得
+        // キャッシュから投稿を取得して投票
+        getStatusCache(e, (p, t) => p.vote(vote_target, $(e.target)))
     })
 
     /**
@@ -862,11 +848,8 @@
         const vote_targets = []
         $(e.target).closest(".post_poll").find("input.__chk_multi_vote:checked")
             .each((index, elm) => vote_targets.push($(elm).val()))
-        if ($(e.target).closest(".tl_group_box").length > 0) // TLに表示されているものはそのまま使用
-            Column.get($(e.target).closest(".column_box"))
-                .getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus($(e.target).closest("li")).vote(vote_targets, $(e.target))
-        else Status.TEMPORARY_CONTEXT_STATUS.vote(vote_targets, $(e.target)) // ポップアップの場合は一時保存から取得
+        // キャッシュから投稿を取得して投票
+        getStatusCache(e, (p, t) => p.vote(vote_targets, $(e.target)))
     })
 
     /**
@@ -912,16 +895,8 @@
      */
     $(document).on("click", "li.short_timeline, li.filtered_timeline, .content_length_limit", e => {
         $("#pop_expand_post").hide() // 一旦閉じる
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).createExpandWindow(target_li, e, "under")
-        else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.createExpandWindow(target_li, e, "under"))
+        // キャッシュから投稿を取得して表示
+        getStatusCache(e, (p, t) => p.createExpandWindow(t, e, "under"))
     })
 
     /**
@@ -930,18 +905,15 @@
      * => 引用先をノーマルレイアウトでポップアップ表示する
      */
     $(document).on("click", "li .post_quote", e => {
-        const target_li = $(e.target).closest("li")
-        if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-            Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                .getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-            Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.flash_tl").length > 0) // フラッシュタイムラインの場合
-            FlashTimeline.getWindow($(e.target)).current.quote.createExpandWindow(target_li, e, "under")
-        else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-            Trend.getStatus(target_li).quote.createExpandWindow(target_li, e, "under")
-        else // 他の部分は直接リモートの投稿を取る
-            Status.getStatus(target_li.attr("name")).then(post => post.quote.createExpandWindow(target_li, e, "under"))
+        if ($(e.target).is(".expand_header")) return false // 展開時は無視
+        // キャッシュから投稿を取得して表示
+        getStatusCache(e, (p, t) => p.quote.createExpandWindow(t, e, "under"))
+    })
+
+    $(document).on("click", "li .post_quote .__on_media_expand", e => {
+        const image_url = $(e.target).closest(".__on_media_expand").attr("href")
+        // キャッシュから投稿を取得して画像モーダルを表示
+        getStatusCache(e, (p, t) => p.quote.createImageModal(image_url))
     })
 
     /**
@@ -960,16 +932,8 @@
      * => オプションが有効な場合は両脇サイドにポップアップを表示する
      */
     if (Preference.GENERAL_PREFERENCE.enable_pop_hover_list) { // オプションが有効な場合にイベント定義
-        $(document).on("mouseenter", "li.short_timeline", e => {
-            const target_li = $(e.target).closest("li")
-            if ($(e.target).closest(".tl_group_box").length > 0) // メイン画面のTLの場合はグループから取ってきて表示
-                Column.get($(e.target).closest(".column_box")).getGroup($(e.target).closest(".tl_group_box").attr("id"))
-                    .getStatus(target_li).createExpandWindow(target_li, e, "side")
-            else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
-                Timeline.getWindow($(e.target)).ref_group.getStatus(target_li).createExpandWindow(target_li, e, "side")
-            else if ($(e.target).closest("ul.trend_ul").length > 0) // トレンドタイムラインの場合
-                Trend.getStatus(target_li).createExpandWindow(target_li, e, "side")
-        })
+        // キャッシュから投稿を取得して表示
+        $(document).on("mouseenter", "li.short_timeline", e => getStatusCache(e, (p, t) => p.createExpandWindow(t, e, "side")))
         // マウスを離したら閉じる
         $(document).on("mouseleave", "li.short_timeline", e => {
             // 発火した場所がポップアップした投稿の場合は無視
@@ -992,9 +956,10 @@
                     .getGroup($(e.target).closest(".tl_group_box").attr("id")).getStatus(target_li)
             else if ($(e.target).closest("ul.scrollable_tl").length > 0) // 一時スクロールの場合
                 target_post = Timeline.getWindow($(e.target)).ref_group.getStatus(target_li)
-
             // 対象の投稿が取得できたらそこからリプライ先を探して表示
             target_post?.findReplyTo()?.createExpandWindow(target_li, e, "reply")
+            // TODO: キャッシュから投稿を取得して表示
+            //getStatusCache(e, (p, t) => p?.findReplyTo()?.createExpandWindow(t, e, "reply"))
         })
 
     /**
@@ -1006,6 +971,7 @@
         "li:not(.chat_timeline, .filtered_timeline, .context_disabled), li.chat_timeline>.content", e => {
             // リストレイアウト無効化オプションがついているときはなにもしない
             if (!Preference.GENERAL_PREFERENCE.enable_list_action_palette && $(e.currentTarget).is(".short_timeline")) return
+            // TODO: 86e8e37で共通化したのでここの共通化できるようにする……
             let target_post = null
             if ($(e.target).closest(".tl_group_box").length > 0)
                 // メインタイムラインの場合はGroupのステータスマップから取得
@@ -1092,10 +1058,17 @@
 
     /**
      * #Event
-     * 簡易アクションバー: 最近のリアクションを開く.
+     * 簡易アクションバー: 最近のリアクションを開く(全体オプションによって挙動が変化).
      */
-    $(document).on("click", ".__short_open_reaction",
-        e => $("#pop_expand_action>.reactions").show(...Preference.getAnimation("SLIDE_DOWN")))
+    if (Preference.GENERAL_PREFERENCE.reaction_bar_event == 'hover') { // ホバーで展開
+        $(document).on("mouseenter", ".__short_open_reaction", e => $("#pop_expand_action>.reactions").show())
+        $(document).on("click", ".__short_open_reaction", e => Status.TEMPORARY_ACTION_STATUS.from_account
+            .reaction('__menu_reaction', null, Status.TEMPORARY_ACTION_STATUS))
+    } else $(document).on("click", ".__short_open_reaction", e => { // クリックで展開
+        if ($("#pop_expand_action>.reactions").is(":visible")) // 表示済みは別のリアクション
+            Status.TEMPORARY_ACTION_STATUS.from_account.reaction('__menu_reaction', null, Status.TEMPORARY_ACTION_STATUS)
+        else $("#pop_expand_action>.reactions").show(...Preference.getAnimation("SLIDE_DOWN"))
+    })
 
     /**
      * #Event
@@ -1425,20 +1398,36 @@
 
     /**
      * #Event #Contextmenu
-     * 投稿系メニュー: 範囲指定リノートの各項目.
-     * => 投稿を指定した範囲にリノートする
+     * 投稿系メニュー: 範囲指定リノート-ローカルへリノート.
+     * => 投稿をローカル(連合オフ)にリノートする
      */
-    $(document).on("click",
-        "#pop_context_menu>.ui_menu ul.__limited_renote_send>li, #pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
-            const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
-            $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
-            const clicked_elm = $(e.target).closest("li")
-            let option = null
-            if (clicked_elm.is(".__renote_send_local")) option = 'local'
-            else if (clicked_elm.is(".__renote_send_home")) option = 'home'
-            else option = clicked_elm.attr("name")
-            target_account.renote($("#pop_context_menu").attr("name"), option)
-        })
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li.__renote_send_local", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), 'local')
+    })
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 範囲指定リノート-ホームへリノート.
+     * => 投稿をホーム(ローカルタイムライン非表示)にリノートする
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__limited_renote_send>li.__renote_send_home", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), 'home')
+    })
+
+    /**
+     * #Event #Contextmenu
+     * 投稿系メニュー: 範囲指定リノート-チャンネルへリノート.
+     * => 投稿を指定したチャンネルにリノートする
+     */
+    $(document).on("click", "#pop_context_menu>.ui_menu ul.__renote_send_channel>li", e => {
+        const target_account = Account.get($(e.target).closest("ul.__limited_renote_send").attr("name"))
+        $("#pop_context_menu").hide(...Preference.getAnimation("WINDOW_FOLD"))
+        target_account.renote($("#pop_context_menu").attr("name"), $(e.target).closest("li").attr("name"))
+    })
 
     /**
      * #Event #Contextmenu

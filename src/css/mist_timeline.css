@@ -433,7 +433,7 @@
             }
 
             /*=== Media Info =====================================================================*/
-            > .media a.__on_media_expand {
+            .media a.__on_media_expand {
                 display: inline-block;
                 width: calc(50% - 3px);
                 position: relative;
@@ -590,8 +590,11 @@
                     border-left-color: var(--tl-color-quote-hoverborder);
                     cursor: pointer;
                 }
+                > .media a.__on_media_expand {
+                    max-height: var(--media-size-quote);
+                    .media_preview { border-radius: 6px; }
+                }
             }
-
             /*=== Notification Impression Info ===================================================*/
             > .notification_summary {
                 font-size: 1px;

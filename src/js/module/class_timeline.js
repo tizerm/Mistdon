@@ -292,20 +292,26 @@ class Timeline {
         const socket = this.target_account.socket
         const captured_notes = this.target_account.captured_notes
 
+        try { // WebSocketにCaptureリクエストを送信
+            socket.send(JSON.stringify({
+                "type": "subNote",
+                "body": { "id": post.id }
+            }))
+        } catch (err) { // コネクションを確立する前にキャプチャしてしまった場合
+            console.log(`#CAPTURE-FAILED: ${post.id}`)
+            console.log(err)
+            // 3秒後に再実行
+            sleep(3000).then(() => this.captureNote(post))
+            return
+        }
+
         // アカウントのノートマップにタイムラインセットをセット
         let tl_set = new Set()
         if (captured_notes.has(post.id)) tl_set = captured_notes.get(post.id)
         else captured_notes.set(post.id, tl_set)
         tl_set.add(this)
-
         // キューの先頭に対象の投稿データを追加
         this.capture_queue.unshift(post)
-
-        socket.send(JSON.stringify({ // WebSocketにCaptureリクエストを送信
-            "type": "subNote",
-            "body": { "id": post.id }
-        }))
-
         // キャプチャキューが30超えてる場合uncaptureする
         if (this.capture_queue.length > 30) this.uncaptureNote(this.capture_queue.pop().id)
     }

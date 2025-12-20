@@ -180,6 +180,12 @@
                         title="オンにすると同一の投稿に対して複数のユーザーから反応があった場合、まとめて表示されます。"/>
                     </li>
                     <li>
+                        <input type="checkbox" id="__chk_gen_show_quote_media"/>
+                        <label for="__chk_gen_show_quote_media">引用投稿のメディアを表示する</label>
+                        <img src="resources/ic_help.png" class="tooltip_help"
+                        title="オンにするとタイムライン上の引用投稿に対して、直接サムネイルが表示されるようになります。"/>
+                    </li>
+                    <li>
                         <input type="checkbox" id="__chk_gen_use_remote_label"/>
                         <label for="__chk_gen_use_remote_label">リモートインスタンスの投稿にラベルを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
@@ -220,6 +226,24 @@
                         <label for="__chk_gen_show_tips">TIPSを表示する</label>
                         <img src="resources/ic_help.png" class="tooltip_help"
                         title="タイトルヘッダにTIPSを表示します。オンにすると30秒おきにMistdonの簡潔な操作説明のTIPSが流れてきます。"/>
+                    </li>
+                </ul>
+            </dd>
+            <dt>簡易アクションバーのリアクションボタンの挙動
+                <img src="resources/ic_help.png" class="tooltip_help"
+                title="Misskeyの投稿に対して簡易アクションバーを開いたときのリアクションボタンの挙動を設定します。"/>
+            </dt>
+            <dd>
+                <ul class="selector_list">
+                    <li>
+                        <input type="radio" id="__opt_gen_reaction_button1"
+                            name="__opt_gen_reaction_button" class="__opt_gen_reaction_button" value="click"/>
+                        <label for="__opt_gen_reaction_button1">クリックで最近のリアクションを展開+再度クリックで他のリアクション</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="__opt_gen_reaction_button2"
+                            name="__opt_gen_reaction_button" class="__opt_gen_reaction_button" value="hover"/>
+                        <label for="__opt_gen_reaction_button2">ホバーで最近のリアクションを展開+クリックで他のリアクション</label>
                     </li>
                 </ul>
             </dd>
@@ -476,6 +500,10 @@
                     <tr>
                         <th>ギャラリー</th>
                         <td><input type="text" id="__txt_gen_imageheight_limit_gallery" size="6" maxlength="3"/>px</td>
+                    </tr>
+                    <tr>
+                        <th>引用</th>
+                        <td><input type="text" id="__txt_gen_imageheight_limit_quote" size="6" maxlength="3"/>px</td>
                     </tr>
                 </tbody></table>
             </dd>

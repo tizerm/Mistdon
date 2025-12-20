@@ -84,6 +84,11 @@ class Status extends StatusLayout {
                     .replace(/:[a-zA-Z0-9_]+:/g, '1234'))).text().length
                 else this.content_length = 0
 
+                // 引用投稿が存在する場合は引用先を設定
+                this.quote_flg = !!data.quote && data.quote.state == 'accepted'
+                if (this.quote_flg && !data.quote.quoted_status_id) // TODO: quoted_status_idは一旦無視
+                    this.quote = new Status(data.quote.quoted_status, timeline, account)
+
                 // 投票がある場合は投票に関するデータ
                 if (data.poll) {
                     this.poll_id = data.poll.id
@@ -712,10 +717,14 @@ class Status extends StatusLayout {
         jqelm.closest('li').css('border-left-color', this.profile_post_flg || this.detail_flg
             ? this.relative_time.ltcolor : this.relative_time.color)
         if (this.profile_post_flg) jqelm.find('.post_footer>.created_at').addClass('from_address')
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) { // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
+            jqelm.find('.media').hide() // メディア欄も非表示にする
+        }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }
@@ -747,10 +756,14 @@ class Status extends StatusLayout {
         if (this.reblog) jqelm.closest('li').addClass('rebloged_post')
         // 時間で色分け
         jqelm.find('.content').css('border-left-color', this.relative_time.color)
-        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) // CWを非表示にする
+        if (this.cw_text && !this.from_timeline?.pref?.expand_cw) { // CWを非表示にする
             jqelm.find('.content>.expand_header.label_cw+div').hide()
+            jqelm.find('.media').hide() // メディア欄も非表示にする
+        }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }
@@ -800,6 +813,8 @@ class Status extends StatusLayout {
         jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
             jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }
