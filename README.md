@@ -13,7 +13,6 @@
 <p>
     MistdonはMastodonとMisskeyの統合Fediverseクライアントです。<br/>
     MastodonやMisskeyの複数のインスタンスにアカウントを持つユーザーが、複数のアカウントを閲覧/管理するのが煩わしくならないように設計されています。<br/>
-    また、MastodonインスタンスのSkyBridgeに接続すればBlueskyアカウントを扱うことも可能です(※一部機能制限があります)。<br/>
     もちろん、アカウントをひとつしか持っていない方や、Mastodonのみ、Misskeyのみ使用する方でもお使いいただけます。
 </p>
 <p>
@@ -69,7 +68,7 @@
     License
 </h2>
 <p>
-    Copyright (C) 2023-2024 tizerm@misskey.dev<br/>
+    Copyright (C) 2023-2025 tizerm@misskey.dev<br/>
     This program is free software: you can redistribute it and/or modify it under the terms of LGPL.<br/>
     See also: https://www.gnu.org/licenses/
 </p>
