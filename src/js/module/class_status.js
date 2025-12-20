@@ -723,6 +723,8 @@ class Status extends StatusLayout {
         }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }
@@ -760,6 +762,8 @@ class Status extends StatusLayout {
         }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }
@@ -809,6 +813,8 @@ class Status extends StatusLayout {
         jqelm.closest('li').css('border-left-color', this.relative_time.color)
         if (this.sensitive && !this.from_timeline?.pref?.expand_media)
             jqelm.find('.media>.media_content').hide() // 閲覧注意メディアを非表示にする
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         return jqelm
     }

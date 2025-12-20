@@ -210,6 +210,8 @@ class NotificationStatus extends Status {
         }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         switch (this.notification_type) {
             case 'favourite': // お気に入り
@@ -260,6 +262,8 @@ class NotificationStatus extends Status {
         }
         if (this.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
             jqelm.find('.media>.media_content').hide()
+        if (this.quote?.sensitive && !this.from_timeline?.pref?.expand_media) // 閲覧注意メディアを非表示にする
+            jqelm.find('.post_quote>.media>.media_content').hide()
 
         switch (this.notification_type) {
             case 'favourite': // お気に入り
