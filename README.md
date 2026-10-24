@@ -52,9 +52,22 @@
 <h2>
     インストールガイド
 </h2>
+<h3>
+    Windows/Mac版をお使いの方へ
+</h3>
 <p>
-    右のReleaseのリンクから最新バージョンのZIPをダウンロードして任意のフォルダに解凍してお使いください。<br/>
-    設定ファイルはユーザーフォルダに保存されているため、アップデート時に設定ファイルをコピーしたりする必要はありません。
+    右のReleaseのリンクから最新バージョンのZIPをダウンロードして任意のフォルダに解凍してお使いください。
+</p>
+<h3>
+    Debian系Linux版をお使いの方へ
+</h3>
+<p>
+    右のReleaseのリンクから最新バージョンのdebファイルを任意のディレクトリにダウンロードしてください。<br/>
+    その後、対象ディレクトリで下記コマンドを実行すればOKです(v1.6.4の場合)。<br/><br/>
+    sudo apt install mistdon_1.6.4_amd64.deb
+</p>
+<p>
+    いずれの場合も設定ファイルはユーザーフォルダに保存されているため、アップデート時に設定ファイルをコピーしたりする必要はありません。
 </p>
 <h2>
     バグ報告など
@@ -68,7 +81,7 @@
     License
 </h2>
 <p>
-    Copyright (C) 2023-2025 tizerm@misskey.dev<br/>
+    Copyright (C) 2023-2026 tizerm@misskey.dev<br/>
     This program is free software: you can redistribute it and/or modify it under the terms of LGPL.<br/>
     See also: https://www.gnu.org/licenses/
 </p>

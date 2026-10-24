@@ -1,6 +1,6 @@
 {
   "name": "Mistdon",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "The integrated client application of Mastodon and Misskey.",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "publish": "electron-forge publish"
+    "publish": "electron-forge release"
   },
   "repository": {
     "type": "git",
@@ -17,19 +17,19 @@
   "author": "tizerm",
   "license": "LGPL",
   "devDependencies": {
-    "@electron-forge/cli": "^6.4.1",
-    "@electron-forge/maker-deb": "^6.4.1",
-    "@electron-forge/maker-rpm": "^6.4.1",
-    "@electron-forge/maker-squirrel": "^6.4.1",
-    "@electron-forge/maker-zip": "^6.4.1",
-    "@electron-forge/plugin-auto-unpack-natives": "^6.4.1",
-    "electron": "^26.1.0"
+    "@electron-forge/cli": "^8.0.1",
+    "@electron-forge/maker-deb": "^8.0.1",
+    "@electron-forge/maker-rpm": "^8.0.1",
+    "@electron-forge/maker-squirrel": "^8.0.1",
+    "@electron-forge/maker-zip": "^8.0.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^8.0.1",
+    "electron": "^45.0.0"
   },
   "dependencies": {
-    "@electron-forge/publisher-github": "^6.4.2",
-    "electron-squirrel-startup": "^1.0.0",
+    "@electron-forge/publisher-github": "^8.0.1",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-window-state": "^5.0.3",
-    "feedparser": "^2.2.10",
+    "feedparser": "^2.6.0",
     "node-fetch": "^2.7.0"
   }
 }
